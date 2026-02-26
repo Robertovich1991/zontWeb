@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Menu, X } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
 
 const Header = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('signin'); // 'signin' or 'signup'
-  const [selectedCountry, setSelectedCountry] = useState('France');
+  const [authMode, setAuthMode] = useState('signin');
 
   const handleAuthClick = (mode) => {
     setAuthMode(mode);
@@ -20,90 +20,47 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     setMobileMenuOpen(false);
+    navigate('/');
   };
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 bg-white shadow-md z-50">
+      <header className="fixed top-0 left-0 right-0 bg-[#1a2332] shadow-lg z-50 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex-shrink-0">
-              <div className="flex items-center">
-                <div className="text-3xl font-bold text-blue-600">ZONT</div>
+              <div className="flex items-center space-x-2">
+                <div className="text-2xl font-bold text-white tracking-wider">ZONT</div>
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/become-driver"
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-              >
-                Become a Driver
-              </Link>
-              <Link
-                to="/become-client"
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-              >
-                Become a Client
-              </Link>
-              <Link
-                to="/countries"
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-              >
-                Countries
-              </Link>
-              <Link
-                to="/help"
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-              >
-                Help
-              </Link>
-
-              {/* Country Selector */}
-              <select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="France">France</option>
-                <option value="Armenia">Armenia</option>
-              </select>
-
-              {/* Auth Buttons */}
+            <nav className="hidden md:flex items-center space-x-1">
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-gray-700">Bonjour, {user?.name || 'User'}</span>
+                  <span className="text-gray-300 text-sm">Hello, {user?.name || 'User'}</span>
                   <button
                     onClick={handleLogout}
-                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-white hover:text-gray-300 transition-colors"
                   >
                     Sign out
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => handleAuthClick('signin')}
-                    className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-                  >
-                    Sign in
-                  </button>
-                  <button
-                    onClick={() => handleAuthClick('signup')}
-                    className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Sign up
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleAuthClick('signin')}
+                  className="px-6 py-2 text-sm font-medium text-white hover:text-gray-300 transition-colors"
+                >
+                  Sign in
+                </button>
               )}
             </nav>
 
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100"
+              className="md:hidden p-2 rounded-lg text-white hover:bg-gray-700"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -112,49 +69,11 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-200">
+          <div className="md:hidden bg-[#1a2332] border-t border-gray-700">
             <div className="px-4 py-3 space-y-3">
-              <Link
-                to="/become-driver"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-blue-600 font-medium"
-              >
-                Become a Driver
-              </Link>
-              <Link
-                to="/become-client"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-blue-600 font-medium"
-              >
-                Become a Client
-              </Link>
-              <Link
-                to="/countries"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-blue-600 font-medium"
-              >
-                Countries
-              </Link>
-              <Link
-                to="/help"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-blue-600 font-medium"
-              >
-                Help
-              </Link>
-
-              <select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="France">France</option>
-                <option value="Armenia">Armenia</option>
-              </select>
-
               {isAuthenticated ? (
                 <>
-                  <div className="text-gray-700 py-2">Bonjour, {user?.name || 'User'}</div>
+                  <div className="text-gray-300 py-2">Hello, {user?.name || 'User'}</div>
                   <button
                     onClick={handleLogout}
                     className="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
@@ -163,20 +82,12 @@ const Header = () => {
                   </button>
                 </>
               ) : (
-                <>
-                  <button
-                    onClick={() => handleAuthClick('signin')}
-                    className="w-full px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  >
-                    Sign in
-                  </button>
-                  <button
-                    onClick={() => handleAuthClick('signup')}
-                    className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                  >
-                    Sign up
-                  </button>
-                </>
+                <button
+                  onClick={() => handleAuthClick('signin')}
+                  className="w-full px-4 py-2 text-sm font-medium text-white border border-gray-600 rounded-lg hover:bg-gray-700"
+                >
+                  Sign in
+                </button>
               )}
             </div>
           </div>
