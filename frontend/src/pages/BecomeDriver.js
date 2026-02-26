@@ -84,11 +84,11 @@ const BecomeDriver = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#1a2332]">
       <Header />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-12 px-4 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+      <section className="pt-32 pb-12 px-4 bg-gradient-to-br from-[#2ecc71] to-[#27ae60] text-white">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">Become a Driver</h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
