@@ -10,8 +10,11 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: '',
+    firstName: '',
+    lastName: '',
     phone: '',
+    confirmPassword: '',
+    agreeTerms: false,
   });
 
   const handleSubmit = async (e) => {
@@ -22,22 +25,45 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
       if (mode === 'signin') {
         await login({ email: formData.email, password: formData.password });
         toast({
-          title: 'Connexion réussie',
-          description: 'Bienvenue sur Zont !',
+          title: 'Login successful',
+          description: 'Welcome to Zont!',
         });
         onClose();
       } else {
-        await register(formData);
+        if (formData.password !== formData.confirmPassword) {
+          toast({
+            title: 'Error',
+            description: 'Passwords do not match',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+        if (!formData.agreeTerms) {
+          toast({
+            title: 'Error',
+            description: 'You must agree to Terms of Services and Privacy Policy',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+        await register({
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+        });
         toast({
-          title: 'Inscription réussie',
-          description: 'Votre compte a été créé avec succès.',
+          title: 'Registration successful',
+          description: 'Your account has been created successfully.',
         });
         onSwitchMode('signin');
       }
     } catch (error) {
       toast({
-        title: 'Erreur',
-        description: error.response?.data?.message || 'Une erreur est survenue',
+        title: 'Error',
+        description: error.response?.data?.message || 'An error occurred',
         variant: 'destructive',
       });
     } finally {
@@ -46,78 +72,88 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
+      <div className="fixed inset-0 bg-black bg-opacity-70" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-8 z-10">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-        >
-          <X size={24} />
-        </button>
-
+      <div className="relative bg-[#1a2332] rounded-lg shadow-2xl w-full max-w-md mx-4 z-10 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">
-            {mode === 'signin' ? 'Sign in' : 'Sign up'}
-          </h2>
-          <p className="text-gray-600 mt-2">
-            {mode === 'signin'
-              ? 'Welcome back! Please enter your details.'
-              : 'Create your account to start booking rides.'}
-          </p>
+        <div className="sticky top-0 bg-[#1a2332] border-b border-gray-700 px-6 py-4 flex justify-between items-center">
+          <div className="flex space-x-6">
+            <button
+              onClick={() => onSwitchMode('signup')}
+              className={`text-lg font-medium pb-2 transition-colors relative ${
+                mode === 'signup'
+                  ? 'text-[#2ecc71] border-b-2 border-[#2ecc71]'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Sign up
+            </button>
+            <button
+              onClick={() => onSwitchMode('signin')}
+              className={`text-lg font-medium pb-2 transition-colors relative ${
+                mode === 'signin'
+                  ? 'text-[#2ecc71] border-b-2 border-[#2ecc71]'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Sign in
+            </button>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <X size={24} />
+          </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="px-6 py-6 space-y-4">
           {mode === 'signup' && (
             <>
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-300 mb-2">
+                  FIRST NAME <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="John Doe"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent"
+                  placeholder="FIRST NAME"
                 />
               </div>
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-300 mb-2">
+                  LAST NAME <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="+33 6 12 34 56 78"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent"
+                  placeholder="LAST NAME"
                 />
               </div>
             </>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              EMAIL ADDRESS <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -126,14 +162,32 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="john@example.com"
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent"
+              placeholder="EMAIL ADDRESS"
             />
           </div>
 
+          {mode === 'signup' && (
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
+                MOBILE PHONE <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent"
+                placeholder="01 23 45 67 89"
+              />
+            </div>
+          )}
+
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              {mode === 'signup' ? 'CHOOSE PASSWORD' : 'PASSWORD'} <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
@@ -142,40 +196,52 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••"
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent"
+              placeholder={mode === 'signup' ? 'CHOOSE PASSWORD' : 'PASSWORD'}
             />
           </div>
 
-          {mode === 'signin' && (
-            <div className="text-right">
-              <button type="button" className="text-sm text-blue-600 hover:text-blue-700">
-                Forgot password?
-              </button>
-            </div>
+          {mode === 'signup' && (
+            <>
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
+                  CONFIRM PASSWORD <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent"
+                  placeholder="CONFIRM PASSWORD"
+                />
+              </div>
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="agreeTerms"
+                  name="agreeTerms"
+                  checked={formData.agreeTerms}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-[#2ecc71] bg-gray-700 border-gray-600 rounded focus:ring-[#2ecc71]"
+                />
+                <label htmlFor="agreeTerms" className="text-sm text-gray-300">
+                  I agree with Terms of Services and Privacy Policy
+                </label>
+              </div>
+            </>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-[#2ecc71] text-white py-4 rounded font-semibold text-lg hover:bg-[#27ae60] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed mt-6"
           >
             {loading ? 'Loading...' : mode === 'signin' ? 'Sign in' : 'Sign up'}
           </button>
         </form>
-
-        {/* Switch Mode */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}{' '}
-            <button
-              onClick={() => onSwitchMode(mode === 'signin' ? 'signup' : 'signin')}
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              {mode === 'signin' ? 'Sign up' : 'Sign in'}
-            </button>
-          </p>
-        </div>
       </div>
     </div>
   );
