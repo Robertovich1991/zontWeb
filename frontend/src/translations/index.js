@@ -47,8 +47,8 @@ export const translations = {
       transparentDesc: 'No hidden fees. See the exact price before you book',
     },
     booking: {
-      title: 'Book a Zont in the City You Plan on Visiting',
-      description: 'Choose from a range of categories and prices. Zont provides professional ground transportation at the lowest rates across the globe. Book an airport transfer or car service in any city worldwide. Track your driver in real time, ensuring quality and punctuality.',
+      title: 'Book Your Airport Transfer & Private Driver Service',
+      description: 'Choose from premium sedans, luxury vehicles, and business vans at competitive rates. Zont provides professional airport transfers and private driver services at the lowest rates across the globe. Book your airport taxi, city transfer, or hourly car rental in any city worldwide. Track your driver in real-time, ensuring quality, safety, and punctuality for every ride.',
       oneWay: 'One way',
       hourlyRental: 'Hourly Rental',
       pickup: 'Pick up',
@@ -143,8 +143,8 @@ export const translations = {
       transparentDesc: 'Aucun frais caché. Voyez le prix exact avant de réserver',
     },
     booking: {
-      title: 'Réservez un Zont dans la Ville que Vous Prévoyez de Visiter',
-      description: 'Choisissez parmi une gamme de catégories et de prix. Zont fournit un transport terrestre professionnel aux tarifs les plus bas du monde. Réservez un transfert aéroport ou un service de voiture dans n\'importe quelle ville. Suivez votre chauffeur en temps réel, garantissant qualité et ponctualité.',
+      title: 'Réservez Votre Transfert Aéroport & Chauffeur Privé',
+      description: 'Choisissez parmi des berlines premium, véhicules de luxe et vans d\'affaires à tarifs compétitifs. Zont fournit des transferts aéroport professionnels et services de chauffeur privé aux meilleurs tarifs mondiaux. Réservez votre taxi aéroport, transfert en ville ou location de voiture avec chauffeur dans n\'importe quelle ville. Suivez votre chauffeur en temps réel pour qualité, sécurité et ponctualité garanties.',
       oneWay: 'Aller simple',
       hourlyRental: 'Location Horaire',
       pickup: 'Départ',
@@ -239,8 +239,8 @@ export const translations = {
       transparentDesc: 'Никаких скрытых платежей. Узнайте точную цену перед бронированием',
     },
     booking: {
-      title: 'Закажите Zont в Городе, Который Вы Планируете Посетить',
-      description: 'Выбирайте из множества категорий и цен. Zont предоставляет профессиональный наземный транспорт по самым низким тарифам по всему миру. Забронируйте трансфер из аэропорта или автомобильный сервис в любом городе. Отслеживайте водителя в реальном времени, обеспечивая качество и пунктуальность.',
+      title: 'Забронируйте Трансфер из Аэропорта и Частного Водителя',
+      description: 'Выбирайте из премиум седанов, роскошных автомобилей и бизнес-микроавтобусов по конкурентным ценам. Zont предоставляет профессиональные трансферы из аэропорта и услуги частного водителя по самым низким тарифам по всему миру. Забронируйте такси из аэропорта, городской трансфер или почасовую аренду автомобиля с водителем в любом городе. Отслеживайте водителя в режиме реального времени, гарантируя качество, безопасность и пунктуальность каждой поездки.',
       oneWay: 'В одну сторону',
       hourlyRental: 'Почасовая Аренда',
       pickup: 'Откуда',

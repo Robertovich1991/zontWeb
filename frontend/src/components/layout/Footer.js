@@ -1,7 +1,10 @@
 import React from 'react';
 import { Facebook, Instagram } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const Footer = () => {
+  const { t } = useLanguage();
+  
   return (
     <footer className="bg-[#0f1419] text-white border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -10,27 +13,27 @@ const Footer = () => {
           <div className="col-span-1">
             <div className="text-2xl font-bold text-white mb-4">ZONT</div>
             <p className="text-gray-400 text-sm">
-              The smartest way to move around your city.
+              {t('footer.description')}
             </p>
           </div>
 
           {/* Links */}
           <div>
-            <h3 className="text-base font-semibold mb-3 text-gray-300">Quick Links</h3>
+            <h3 className="text-base font-semibold mb-3 text-gray-300">{t('footer.quickLinks')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="/about" className="text-gray-400 hover:text-white transition-colors">
-                  About Us
+                  {t('footer.aboutUs')}
                 </a>
               </li>
               <li>
                 <a href="/terms" className="text-gray-400 hover:text-white transition-colors">
-                  Terms of Use
+                  {t('footer.terms')}
                 </a>
               </li>
               <li>
                 <a href="/privacy" className="text-gray-400 hover:text-white transition-colors">
-                  Privacy Policy
+                  {t('footer.privacy')}
                 </a>
               </li>
             </ul>
@@ -38,7 +41,7 @@ const Footer = () => {
 
           {/* Social */}
           <div>
-            <h3 className="text-base font-semibold mb-3 text-gray-300">Follow Us</h3>
+            <h3 className="text-base font-semibold mb-3 text-gray-300">{t('footer.followUs')}</h3>
             <div className="flex space-x-4">
               <a
                 href="https://www.facebook.com/Zontcab-390761701681460/"
@@ -62,7 +65,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-6 pt-6 text-center text-gray-400 text-sm">
-          <p>© 2025 Zont Technologies Inc. All rights reserved.</p>
+          <p>{t('footer.copyright')}</p>
         </div>
       </div>
     </footer>

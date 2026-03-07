@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard } from 'lucide-react';
+import { Helmet } from 'react-helmet';
 
 const Home = () => {
   const navigate = useNavigate();
   const { startBooking } = useBooking();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [tripType, setTripType] = useState('oneway');
   const [formData, setFormData] = useState({
@@ -48,56 +51,61 @@ const Home = () => {
   const features = [
     {
       icon: <CheckCircle className="w-8 h-8 text-[#2ecc71]" />,
-      title: 'Confirmed Booking',
-      description: 'Get instant confirmation and driver details 3 hours before pickup',
+      title: t('features.confirmedBooking'),
+      description: t('features.confirmedDesc'),
     },
     {
       icon: <MapPin className="w-8 h-8 text-[#2ecc71]" />,
-      title: 'Real-Time Tracking',
-      description: 'Track your driver in real-time and know exactly when they will arrive',
+      title: t('features.realTimeTracking'),
+      description: t('features.realTimeDesc'),
     },
     {
       icon: <Shield className="w-8 h-8 text-[#2ecc71]" />,
-      title: 'Professional Drivers',
-      description: 'All drivers are verified, licensed, and highly rated by our community',
+      title: t('features.professionalDrivers'),
+      description: t('features.professionalDesc'),
     },
     {
       icon: <CreditCard className="w-8 h-8 text-[#2ecc71]" />,
-      title: 'Transparent Pricing',
-      description: 'No hidden fees. See the exact price before you book',
+      title: t('features.transparentPricing'),
+      description: t('features.transparentDesc'),
     },
   ];
 
   const stats = [
-    { number: '120+', label: 'Cities Worldwide' },
-    { number: '50K+', label: 'Happy Customers' },
-    { number: '10K+', label: 'Professional Drivers' },
-    { number: '4.8/5', label: 'Average Rating' },
+    { number: '120+', label: t('stats.cities') },
+    { number: '50K+', label: t('stats.customers') },
+    { number: '10K+', label: t('stats.drivers') },
+    { number: '4.8/5', label: t('stats.rating') },
   ];
 
   const testimonials = [
     {
-      name: 'Marie Dubois',
-      location: 'Paris, France',
+      name: t('testimonials.name1'),
+      location: t('testimonials.location1'),
       rating: 5,
-      text: 'Perfect service for airport transfers! The driver was waiting for me with a sign, very professional.',
+      text: t('testimonials.review1'),
     },
     {
-      name: 'James Wilson',
-      location: 'London, UK',
+      name: t('testimonials.name2'),
+      location: t('testimonials.location2'),
       rating: 5,
-      text: 'I use Zont for all my business trips. Reliable, on-time, and the drivers know the best routes.',
+      text: t('testimonials.review2'),
     },
     {
-      name: 'Anna Petrosyan',
-      location: 'Yerevan, Armenia',
+      name: t('testimonials.name3'),
+      location: t('testimonials.location3'),
       rating: 5,
-      text: 'Great prices and excellent service. I highly recommend Zont for anyone visiting Armenia!',
+      text: t('testimonials.review3'),
     },
   ];
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
+      <Helmet>
+        <title>{t('meta.title')}</title>
+        <meta name="description" content={t('meta.description')} />
+        <meta name="keywords" content={t('meta.keywords')} />
+      </Helmet>
       <Header />
 
       <main className="flex-1 pt-16">
@@ -108,13 +116,13 @@ const Home = () => {
               {/* Left Content */}
               <div className="text-center lg:text-left">
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-                  Press a Button,<br />
-                  <span className="text-[#2ecc71]">Get a Ride</span>
+                  {t('hero.title1')}<br />
+                  <span className="text-[#2ecc71]">{t('hero.title2')}</span>
                 </h1>
                 <p className="text-xl md:text-2xl text-gray-300 mb-8">
-                  <span className="font-semibold text-white">Zont</span> is the smartest way to move around your city.
+                  <span className="font-semibold text-white">Zont</span> {t('hero.subtitle')}
                   <br />
-                  Get the app for <span className="font-semibold">iPhone</span> and <span className="font-semibold">Android</span>.
+                  {t('hero.getApp')} <span className="font-semibold">{t('hero.iphone')}</span> {t('hero.and')} <span className="font-semibold">{t('hero.android')}</span>.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
                   <a
@@ -125,8 +133,8 @@ const Home = () => {
                   >
                     <span className="text-2xl mr-2">📱</span>
                     <div className="text-left">
-                      <div className="text-xs">Download on the</div>
-                      <div className="text-lg font-semibold">App Store</div>
+                      <div className="text-xs">{t('hero.downloadOn')}</div>
+                      <div className="text-lg font-semibold">{t('hero.appStore')}</div>
                     </div>
                   </a>
                   <a
@@ -137,8 +145,8 @@ const Home = () => {
                   >
                     <span className="text-2xl mr-2">📱</span>
                     <div className="text-left">
-                      <div className="text-xs">GET IT ON</div>
-                      <div className="text-lg font-semibold">Google Play</div>
+                      <div className="text-xs">{t('hero.getItOn')}</div>
+                      <div className="text-lg font-semibold">{t('hero.googlePlay')}</div>
                     </div>
                   </a>
                 </div>
@@ -185,9 +193,9 @@ const Home = () => {
         <section className="py-20 px-4 bg-[#1a2332]">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Why Choose Zont?</h2>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{t('features.title')}</h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                Professional transportation service with the best prices and highest quality standards
+                {t('features.subtitle')}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -207,11 +215,10 @@ const Home = () => {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                Book a Zont in the City You Plan on Visiting
+                {t('booking.title')}
               </h2>
               <p className="text-xl text-gray-300 max-w-4xl mx-auto">
-                Choose from a range of categories and prices. Zont provides professional ground transportation at the lowest rates across the globe. 
-                Book an airport transfer or car service in any city worldwide. Track your driver in real time, ensuring quality and punctuality.
+                {t('booking.description')}
               </p>
             </div>
 
@@ -226,7 +233,7 @@ const Home = () => {
                       : 'text-gray-500 hover:text-gray-400'
                   }`}
                 >
-                  One way
+                  {t('booking.oneWay')}
                 </button>
                 <button
                   onClick={() => setTripType('hourly')}
@@ -236,7 +243,7 @@ const Home = () => {
                       : 'text-gray-500 hover:text-gray-400'
                   }`}
                 >
-                  Hourly Rental
+                  {t('booking.hourlyRental')}
                 </button>
               </div>
 
@@ -244,7 +251,7 @@ const Home = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="pickup" className="block text-base font-medium text-white mb-3">
-                    Pick up
+                    {t('booking.pickup')}
                   </label>
                   <input
                     type="text"
@@ -254,13 +261,13 @@ const Home = () => {
                     onChange={handleChange}
                     required
                     className="w-full px-4 py-4 bg-white text-gray-900 rounded placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]"
-                    placeholder="From:"
+                    placeholder={t('booking.pickupPlaceholder')}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="dropoff" className="block text-base font-medium text-white mb-3">
-                    Drop off
+                    {t('booking.dropoff')}
                   </label>
                   <input
                     type="text"
@@ -271,14 +278,14 @@ const Home = () => {
                     required={tripType === 'oneway'}
                     disabled={tripType === 'hourly'}
                     className="w-full px-4 py-4 bg-white text-gray-900 rounded placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    placeholder={tripType === 'hourly' ? 'N/A for hourly rental' : 'To:'}
+                    placeholder={tripType === 'hourly' ? t('booking.hourlyNA') : t('booking.dropoffPlaceholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="date" className="block text-base font-medium text-white mb-3">
-                      Date
+                      {t('booking.date')}
                     </label>
                     <input
                       type="date"
@@ -292,7 +299,7 @@ const Home = () => {
                   </div>
                   <div>
                     <label htmlFor="time" className="block text-base font-medium text-white mb-3">
-                      Time
+                      {t('booking.time')}
                     </label>
                     <input
                       type="time"
@@ -311,7 +318,7 @@ const Home = () => {
                   disabled={loading}
                   className="w-full bg-[#2ecc71] text-white py-5 rounded font-semibold text-lg hover:bg-[#27ae60] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed uppercase tracking-wider"
                 >
-                  {loading ? 'Searching...' : 'SEARCH'}
+                  {loading ? t('booking.searching') : t('booking.search')}
                 </button>
               </form>
             </div>
@@ -322,8 +329,8 @@ const Home = () => {
         <section className="py-20 px-4 bg-[#1a2332]">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">What Our Customers Say</h2>
-              <p className="text-xl text-gray-300">Trusted by thousands of travelers worldwide</p>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{t('testimonials.title')}</h2>
+              <p className="text-xl text-gray-300">{t('testimonials.subtitle')}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial, index) => (
@@ -348,16 +355,16 @@ const Home = () => {
         <section className="py-20 px-4 bg-gradient-to-r from-[#2ecc71] to-[#27ae60]">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to Experience Premium Transportation?
+              {t('cta.title')}
             </h2>
             <p className="text-xl text-white mb-8">
-              Join thousands of satisfied customers. Book your first ride today!
+              {t('cta.subtitle')}
             </p>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="bg-white text-[#2ecc71] px-12 py-5 rounded-full font-bold text-xl hover:bg-gray-100 transition-colors shadow-2xl"
             >
-              BOOK NOW
+              {t('cta.bookNow')}
             </button>
           </div>
         </section>
@@ -365,10 +372,9 @@ const Home = () => {
         {/* Worldwide Section */}
         <section className="py-16 px-4 bg-[#0f1419]">
           <div className="max-w-7xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-white mb-6">Your Best Worldwide Option</h2>
+            <h2 className="text-4xl font-bold text-white mb-6">{t('worldwide.title')}</h2>
             <p className="text-lg text-gray-300 mb-8 max-w-3xl mx-auto">
-              With a global on-demand network already spanning across <span className="text-[#2ecc71] font-bold">120+ cities</span>, we're taking
-              transportation and instant ordering to the next level.
+              {t('worldwide.description')} <span className="text-[#2ecc71] font-bold">{t('worldwide.cities')}</span>{t('worldwide.description2')}
             </p>
           </div>
         </section>
