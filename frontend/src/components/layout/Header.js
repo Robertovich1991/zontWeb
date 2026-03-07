@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+import { Menu, X, ChevronDown, Globe } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
 
 const Header = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const { t, language, changeLanguage } = useLanguage();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('signin');
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('France');
+
+  const languages = [
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+  ];
+
+  const currentLanguage = languages.find(lang => lang.code === language) || languages[0];
 
   const handleAuthClick = (mode) => {
     setAuthMode(mode);
@@ -30,6 +41,11 @@ const Header = () => {
     setCountryDropdownOpen(false);
   };
 
+  const handleLanguageChange = (langCode) => {
+    changeLanguage(langCode);
+    setLangDropdownOpen(false);
+  };
+
   return (
     <>
       <header className="fixed top-0 left-0 right-0 bg-[#1a2332] shadow-lg z-50 border-b border-gray-700">
@@ -38,7 +54,6 @@ const Header = () => {
             {/* Logo with Icon */}
             <Link to="/" className="flex-shrink-0">
               <div className="flex items-center space-x-3">
-                {/* Logo Icon */}
                 <div className="text-white">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 6L5 3H19L21 6V18L19 21H5L3 18V6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -56,25 +71,25 @@ const Header = () => {
                 to="/become-driver"
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
-                Become a Driver
+                {t('nav.becomeDriver')}
               </Link>
               <Link
                 to="/become-client"
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
-                Become a Client
+                {t('nav.becomeClient')}
               </Link>
               <Link
                 to="/countries"
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
-                Countries
+                {t('nav.countries')}
               </Link>
               <Link
                 to="/help"
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
-                Help
+                {t('nav.help')}
               </Link>
 
               {/* Country Dropdown */}
@@ -104,15 +119,43 @@ const Header = () => {
                 )}
               </div>
 
+              {/* Language Selector */}
+              <div className="relative">
+                <button
+                  onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                  className="flex items-center space-x-2 text-white hover:text-gray-300 transition-colors text-sm font-medium bg-gray-700 px-3 py-2 rounded"
+                >
+                  <Globe size={16} />
+                  <span>{currentLanguage.flag}</span>
+                  <ChevronDown size={14} />
+                </button>
+                {langDropdownOpen && (
+                  <div className="absolute top-full mt-2 bg-[#1a2332] border border-gray-700 rounded shadow-lg py-2 min-w-[150px] right-0">
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => handleLanguageChange(lang.code)}
+                        className={`w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors text-sm flex items-center space-x-2 ${
+                          language === lang.code ? 'bg-gray-700 text-white' : 'text-gray-300'
+                        }`}
+                      >
+                        <span>{lang.flag}</span>
+                        <span>{lang.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Auth Buttons */}
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-gray-300 text-sm">Hello, {user?.name || 'User'}</span>
+                  <span className="text-gray-300 text-sm">{t('nav.hello')}, {user?.name || 'User'}</span>
                   <button
                     onClick={handleLogout}
                     className="px-4 py-2 text-sm font-medium text-white hover:text-gray-300 transition-colors"
                   >
-                    Sign out
+                    {t('nav.signout')}
                   </button>
                 </div>
               ) : (
@@ -121,13 +164,13 @@ const Header = () => {
                     onClick={() => handleAuthClick('signin')}
                     className="px-4 py-2 text-sm font-medium text-white hover:text-gray-300 transition-colors"
                   >
-                    Sign in
+                    {t('nav.signin')}
                   </button>
                   <button
                     onClick={() => handleAuthClick('signup')}
                     className="px-6 py-2 text-sm font-medium text-white bg-gray-700 rounded hover:bg-gray-600 transition-colors uppercase tracking-wider"
                   >
-                    SIGN UP
+                    {t('nav.signup')}
                   </button>
                 </div>
               )}
@@ -152,28 +195,28 @@ const Header = () => {
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >
-                Become a Driver
+                {t('nav.becomeDriver')}
               </Link>
               <Link
                 to="/become-client"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >
-                Become a Client
+                {t('nav.becomeClient')}
               </Link>
               <Link
                 to="/countries"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >
-                Countries
+                {t('nav.countries')}
               </Link>
               <Link
                 to="/help"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >
-                Help
+                {t('nav.help')}
               </Link>
 
               <div className="py-2">
@@ -187,14 +230,28 @@ const Header = () => {
                 </select>
               </div>
 
+              <div className="py-2">
+                <select
+                  value={language}
+                  onChange={(e) => changeLanguage(e.target.value)}
+                  className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.flag} {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {isAuthenticated ? (
                 <>
-                  <div className="text-gray-300 py-2 text-sm">Hello, {user?.name || 'User'}</div>
+                  <div className="text-gray-300 py-2 text-sm">{t('nav.hello')}, {user?.name || 'User'}</div>
                   <button
                     onClick={handleLogout}
                     className="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
                   >
-                    Sign out
+                    {t('nav.signout')}
                   </button>
                 </>
               ) : (
@@ -203,13 +260,13 @@ const Header = () => {
                     onClick={() => handleAuthClick('signin')}
                     className="w-full px-4 py-2 text-sm font-medium text-white border border-gray-600 rounded hover:bg-gray-700"
                   >
-                    Sign in
+                    {t('nav.signin')}
                   </button>
                   <button
                     onClick={() => handleAuthClick('signup')}
                     className="w-full px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded hover:bg-gray-600 uppercase"
                   >
-                    SIGN UP
+                    {t('nav.signup')}
                   </button>
                 </>
               )}
