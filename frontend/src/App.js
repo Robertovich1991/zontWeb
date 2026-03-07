@@ -5,7 +5,6 @@ import { AuthProvider } from "@/context/AuthContext";
 import { BookingProvider } from "@/context/BookingContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
-import { Helmet } from "react-helmet";
 
 // Pages
 import Home from "@/pages/Home";
