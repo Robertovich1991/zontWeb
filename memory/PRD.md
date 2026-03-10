@@ -22,9 +22,16 @@ Convert the existing Angular website zont.cab into a React frontend. The new sit
   - Rome, Milan (Italy)
   - Alicante, Barcelona (Spain)
   - Yerevan (Armenia)
+- **4 New Paris-specific SEO Pages**:
+  - CDG Charles de Gaulle Airport Transfer
+  - Orly Airport Transfer
+  - Beauvais Airport Transfer
+  - Paris Train Station Transfer (Gare du Nord, Lyon, Montparnasse, etc.)
 - **Reusable CityTransferPage component** for consistent city pages
-- **Countries page** listing all 12 cities grouped by country with links
-- **All city routes** registered in EN/FR/RU URL variants
+- **Vehicle RESERVER button** scrolls to booking form (not navigates away)
+- **Selected vehicle banner** shows above booking form after selection
+- **Countries page** listing all 16+ destinations grouped by country with links
+- **All routes** registered in EN/FR/RU URL variants
 - **City data model** in `/frontend/src/data/cities.js`
 - **Booking flow**: form → car selection → checkout → confirmation
 
