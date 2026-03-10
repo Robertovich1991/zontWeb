@@ -6,12 +6,11 @@ import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard } from 'lucide-react';
-import { Helmet } from 'react-helmet';
 
 const Home = () => {
   const navigate = useNavigate();
   const { startBooking } = useBooking();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const [tripType, setTripType] = useState('oneway');
   const [formData, setFormData] = useState({
@@ -101,11 +100,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
-      <Helmet>
-        <title>{t('meta.title')}</title>
-        <meta name="description" content={t('meta.description')} />
-        <meta name="keywords" content={t('meta.keywords')} />
-      </Helmet>
       <Header />
 
       <main className="flex-1 pt-16">
