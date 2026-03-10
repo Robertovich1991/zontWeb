@@ -15,6 +15,7 @@ import Countries from "@/pages/Countries";
 import CarSelection from "@/pages/CarSelection";
 import Checkout from "@/pages/Checkout";
 import BookingConfirmation from "@/pages/BookingConfirmation";
+import LookingForPartners from "@/pages/LookingForPartners";
 import ParisAirportTransfer from "@/pages/ParisAirportTransfer";
 
 function App() {
