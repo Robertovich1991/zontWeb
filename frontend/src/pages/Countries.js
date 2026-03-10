@@ -68,7 +68,8 @@ const countryColors = {
 };
 
 const startingPrices = {
-  paris: 65, nice: 35, monaco: 65, cannes: 70, cotedazur: 45,
+  paris: 65, cdg: 65, orly: 45, beauvais: 120, paristrainstation: 25,
+  nice: 35, monaco: 65, cannes: 70, cotedazur: 45,
   berlin: 45, munich: 55, rome: 40, milan: 35, alicante: 30, barcelona: 39, yerevan: 15,
 };
 

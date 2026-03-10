@@ -1,5 +1,5 @@
 export const citiesData = {
-  // FRANCE
+  // FRANCE - PARIS
   paris: {
     id: 'paris',
     country: 'France',
@@ -10,6 +10,50 @@ export const citiesData = {
     urlEn: '/paris-airport-transfer',
     urlFr: '/transfert-aeroport-paris',
     urlRu: '/taksi-iz-aeroporta-parij',
+  },
+  cdg: {
+    id: 'cdg',
+    country: 'France',
+    nameEn: 'CDG - Charles de Gaulle',
+    nameFr: 'CDG - Charles de Gaulle',
+    nameRu: 'CDG - Шарль де Голль',
+    airports: ['CDG Terminal 1', 'CDG Terminal 2', 'CDG Terminal 3'],
+    urlEn: '/cdg-airport-transfer',
+    urlFr: '/transfert-aeroport-cdg',
+    urlRu: '/taksi-iz-aeroporta-cdg',
+  },
+  orly: {
+    id: 'orly',
+    country: 'France',
+    nameEn: 'Orly Airport',
+    nameFr: 'Aeroport Orly',
+    nameRu: 'Аэропорт Орли',
+    airports: ['Orly 1', 'Orly 2', 'Orly 3', 'Orly 4'],
+    urlEn: '/orly-airport-transfer',
+    urlFr: '/transfert-aeroport-orly',
+    urlRu: '/taksi-iz-aeroporta-orli',
+  },
+  beauvais: {
+    id: 'beauvais',
+    country: 'France',
+    nameEn: 'Beauvais Airport',
+    nameFr: 'Aeroport Beauvais',
+    nameRu: 'Аэропорт Бове',
+    airports: ['Beauvais-Tille'],
+    urlEn: '/beauvais-airport-transfer',
+    urlFr: '/transfert-aeroport-beauvais',
+    urlRu: '/taksi-iz-aeroporta-bove',
+  },
+  paristrainstation: {
+    id: 'paristrainstation',
+    country: 'France',
+    nameEn: 'Paris Train Stations',
+    nameFr: 'Gares de Paris',
+    nameRu: 'Вокзалы Парижа',
+    airports: ['Gare du Nord', 'Gare de Lyon', 'Montparnasse', 'Gare de l\'Est', 'Saint-Lazare'],
+    urlEn: '/paris-train-station-transfer',
+    urlFr: '/transfert-gare-paris',
+    urlRu: '/transfer-vokzal-parizh',
   },
   nice: {
     id: 'nice',
@@ -145,7 +189,7 @@ export const citiesData = {
 export const countriesList = [
   {
     name: 'France',
-    cities: ['paris', 'nice', 'cannes', 'cotedazur']
+    cities: ['paris', 'cdg', 'orly', 'beauvais', 'paristrainstation', 'nice', 'cannes', 'cotedazur']
   },
   {
     name: 'Monaco',

@@ -29,6 +29,10 @@ import MilanTransfer from "@/pages/cities/Milan";
 import AlicanteTransfer from "@/pages/cities/Alicante";
 import BarcelonaTransfer from "@/pages/cities/Barcelona";
 import YerevanTransfer from "@/pages/cities/Yerevan";
+import CDGTransfer from "@/pages/cities/CDG";
+import OrlyTransfer from "@/pages/cities/Orly";
+import BeauvaisTransfer from "@/pages/cities/Beauvais";
+import ParisTrainStationTransfer from "@/pages/cities/ParisTrainStation";
 
 function App() {
   return (
@@ -43,6 +47,22 @@ function App() {
                 <Route path="/paris-airport-transfer" element={<ParisAirportTransfer />} />
                 <Route path="/transfert-aeroport-paris" element={<ParisAirportTransfer />} />
                 <Route path="/taksi-iz-aeroporta-parij" element={<ParisAirportTransfer />} />
+                {/* CDG */}
+                <Route path="/cdg-airport-transfer" element={<CDGTransfer />} />
+                <Route path="/transfert-aeroport-cdg" element={<CDGTransfer />} />
+                <Route path="/taksi-iz-aeroporta-cdg" element={<CDGTransfer />} />
+                {/* Orly */}
+                <Route path="/orly-airport-transfer" element={<OrlyTransfer />} />
+                <Route path="/transfert-aeroport-orly" element={<OrlyTransfer />} />
+                <Route path="/taksi-iz-aeroporta-orli" element={<OrlyTransfer />} />
+                {/* Beauvais */}
+                <Route path="/beauvais-airport-transfer" element={<BeauvaisTransfer />} />
+                <Route path="/transfert-aeroport-beauvais" element={<BeauvaisTransfer />} />
+                <Route path="/taksi-iz-aeroporta-bove" element={<BeauvaisTransfer />} />
+                {/* Paris Train Station */}
+                <Route path="/paris-train-station-transfer" element={<ParisTrainStationTransfer />} />
+                <Route path="/transfert-gare-paris" element={<ParisTrainStationTransfer />} />
+                <Route path="/transfer-vokzal-parizh" element={<ParisTrainStationTransfer />} />
                 {/* Nice */}
                 <Route path="/nice-airport-transfer" element={<NiceTransfer />} />
                 <Route path="/transfert-aeroport-nice" element={<NiceTransfer />} />
