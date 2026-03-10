@@ -81,7 +81,7 @@ tail -f /var/log/supervisor/frontend.out.log
 ## 🌐 Accès
 
 Une fois lancé, le site est accessible à :
-- **Frontend** : https://cab-native-preview.preview.emergentagent.com
+- **Frontend** : https://multi-city-booking-1.preview.emergentagent.com
 
 ## 📁 Structure du projet
 
