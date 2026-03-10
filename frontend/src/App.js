@@ -15,7 +15,7 @@ import Countries from "@/pages/Countries";
 import CarSelection from "@/pages/CarSelection";
 import Checkout from "@/pages/Checkout";
 import BookingConfirmation from "@/pages/BookingConfirmation";
-import LookingForPartners from "@/pages/LookingForPartners";
+import ParisAirportTransfer from "@/pages/ParisAirportTransfer";
 
 function App() {
   return (
@@ -26,6 +26,9 @@ function App() {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/paris-airport-transfer" element={<ParisAirportTransfer />} />
+                <Route path="/transfert-aeroport-paris" element={<ParisAirportTransfer />} />
+                <Route path="/taksi-iz-aeroporta-parij" element={<ParisAirportTransfer />} />
                 <Route path="/car-selection" element={<CarSelection />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/booking-confirmation" element={<BookingConfirmation />} />
