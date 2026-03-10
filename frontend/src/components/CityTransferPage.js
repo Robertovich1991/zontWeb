@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -13,6 +13,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, popularRoutes: ro
   const { language } = useLanguage();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const bookingFormRef = useRef(null);
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
@@ -40,7 +42,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, popularRoutes: ro
     e.preventDefault();
     setLoading(true);
     try {
-      startBooking({ ...formData });
+      startBooking({ ...formData, selectedVehicle });
       navigate('/car-selection');
     } catch (error) {
       toast({ title: 'Error', description: 'An error occurred', variant: 'destructive' });
@@ -145,8 +147,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, popularRoutes: ro
                       <p className="text-sm text-gray-500 mb-4">{c.allInclusive}</p>
                       <button
                         onClick={() => {
-                          startBooking({ ...formData, selectedVehicle: v });
-                          navigate('/car-selection');
+                          setSelectedVehicle(v);
+                          bookingFormRef.current?.scrollIntoView({ behavior: 'smooth' });
                         }}
                         className="bg-[#2ecc71] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors w-full"
                         data-testid={`book-vehicle-${v.id}`}
@@ -198,9 +200,21 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, popularRoutes: ro
         )}
 
         {/* Booking Form */}
-        <section className="py-20 px-4 bg-[#1a2332]">
+        <section className="py-20 px-4 bg-[#1a2332]" ref={bookingFormRef}>
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-8" data-testid="booking-form-title">{c.bookingForm}</h2>
+            {selectedVehicle && (
+              <div className="bg-[#2ecc71]/10 border border-[#2ecc71] rounded-xl p-4 mb-6 flex items-center justify-between" data-testid="selected-vehicle-banner">
+                <div className="flex items-center space-x-4">
+                  <span className="text-4xl">{selectedVehicle.image}</span>
+                  <div>
+                    <p className="text-white font-bold text-lg">{selectedVehicle.name}</p>
+                    <p className="text-gray-400 text-sm">{selectedVehicle.passengers} {c.passengers} / {selectedVehicle.luggage} {c.luggage}</p>
+                  </div>
+                </div>
+                <div className="text-[#2ecc71] text-2xl font-bold">{selectedVehicle.price} &euro;</div>
+              </div>
+            )}
             <div className="bg-[#0f1419] rounded-2xl p-8">
               <form onSubmit={handleSubmit} className="space-y-6" data-testid="booking-form">
                 <div>

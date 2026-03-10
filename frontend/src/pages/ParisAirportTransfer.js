@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -13,6 +13,8 @@ const ParisAirportTransfer = () => {
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const [tripType, setTripType] = useState('oneway');
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const bookingFormRef = useRef(null);
   const [formData, setFormData] = useState({
     pickup: language === 'fr' ? 'Aéroport CDG Paris' : language === 'ru' ? 'Аэропорт CDG Париж' : 'Paris CDG Airport',
     dropoff: '',
@@ -186,7 +188,7 @@ const ParisAirportTransfer = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const searchData = { ...formData, tripType };
+      const searchData = { ...formData, tripType, selectedVehicle };
       startBooking(searchData);
       navigate('/car-selection');
     } catch (error) {
@@ -297,8 +299,8 @@ const ParisAirportTransfer = () => {
                       <p className="text-sm text-gray-500 mb-4">All inclusive</p>
                       <button
                         onClick={() => {
-                          startBooking({ ...formData, selectedVehicle: vehicle });
-                          navigate('/car-selection');
+                          setSelectedVehicle(vehicle);
+                          bookingFormRef.current?.scrollIntoView({ behavior: 'smooth' });
                         }}
                         className="bg-[#2ecc71] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors w-full"
                       >
@@ -362,9 +364,21 @@ const ParisAirportTransfer = () => {
         </section>
 
         {/* Booking Form */}
-        <section className="py-20 px-4 bg-[#1a2332]">
+        <section className="py-20 px-4 bg-[#1a2332]" ref={bookingFormRef}>
           <div className="max-w-4xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center mb-8">{c.bookingForm}</h2>
+            {selectedVehicle && (
+              <div className="bg-[#2ecc71]/10 border border-[#2ecc71] rounded-xl p-4 mb-6 flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <span className="text-4xl">{selectedVehicle.image}</span>
+                  <div>
+                    <p className="text-white font-bold text-lg">{selectedVehicle.name}</p>
+                    <p className="text-gray-400 text-sm">{selectedVehicle.passengers} {c.passengers} / {selectedVehicle.luggage} {c.luggage}</p>
+                  </div>
+                </div>
+                <div className="text-[#2ecc71] text-2xl font-bold">{selectedVehicle.price} &euro;</div>
+              </div>
+            )}
             <div className="bg-[#0f1419] rounded-2xl p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
