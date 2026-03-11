@@ -16,44 +16,33 @@ Convert the existing Angular website zont.cab into a React frontend. The new sit
 - **Paris Airport Transfer** converted to CityTransferPage component (same mobile-optimized design as all cities)
 - **Header/Footer** with navigation, language switcher (FR/EN/RU)
 - **Multilingual framework** using i18next (Home + Footer translated)
-- **Paris Airport Transfer** SEO landing page with booking form
-- **10 City SEO Landing Pages** (all tested and working):
+- **15+ City SEO Landing Pages** (all tested and working):
+  - Paris CDG, Orly, Beauvais, Paris Train Station
   - Nice, Monaco, Cannes (France/Riviera)
   - Berlin, Munich (Germany)
   - Rome, Milan (Italy)
   - Alicante, Barcelona (Spain)
   - Yerevan (Armenia)
-- **4 New Paris-specific SEO Pages**:
-  - CDG Charles de Gaulle Airport Transfer
-  - Orly Airport Transfer
-  - Beauvais Airport Transfer
-  - Paris Train Station Transfer (Gare du Nord, Lyon, Montparnasse, etc.)
-- **Mobile-First Conversion Redesign** (all city pages):
-  - Booking form above the fold on mobile (white card, clear CTA)
-  - Professional photos (Mercedes sedan, interior, airport)
-  - Trust elements: 50K+ trips, 24/7 available, 4.9/5 rating
-  - Security badges: Visa, Mastercard, PayPal, Apple Pay
-  - Verified Drivers, Flight Tracking, Free Cancellation badges
-  - Customer reviews section (3 reviews with star ratings)
-  - Sticky BOOK NOW button on mobile
-  - Photo gallery section with 4 professional images
-- **SEO Optimizations**:
-  - Custom SEO component (React 19 compatible, no react-helmet)
-  - Dynamic page titles and meta descriptions per page/language
-  - JSON-LD structured data (Schema.org) on all pages
-  - Open Graph tags (og:title, og:description, og:locale)
-  - Lazy loading for all routes except Home (code splitting)
-  - Non-render-blocking Google Fonts loading
-  - Proper HTML lang attribute per language
-- **Accessibility** improvements: aria-labels, roles, htmlFor/id on forms
-- **Reusable CityTransferPage component** for consistent city pages
-- **Vehicle RESERVER button** scrolls to booking form with selected vehicle banner
-- **Countries page** listing all 16+ destinations grouped by country
-- **All routes** registered in EN/FR/RU URL variants
+- **Mobile-First Conversion Redesign** (all city pages)
+- **Full Technical SEO Audit (March 2026):**
+  - Enhanced SEO component with: title, description, canonical, hreflang, og:url, og:image, og:type, og:site_name, robots meta, JSON-LD
+  - Unique `<title>` and `<meta description>` on every page (verified)
+  - Single `<h1>` per page (verified on all pages)
+  - Canonical URLs set on all public pages
+  - hreflang tags (en, fr, ru, x-default) on all multilingual city pages
+  - `robots.txt` created - blocks utility pages, references sitemap
+  - `sitemap.xml` created with all pages + hreflang annotations
+  - JSON-LD structured data: Organization+WebSite (Home), Service with AggregateOffer+Rating (city pages), FAQPage (Help)
+  - OG tags complete: title, description, type, url, image, locale, site_name
+  - noindex on utility pages (car-selection, checkout, booking-confirmation)
+  - Removed duplicate content routes (/how-it-works, /hotels-b2b-tours-operators)
+  - 404 catch-all route with noindex
+  - SEO testing agent: 44/44 checks passed (98% success rate)
 
 ### Architecture
-- Frontend: React + Tailwind CSS + react-router-dom
+- Frontend: React 19 + Tailwind CSS + react-router-dom
 - i18n: i18next + react-i18next
+- SEO: Custom SEO.js component (vanilla DOM manipulation, React 19 compatible)
 - Backend: FastAPI (unused, placeholder)
 - No database connected yet
 
@@ -63,14 +52,11 @@ Convert the existing Angular website zont.cab into a React frontend. The new sit
 - None currently blocking
 
 ### P1 (High)
-- Fix react-helmet for dynamic SEO meta tags per page/language
 - Translate remaining pages (BecomeDriver, BecomeClient, Help, LookingForPartners) to FR/EN/RU
 
 ### P2 (Medium)
 - Connect to C# backend (bookings, auth, dynamic data)
-- Add Cote d'Azur / French Riviera landing page
 
 ### P3 (Low)
-- Break down Home.js into smaller sub-components
-- Add sitemap.xml generation for SEO
-- Add structured data (JSON-LD) for rich search results
+- Break down CityTransferPage.js into smaller sub-components
+- Add Cote d'Azur / French Riviera landing page

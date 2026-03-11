@@ -19,6 +19,7 @@ const Checkout = lazy(() => import("@/pages/Checkout"));
 const BookingConfirmation = lazy(() => import("@/pages/BookingConfirmation"));
 const LookingForPartners = lazy(() => import("@/pages/LookingForPartners"));
 const ParisAirportTransfer = lazy(() => import("@/pages/ParisAirportTransfer"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
 
 // City Pages (lazy)
 const NiceTransfer = lazy(() => import("@/pages/cities/Nice"));
@@ -121,6 +122,7 @@ function App() {
                   <Route path="/become-client" element={<BecomeClient />} />
                   <Route path="/help" element={<Help />} />
                   <Route path="/countries" element={<Countries />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
             </BrowserRouter>
