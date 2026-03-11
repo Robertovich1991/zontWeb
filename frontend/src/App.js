@@ -37,6 +37,17 @@ const OrlyTransfer = lazy(() => import("@/pages/cities/Orly"));
 const BeauvaisTransfer = lazy(() => import("@/pages/cities/Beauvais"));
 const ParisTrainStationTransfer = lazy(() => import("@/pages/cities/ParisTrainStation"));
 
+// B2B Pages (lazy)
+const Partners = lazy(() => import("@/pages/Partners"));
+const TravelAgencies = lazy(() => import("@/pages/b2b/TravelAgencies"));
+const TourismAgencies = lazy(() => import("@/pages/b2b/TourismAgencies"));
+const HotelsB2B = lazy(() => import("@/pages/b2b/Hotels"));
+const ConciergeServices = lazy(() => import("@/pages/b2b/ConciergeServices"));
+const EventAgencies = lazy(() => import("@/pages/b2b/EventAgencies"));
+const CorporateClients = lazy(() => import("@/pages/b2b/CorporateClients"));
+const BusinessPartners = lazy(() => import("@/pages/b2b/BusinessPartners"));
+const TourOperators = lazy(() => import("@/pages/b2b/TourOperators"));
+
 const Loading = () => (
   <div className="min-h-screen bg-[#1a2332] flex items-center justify-center">
     <div className="w-10 h-10 border-4 border-[#2ecc71] border-t-transparent rounded-full animate-spin" role="status" aria-label="Loading"></div>
@@ -122,6 +133,16 @@ function App() {
                   <Route path="/become-client" element={<BecomeClient />} />
                   <Route path="/help" element={<Help />} />
                   <Route path="/countries" element={<Countries />} />
+                  {/* B2B Pages */}
+                  <Route path="/partners" element={<Partners />} />
+                  <Route path="/travel-agencies" element={<TravelAgencies />} />
+                  <Route path="/tourism-agencies" element={<TourismAgencies />} />
+                  <Route path="/hotels" element={<HotelsB2B />} />
+                  <Route path="/concierge-services" element={<ConciergeServices />} />
+                  <Route path="/event-agencies" element={<EventAgencies />} />
+                  <Route path="/corporate-clients" element={<CorporateClients />} />
+                  <Route path="/business-partners" element={<BusinessPartners />} />
+                  <Route path="/tour-operators" element={<TourOperators />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

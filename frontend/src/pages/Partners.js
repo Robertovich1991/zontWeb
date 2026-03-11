@@ -1,0 +1,351 @@
+import React, { useRef } from 'react';
+import { Link } from 'react-router-dom';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
+import { useLanguage } from '@/context/LanguageContext';
+import { CheckCircle, ArrowRight, Phone, Mail, Building2, Briefcase, Hotel, Star, Users, Plane, ChevronRight, Shield, Clock, Globe, Headphones } from 'lucide-react';
+
+const content = {
+  en: {
+    seoTitle: 'Premium Transport Solutions for Professionals | Zont B2B',
+    seoDesc: 'Zont supports travel agencies, hotels, concierges, event agencies, tour operators and corporate clients with reliable airport transfers and chauffeur services across Europe.',
+    badge: 'B2B Partnership Program',
+    heroTitle: 'Premium Transport Solutions for Professionals',
+    heroSub: 'ZONT supports travel agencies, hotels, concierges, event agencies, tour operators and corporate clients with reliable airport transfers and chauffeur services in Paris, France, Monaco and key European destinations.',
+    ctaPartner: 'Become a Partner',
+    ctaQuote: 'Request a Quote',
+    whoTitle: 'Who We Work With',
+    whoSub: 'Tailored transport solutions for every professional need',
+    servicesTitle: 'Services for Professionals',
+    servicesSub: 'Comprehensive transport solutions designed for business partners',
+    services: [
+      { title: 'Airport Transfers', desc: 'Reliable pickups and drop-offs at all major airports. Flight tracking, meet & greet, free waiting time.' },
+      { title: 'Train Station Transfers', desc: 'Professional transfers from all major train stations. Prompt, punctual service.' },
+      { title: 'Chauffeur at Disposal', desc: 'Dedicated driver available for hours or full days. Ideal for events, site visits and meetings.' },
+      { title: 'City-to-City Transfers', desc: 'Long-distance transfers between cities. Comfortable vehicles for intercity travel.' },
+      { title: 'Group Transportation', desc: 'Minivans and minibuses for groups of up to 16 passengers. Perfect for delegations and tour groups.' },
+      { title: 'VIP & Luxury Service', desc: 'Premium vehicles, discreet drivers. First-class service for your most demanding clients.' },
+    ],
+    whyTitle: 'Why Partner With ZONT',
+    whySub: 'A partnership built on reliability, quality and mutual growth',
+    whyPoints: [
+      { icon: 'shield', title: 'Fixed & Transparent Rates', desc: 'No hidden fees, no surge pricing. Predictable costs for seamless budget planning.' },
+      { icon: 'users', title: 'Professional Chauffeurs', desc: 'Vetted, licensed, multilingual drivers. Trained for VIP and business travel.' },
+      { icon: 'plane', title: 'Real-Time Flight Monitoring', desc: 'Automatic tracking of all flights. Schedule adjustments without extra cost.' },
+      { icon: 'star', title: 'Meet & Greet Service', desc: 'Driver waits at arrivals with a name sign. Personalized welcome for every guest.' },
+      { icon: 'clock', title: '24/7 Availability', desc: 'Book transfers day or night. Dedicated support around the clock.' },
+      { icon: 'headphones', title: 'Dedicated Partner Support', desc: 'Priority access to a dedicated account manager for your organization.' },
+    ],
+    howTitle: 'How Partnership Works',
+    howSteps: [
+      { title: 'Send Your Request', desc: 'Tell us about your business, volume and needs.' },
+      { title: 'Receive a Quote', desc: 'We respond within 24h with tailored rates.' },
+      { title: 'We Organize Transport', desc: 'Book seamlessly via portal, email or phone.' },
+      { title: 'Premium Experience', desc: 'Your clients enjoy first-class transfers.' },
+    ],
+    trustTitle: 'Trusted by Professionals Across Europe',
+    trustSub: '',
+    trustPoints: [
+      { value: '50,000+', label: 'Transfers Completed' },
+      { value: '120+', label: 'Cities Covered' },
+      { value: '4.9/5', label: 'Client Rating' },
+      { value: '24/7', label: 'Support Available' },
+    ],
+    contactTitle: 'Start Your B2B Partnership',
+    contactSub: 'Tell us about your business. We will prepare a personalized offer for your organization.',
+    formName: 'Your Name', formCompany: 'Company Name', formEmail: 'Professional Email', formPhone: 'Phone', formMessage: 'Describe your transport needs, expected volume, and preferred destinations...', formSubmit: 'Send Partnership Request',
+  },
+  fr: {
+    seoTitle: 'Solutions de Transport Premium pour Professionnels | Zont B2B',
+    seoDesc: 'Zont accompagne les agences de voyage, hotels, conciergeries, agences evenementielles, tour-operateurs et entreprises avec des transferts aeroport et services de chauffeur fiables en Europe.',
+    badge: 'Programme Partenariat B2B',
+    heroTitle: 'Solutions de Transport Premium pour Professionnels',
+    heroSub: 'ZONT accompagne les agences de voyage, hotels, conciergeries, agences evenementielles, tour-operateurs et entreprises avec des transferts aeroport et services chauffeur a Paris, en France, a Monaco et dans les principales destinations europeennes.',
+    ctaPartner: 'Devenir Partenaire',
+    ctaQuote: 'Demander un Devis',
+    whoTitle: 'Nos Partenaires',
+    whoSub: 'Des solutions de transport adaptees a chaque besoin professionnel',
+    servicesTitle: 'Services pour Professionnels',
+    servicesSub: 'Des solutions de transport completes concues pour les partenaires commerciaux',
+    services: [
+      { title: 'Transferts Aeroport', desc: 'Prises en charge et depositions fiables dans tous les grands aeroports. Suivi de vol, accueil personnalise.' },
+      { title: 'Transferts Gare', desc: 'Transferts professionnels depuis toutes les grandes gares. Service ponctuel et rapide.' },
+      { title: 'Chauffeur a Disposition', desc: 'Chauffeur dedie disponible a l\'heure ou a la journee. Ideal pour evenements et reunions.' },
+      { title: 'Transferts Interurbains', desc: 'Transferts longue distance entre villes. Vehicules confortables pour les trajets interurbains.' },
+      { title: 'Transport de Groupes', desc: 'Minivans et minibus pour groupes jusqu\'a 16 passagers. Parfait pour delegations et groupes touristiques.' },
+      { title: 'Service VIP & Luxe', desc: 'Vehicules premium, chauffeurs discrets. Service de premiere classe pour vos clients les plus exigeants.' },
+    ],
+    whyTitle: 'Pourquoi Choisir ZONT',
+    whySub: 'Un partenariat fonde sur la fiabilite, la qualite et la croissance mutuelle',
+    whyPoints: [
+      { icon: 'shield', title: 'Tarifs Fixes & Transparents', desc: 'Pas de frais caches, pas de surcharge. Des couts previsibles.' },
+      { icon: 'users', title: 'Chauffeurs Professionnels', desc: 'Chauffeurs verifies, licencies, multilingues. Formes au transport VIP.' },
+      { icon: 'plane', title: 'Suivi des Vols en Temps Reel', desc: 'Suivi automatique de tous les vols. Ajustements sans frais supplementaires.' },
+      { icon: 'star', title: 'Service d\'Accueil', desc: 'Le chauffeur attend aux arrivees avec un panneau nominatif.' },
+      { icon: 'clock', title: 'Disponibilite 24/7', desc: 'Reservez des transferts jour et nuit. Support dedie en permanence.' },
+      { icon: 'headphones', title: 'Support Partenaire Dedie', desc: 'Acces prioritaire a un gestionnaire de compte dedie.' },
+    ],
+    howTitle: 'Comment Ca Marche',
+    howSteps: [
+      { title: 'Envoyez Votre Demande', desc: 'Parlez-nous de votre activite, volume et besoins.' },
+      { title: 'Recevez un Devis', desc: 'Nous repondons sous 24h avec des tarifs personnalises.' },
+      { title: 'Nous Organisons le Transport', desc: 'Reservez facilement via portail, email ou telephone.' },
+      { title: 'Experience Premium', desc: 'Vos clients profitent de transferts de premiere classe.' },
+    ],
+    trustTitle: 'La Confiance des Professionnels en Europe',
+    trustSub: '',
+    trustPoints: [
+      { value: '50 000+', label: 'Transferts Realises' },
+      { value: '120+', label: 'Villes Couvertes' },
+      { value: '4.9/5', label: 'Note Client' },
+      { value: '24/7', label: 'Support Disponible' },
+    ],
+    contactTitle: 'Demarrez Votre Partenariat B2B',
+    contactSub: 'Parlez-nous de votre entreprise. Nous preparerons une offre personnalisee pour votre organisation.',
+    formName: 'Votre Nom', formCompany: 'Nom de l\'Entreprise', formEmail: 'Email Professionnel', formPhone: 'Telephone', formMessage: 'Decrivez vos besoins en transport, volume attendu et destinations preferees...', formSubmit: 'Envoyer la Demande de Partenariat',
+  },
+  ru: {
+    seoTitle: 'Премиальные Транспортные Решения для Профессионалов | Zont B2B',
+    seoDesc: 'Zont поддерживает туристические агентства, отели, консьерж-службы, ивент-агентства, туроператоров и корпоративных клиентов надежными трансферами и услугами шофера по Европе.',
+    badge: 'Партнерская Программа B2B',
+    heroTitle: 'Премиальные Транспортные Решения для Профессионалов',
+    heroSub: 'ZONT поддерживает туристические агентства, отели, консьерж-службы, ивент-агентства, туроператоров и корпоративных клиентов надежными трансферами из аэропорта и услугами шофера в Париже, Франции, Монако и ключевых европейских направлениях.',
+    ctaPartner: 'Стать Партнером',
+    ctaQuote: 'Запросить Предложение',
+    whoTitle: 'С Кем Мы Работаем',
+    whoSub: 'Индивидуальные транспортные решения для каждой профессиональной потребности',
+    servicesTitle: 'Услуги для Профессионалов',
+    servicesSub: 'Комплексные транспортные решения для бизнес-партнеров',
+    services: [
+      { title: 'Трансферы из Аэропорта', desc: 'Надежные встречи и проводы во всех крупных аэропортах. Отслеживание рейсов, встреча.' },
+      { title: 'Трансферы с Вокзалов', desc: 'Профессиональные трансферы со всех крупных вокзалов. Пунктуальный сервис.' },
+      { title: 'Шофер в Распоряжении', desc: 'Выделенный водитель на часы или целый день. Идеально для мероприятий и встреч.' },
+      { title: 'Междугородние Трансферы', desc: 'Трансферы на дальние расстояния между городами. Комфортные автомобили.' },
+      { title: 'Групповой Транспорт', desc: 'Минивэны и микроавтобусы для групп до 16 пассажиров.' },
+      { title: 'VIP & Люкс Сервис', desc: 'Премиальные автомобили, дискретные водители. Первоклассный сервис.' },
+    ],
+    whyTitle: 'Почему Партнерство с ZONT',
+    whySub: 'Партнерство, построенное на надежности, качестве и взаимном росте',
+    whyPoints: [
+      { icon: 'shield', title: 'Фиксированные Тарифы', desc: 'Без скрытых комиссий. Предсказуемые расходы для бюджетного планирования.' },
+      { icon: 'users', title: 'Профессиональные Шоферы', desc: 'Проверенные, лицензированные, многоязычные водители.' },
+      { icon: 'plane', title: 'Мониторинг Рейсов', desc: 'Автоматическое отслеживание всех рейсов без дополнительных расходов.' },
+      { icon: 'star', title: 'Встреча с Табличкой', desc: 'Водитель ждет у выхода с именной табличкой.' },
+      { icon: 'clock', title: 'Доступность 24/7', desc: 'Бронируйте трансферы в любое время. Круглосуточная поддержка.' },
+      { icon: 'headphones', title: 'Выделенная Поддержка', desc: 'Приоритетный доступ к выделенному менеджеру для вашей организации.' },
+    ],
+    howTitle: 'Как Работает Партнерство',
+    howSteps: [
+      { title: 'Отправьте Запрос', desc: 'Расскажите о вашем бизнесе, объемах и потребностях.' },
+      { title: 'Получите Предложение', desc: 'Мы ответим в течение 24 часов с индивидуальными тарифами.' },
+      { title: 'Мы Организуем Транспорт', desc: 'Бронируйте через портал, email или телефон.' },
+      { title: 'Премиальный Опыт', desc: 'Ваши клиенты наслаждаются первоклассными трансферами.' },
+    ],
+    trustTitle: 'Доверие Профессионалов по Всей Европе',
+    trustSub: '',
+    trustPoints: [
+      { value: '50 000+', label: 'Трансферов Выполнено' },
+      { value: '120+', label: 'Городов Охвачено' },
+      { value: '4.9/5', label: 'Рейтинг Клиентов' },
+      { value: '24/7', label: 'Поддержка Доступна' },
+    ],
+    contactTitle: 'Начните Партнерство B2B',
+    contactSub: 'Расскажите о вашем бизнесе. Мы подготовим персональное предложение.',
+    formName: 'Ваше Имя', formCompany: 'Название Компании', formEmail: 'Рабочий Email', formPhone: 'Телефон', formMessage: 'Опишите ваши потребности в транспорте, ожидаемые объемы и предпочтительные направления...', formSubmit: 'Отправить Запрос на Партнерство',
+  },
+};
+
+const targets = [
+  { path: '/travel-agencies', name: { en: 'Travel Agencies', fr: 'Agences de Voyage', ru: 'Тур. Агентства' }, tagline: { en: 'Airport transfer partner', fr: 'Partenaire transfert aeroport', ru: 'Партнер по трансферам' } },
+  { path: '/tourism-agencies', name: { en: 'Tourism Agencies', fr: 'Agences de Tourisme', ru: 'Туристические Агентства' }, tagline: { en: 'Private transport solutions', fr: 'Solutions de transport prive', ru: 'Частный транспорт' } },
+  { path: '/hotels', name: { en: 'Hotels', fr: 'Hotels', ru: 'Отели' }, tagline: { en: 'Guest transfer services', fr: 'Transferts pour clients', ru: 'Трансферы для гостей' } },
+  { path: '/concierge-services', name: { en: 'Concierge Services', fr: 'Conciergeries', ru: 'Консьерж-службы' }, tagline: { en: 'VIP chauffeur solutions', fr: 'Solutions chauffeur VIP', ru: 'VIP решения' } },
+  { path: '/event-agencies', name: { en: 'Event Agencies', fr: 'Agences Evenementielles', ru: 'Ивент-агентства' }, tagline: { en: 'Event transportation', fr: 'Transport evenementiel', ru: 'Транспорт для мероприятий' } },
+  { path: '/corporate-clients', name: { en: 'Corporate Clients', fr: 'Entreprises', ru: 'Корпоративные Клиенты' }, tagline: { en: 'Business travel services', fr: 'Services voyage d\'affaires', ru: 'Бизнес-путешествия' } },
+  { path: '/business-partners', name: { en: 'Business Partners', fr: 'Partenaires Commerciaux', ru: 'Бизнес-партнеры' }, tagline: { en: 'Strategic partnerships', fr: 'Partenariats strategiques', ru: 'Стратегические партнерства' } },
+  { path: '/tour-operators', name: { en: 'Tour Operators', fr: 'Tour-Operateurs', ru: 'Туроператоры' }, tagline: { en: 'Tour logistics partner', fr: 'Partenaire logistique tours', ru: 'Логистика туров' } },
+];
+
+const Partners = () => {
+  const { language } = useLanguage();
+  const c = content[language] || content.en;
+  const contactRef = useRef(null);
+
+  const scrollToContact = () => contactRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#0c1220]" data-testid="partners-page">
+      <SEO
+        title={c.seoTitle}
+        description={c.seoDesc}
+        canonical="https://zont.cab/partners"
+        ogType="website"
+        ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
+        hreflang={[
+          { lang: 'en', href: 'https://zont.cab/partners' },
+          { lang: 'fr', href: 'https://zont.cab/partners' },
+          { lang: 'ru', href: 'https://zont.cab/partners' },
+        ]}
+        jsonLd={[
+          { "@context": "https://schema.org", "@type": "Service", "name": c.seoTitle, "description": c.seoDesc, "provider": { "@type": "Organization", "name": "Zont", "url": "https://zont.cab" }, "serviceType": "B2B Airport Transfer & Chauffeur Service", "areaServed": ["Paris","France","Monaco","Europe"] },
+          { "@context": "https://schema.org", "@type": "WebPage", "name": c.seoTitle, "url": "https://zont.cab/partners", "description": c.seoDesc }
+        ]}
+      />
+      <Header />
+
+      {/* Hero */}
+      <section className="relative pt-24 pb-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c1220] via-[#111b2e] to-[#0c1220]" />
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(46,204,113,0.4) 1px, transparent 0)', backgroundSize: '48px 48px' }} />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <span className="inline-block mb-5 px-5 py-1.5 bg-[#2ecc71]/10 text-[#2ecc71] text-xs font-semibold tracking-widest uppercase rounded-full border border-[#2ecc71]/20" data-testid="b2b-badge">
+            {c.badge}
+          </span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 max-w-4xl mx-auto" data-testid="partners-h1">
+            {c.heroTitle}
+          </h1>
+          <p className="text-lg text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
+            {c.heroSub}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button onClick={scrollToContact} className="px-10 py-4 bg-[#2ecc71] text-white font-bold rounded-lg hover:bg-[#27ae60] transition-all shadow-lg shadow-[#2ecc71]/20 text-lg" data-testid="cta-become-partner">
+              {c.ctaPartner}
+            </button>
+            <button onClick={scrollToContact} className="px-10 py-4 border-2 border-gray-500 text-white font-bold rounded-lg hover:border-[#2ecc71] hover:text-[#2ecc71] transition-all text-lg" data-testid="cta-request-quote">
+              {c.ctaQuote}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Who We Work With */}
+      <section className="py-16 bg-[#111b2e]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{c.whoTitle}</h2>
+          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">{c.whoSub}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {targets.map((t, i) => (
+              <Link key={i} to={t.path} className="bg-[#1a2744]/60 border border-gray-700/30 rounded-xl p-5 hover:border-[#2ecc71]/40 transition-all group text-center" data-testid={`target-link-${i}`}>
+                <div className="w-12 h-12 rounded-full bg-[#2ecc71]/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-[#2ecc71]/20 transition-colors">
+                  {[<Briefcase />, <Globe />, <Hotel />, <Star />, <Users />, <Building2 />, <ArrowRight />, <Plane />][i] && React.cloneElement([<Briefcase className="w-5 h-5 text-[#2ecc71]" />, <Globe className="w-5 h-5 text-[#2ecc71]" />, <Hotel className="w-5 h-5 text-[#2ecc71]" />, <Star className="w-5 h-5 text-[#2ecc71]" />, <Users className="w-5 h-5 text-[#2ecc71]" />, <Building2 className="w-5 h-5 text-[#2ecc71]" />, <ArrowRight className="w-5 h-5 text-[#2ecc71]" />, <Plane className="w-5 h-5 text-[#2ecc71]" />][i])}
+                </div>
+                <div className="text-white font-semibold group-hover:text-[#2ecc71] transition-colors mb-1">
+                  {t.name[language] || t.name.en}
+                </div>
+                <div className="text-gray-500 text-xs">{t.tagline[language] || t.tagline.en}</div>
+                <ChevronRight className="w-4 h-4 text-gray-600 mx-auto mt-3 group-hover:text-[#2ecc71] transition-colors" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services */}
+      <section className="py-16 bg-[#0c1220]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{c.servicesTitle}</h2>
+          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">{c.servicesSub}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {c.services.map((s, i) => (
+              <div key={i} className="bg-[#151f33] border border-gray-700/30 rounded-xl p-6">
+                <h3 className="text-white font-semibold mb-2">{s.title}</h3>
+                <p className="text-gray-400 text-sm">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Partner */}
+      <section className="py-16 bg-[#111b2e]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{c.whyTitle}</h2>
+          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">{c.whySub}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {c.whyPoints.map((p, i) => (
+              <div key={i} className="bg-[#1a2744]/60 border border-gray-700/30 rounded-xl p-6 hover:border-[#2ecc71]/30 transition-all">
+                <div className="w-10 h-10 rounded-lg bg-[#2ecc71]/10 flex items-center justify-center mb-4">
+                  {p.icon === 'shield' && <Shield className="w-5 h-5 text-[#2ecc71]" />}
+                  {p.icon === 'users' && <Users className="w-5 h-5 text-[#2ecc71]" />}
+                  {p.icon === 'plane' && <Plane className="w-5 h-5 text-[#2ecc71]" />}
+                  {p.icon === 'star' && <Star className="w-5 h-5 text-[#2ecc71]" />}
+                  {p.icon === 'clock' && <Clock className="w-5 h-5 text-[#2ecc71]" />}
+                  {p.icon === 'headphones' && <Headphones className="w-5 h-5 text-[#2ecc71]" />}
+                </div>
+                <h3 className="text-white font-semibold mb-2">{p.title}</h3>
+                <p className="text-gray-400 text-sm">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 bg-[#0c1220]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-12">{c.howTitle}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {c.howSteps.map((step, i) => (
+              <div key={i} className="text-center relative">
+                <div className="w-14 h-14 rounded-full bg-[#2ecc71] text-white font-bold text-xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#2ecc71]/20">
+                  {i + 1}
+                </div>
+                {i < 3 && <div className="hidden md:block absolute top-7 left-[60%] w-[80%] h-px bg-gradient-to-r from-[#2ecc71]/40 to-transparent" />}
+                <h3 className="text-white font-semibold mb-2">{step.title}</h3>
+                <p className="text-gray-400 text-sm">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust */}
+      <section className="py-16 bg-[#111b2e]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-12">{c.trustTitle}</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {c.trustPoints.map((tp, i) => (
+              <div key={i} className="text-center">
+                <div className="text-4xl font-bold text-[#2ecc71] mb-2">{tp.value}</div>
+                <div className="text-gray-400 text-sm">{tp.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section ref={contactRef} className="py-20 bg-[#0c1220]" id="contact" data-testid="b2b-contact-section">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="bg-gradient-to-br from-[#151f33] to-[#1a2744] border border-gray-700/40 rounded-2xl p-8 sm:p-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{c.contactTitle}</h2>
+            <p className="text-gray-400 text-center mb-8 max-w-xl mx-auto">{c.contactSub}</p>
+            <form className="space-y-4 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()} data-testid="b2b-contact-form">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input type="text" placeholder={c.formName} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-name" />
+                <input type="text" placeholder={c.formCompany} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-company" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input type="email" placeholder={c.formEmail} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-email" />
+                <input type="tel" placeholder={c.formPhone} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-phone" />
+              </div>
+              <textarea rows="4" placeholder={c.formMessage} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71] resize-none" data-testid="form-message" />
+              <button type="submit" className="w-full py-3.5 bg-[#2ecc71] text-white font-semibold rounded-lg hover:bg-[#27ae60] transition-all shadow-lg shadow-[#2ecc71]/20" data-testid="form-submit">
+                {c.formSubmit}
+              </button>
+            </form>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-8 text-sm text-gray-400">
+              <a href="mailto:partners@zont.cab" className="flex items-center gap-2 hover:text-[#2ecc71] transition-colors"><Mail className="w-4 h-4" /> partners@zont.cab</a>
+              <a href="tel:+33123456789" className="flex items-center gap-2 hover:text-[#2ecc71] transition-colors"><Phone className="w-4 h-4" /> +33 1 23 45 67 89</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Partners;

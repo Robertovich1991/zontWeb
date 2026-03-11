@@ -91,6 +91,13 @@ const Header = () => {
               >
                 {t('nav.help')}
               </Link>
+              <Link
+                to="/partners"
+                className="text-[#2ecc71] hover:text-[#27ae60] transition-colors text-sm font-semibold"
+                data-testid="nav-partners"
+              >
+                B2B
+              </Link>
 
               {/* Country Dropdown */}
               <div className="relative">
@@ -217,6 +224,14 @@ const Header = () => {
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >
                 {t('nav.help')}
+              </Link>
+              <Link
+                to="/partners"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-[#2ecc71] hover:text-[#27ae60] py-2 text-sm font-semibold"
+                data-testid="nav-partners-mobile"
+              >
+                B2B Partners
               </Link>
 
               <div className="py-2">
