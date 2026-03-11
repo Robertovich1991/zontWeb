@@ -5,6 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard } from 'lucide-react';
 
 const Home = () => {
@@ -98,8 +99,29 @@ const Home = () => {
     },
   ];
 
+  const seoContent = {
+    en: { title: 'Zont - Premium Airport Transfer Service in Europe', desc: 'Professional private driver service in 120+ European cities. Fixed prices, flight tracking, meet and greet. Book your airport transfer online.' },
+    fr: { title: 'Zont - Transfert Aeroport Premium en Europe | Chauffeur Prive', desc: 'Service de chauffeur prive premium dans plus de 120 villes europeennes. Prix fixes, suivi de vol, accueil personnalise. Reservez votre transfert aeroport en ligne.' },
+    ru: { title: 'Zont - Премиум Трансфер из Аэропорта в Европе', desc: 'Профессиональный сервис частного водителя в 120+ городах Европы. Фиксированные цены, отслеживание рейсов. Забронируйте онлайн.' },
+  };
+  const seo = seoContent[language] || seoContent.en;
+
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
+      <SEO
+        title={seo.title}
+        description={seo.desc}
+        canonical="https://zont.cab"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Zont",
+          "url": "https://zont.cab",
+          "description": seo.desc,
+          "serviceType": "Airport Transfer",
+          "areaServed": "Europe"
+        }}
+      />
       <Header />
 
       <main className="flex-1 pt-16">

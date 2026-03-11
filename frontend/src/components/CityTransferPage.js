@@ -5,6 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { Users, Briefcase, Shield, Clock, CheckCircle, Star, MapPin, Plane } from 'lucide-react';
 
 const CityTransferPage = ({ content, vehicles: vehiclesPrices, popularRoutes: routesPrices }) => {
@@ -57,13 +58,30 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, popularRoutes: ro
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="city-transfer-page">
+      <SEO
+        title={c.title}
+        description={c.description}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "name": c.title,
+          "description": c.description,
+          "provider": {
+            "@type": "Organization",
+            "name": "Zont",
+            "url": "https://zont.cab"
+          },
+          "areaServed": c.title,
+          "serviceType": "Airport Transfer"
+        }}
+      />
       <Header />
       <main className="flex-1 pt-16">
         {/* Hero */}
         <section className="py-20 px-4 bg-gradient-to-br from-[#1a2332] to-[#1f2937]">
           <div className="max-w-7xl mx-auto text-center">
             <div className="flex justify-center mb-6">
-              <Plane className="w-16 h-16 text-[#2ecc71]" />
+              <Plane className="w-16 h-16 text-[#2ecc71]" aria-hidden="true" />
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6" data-testid="city-hero-title">
               {c.title}
@@ -216,27 +234,27 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, popularRoutes: ro
               </div>
             )}
             <div className="bg-[#0f1419] rounded-2xl p-8">
-              <form onSubmit={handleSubmit} className="space-y-6" data-testid="booking-form">
+              <form onSubmit={handleSubmit} className="space-y-6" data-testid="booking-form" role="form" aria-label={c.bookingForm}>
                 <div>
-                  <label className="block text-white font-medium mb-3">{c.pickupLabel}</label>
-                  <input type="text" name="pickup" value={formData.pickup} onChange={handleChange} required
-                    className="w-full px-4 py-4 bg-white text-gray-900 rounded" data-testid="pickup-input" />
+                  <label htmlFor="pickup" className="block text-white font-medium mb-3">{c.pickupLabel}</label>
+                  <input type="text" id="pickup" name="pickup" value={formData.pickup} onChange={handleChange} required
+                    className="w-full px-4 py-4 bg-white text-gray-900 rounded" data-testid="pickup-input" aria-label={c.pickupLabel} />
                 </div>
                 <div>
-                  <label className="block text-white font-medium mb-3">{c.dropoffLabel}</label>
-                  <input type="text" name="dropoff" value={formData.dropoff} onChange={handleChange} required
-                    className="w-full px-4 py-4 bg-white text-gray-900 rounded" data-testid="dropoff-input" />
+                  <label htmlFor="dropoff" className="block text-white font-medium mb-3">{c.dropoffLabel}</label>
+                  <input type="text" id="dropoff" name="dropoff" value={formData.dropoff} onChange={handleChange} required
+                    className="w-full px-4 py-4 bg-white text-gray-900 rounded" data-testid="dropoff-input" aria-label={c.dropoffLabel} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white font-medium mb-3">{c.dateLabel}</label>
-                    <input type="date" name="date" value={formData.date} onChange={handleChange} required
-                      className="w-full px-4 py-4 bg-white text-gray-900 rounded" data-testid="date-input" />
+                    <label htmlFor="date" className="block text-white font-medium mb-3">{c.dateLabel}</label>
+                    <input type="date" id="date" name="date" value={formData.date} onChange={handleChange} required
+                      className="w-full px-4 py-4 bg-white text-gray-900 rounded" data-testid="date-input" aria-label={c.dateLabel} />
                   </div>
                   <div>
-                    <label className="block text-white font-medium mb-3">{c.timeLabel}</label>
-                    <input type="time" name="time" value={formData.time} onChange={handleChange} required
-                      className="w-full px-4 py-4 bg-white text-gray-900 rounded" data-testid="time-input" />
+                    <label htmlFor="time" className="block text-white font-medium mb-3">{c.timeLabel}</label>
+                    <input type="time" id="time" name="time" value={formData.time} onChange={handleChange} required
+                      className="w-full px-4 py-4 bg-white text-gray-900 rounded" data-testid="time-input" aria-label={c.timeLabel} />
                   </div>
                 </div>
                 <button type="submit" disabled={loading}

@@ -5,6 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { Users, Briefcase, Shield, Clock, CheckCircle, Star } from 'lucide-react';
 
 const ParisAirportTransfer = () => {
@@ -208,6 +209,19 @@ const ParisAirportTransfer = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
+      <SEO
+        title={c.title}
+        description={c.description}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "name": c.title,
+          "description": c.description,
+          "provider": { "@type": "Organization", "name": "Zont", "url": "https://zont.cab" },
+          "areaServed": "Paris",
+          "serviceType": "Airport Transfer"
+        }}
+      />
       <Header />
 
       <main className="flex-1 pt-16">

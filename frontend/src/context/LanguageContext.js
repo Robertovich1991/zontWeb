@@ -19,10 +19,14 @@ export const LanguageProvider = ({ children }) => {
     const savedLang = localStorage.getItem('language');
     if (savedLang) {
       setLanguage(savedLang);
+      document.documentElement.lang = savedLang;
     } else {
       const browserLang = navigator.language.split('-')[0];
       if (['en', 'fr', 'ru'].includes(browserLang)) {
         setLanguage(browserLang);
+        document.documentElement.lang = browserLang;
+      } else {
+        document.documentElement.lang = 'en';
       }
     }
   }, []);

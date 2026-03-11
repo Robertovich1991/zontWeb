@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { MapPin, Plane, ArrowRight } from 'lucide-react';
 import { citiesData, countriesList } from '@/data/cities';
 
@@ -95,6 +96,10 @@ const Countries = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="countries-page">
+      <SEO
+        title={language === 'fr' ? 'Transferts Aeroport en Europe - Toutes les Destinations | Zont' : language === 'ru' ? 'Трансферы из Аэропортов Европы - Все Направления | Zont' : 'Airport Transfers in Europe - All Destinations | Zont'}
+        description={t.heroSubtitle}
+      />
       <Header />
 
       {/* Hero */}
