@@ -18,6 +18,7 @@ const IMAGES = {
 const trustLabels = {
   en: { trips: 'Completed Trips', available: 'Available', fixed: 'Fixed Prices', rating: 'Rating', reviews: 'reviews', trustTitle: 'Trusted by thousands of travelers', paySecure: 'Secure Payment', payDesc: 'All major cards accepted', verifiedDriver: 'Verified Drivers', verifiedDesc: 'Licensed professionals', flightTrack: 'Flight Tracking', flightDesc: 'Real-time monitoring', freeCancel: 'Free Cancellation', cancelDesc: 'Up to 24h before' },
   fr: { trips: 'Courses Effectuees', available: 'Disponible', fixed: 'Prix Fixes', rating: 'Note', reviews: 'avis', trustTitle: 'La confiance de milliers de voyageurs', paySecure: 'Paiement Securise', payDesc: 'Toutes cartes acceptees', verifiedDriver: 'Chauffeurs Verifies', verifiedDesc: 'Professionnels agrees', flightTrack: 'Suivi de Vol', flightDesc: 'Surveillance en temps reel', freeCancel: 'Annulation Gratuite', cancelDesc: 'Jusqu\'a 24h avant' },
+  hy: { trips: 'Կատարված Ուղևորություններ', available: 'Հասանելի', fixed: 'Հաստատ Գներ', rating: 'Վարկանիշ', reviews: 'կարծիք', trustTitle: 'Վստահելի հազարավոր ճամորդների կողմից', paySecure: 'Ապահով Վճարում', payDesc: 'Բոլոր քարտեր ընդունվում են', verifiedDriver: 'Ստուգված Վարորդներ', verifiedDesc: 'Լիցենզավորված մասնագետներ', flightTrack: 'Թռիչքի Հետևելում', flightDesc: 'Իրական ժամանակի մոնիտորինգ', freeCancel: 'Անվճար Չեղարկում', cancelDesc: 'Մինչև 24 ժամ առաջ' },
   ru: { trips: 'Выполненных Поездок', available: 'Доступно', fixed: 'Фиксированные Цены', rating: 'Рейтинг', reviews: 'отзывов', trustTitle: 'Доверие тысяч путешественников', paySecure: 'Безопасная Оплата', payDesc: 'Все карты принимаются', verifiedDriver: 'Проверенные Водители', verifiedDesc: 'Лицензированные профессионалы', flightTrack: 'Отслеживание Рейса', flightDesc: 'Мониторинг в реальном времени', freeCancel: 'Бесплатная Отмена', cancelDesc: 'До 24 часов' },
 };
 
@@ -31,6 +32,11 @@ const reviewsData = {
     { name: 'Sarah M.', city: 'Londres', text: 'Excellent service ! Le chauffeur attendait avec une pancarte, tres professionnel. Voiture impeccable.', stars: 5 },
     { name: 'Jean-Pierre D.', city: 'Paris', text: 'Transfert parfait depuis l\'aeroport. Prix fixe, pas de surprises. Le chauffeur nous a aide avec tous nos bagages.', stars: 5 },
     { name: 'Marco R.', city: 'Milan', text: 'Meilleur transfert aeroport que j\'ai eu. Ponctuel, voiture propre, chauffeur poli. Je recommande vivement !', stars: 5 },
+  ],
+  hy: [
+    { name: 'Sarah M.', city: 'Լոնդոն', text: 'Գերազանց ծառայություն! Վարորդը սպասում էր ցուցանակով, շատ պրոֆեսիոնալ: Մեքենան անթերի էր:', stars: 5 },
+    { name: 'Jean-Pierre D.', city: 'Փարիզ', text: 'Կատարյալ տրանսֆեր օդանավակայանից: Հաստատ գին, անակնկալներ չկան: Վարորդը օգնեց ուղեբեռներով:', stars: 5 },
+    { name: 'Marco R.', city: 'Միլան', text: 'Լավագույն օդանավակայանի տրանսֆեր: Ժամանին, մաքուր մեքենա, քաղաքավարի վարորդ: Խորհուրդ եմ տալիս!', stars: 5 },
   ],
   ru: [
     { name: 'Сара М.', city: 'Лондон', text: 'Отличный сервис! Водитель ждал с табличкой, очень профессионально. Машина идеально чистая.', stars: 5 },
@@ -97,6 +103,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
           { lang: 'en', href: `https://zont.cab${seoUrls.en}` },
           { lang: 'fr', href: `https://zont.cab${seoUrls.fr}` },
           { lang: 'ru', href: `https://zont.cab${seoUrls.ru}` },
+          { lang: 'hy', href: `https://zont.cab${seoUrls.hy || seoUrls.en}` },
         ] : undefined}
         jsonLd={{
           "@context": "https://schema.org",

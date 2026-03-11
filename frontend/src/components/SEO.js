@@ -7,7 +7,7 @@ const SEO = ({ title, description, canonical, jsonLd, ogImage, ogType, hreflang,
   useEffect(() => {
     if (title) document.title = title;
 
-    document.documentElement.lang = language === 'fr' ? 'fr' : language === 'ru' ? 'ru' : 'en';
+    document.documentElement.lang = language === 'fr' ? 'fr' : language === 'ru' ? 'ru' : language === 'hy' ? 'hy' : 'en';
 
     // Meta description
     let metaDesc = document.querySelector('meta[name="description"]');
@@ -49,7 +49,7 @@ const SEO = ({ title, description, canonical, jsonLd, ogImage, ogType, hreflang,
       ogLocale.setAttribute('property', 'og:locale');
       document.head.appendChild(ogLocale);
     }
-    ogLocale.setAttribute('content', language === 'fr' ? 'fr_FR' : language === 'ru' ? 'ru_RU' : 'en_US');
+    ogLocale.setAttribute('content', language === 'fr' ? 'fr_FR' : language === 'ru' ? 'ru_RU' : language === 'hy' ? 'hy_AM' : 'en_US');
 
     // OG type
     let ogTypeEl = document.querySelector('meta[property="og:type"]');

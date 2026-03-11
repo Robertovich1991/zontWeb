@@ -22,7 +22,7 @@ export const LanguageProvider = ({ children }) => {
       document.documentElement.lang = savedLang;
     } else {
       const browserLang = navigator.language.split('-')[0];
-      if (['en', 'fr', 'ru'].includes(browserLang)) {
+      if (['en', 'fr', 'ru', 'hy'].includes(browserLang)) {
         setLanguage(browserLang);
         document.documentElement.lang = browserLang;
       } else {

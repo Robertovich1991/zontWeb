@@ -20,6 +20,7 @@ const Header = () => {
     { code: 'en', name: 'English', flag: '🇬🇧' },
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
     { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+    { code: 'hy', name: 'Հայերեն', flag: '🇦🇲' },
   ];
 
   const currentLanguage = languages.find(lang => lang.code === language) || languages[0];

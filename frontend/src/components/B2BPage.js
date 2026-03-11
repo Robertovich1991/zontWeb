@@ -36,7 +36,7 @@ const B2BPage = ({ content, seoUrls, relatedPages }) => {
       setSubmitted(true);
       setFormState({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {
-      setError(language === 'fr' ? 'Erreur. Veuillez reessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : 'Error. Please try again.');
+      setError(language === 'fr' ? 'Erreur. Veuillez reessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : language === 'hy' ? 'Սխալ: Խնդրում ենք կրկին փորձեք:' : 'Error. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -221,8 +221,8 @@ const B2BPage = ({ content, seoUrls, relatedPages }) => {
             {submitted ? (
               <div className="text-center py-8" data-testid="form-success">
                 <CheckCircle className="w-16 h-16 text-[#2ecc71] mx-auto mb-4" />
-                <p className="text-xl text-white font-semibold mb-2">{language === 'fr' ? 'Demande envoyee !' : language === 'ru' ? 'Запрос отправлен!' : 'Request sent!'}</p>
-                <p className="text-gray-400">{language === 'fr' ? 'Nous vous repondrons sous 24h.' : language === 'ru' ? 'Мы ответим в течение 24 часов.' : 'We will respond within 24 hours.'}</p>
+                <p className="text-xl text-white font-semibold mb-2">{language === 'fr' ? 'Demande envoyee !' : language === 'ru' ? 'Запрос отправлен!' : language === 'hy' ? 'Հարցումը ուղարկվեց!' : 'Request sent!'}</p>
+                <p className="text-gray-400">{language === 'fr' ? 'Nous vous repondrons sous 24h.' : language === 'ru' ? 'Мы ответим в течение 24 часов.' : language === 'hy' ? 'Մենք կպատասխանենք 24 ժամվա ընթացքում:' : 'We will respond within 24 hours.'}</p>
               </div>
             ) : (
             <form className="space-y-4 max-w-lg mx-auto" onSubmit={handleSubmit} data-testid="b2b-contact-form">

@@ -1,0 +1,163 @@
+<analysis>**original_problem_statement:**
+The user initially requested the conversion of their Angular website, , into a React application connected to their existing C# backend. Key requirements included replicating the original design, implementing multilingual support (French, English, Russian), and creating SEO-optimized landing pages for airport transfers.
+
+The project has since evolved to include:
+- A mobile-first, conversion-optimized redesign to increase bookings.
+- A full technical SEO audit and implementation to improve search engine performance.
+- A comprehensive B2B section with dedicated pages for various professional partners.
+- Connecting a contact form to a new lead-generation backend endpoint.
+- The latest request is to add Armenian as a fourth language to the entire website.
+
+**User's preferred language**: French
+
+**what currently exists?**
+A full-stack application with a React frontend and a FastAPI backend. The frontend is a sophisticated, mobile-optimized clone of . The backend, initially a placeholder, now includes a functional  endpoint connected to a MongoDB database for B2B lead capture.
+
+Key features implemented:
+- Multilingual support for French, English, and Russian using .
+- A complete technical SEO implementation: , , canonical URLs,  tags, and rich JSON-LD structured data on all pages, managed by a custom  hook.
+- Over 15 dedicated SEO landing pages for specific European cities.
+- A newly built B2B section with a main  page and 8 unique sub-pages targeting different professional audiences (, , etc.).
+- Several static pages (, , etc.) are now fully translated.
+- All B2B contact forms are fully functional and save inquiries to the database.
+
+**Last working item**:
+- **Last item agent was working:** Adding Armenian ('hy') as a new language to the entire website. The agent started creating the necessary infrastructure by attempting to update language context files and create an Armenian translation file ().
+- **Status:** IN PROGRESS
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** Frontend testing agent. After implementation, the agent must test that the language switcher works, all pages render correctly in Armenian without character or layout issues, and that SEO tags () are correctly updated.
+- **User Testing Done:** N
+
+**All Pending/In progress Issue list**:
+  - **Issue 1:** Armenian language implementation is failing. (Priority: P0)
+
+  **Issues Detail:**
+  - **Issue 1:** 
+     - **Attempted fixes:** The agent's attempt to create  failed. The initial file contained placeholder text, and subsequent attempts to fix it resulted in file corruption or character rendering issues. The agent's last action was to initiate a web search for correct translations, but this was not completed.
+     - **Next debug checklist:**
+        1.  Create a new, valid  file in . Start with a few key translations for the header or footer to create a minimum viable test case.
+        2.  Ensure the file is saved with UTF-8 encoding.
+        3.  Verify that the Google Font used in the application supports Armenian characters. If not, add a font that does (e.g., Noto Sans Armenian) to  and .
+        4.  Correctly wire up the new language in  by adding the 'hy' resource.
+        5.  Update the language switcher UI in  to include the Armenian option.
+        6.  Once the basic setup is working, proceed to translate the entire content from  into Armenian and populate .
+     - **Why fix this issue and what will be achieved with the fix?** Fulfills the user's direct request to make the website accessible to an Armenian-speaking audience.
+     - **Status:**  IN PROGRESS
+     - **Is recurring issue?** N
+     - **Should Test frontend/backend/both after fix?** Frontend
+     - **Blocked on other issue:** None
+
+**In progress Task List**:
+  - **Task 1:**  Add Armenian Language Support to the Entire Website (Priority: P0)
+  
+  **Task Detail:**
+  - **Task 1:** 
+     - **Where to resume:** The agent was blocked on creating a valid  translation file. The next step is to use a web search to find accurate translations, create the file correctly (ensuring UTF-8 encoding), and verify that the site's fonts support Armenian characters.
+     - **What will be achieved with this?** The website will be fully translated and functional in Armenian.
+     - **Status:**  IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** Frontend
+     - **Blocked on something:** Blocked on getting accurate translations and resolving potential font/encoding issues.
+
+**Upcoming and Future Tasks**
+- **Future Tasks:**
+    - **Connect to C# Backend (P2):** The core, long-term task of replacing the mock booking flow with a connection to the user's live C# backend. This is blocked until the user provides the necessary API documentation and endpoints.
+
+**Completed work in this session**
+- **B2B Section Implementation:**
+  - Created a main B2B landing page () and 8 dedicated, uniquely-worded pages for different professional audiences (e.g., , ).
+  - Implemented a new, professional B2B design template ().
+  - Added a B2B navigation link in the main header.
+- **Backend Lead Generation:**
+  - Created a new FastAPI model () and a corresponding API endpoint ().
+  - Connected the contact forms on all 9 B2B pages to this endpoint.
+  - Confirmed that lead data is successfully submitted and stored in the MongoDB database.
+- **Content Translation:**
+  - Translated the , , , and  pages, which previously had hardcoded English text, into French, English, and Russian using the  framework.
+- **Full Technical SEO Audit:**
+  - Systematically implemented a comprehensive list of SEO improvements across the entire site, including creating  and , adding  for multilingual SEO, enriching JSON-LD data, and ensuring all pages have unique and optimized meta tags. This task is fully complete and verified.
+- **404 Page:**
+  - Added a Not Found page for handling invalid routes.
+
+**Earlier issues found/mentioned but not fixed**
+- None.
+
+**Known issue recurrence from previous fork**
+  - **Issue:** Blank screen after frontend modifications.
+  - **Recurrence count:** High (in previous sessions).
+  - **Status:** RESOLVED. The issue was traced to the  library and fixed by replacing it with a custom  hook. This solution has remained stable.
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **Frontend:** React (v19), , Tailwind CSS.
+- **Backend:** FastAPI, Pydantic.
+- **Database:** MongoDB for lead storage.
+- **Internationalization (i18n):**  with .
+- **SEO:** Custom  hook for dynamic head management.
+- **Performance:**  for route-based code splitting.
+
+**key DB schema**
+  - **leads**: 
+
+**changes in tech stack**
+- None in this session. The previous removal of  remains a critical change.
+
+**All files of reference**
+- : All new files in this directory.
+- : The new template for B2B pages.
+- : Modified to add the  route.
+- : Created to define the  data model.
+- : Modified to add the B2B navigation link.
+- : Updated with routes for all new B2B pages.
+- : Updated to include all new B2B page URLs.
+- : This directory is the focus of the current task.
+
+**Areas that need refactoring**:
+- The  component is large and could be broken down into smaller sub-components as noted previously.
+
+**key api endpoints**
+- : Submits a B2B contact form inquiry and stores it in the database.
+
+**Critical Info for New Agent**
+- **User's language is French.** All communication must be in French.
+- The immediate task (P0) is to **fix and complete the Armenian language implementation**. The agent was stuck on creating a valid  file due to character encoding/rendering issues. The next agent must prioritize debugging this, likely by checking font support and ensuring the translation file is correctly encoded (UTF-8).
+- The B2B section and its lead generation backend are complete and tested. Do not modify unless requested.
+- The technical SEO audit is also complete.  is the stable solution for all meta tags.
+
+**documents and test reports created in this job**
+- 
+- Multiple reports in , including successful validation of the SEO audit, B2B pages, and backend lead generation.
+
+**Last 10 User Messages and any pending HUMAN messages** 
+1. **USER:** Asks to translate the entire website into Armenian and add the language. (PENDING IMPLEMENTATION)
+2. **AGENT:** Proposes a plan to add Armenian support.
+3. **USER:** OUI (Confirms the plan to add Armenian). (PENDING IMPLEMENTATION)
+4. **AGENT:** Finishes the B2B lead generation task.
+5. **USER:** OUI (Confirms starting the B2B backend task). (COMPLETED)
+6. **AGENT:** Asks for confirmation to start implementing B2B form backend and translating static pages.
+7. **USER:** Asks for the link to the pages. (COMPLETED)
+8. **AGENT:** Finishes the comprehensive B2B section build.
+9. **USER:** Provides a very detailed feature request for a new professional B2B section with 9 unique pages. (COMPLETED)
+10. **AGENT:** Asks for clarification on the user's request for LE LIEN VERS LES PAGE.
+
+**Project Health Check:**
+- **Broken:** Armenian language implementation.
+- **Mocked:** The main user booking flow is still mocked and does not connect to a real backend. The B2B lead generation form is NOT mocked and is fully functional.
+
+**3rd Party Integrations**
+- : For handling translations.
+- : React bindings for .
+- : To detect the user's browser language.
+
+**Testing status**
+- **Testing agent used after significant changes:** YES. The agent successfully used the testing agent to validate the massive SEO audit, the new B2B section, and the backend lead generation feature.
+- **Troubleshoot agent used after agent stuck in loop:** NO
+- **Test files created:** None.
+- **Known regressions:** None.
+
+**Credentials to test flow:**
+N/A
+
+**What agent forgot to execute**
+- The agent failed to successfully implement the user's latest request to add Armenian language support, getting stuck in a loop of creating corrupted/invalid translation files.</analysis>

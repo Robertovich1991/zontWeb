@@ -81,7 +81,7 @@ tail -f /var/log/supervisor/frontend.out.log
 ## 🌐 Accès
 
 Une fois lancé, le site est accessible à :
-- **Frontend** : https://seo-audit-zont.preview.emergentagent.com
+- **Frontend** : https://localization-update-4.preview.emergentagent.com
 
 ## 📁 Structure du projet
 

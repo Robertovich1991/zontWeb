@@ -106,15 +106,45 @@ const homeContent = {
     seoTitle: 'Zont - Премиум Трансфер из Аэропорта в Европе',
     seoDesc: 'Профессиональный сервис в 120+ городах Европы. Фиксированные цены.',
   },
+  hy: {
+    heroTitle: 'Պրեմիում Օդանավակայանի Տրանսֆեր',
+    heroAccent: 'Ամբողջ Եվրոպայում',
+    heroSub: 'Պրոֆեսիոնալ անձնական վարորդներ 120+ քաղաքներում: Հաստատ գներ, թռիչքի հետևելում, անհատական դիմավորում:',
+    bookingTitle: 'Ամրագրեք Ձեր Տրանսֆերը',
+    pickup: 'Վերցնելու հասցե', dropoff: 'Իջնելու հասցե', date: 'Ամսաթիվ', time: 'Ժամ',
+    pickupPh: 'Օդանավակայան, հյուրանոց, հասցե...', dropoffPh: 'Հյուրանոց, կենտրոն, հասցե...',
+    bookNow: 'ՈՌՈՆԵԼ ՏՌԱՆՍՖԵՌ', searching: 'ՈՌՈՆՈՒՄ...',
+    fixedPrices: 'Հաստատ Գներ', securePay: 'Ապահով Վճարում',
+    stats: { trips: '50K+', tripsLabel: 'Կատարված Ուղևորություններ', cities: '120+', citiesLabel: 'Քաղաքներ', available: '24/7', availableLabel: 'Սպասարկում', rating: '4.9/5', ratingLabel: 'Վարկանիշ' },
+    trustTitle: 'Ինչու Ճամորդները Վստահում Են Zont-ին',
+    f1Title: 'Դիմավորում', f1Desc: 'Վարորդը սպասում է ժամանման վայրում անվանական ցուցանակով: 60 րոպե անվճար սպասում:',
+    f2Title: 'Թռիչքի Հետևելում', f2Desc: 'Ձեր թռիչքի հետևելում իրական ժամանակում: Հավելյալ վճար ուշացման դեպքում:',
+    f3Title: 'Պրեմիում Մեքենաներ', f3Desc: 'Mercedes, BMW: Մաքուր, օդարակություն, 3 տարիից փոքր:',
+    f4Title: 'Հաստատ Գներ', f4Desc: 'Գինը հաստատվում է ամրագրման ժամանակ: Թաքնված վճարներ չկան:',
+    popularTitle: 'Հանրահայտ Ուղղություններ',
+    reviewsTitle: 'Ինչ Ասում Են Ճամորդները',
+    reviews: [
+      { name: 'Sarah M.', city: 'Լոնդոն', text: 'Գերազանց ծառայություն! Վարորդը սպասում էր ցուցանակով CDG-ում: Շատ պրոֆեսիոնալ, մաքուր մեքենա:' },
+      { name: 'Jean-Pierre D.', city: 'Փարիզ', text: 'Կատարյալ տրանսֆեր CDG-ից: Հաստատ գին, անակնկալներ չկան: Վարորդը օգնեց բոլոր ուղեբեռներով:' },
+      { name: 'Marco R.', city: 'Միլան', text: 'Լավագույն օդանավակայանի տրանսֆեր Եվրոպայում: Ժամանին, պրեմիում մեքենա:' },
+    ],
+    ctaTitle: 'Պատրաստ՞ Եք Ամրագրել Տրանսֆերը:', ctaBtn: 'Ամրագրել Հիմա',
+    howTitle: 'Ինչպես Է Աշխատում',
+    s1: 'Ամրագրեք Առցանց', s1d: 'Մուտքագրեք ձեր թռիչքի տվյալները և ուղղությունը: Գնի ակնթարտ հաստատում:',
+    s2: 'Հանդիպեք Վարորդին', s2d: 'Վարորդը սպասում է ժամանման վայրում ձեր անվանական ցուցանակով:',
+    s3: 'Վայելեք Ուղևորությունից', s3d: 'Հարմարավետ ուղիղ տրանսֆեր պրեմիում մեքենայով:',
+    seoTitle: 'Zont - Պրեմիում Օդանավակայանի Տրանսֆեր Եվրոպայում',
+    seoDesc: 'Պրոֆեսիոնալ անձնական վարորդ 120+ եվրոպական քաղաքներում: Հաստատ գներ, թռիչքի հետևելում:',
+  },
 };
 
 const popularDest = [
-  { nameEn: 'Paris CDG', nameFr: 'Paris CDG', nameRu: 'Париж CDG', price: 65, url: '/transfert-aeroport-paris' },
-  { nameEn: 'Nice', nameFr: 'Nice', nameRu: 'Ницца', price: 35, url: '/transfert-aeroport-nice' },
-  { nameEn: 'Barcelona', nameFr: 'Barcelone', nameRu: 'Барселона', price: 39, url: '/transfert-aeroport-barcelone' },
-  { nameEn: 'Rome', nameFr: 'Rome', nameRu: 'Рим', price: 40, url: '/transfert-aeroport-rome' },
-  { nameEn: 'Berlin', nameFr: 'Berlin', nameRu: 'Берлин', price: 45, url: '/transfert-aeroport-berlin' },
-  { nameEn: 'Monaco', nameFr: 'Monaco', nameRu: 'Монако', price: 65, url: '/transfert-aeroport-monaco' },
+  { nameEn: 'Paris CDG', nameFr: 'Paris CDG', nameRu: 'Париж CDG', nameHy: 'Փարիզ CDG', price: 65, url: '/transfert-aeroport-paris' },
+  { nameEn: 'Nice', nameFr: 'Nice', nameRu: 'Ницца', nameHy: 'Նիցա', price: 35, url: '/transfert-aeroport-nice' },
+  { nameEn: 'Barcelona', nameFr: 'Barcelone', nameRu: 'Барселона', nameHy: 'Բարսելոնա', price: 39, url: '/transfert-aeroport-barcelone' },
+  { nameEn: 'Rome', nameFr: 'Rome', nameRu: 'Рим', nameHy: 'Հռոմ', price: 40, url: '/transfert-aeroport-rome' },
+  { nameEn: 'Berlin', nameFr: 'Berlin', nameRu: 'Берлин', nameHy: 'Բեռլին', price: 45, url: '/transfert-aeroport-berlin' },
+  { nameEn: 'Monaco', nameFr: 'Monaco', nameRu: 'Монако', nameHy: 'Մոնակո', price: 65, url: '/transfert-aeroport-monaco' },
 ];
 
 const Home = () => {
@@ -145,7 +175,7 @@ const Home = () => {
 
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-  const getName = (d) => language === 'fr' ? d.nameFr : language === 'ru' ? d.nameRu : d.nameEn;
+  const getName = (d) => language === 'fr' ? d.nameFr : language === 'ru' ? d.nameRu : language === 'hy' ? (d.nameHy || d.nameEn) : d.nameEn;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="home-page">
@@ -158,6 +188,7 @@ const Home = () => {
           { lang: 'fr', href: 'https://zont.cab/' },
           { lang: 'en', href: 'https://zont.cab/' },
           { lang: 'ru', href: 'https://zont.cab/' },
+          { lang: 'hy', href: 'https://zont.cab/' },
         ]}
         jsonLd={[
           {
@@ -167,7 +198,7 @@ const Home = () => {
             "url": "https://zont.cab",
             "logo": "https://zont.cab/logo.png",
             "description": c.seoDesc,
-            "contactPoint": { "@type": "ContactPoint", "telephone": "+33-1-23-45-67-89", "contactType": "customer service", "availableLanguage": ["French", "English", "Russian"] },
+            "contactPoint": { "@type": "ContactPoint", "telephone": "+33-1-23-45-67-89", "contactType": "customer service", "availableLanguage": ["French", "English", "Russian", "Armenian"] },
             "sameAs": ["https://apps.apple.com/am/app/zont-cab/id1468482270", "https://play.google.com/store/apps/details?id=com.zont.rider"]
           },
           {
@@ -195,7 +226,7 @@ const Home = () => {
                 <div className="text-center lg:text-left">
                   <div className="flex justify-center lg:justify-start mb-4">
                     <div className="bg-[#2ecc71]/20 text-[#2ecc71] px-4 py-1.5 rounded-full text-sm font-semibold inline-flex items-center" data-testid="home-trust-badge">
-                      <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />{c.stats.rating} - 10,000+ {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : 'reviews'}
+                      <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />{c.stats.rating} - 10,000+ {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : 'reviews'}
                     </div>
                   </div>
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 leading-tight" data-testid="home-hero-title">
@@ -294,9 +325,9 @@ const Home = () => {
           <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
             {[
               { icon: <CreditCard className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.securePay, d: 'Visa, MC, PayPal' },
-              { icon: <Shield className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.f1Title, d: language === 'fr' ? 'Chauffeurs agrees' : 'Verified drivers' },
-              { icon: <Plane className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.f2Title, d: language === 'fr' ? 'Temps reel' : 'Real-time' },
-              { icon: <Clock className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.fixedPrices, d: language === 'fr' ? 'Sans surprises' : 'No surprises' },
+              { icon: <Shield className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.f1Title, d: language === 'fr' ? 'Chauffeurs agrees' : language === 'hy' ? 'Ստուգված վարորդներ' : 'Verified drivers' },
+              { icon: <Plane className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.f2Title, d: language === 'fr' ? 'Temps reel' : language === 'hy' ? 'Իրական ժամանակ' : 'Real-time' },
+              { icon: <Clock className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.fixedPrices, d: language === 'fr' ? 'Sans surprises' : language === 'hy' ? 'Անակնկալներ չկան' : 'No surprises' },
             ].map((b, i) => (
               <div key={i} className="flex items-center space-x-2 bg-[#1a2332] rounded-lg p-3">
                 {b.icon}
@@ -319,7 +350,7 @@ const Home = () => {
                   <div className="p-3 md:p-4">
                     <h3 className="text-white font-bold text-sm md:text-base group-hover:text-[#2ecc71] transition-colors">{getName(d)}</h3>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="text-[#2ecc71] font-semibold text-sm">{language === 'fr' ? 'Des' : language === 'ru' ? 'От' : 'From'} {d.price}&euro;</span>
+                      <span className="text-[#2ecc71] font-semibold text-sm">{language === 'fr' ? 'Des' : language === 'ru' ? 'От' : language === 'hy' ? 'Սկսած' : 'From'} {d.price}&euro;</span>
                       <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-[#2ecc71]" aria-hidden="true" />
                     </div>
                   </div>
@@ -328,7 +359,7 @@ const Home = () => {
             </div>
             <div className="text-center mt-8">
               <Link to="/countries" className="inline-flex items-center bg-white/10 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors" data-testid="view-all-destinations">
-                {language === 'fr' ? 'Voir les 120+ destinations' : language === 'ru' ? 'Все 120+ направлений' : 'View all 120+ destinations'} <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
+                {language === 'fr' ? 'Voir les 120+ destinations' : language === 'ru' ? 'Все 120+ направлений' : language === 'hy' ? 'Տեսնել բոլոր 120+ ուղղությունները' : 'View all 120+ destinations'} <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
               </Link>
             </div>
           </div>

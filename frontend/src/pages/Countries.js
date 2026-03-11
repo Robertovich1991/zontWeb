@@ -83,6 +83,24 @@ const translations = {
     ctaTitle: 'Готовы Забронировать?', ctaText: 'Выберите город или свяжитесь с нами.',
     downloadIos: 'Скачать для iOS', downloadAndroid: 'Скачать для Android',
   },
+  hy: {
+    seoTitle: 'Օդանավակայանի Տրանսֆերներ Եվրոպայում - Բոլոր Ուղղությունները | Zont',
+    seoDesc: 'Պրեմիում անձնական օդանավակայանի տրանսֆեր 120+ եվրոպական քաղաքներում: Հաստատ գներ:',
+    heroTitle: 'Օդանավակայանի Տրանսֆերներ', heroAccent: 'Ամբողջ Եվրոպայում',
+    heroSub: 'Պրեմիում անձնական վարորդի ծառայություն 120+ քաղաքներում: Ամրագրեք հաստատ գներով:',
+    searchPh: 'Որոնել քաղաք կամ օդանավակայան...',
+    stats: [{ v: '120+', l: 'Քաղաքներ' }, { v: '40+', l: 'Երկրներ' }, { v: '24/7', l: 'Սպասարկում' }, { v: '4.9/5', l: 'Վարկանիշ' }],
+    browseTitle: 'Ընտրեք Ձեր Ուղղությունը',
+    viewCity: 'Ամրագրել Տրանսֆեր', from: 'Սկսած', airports: 'Օդանավակայաններ',
+    noResults: 'Ուղղություններ չգտնվեցին',
+    trustTitle: 'Ինչու Ընտրել Zont-ը՞',
+    t1: 'Հաստատ Գներ', t1d: 'Թաքնված վճարներ չկան, գինը հաստատվում է',
+    t2: 'Թռիչքի Հետևելում', t2d: 'Իրական ժամանակի մոնիտորինգ, անվճար սպասում',
+    t3: 'Պրեմիում Մեքենաներ', t3d: 'Mercedes, BMW, 3 տարիից փոքր',
+    t4: 'Ապահով Վճարում', t4d: 'Visa, Mastercard, PayPal, Apple Pay',
+    ctaTitle: 'Պատրաստ՞ Եք Ամրագրել՞', ctaText: 'Ընտրեք ձեր քաղաքը վերևում կամ կապվեք մեզ:',
+    downloadIos: 'Ներբեռնել iOS-ի համար', downloadAndroid: 'Ներբեռնել Android-ի համար',
+  },
 };
 
 const startingPrices = {
@@ -101,13 +119,13 @@ const Countries = () => {
   const getCityName = (cityId) => {
     const city = citiesData[cityId];
     if (!city) return cityId;
-    return language === 'fr' ? city.nameFr : language === 'ru' ? city.nameRu : city.nameEn;
+    return language === 'fr' ? city.nameFr : language === 'ru' ? city.nameRu : language === 'hy' ? (city.nameHy || city.nameEn) : city.nameEn;
   };
 
   const getCityUrl = (cityId) => {
     const city = citiesData[cityId];
     if (!city) return '#';
-    return language === 'fr' ? city.urlFr : language === 'ru' ? city.urlRu : city.urlEn;
+    return language === 'fr' ? city.urlFr : language === 'ru' ? city.urlRu : language === 'hy' ? (city.urlHy || city.urlEn) : city.urlEn;
   };
 
   const filteredCountries = countriesList.map(country => ({
@@ -152,7 +170,7 @@ const Countries = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-4">
               <div className="bg-[#2ecc71]/20 text-[#2ecc71] px-4 py-1.5 rounded-full text-sm font-semibold inline-flex items-center">
-                <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />4.9/5 - 10,000+ {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : 'reviews'}
+                <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />4.9/5 - 10,000+ {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : 'reviews'}
               </div>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2" data-testid="countries-hero-title">{t.heroTitle}</h1>

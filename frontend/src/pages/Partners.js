@@ -156,17 +156,67 @@ const content = {
     contactSub: 'Расскажите о вашем бизнесе. Мы подготовим персональное предложение.',
     formName: 'Ваше Имя', formCompany: 'Название Компании', formEmail: 'Рабочий Email', formPhone: 'Телефон', formMessage: 'Опишите ваши потребности в транспорте, ожидаемые объемы и предпочтительные направления...', formSubmit: 'Отправить Запрос на Партнерство',
   },
+  hy: {
+    seoTitle: 'Պրեմիում Տրանսպորտային Լուծումներ Մասնագետների Համար | Zont B2B',
+    seoDesc: 'Zont-ը աջակցում է տուրիստական գործակալություններին, հյուրանոցներին, կոնսյերժ ծառայություններին:',
+    badge: 'B2B Գործընկերության Ծրագիր',
+    heroTitle: 'Պրեմիում Տրանսպորտային Լուծումներ Մասնագետների Համար',
+    heroSub: 'ZONT-ը աջակցում է տուրիստական գործակալություններին և հյուրանոցներին Հայաստանում, Եվրոպայում:',
+    ctaPartner: 'Դառնալ Գործընկեր',
+    ctaQuote: 'Հարցում Առաջարկ',
+    whoTitle: 'Ում Ենք Աշխատում',
+    whoSub: 'Տրանսպորտային լուծումներ յուրաքանչյուր կարիքի համար',
+    servicesTitle: 'Ծառայություններ Մասնագետների Համար',
+    servicesSub: 'Լիարժեք տրանսպորտային լուծումներ',
+    services: [
+      { title: 'Օդանավակայանի Տրանսֆերներ', desc: 'Հուսալի վերցնում և իջնեցում օդանավակայաններում:' },
+      { title: 'Կայարանի Տրանսֆերներ', desc: 'Պրոֆեսիոնալ տրանսֆերներ կայարաններից:' },
+      { title: 'Վարորդ Տրամադրության', desc: 'Նվիրված վարորդ ժամերով կամ օրերով:' },
+      { title: 'Քաղաք-Քաղաք Տրանսֆերներ', desc: 'Երկար հեռավորություն տրանսֆերներ:' },
+      { title: 'Խմբային Տրանսպորտ', desc: 'Մինիվեններ 16 ուղևորների համար:' },
+      { title: 'VIP և Շքեղ Ծառայություն', desc: 'Պրեմիում մեքենաներ, դիսկրետ վարորդներ:' },
+    ],
+    whyTitle: 'Ինչու Գործընկերել ZONT-ի Հետ',
+    whySub: 'Գործընկերություն կառուցված հուսալիության վրա',
+    whyPoints: [
+      { icon: 'shield', title: 'Հաստատ և Թաֆանցիկ Տարիֆներ', desc: 'Թաքնված վճարներ չկան:' },
+      { icon: 'users', title: 'Պրոֆեսիոնալ Վարորդներ', desc: 'Ստուգված, լիցենզավորված վարորդներ:' },
+      { icon: 'plane', title: 'Թռիչքի Հետևում', desc: 'Բոլոր թռիչքների ավտոմատ հետևում:' },
+      { icon: 'star', title: 'Դիմավորում Ցուցանակով', desc: 'Վարորդը սպասում է անվանական ցուցանակով:' },
+      { icon: 'clock', title: 'Հասանելիություն 24/7', desc: 'Ամրագրեք ցանկացած սպասարկում:' },
+      { icon: 'headphones', title: 'Հատուկ Գործընկեր Աջակցություն', desc: 'Նվիրված հաշվի կառավարիչ:' },
+    ],
+    howTitle: 'Ինչպես Գործում Է Գործընկերությունը',
+    howSteps: [
+      { title: 'Ուղարկեք Հարցում', desc: 'Պատմեք ձեր բիզնեսի մասին:' },
+      { title: 'Ստացեք Առաջարկ', desc: 'Մենք կպատասխանենք 24 ժամվա ընթացքում:' },
+      { title: 'Մենք Կազմակերպում Ենք Տրանսպորտը', desc: 'Ամրագրեք պորտալով, email կամ հեռախոսով:' },
+      { title: 'Պրեմիում Փորձ', desc: 'Ձեր հաճախորդները վայելում են տրանսֆերներ:' },
+    ],
+    trustTitle: 'Վստահելի Մասնագետների Կողմից Եվրոպայում',
+    trustSub: '',
+    trustPoints: [
+      { value: '50,000+', label: 'Տրանսֆերներ Կատարված' },
+      { value: '120+', label: 'Քաղաքներ Ընդգրկված' },
+      { value: '4.9/5', label: 'Հաճախորդի Վարկանիշ' },
+      { value: '24/7', label: 'Աջակցություն Հասանելի' },
+    ],
+    contactTitle: 'Սկսեք Ձեր B2B Գործընկերությունը',
+    contactSub: 'Պատմեք ձեր բիզնեսի մասին: Մենք կպատրաստենք անհատական առաջարկ:',
+    formName: 'Ձեր Անունը', formCompany: 'Ընկերության Անունը', formEmail: 'Գործնական Email', formPhone: 'Հեռախոս', formMessage: 'Նկարագրեք ձեր տրանսպորտային կարիքները...', formSubmit: 'Ուղարկեք Գործընկերության Հարցումը',
+  },
 };
 
+
 const targets = [
-  { path: '/travel-agencies', name: { en: 'Travel Agencies', fr: 'Agences de Voyage', ru: 'Тур. Агентства' }, tagline: { en: 'Airport transfer partner', fr: 'Partenaire transfert aeroport', ru: 'Партнер по трансферам' } },
-  { path: '/tourism-agencies', name: { en: 'Tourism Agencies', fr: 'Agences de Tourisme', ru: 'Туристические Агентства' }, tagline: { en: 'Private transport solutions', fr: 'Solutions de transport prive', ru: 'Частный транспорт' } },
-  { path: '/hotels', name: { en: 'Hotels', fr: 'Hotels', ru: 'Отели' }, tagline: { en: 'Guest transfer services', fr: 'Transferts pour clients', ru: 'Трансферы для гостей' } },
-  { path: '/concierge-services', name: { en: 'Concierge Services', fr: 'Conciergeries', ru: 'Консьерж-службы' }, tagline: { en: 'VIP chauffeur solutions', fr: 'Solutions chauffeur VIP', ru: 'VIP решения' } },
-  { path: '/event-agencies', name: { en: 'Event Agencies', fr: 'Agences Evenementielles', ru: 'Ивент-агентства' }, tagline: { en: 'Event transportation', fr: 'Transport evenementiel', ru: 'Транспорт для мероприятий' } },
-  { path: '/corporate-clients', name: { en: 'Corporate Clients', fr: 'Entreprises', ru: 'Корпоративные Клиенты' }, tagline: { en: 'Business travel services', fr: 'Services voyage d\'affaires', ru: 'Бизнес-путешествия' } },
-  { path: '/business-partners', name: { en: 'Business Partners', fr: 'Partenaires Commerciaux', ru: 'Бизнес-партнеры' }, tagline: { en: 'Strategic partnerships', fr: 'Partenariats strategiques', ru: 'Стратегические партнерства' } },
-  { path: '/tour-operators', name: { en: 'Tour Operators', fr: 'Tour-Operateurs', ru: 'Туроператоры' }, tagline: { en: 'Tour logistics partner', fr: 'Partenaire logistique tours', ru: 'Логистика туров' } },
+  { path: '/travel-agencies', name: { en: 'Travel Agencies', fr: 'Agences de Voyage', ru: 'Тур. Агентства', hy: 'Տուրիստական Գործակալություններ' }, tagline: { en: 'Airport transfer partner', fr: 'Partenaire transfert aeroport', ru: 'Партнер по трансферам', hy: 'Օդանավակայանի տրանսֆեր գործընկեր' } },
+  { path: '/tourism-agencies', name: { en: 'Tourism Agencies', fr: 'Agences de Tourisme', ru: 'Туристические Агентства', hy: 'Տուրիստական Գործակալություններ' }, tagline: { en: 'Private transport solutions', fr: 'Solutions de transport prive', ru: 'Частный транспорт', hy: 'Օդանավակայանի տրանսֆեր գործընկեր' } },
+  { path: '/hotels', name: { en: 'Hotels', fr: 'Hotels', ru: 'Отели', hy: 'Հյուրանոցներ' }, tagline: { en: 'Guest transfer services', fr: 'Transferts pour clients', ru: 'Трансферы для гостей', hy: 'Օդանավակայանի տրանսֆեր գործընկեր' } },
+  { path: '/concierge-services', name: { en: 'Concierge Services', fr: 'Conciergeries', ru: 'Консьерж-службы', hy: 'Կոնսյերժ Ծառայություններ' }, tagline: { en: 'VIP chauffeur solutions', fr: 'Solutions chauffeur VIP', ru: 'VIP решения', hy: 'VIP վարորդի լուծումներ' } },
+  { path: '/event-agencies', name: { en: 'Event Agencies', fr: 'Agences Evenementielles', ru: 'Ивент-агентства', hy: 'Միջոցառումների Գործակալություններ' }, tagline: { en: 'Event transportation', fr: 'Transport evenementiel', ru: 'Транспорт для мероприятий', hy: 'Օդանավակայանի տրանսֆեր գործընկեր' } },
+  { path: '/corporate-clients', name: { en: 'Corporate Clients', fr: 'Entreprises', ru: 'Корпоративные Клиенты', hy: 'Կորպորատիվ Հաճախորդներ' }, tagline: { en: 'Business travel services', fr: 'Services voyage d\'affaires', ru: 'Бизнес-путешествия', hy: 'Օդանավակայանի տրանսֆեր գործընկեր' } },
+  { path: '/business-partners', name: { en: 'Business Partners', fr: 'Partenaires Commerciaux', ru: 'Бизнес-партнеры', hy: 'Տուրիստական Գործակալություններ' }, tagline: { en: 'Strategic partnerships', fr: 'Partenariats strategiques', ru: 'Стратегические партнерства', hy: 'Օդանավակայանի տրանսֆեր գործընկեր' } },
+  { path: '/tour-operators', name: { en: 'Tour Operators', fr: 'Tour-Operateurs', ru: 'Туроператоры', hy: 'Տուր Օպերատորներ' }, tagline: { en: 'Tour logistics partner', fr: 'Partenaire logistique tours', ru: 'Логистика туров', hy: 'Օդանավակայանի տրանսֆեր գործընկեր' } },
 ];
 
 const Partners = () => {
@@ -195,7 +245,7 @@ const Partners = () => {
       setSubmitted(true);
       setFormState({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {
-      setError(language === 'fr' ? 'Erreur. Veuillez reessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : 'Error. Please try again.');
+      setError(language === 'fr' ? 'Erreur. Veuillez reessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : language === 'hy' ? 'Սխալ: Խնդրում ենք կրկին փորձեք:' : 'Error. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -351,8 +401,8 @@ const Partners = () => {
             {submitted ? (
               <div className="text-center py-8" data-testid="form-success">
                 <CheckCircle className="w-16 h-16 text-[#2ecc71] mx-auto mb-4" />
-                <p className="text-xl text-white font-semibold mb-2">{language === 'fr' ? 'Demande envoyee !' : language === 'ru' ? 'Запрос отправлен!' : 'Request sent!'}</p>
-                <p className="text-gray-400">{language === 'fr' ? 'Nous vous repondrons sous 24h.' : language === 'ru' ? 'Мы ответим в течение 24 часов.' : 'We will respond within 24 hours.'}</p>
+                <p className="text-xl text-white font-semibold mb-2">{language === 'fr' ? 'Demande envoyee !' : language === 'ru' ? 'Запрос отправлен!' : language === 'hy' ? 'Հարցումը ուղարկվեց!' : 'Request sent!'}</p>
+                <p className="text-gray-400">{language === 'fr' ? 'Nous vous repondrons sous 24h.' : language === 'ru' ? 'Мы ответим в течение 24 часов.' : language === 'hy' ? 'Մենք կպատասխանենք 24 ժամվա ընթացքում:' : 'We will respond within 24 hours.'}</p>
               </div>
             ) : (
             <form className="space-y-4 max-w-lg mx-auto" onSubmit={handleSubmit} data-testid="b2b-contact-form">
