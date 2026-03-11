@@ -6,10 +6,11 @@ Convert the Angular website zont.cab into a React application connected to the e
 - Multilingual support (French, English, Russian, Armenian)
 - SEO-optimized landing pages for airport transfers
 - B2B section for professional partners
+- CMS/Admin Panel for content management
 
 ## Core Architecture
 - **Frontend**: React 19, Tailwind CSS, custom LanguageContext for i18n
-- **Backend**: FastAPI (placeholder), MongoDB for leads
+- **Backend**: FastAPI (placeholder), MongoDB for leads & CMS content
 - **Languages**: FR, EN, RU, HY (Armenian)
 - **SEO**: Custom useSEO.js hook, sitemap.xml, robots.txt, hreflang, JSON-LD
 
@@ -24,27 +25,30 @@ Convert the Angular website zont.cab into a React application connected to the e
 
 ### Armenian Language (HY) - COMPLETE (Feb 2026)
 - Full Armenian translations across all pages
-- Noto Sans Armenian font for character rendering
-- SEO hreflang tags for Armenian
-- Language selector with Armenian flag
-- Tested: 13/13 frontend tests passed (95% success rate)
+- Tested: 13/13 frontend tests passed
 
 ### Technical SEO - COMPLETE
 - robots.txt and sitemap.xml with all pages
 - hreflang tags for FR/EN/RU/HY on all pages
-- Rich JSON-LD structured data
-- Canonical URLs
+- Rich JSON-LD structured data, Canonical URLs
 
 ### B2B Section - COMPLETE
 - Main /partners page with 8 partner types
-- 8 dedicated B2B pages (/travel-agencies, /hotels, etc.)
+- 8 dedicated B2B pages
 - Contact forms connected to backend /api/leads endpoint
-- All B2B pages translated in 4 languages
 
-### Backend - COMPLETE (Placeholder)
-- FastAPI with `/api/leads` POST endpoint
-- MongoDB for lead storage
-- Lead model: { name, company, email, phone, message, page_source, created_at }
+### CMS / Admin Panel - COMPLETE (Feb 2026)
+- **Authentication**: JWT-based login/register with route protection
+- **Dashboard**: Stats overview (pages, places, trust blocks, FAQs, leads)
+- **Pages Manager**: Full CRUD with multi-language SEO fields, content tabs (general/seo/content/faq), image upload, status toggle, filtering & search
+- **Places Manager**: Full CRUD with multi-language names, place types (city/airport/station/country/region), keywords, pricing, image upload
+- **Homepage Editor**: Hero section, stats, advantages, CTA, section ordering
+- **Trust Blocks**: CRUD with icon selection, active toggle, ordering
+- **FAQ Manager**: CRUD with multi-language Q&A, page association, active toggle
+- **SEO Overview**: Table view of all pages with SEO score indicator
+- **Image Upload**: File upload to /api/uploads/ with preview
+- **Testing**: 26/26 backend pytest tests + 10/10 frontend tests passed
+- **Credentials**: admin@zont.cab / admin123
 
 ### Static Pages - COMPLETE
 - Home, Help, BecomeDriver, BecomeClient, LookingForPartners
@@ -52,10 +56,19 @@ Convert the Angular website zont.cab into a React application connected to the e
 - 404 Not Found page
 - All pages translated in 4 languages
 
+### Backend - COMPLETE
+- FastAPI with leads API, admin auth, CMS CRUD endpoints
+- MongoDB collections: leads, admin_users, cms_pages, cms_places, cms_homepage, cms_trust_blocks, cms_faqs
+
 ## Backlog
+- **P1**: Connect public-facing pages to CMS (dynamic content from CMS APIs instead of static i18next files)
 - **P2**: Connect to real C# backend (blocked on API documentation)
 - **P3**: Refactor CityTransferPage.js (large component)
 
 ## Mocked Features
 - Main booking flow (search, results, payment) is mocked
 - B2B lead generation is REAL (connected to MongoDB)
+
+## Admin Panel Access
+- URL: /admin/login
+- Credentials: admin@zont.cab / admin123
