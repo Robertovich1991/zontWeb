@@ -1,82 +1,61 @@
 <analysis>**original_problem_statement:**
-The user initially requested the conversion of their Angular website, , into a React application connected to their existing C# backend. Key requirements included replicating the original design, implementing multilingual support (French, English, Russian), and creating SEO-optimized landing pages for airport transfers.
+The user initially requested the conversion of their Angular website, , into a React application connected to their existing C# backend, with multilingual support (French, English, Russian). The project has since evolved to include a mobile-first redesign, a full technical SEO implementation, and a B2B section with lead generation.
 
-The project has since evolved to include:
-- A mobile-first, conversion-optimized redesign to increase bookings.
-- A full technical SEO audit and implementation to improve search engine performance.
-- A comprehensive B2B section with dedicated pages for various professional partners.
-- Connecting a contact form to a new lead-generation backend endpoint.
-- The latest request is to add Armenian as a fourth language to the entire website.
+During this session, two major tasks were addressed:
+1.  **Add Armenian Language Support:** The user requested to add Armenian ('hy') as a fourth language to the entire website.
+2.  **Build a Content Management System (CMS):** The user provided a detailed specification for a new admin panel to manage all SEO and marketing content (pages, places, homepage, trust blocks, etc.), completely separate from their operational backend. Key requirements include email/password authentication, image uploads, and multi-language content management.
 
 **User's preferred language**: French
 
 **what currently exists?**
-A full-stack application with a React frontend and a FastAPI backend. The frontend is a sophisticated, mobile-optimized clone of . The backend, initially a placeholder, now includes a functional  endpoint connected to a MongoDB database for B2B lead capture.
+A full-stack application with a React frontend and a FastAPI backend. The application is now fully translated into French, English, Russian, and Armenian.
 
-Key features implemented:
-- Multilingual support for French, English, and Russian using .
-- A complete technical SEO implementation: , , canonical URLs,  tags, and rich JSON-LD structured data on all pages, managed by a custom  hook.
-- Over 15 dedicated SEO landing pages for specific European cities.
-- A newly built B2B section with a main  page and 8 unique sub-pages targeting different professional audiences (, , etc.).
-- Several static pages (, , etc.) are now fully translated.
-- All B2B contact forms are fully functional and save inquiries to the database.
+The agent has successfully laid the complete backend foundation for the new CMS admin panel. This includes:
+*   **Backend Restructuring:** A new  directory structure for better organization.
+*   **Authentication:** A JWT-based authentication system with  and  endpoints, protected by a middleware.
+*   **Content Models:** Pydantic models for , , , , and  have been created.
+*   **API Endpoints:** A comprehensive set of RESTful CRUD APIs for all content models, including an endpoint for image uploads (). All backend endpoints were tested and confirmed to be functional.
+*   **Frontend Scaffolding:** An  directory has been created with placeholder components for the entire admin interface (, , , and managers for each content type). Routes have been added to .
 
 **Last working item**:
-- **Last item agent was working:** Adding Armenian ('hy') as a new language to the entire website. The agent started creating the necessary infrastructure by attempting to update language context files and create an Armenian translation file ().
+- **Last item agent was working:** Building the foundation for the new CMS / Admin Panel. The agent completed the entire backend (auth, models, routes) and created the empty shell components for the frontend admin interface.
 - **Status:** IN PROGRESS
-- **Agent Testing Done:** N
-- **Which testing method agent to use?** Frontend testing agent. After implementation, the agent must test that the language switcher works, all pages render correctly in Armenian without character or layout issues, and that SEO tags () are correctly updated.
+- **Agent Testing Done:** Y (Backend APIs only, via curl)
+- **Which testing method agent to use?** Frontend testing agent. Once the admin UI is fully implemented, a comprehensive test of the admin workflow is required: login, create/edit/delete content for each model, upload images, and manage user sessions.
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-  - **Issue 1:** Armenian language implementation is failing. (Priority: P0)
-
-  **Issues Detail:**
-  - **Issue 1:** 
-     - **Attempted fixes:** The agent's attempt to create  failed. The initial file contained placeholder text, and subsequent attempts to fix it resulted in file corruption or character rendering issues. The agent's last action was to initiate a web search for correct translations, but this was not completed.
-     - **Next debug checklist:**
-        1.  Create a new, valid  file in . Start with a few key translations for the header or footer to create a minimum viable test case.
-        2.  Ensure the file is saved with UTF-8 encoding.
-        3.  Verify that the Google Font used in the application supports Armenian characters. If not, add a font that does (e.g., Noto Sans Armenian) to  and .
-        4.  Correctly wire up the new language in  by adding the 'hy' resource.
-        5.  Update the language switcher UI in  to include the Armenian option.
-        6.  Once the basic setup is working, proceed to translate the entire content from  into Armenian and populate .
-     - **Why fix this issue and what will be achieved with the fix?** Fulfills the user's direct request to make the website accessible to an Armenian-speaking audience.
-     - **Status:**  IN PROGRESS
-     - **Is recurring issue?** N
-     - **Should Test frontend/backend/both after fix?** Frontend
-     - **Blocked on other issue:** None
+There are no pending bugs or issues. The current focus is on new feature development.
 
 **In progress Task List**:
-  - **Task 1:**  Add Armenian Language Support to the Entire Website (Priority: P0)
-  
-  **Task Detail:**
+  - **Task 1:  Implement the CMS / Admin Panel Frontend UI (Priority: P0)**
+
+ **Task Detail:**
   - **Task 1:** 
-     - **Where to resume:** The agent was blocked on creating a valid  translation file. The next step is to use a web search to find accurate translations, create the file correctly (ensuring UTF-8 encoding), and verify that the site's fonts support Armenian characters.
-     - **What will be achieved with this?** The website will be fully translated and functional in Armenian.
+     - **Where to resume:** The component files inside  are currently empty shells. The next step is to build the UI and logic for each:
+        1.  ****: Implement the login form to authenticate against the  endpoint and manage the user's token.
+        2.  ** & **: Create the main admin layout with navigation to the different content management sections. Implement route protection to ensure only authenticated users can access the admin panel.
+        3.  **Manager Components** (, , etc.): Build the complete CRUD interfaces (tables to list data, forms to create/edit, and buttons to delete). These forms should connect to the corresponding backend APIs. The image upload functionality needs to be integrated into the relevant forms.
+     - **What will be achieved with this?** A fully functional admin panel that allows the user to manage their website's content as per their detailed requirements, fulfilling the latest major feature request.
      - **Status:**  IN PROGRESS
      - **Should Test frontend/backend/both after fix?** Frontend
-     - **Blocked on something:** Blocked on getting accurate translations and resolving potential font/encoding issues.
+     - **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
+- **Upcoming Tasks:**
+    - **Connect Frontend to CMS (P1):** Once the admin panel is functional, update the public-facing pages (e.g., Homepage, City pages) to fetch their content dynamically from the new CMS APIs instead of relying on the static content in the  JSON files.
 - **Future Tasks:**
-    - **Connect to C# Backend (P2):** The core, long-term task of replacing the mock booking flow with a connection to the user's live C# backend. This is blocked until the user provides the necessary API documentation and endpoints.
+    - **Connect to C# Backend (P2):** The original, long-term goal of integrating the booking engine with the user's proprietary C# backend remains. This is blocked pending API documentation from the user.
 
 **Completed work in this session**
-- **B2B Section Implementation:**
-  - Created a main B2B landing page () and 8 dedicated, uniquely-worded pages for different professional audiences (e.g., , ).
-  - Implemented a new, professional B2B design template ().
-  - Added a B2B navigation link in the main header.
-- **Backend Lead Generation:**
-  - Created a new FastAPI model () and a corresponding API endpoint ().
-  - Connected the contact forms on all 9 B2B pages to this endpoint.
-  - Confirmed that lead data is successfully submitted and stored in the MongoDB database.
-- **Content Translation:**
-  - Translated the , , , and  pages, which previously had hardcoded English text, into French, English, and Russian using the  framework.
-- **Full Technical SEO Audit:**
-  - Systematically implemented a comprehensive list of SEO improvements across the entire site, including creating  and , adding  for multilingual SEO, enriching JSON-LD data, and ensuring all pages have unique and optimized meta tags. This task is fully complete and verified.
-- **404 Page:**
-  - Added a Not Found page for handling invalid routes.
+- **Armenian Language Implementation:**
+  - Integrated the 'Noto Sans Armenian' font and created a fully populated  translation file.
+  - Updated all necessary components (, , ) and files () to support Armenian.
+  - The feature was successfully tested and verified by the  (13/13 tests passed).
+- **CMS/Admin Panel Backend Foundation:**
+  - Built and tested a complete set of backend services for the CMS, including JWT authentication, data models, and full CRUD API endpoints for Pages, Places, Homepage, and Trust Blocks.
+- **PRD Update:**
+  - Updated  to reflect the completion of the Armenian language task and the new requirements for the CMS.
 
 **Earlier issues found/mentioned but not fixed**
 - None.
@@ -84,80 +63,87 @@ Key features implemented:
 **Known issue recurrence from previous fork**
   - **Issue:** Blank screen after frontend modifications.
   - **Recurrence count:** High (in previous sessions).
-  - **Status:** RESOLVED. The issue was traced to the  library and fixed by replacing it with a custom  hook. This solution has remained stable.
+  - **Status:** RESOLVED. This issue was fixed in a prior fork and has not recurred.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Frontend:** React (v19), , Tailwind CSS.
-- **Backend:** FastAPI, Pydantic.
-- **Database:** MongoDB for lead storage.
-- **Internationalization (i18n):**  with .
-- **SEO:** Custom  hook for dynamic head management.
-- **Performance:**  for route-based code splitting.
+- **Frontend:** React, , Tailwind CSS, .
+- **Backend:** FastAPI, Pydantic, JWT (, ).
+- **Database:** MongoDB.
+- **Internationalization (i18n):**  framework.
 
 **key DB schema**
   - **leads**: 
+  - **users**: 
+  - **pages**: 
+  - **places**: 
+  - **homepage**: 
+  - **trust_blocks**: 
 
 **changes in tech stack**
-- None in this session. The previous removal of  remains a critical change.
+- **Backend:** Added  and  to support JWT-based authentication.
 
 **All files of reference**
-- : All new files in this directory.
-- : The new template for B2B pages.
-- : Modified to add the  route.
-- : Created to define the  data model.
-- : Modified to add the B2B navigation link.
-- : Updated with routes for all new B2B pages.
-- : Updated to include all new B2B page URLs.
-- : This directory is the focus of the current task.
+- : All new files for the CMS backend.
+- : Heavily modified to include new routers.
+- : All new files for the admin panel frontend.
+- : Modified to add  routes.
+- : Newly created translation file.
+- : Contains the user's detailed requirements for the CMS.
 
 **Areas that need refactoring**:
-- The  component is large and could be broken down into smaller sub-components as noted previously.
+- The  component could be broken down into smaller components, but this is a low-priority task.
 
 **key api endpoints**
-- : Submits a B2B contact form inquiry and stores it in the database.
+- 
+- 
+- 
+- 
+- **CRUD Endpoints (prefixed with ):**
+  - , 
+  - , 
+  - 
+  - , 
 
 **Critical Info for New Agent**
 - **User's language is French.** All communication must be in French.
-- The immediate task (P0) is to **fix and complete the Armenian language implementation**. The agent was stuck on creating a valid  file due to character encoding/rendering issues. The next agent must prioritize debugging this, likely by checking font support and ensuring the translation file is correctly encoded (UTF-8).
-- The B2B section and its lead generation backend are complete and tested. Do not modify unless requested.
-- The technical SEO audit is also complete.  is the stable solution for all meta tags.
+- The immediate and highest priority task is to **build the frontend for the Admin Panel**. The backend is already complete, tested, and ready to be connected. All required frontend component files have been created in .
+- The full specification for the CMS is in the user message history () and has been summarized in . Refer to these for functional requirements.
+- The Armenian language translation task is **100% complete and verified.** Do not revisit it.
 
 **documents and test reports created in this job**
 - 
-- Multiple reports in , including successful validation of the SEO audit, B2B pages, and backend lead generation.
+- 
 
 **Last 10 User Messages and any pending HUMAN messages** 
-1. **USER:** Asks to translate the entire website into Armenian and add the language. (PENDING IMPLEMENTATION)
-2. **AGENT:** Proposes a plan to add Armenian support.
-3. **USER:** OUI (Confirms the plan to add Armenian). (PENDING IMPLEMENTATION)
-4. **AGENT:** Finishes the B2B lead generation task.
-5. **USER:** OUI (Confirms starting the B2B backend task). (COMPLETED)
-6. **AGENT:** Asks for confirmation to start implementing B2B form backend and translating static pages.
-7. **USER:** Asks for the link to the pages. (COMPLETED)
-8. **AGENT:** Finishes the comprehensive B2B section build.
-9. **USER:** Provides a very detailed feature request for a new professional B2B section with 9 unique pages. (COMPLETED)
-10. **AGENT:** Asks for clarification on the user's request for LE LIEN VERS LES PAGE.
+1. **USER:** Provides very detailed specifications for a new CMS / Admin Panel. (IN PROGRESS)
+2. **USER:** Clarifies CMS requirements: Login email mot de passe upload image (Login with email/password, image upload). (IN PROGRESS)
+3. **AGENT:** Confirms understanding and begins work on the CMS.
+4. **USER:** Requests the preview link for the website. (COMPLETED)
+5. **AGENT:** Provides the preview link. (COMPLETED)
+The remaining messages relate to the now-completed Armenian language implementation.
 
 **Project Health Check:**
-- **Broken:** Armenian language implementation.
-- **Mocked:** The main user booking flow is still mocked and does not connect to a real backend. The B2B lead generation form is NOT mocked and is fully functional.
+- **Broken:** Nothing is broken. The admin panel feature is under construction.
+- **Mocked:** The main booking flow remains mocked, pending integration with the user's C# backend.
 
 **3rd Party Integrations**
 - : For handling translations.
-- : React bindings for .
-- : To detect the user's browser language.
+-  / : For backend JWT authentication.
 
 **Testing status**
-- **Testing agent used after significant changes:** YES. The agent successfully used the testing agent to validate the massive SEO audit, the new B2B section, and the backend lead generation feature.
+- **Testing agent used after significant changes:** YES (for the Armenian language feature).
 - **Troubleshoot agent used after agent stuck in loop:** NO
 - **Test files created:** None.
 - **Known regressions:** None.
 
 **Credentials to test flow:**
-N/A
+An admin user was registered during backend testing:
+- **Email:** 
+- **Password:** 
+The next agent can use these credentials to test the login page or register a new user.
 
 **What agent forgot to execute**
-- The agent failed to successfully implement the user's latest request to add Armenian language support, getting stuck in a loop of creating corrupted/invalid translation files.</analysis>
+The agent has not forgotten anything. It successfully completed the first user request and then correctly pivoted to begin the new, larger request for a CMS, laying a solid and complete foundation for the next steps.</analysis>

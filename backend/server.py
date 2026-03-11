@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -21,6 +22,7 @@ db = client[os.environ['DB_NAME']]
 
 # Create the main app without a prefix
 app = FastAPI()
+app.state.db = db
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -104,6 +106,24 @@ async def get_leads():
 
 # Include the router in the main app
 app.include_router(api_router)
+
+# Admin routes
+from routes.admin_auth import router as auth_router
+from routes.admin_pages import router as pages_router
+from routes.admin_places import router as places_router
+from routes.admin_cms import router as cms_router
+from routes.admin_upload import router as upload_router
+
+app.include_router(auth_router)
+app.include_router(pages_router)
+app.include_router(places_router)
+app.include_router(cms_router)
+app.include_router(upload_router)
+
+# Serve uploaded files
+UPLOAD_DIR = ROOT_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,

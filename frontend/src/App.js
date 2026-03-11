@@ -1,10 +1,11 @@
 import React, { Suspense, lazy } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { BookingProvider } from "@/context/BookingContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
+import { AdminAuthProvider, useAdminAuth } from "@/pages/admin/AdminAuthContext";
 
 // Core pages (eager load)
 import Home from "@/pages/Home";
@@ -20,6 +21,24 @@ const BookingConfirmation = lazy(() => import("@/pages/BookingConfirmation"));
 const LookingForPartners = lazy(() => import("@/pages/LookingForPartners"));
 const ParisAirportTransfer = lazy(() => import("@/pages/ParisAirportTransfer"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+
+// Admin pages (lazy)
+const AdminLogin = lazy(() => import("@/pages/admin/AdminLogin"));
+const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
+const Dashboard = lazy(() => import("@/pages/admin/Dashboard"));
+const PagesManager = lazy(() => import("@/pages/admin/PagesManager"));
+const PlacesManager = lazy(() => import("@/pages/admin/PlacesManager"));
+const HomepageEditor = lazy(() => import("@/pages/admin/HomepageEditor"));
+const TrustBlocks = lazy(() => import("@/pages/admin/TrustBlocks"));
+const FaqManager = lazy(() => import("@/pages/admin/FaqManager"));
+const SeoOverview = lazy(() => import("@/pages/admin/SeoOverview"));
+
+const AdminGuard = ({ children }) => {
+  const { user, loading } = useAdminAuth();
+  if (loading) return <Loading />;
+  if (!user) return <Navigate to="/admin/login" replace />;
+  return children;
+};
 
 // City Pages (lazy)
 const NiceTransfer = lazy(() => import("@/pages/cities/Nice"));
@@ -143,6 +162,17 @@ function App() {
                   <Route path="/corporate-clients" element={<CorporateClients />} />
                   <Route path="/business-partners" element={<BusinessPartners />} />
                   <Route path="/tour-operators" element={<TourOperators />} />
+                  {/* Admin Panel */}
+                  <Route path="/admin/login" element={<AdminAuthProvider><AdminLogin /></AdminAuthProvider>} />
+                  <Route path="/admin" element={<AdminAuthProvider><AdminGuard><AdminLayout /></AdminGuard></AdminAuthProvider>}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="pages" element={<PagesManager />} />
+                    <Route path="places" element={<PlacesManager />} />
+                    <Route path="homepage" element={<HomepageEditor />} />
+                    <Route path="trust-blocks" element={<TrustBlocks />} />
+                    <Route path="faqs" element={<FaqManager />} />
+                    <Route path="seo" element={<SeoOverview />} />
+                  </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
