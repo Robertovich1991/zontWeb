@@ -69,12 +69,6 @@ const Header = () => {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-6" aria-label="Main navigation">
               <Link
-                to="/become-driver"
-                className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
-              >
-                {t('nav.becomeDriver')}
-              </Link>
-              <Link
                 to="/become-client"
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
@@ -198,13 +192,6 @@ const Header = () => {
         {mobileMenuOpen && (
           <div className="lg:hidden bg-[#1a2332] border-t border-gray-700">
             <div className="px-4 py-3 space-y-3">
-              <Link
-                to="/become-driver"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
-              >
-                {t('nav.becomeDriver')}
-              </Link>
               <Link
                 to="/become-client"
                 onClick={() => setMobileMenuOpen(false)}

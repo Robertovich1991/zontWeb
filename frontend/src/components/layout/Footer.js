@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Facebook, Instagram } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -25,6 +26,11 @@ const Footer = () => {
                 <a href="/about" className="text-gray-400 hover:text-white transition-colors">
                   {t('footer.aboutUs')}
                 </a>
+              </li>
+              <li>
+                <Link to="/become-driver" className="text-gray-400 hover:text-white transition-colors" data-testid="footer-become-driver">
+                  {t('nav.becomeDriver')}
+                </Link>
               </li>
               <li>
                 <a href="/terms" className="text-gray-400 hover:text-white transition-colors">
