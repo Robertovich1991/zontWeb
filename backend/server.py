@@ -6,7 +6,7 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 
@@ -37,6 +37,26 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+class LeadCreate(BaseModel):
+    name: str
+    company: str
+    email: str
+    phone: Optional[str] = ""
+    message: Optional[str] = ""
+    source_page: Optional[str] = ""
+
+class Lead(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    company: str
+    email: str
+    phone: str = ""
+    message: str = ""
+    source_page: str = ""
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    status: str = "new"
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
@@ -65,6 +85,22 @@ async def get_status_checks():
             check['timestamp'] = datetime.fromisoformat(check['timestamp'])
     
     return status_checks
+
+@api_router.post("/leads", response_model=Lead)
+async def create_lead(input: LeadCreate):
+    lead = Lead(**input.model_dump())
+    doc = lead.model_dump()
+    doc['timestamp'] = doc['timestamp'].isoformat()
+    await db.leads.insert_one(doc)
+    return lead
+
+@api_router.get("/leads", response_model=List[Lead])
+async def get_leads():
+    leads = await db.leads.find({}, {"_id": 0}).sort("timestamp", -1).to_list(1000)
+    for lead in leads:
+        if isinstance(lead.get('timestamp'), str):
+            lead['timestamp'] = datetime.fromisoformat(lead['timestamp'])
+    return leads
 
 # Include the router in the main app
 app.include_router(api_router)

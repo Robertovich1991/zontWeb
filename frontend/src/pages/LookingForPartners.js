@@ -3,44 +3,95 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
+import { useLanguage } from '@/context/LanguageContext';
+
+const content = {
+  en: {
+    seoTitle: 'Looking for Partners - Drive with Zont',
+    seoDesc: 'Zont needs partners like you. Join our network of professional drivers. Quick signup. Start earning with airport transfers across Europe.',
+    heroTitle: 'Looking for Partners',
+    heroSub: 'We are always looking for reliable drivers to join our growing network. Apply today and start earning.',
+    ctaTitle: 'Want to become a partner driver?',
+    ctaBtn: 'Apply Now',
+    points: [
+      'Competitive earnings per transfer',
+      'Flexible schedule — work when you want',
+      'Growing network across 120+ cities',
+      'Professional support and training',
+    ],
+  },
+  fr: {
+    seoTitle: 'Recherche de Partenaires - Conduisez avec Zont',
+    seoDesc: 'Zont a besoin de partenaires comme vous. Rejoignez notre reseau de chauffeurs professionnels. Inscription rapide. Commencez a gagner avec les transferts aeroport.',
+    heroTitle: 'Recherche de Partenaires',
+    heroSub: 'Nous recherchons en permanence des chauffeurs fiables pour rejoindre notre reseau en pleine croissance. Postulez aujourd\'hui et commencez a gagner.',
+    ctaTitle: 'Vous souhaitez devenir chauffeur partenaire ?',
+    ctaBtn: 'Postuler Maintenant',
+    points: [
+      'Revenus competitifs par transfert',
+      'Horaires flexibles — travaillez quand vous voulez',
+      'Reseau en croissance dans plus de 120 villes',
+      'Support professionnel et formation',
+    ],
+  },
+  ru: {
+    seoTitle: 'Ищем Партнеров - Работайте с Zont',
+    seoDesc: 'Zont ищет партнеров. Присоединяйтесь к нашей сети профессиональных водителей. Быстрая регистрация. Начните зарабатывать на трансферах.',
+    heroTitle: 'Ищем Партнеров',
+    heroSub: 'Мы всегда ищем надежных водителей для нашей растущей сети. Подайте заявку сегодня и начните зарабатывать.',
+    ctaTitle: 'Хотите стать партнером-водителем?',
+    ctaBtn: 'Подать Заявку',
+    points: [
+      'Конкурентный заработок за трансфер',
+      'Гибкий график — работайте когда хотите',
+      'Растущая сеть в 120+ городах',
+      'Профессиональная поддержка и обучение',
+    ],
+  },
+};
 
 const LookingForPartners = () => {
+  const { language } = useLanguage();
+  const c = content[language] || content.en;
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#1a2332]">
-      <SEO
-        title="Looking for Partners - Drive with Zont"
-        description="Zont needs partners like you. Join our network of professional drivers. Quick and easy signup. Start earning with airport transfers across Europe."
-        canonical="https://zont.cab/looking-for-partners"
-      />
+    <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="looking-for-partners-page">
+      <SEO title={c.seoTitle} description={c.seoDesc} canonical="https://zont.cab/looking-for-partners" />
       <Header />
 
-      <main className="flex-1 pt-16 flex items-center justify-center px-4">
-        <div className="max-w-2xl mx-auto text-center py-20">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Looking for Partners
-          </h1>
-          <p className="text-2xl text-gray-300 mb-4">
-            <span className="font-semibold">Zont</span> needs partners like you. It's{' '}
-            <span className="font-bold">quick</span> and{' '}
-            <span className="font-bold">easy</span> to start working and earning with us.
-          </p>
+      <section className="pt-32 pb-12 px-4 bg-gradient-to-br from-[#2ecc71] to-[#27ae60] text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-6" data-testid="partners-search-h1">{c.heroTitle}</h1>
+          <p className="text-lg sm:text-xl max-w-2xl mx-auto">{c.heroSub}</p>
+        </div>
+      </section>
+
+      <section className="py-16 px-4">
+        <div className="max-w-3xl mx-auto">
+          <ul className="space-y-4">
+            {c.points.map((point, i) => (
+              <li key={i} className="flex items-start gap-3 text-gray-300 text-lg">
+                <span className="text-[#2ecc71] font-bold mt-0.5">&#10003;</span>
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="py-16 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl font-bold text-white mb-6">{c.ctaTitle}</h2>
           <button
             onClick={() => navigate('/become-driver')}
-            className="bg-[#2ecc71] text-white px-12 py-5 rounded-full font-semibold text-xl hover:bg-[#27ae60] transition-colors mt-8 inline-block"
+            className="px-10 py-4 bg-[#2ecc71] text-white font-bold rounded-lg hover:bg-[#27ae60] transition-colors text-lg"
+            data-testid="apply-btn"
           >
-            Sign up
+            {c.ctaBtn}
           </button>
-
-          {/* Illustration would go here */}
-          <div className="mt-12">
-            <div className="w-full h-64 bg-gradient-to-b from-transparent to-[#0f1419] rounded-lg flex items-end justify-center">
-              <div className="text-6xl mb-4">🚕</div>
-            </div>
-          </div>
         </div>
-      </main>
+      </section>
 
       <Footer />
     </div>

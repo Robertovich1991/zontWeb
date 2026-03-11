@@ -1,10 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { useLanguage } from '@/context/LanguageContext';
 import { CheckCircle, ArrowRight, Phone, Mail, Building2, Briefcase, Hotel, Star, Users, Plane, ChevronRight, Shield, Clock, Globe, Headphones } from 'lucide-react';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const content = {
   en: {
@@ -171,8 +173,33 @@ const Partners = () => {
   const { language } = useLanguage();
   const c = content[language] || content.en;
   const contactRef = useRef(null);
+  const [formState, setFormState] = useState({ name: '', company: '', email: '', phone: '', message: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const scrollToContact = () => contactRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formState.name || !formState.email || !formState.company) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const res = await fetch(`${API_URL}/api/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formState, source_page: '/partners' }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      setSubmitted(true);
+      setFormState({ name: '', company: '', email: '', phone: '', message: '' });
+    } catch {
+      setError(language === 'fr' ? 'Erreur. Veuillez reessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : 'Error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0c1220]" data-testid="partners-page">
@@ -321,20 +348,29 @@ const Partners = () => {
           <div className="bg-gradient-to-br from-[#151f33] to-[#1a2744] border border-gray-700/40 rounded-2xl p-8 sm:p-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{c.contactTitle}</h2>
             <p className="text-gray-400 text-center mb-8 max-w-xl mx-auto">{c.contactSub}</p>
-            <form className="space-y-4 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()} data-testid="b2b-contact-form">
+            {submitted ? (
+              <div className="text-center py-8" data-testid="form-success">
+                <CheckCircle className="w-16 h-16 text-[#2ecc71] mx-auto mb-4" />
+                <p className="text-xl text-white font-semibold mb-2">{language === 'fr' ? 'Demande envoyee !' : language === 'ru' ? 'Запрос отправлен!' : 'Request sent!'}</p>
+                <p className="text-gray-400">{language === 'fr' ? 'Nous vous repondrons sous 24h.' : language === 'ru' ? 'Мы ответим в течение 24 часов.' : 'We will respond within 24 hours.'}</p>
+              </div>
+            ) : (
+            <form className="space-y-4 max-w-lg mx-auto" onSubmit={handleSubmit} data-testid="b2b-contact-form">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input type="text" placeholder={c.formName} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-name" />
-                <input type="text" placeholder={c.formCompany} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-company" />
+                <input type="text" required placeholder={c.formName} value={formState.name} onChange={e => setFormState(p => ({...p, name: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-name" />
+                <input type="text" required placeholder={c.formCompany} value={formState.company} onChange={e => setFormState(p => ({...p, company: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-company" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input type="email" placeholder={c.formEmail} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-email" />
-                <input type="tel" placeholder={c.formPhone} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-phone" />
+                <input type="email" required placeholder={c.formEmail} value={formState.email} onChange={e => setFormState(p => ({...p, email: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-email" />
+                <input type="tel" placeholder={c.formPhone} value={formState.phone} onChange={e => setFormState(p => ({...p, phone: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-phone" />
               </div>
-              <textarea rows="4" placeholder={c.formMessage} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71] resize-none" data-testid="form-message" />
-              <button type="submit" className="w-full py-3.5 bg-[#2ecc71] text-white font-semibold rounded-lg hover:bg-[#27ae60] transition-all shadow-lg shadow-[#2ecc71]/20" data-testid="form-submit">
-                {c.formSubmit}
+              <textarea rows="4" placeholder={c.formMessage} value={formState.message} onChange={e => setFormState(p => ({...p, message: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71] resize-none" data-testid="form-message" />
+              {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+              <button type="submit" disabled={submitting} className="w-full py-3.5 bg-[#2ecc71] text-white font-semibold rounded-lg hover:bg-[#27ae60] transition-all shadow-lg shadow-[#2ecc71]/20 disabled:opacity-50" data-testid="form-submit">
+                {submitting ? '...' : c.formSubmit}
               </button>
             </form>
+            )}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-8 text-sm text-gray-400">
               <a href="mailto:partners@zont.cab" className="flex items-center gap-2 hover:text-[#2ecc71] transition-colors"><Mail className="w-4 h-4" /> partners@zont.cab</a>
               <a href="tel:+33123456789" className="flex items-center gap-2 hover:text-[#2ecc71] transition-colors"><Phone className="w-4 h-4" /> +33 1 23 45 67 89</a>

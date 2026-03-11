@@ -2,266 +2,194 @@ import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { Mail, Phone, MapPin, MessageCircle, Send } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
+import { Mail, Phone, MapPin, MessageCircle, Send, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+const content = {
+  en: {
+    seoTitle: 'Help & Support - Contact Zont | FAQ',
+    seoDesc: 'Need help? Contact Zont support 24/7. Find answers to common questions about bookings, payments, cancellations. Call, email or live chat.',
+    heroTitle: 'Help & Support',
+    heroSub: 'We\'re here to help you 24/7. Find answers below or contact our team.',
+    faqTitle: 'Frequently Asked Questions',
+    faqs: [
+      { q: 'How do I book a ride?', a: 'Download the Zont app, create an account, enter your pickup and drop-off locations, and confirm your booking. You\'ll receive driver details 3 hours before your trip.' },
+      { q: 'What payment methods do you accept?', a: 'We accept credit cards, debit cards, and mobile payment options through our app. Payment is processed securely at the end of your ride.' },
+      { q: 'Can I cancel my booking?', a: 'Yes, you can cancel your booking through the app. Cancellation fees may apply depending on how close to the pickup time you cancel.' },
+      { q: 'How do I become a driver?', a: 'Visit our "Become a Driver" page and fill out the application form. We\'ll review your application and contact you within 24 hours.' },
+      { q: 'Is Zont available in my city?', a: 'Zont operates in 120+ cities worldwide. Check our "Countries" page or the app to see if we\'re available in your location.' },
+      { q: 'What if I have an issue during my ride?', a: 'Contact our 24/7 support team through the app or call our emergency hotline. We\'re always here to help.' },
+    ],
+    contactTitle: 'Contact Us',
+    contactSub: 'Can\'t find an answer? Reach out to our team.',
+    contactInfo: [
+      { type: 'email', label: 'Email Support', value: 'support@zont.cab' },
+      { type: 'phone', label: 'Phone Support', value: '+33 1 23 45 67 89' },
+      { type: 'address', label: 'Office', value: 'Paris, France' },
+    ],
+    formName: 'Your Name *', formEmail: 'Email *', formSubject: 'Subject *',
+    formMessage: 'Your Message *', formPlaceholder: 'Describe your question or issue...',
+    submit: 'Send Message', sending: 'Sending...',
+    successTitle: 'Message sent!', successDesc: 'We will respond as soon as possible.',
+    errorTitle: 'Error', errorDesc: 'An error occurred while sending.',
+  },
+  fr: {
+    seoTitle: 'Aide & Support - Contactez Zont | FAQ',
+    seoDesc: 'Besoin d\'aide ? Contactez le support Zont 24h/24. Trouvez les reponses aux questions frequentes sur les reservations, paiements et annulations.',
+    heroTitle: 'Aide & Support',
+    heroSub: 'Nous sommes la pour vous aider 24h/24. Trouvez des reponses ci-dessous ou contactez notre equipe.',
+    faqTitle: 'Questions Frequentes',
+    faqs: [
+      { q: 'Comment reserver une course ?', a: 'Telechargez l\'appli Zont, creez un compte, entrez vos lieux de depart et d\'arrivee, et confirmez votre reservation. Vous recevrez les details du chauffeur 3 heures avant votre trajet.' },
+      { q: 'Quels modes de paiement acceptez-vous ?', a: 'Nous acceptons les cartes de credit, cartes de debit et les paiements mobiles via notre application. Le paiement est traite de maniere securisee a la fin de votre course.' },
+      { q: 'Puis-je annuler ma reservation ?', a: 'Oui, vous pouvez annuler votre reservation via l\'application. Des frais d\'annulation peuvent s\'appliquer selon la proximite de l\'heure de prise en charge.' },
+      { q: 'Comment devenir chauffeur ?', a: 'Visitez notre page "Devenir Chauffeur" et remplissez le formulaire de candidature. Nous examinerons votre dossier et vous contacterons sous 24 heures.' },
+      { q: 'Zont est-il disponible dans ma ville ?', a: 'Zont opere dans plus de 120 villes. Consultez notre page "Destinations" ou l\'application pour verifier la disponibilite.' },
+      { q: 'Que faire en cas de probleme pendant la course ?', a: 'Contactez notre support 24/7 via l\'application ou appelez notre ligne d\'urgence. Nous sommes toujours la pour vous aider.' },
+    ],
+    contactTitle: 'Contactez-Nous',
+    contactSub: 'Vous ne trouvez pas de reponse ? Contactez notre equipe.',
+    contactInfo: [
+      { type: 'email', label: 'Support Email', value: 'support@zont.cab' },
+      { type: 'phone', label: 'Support Telephone', value: '+33 1 23 45 67 89' },
+      { type: 'address', label: 'Bureau', value: 'Paris, France' },
+    ],
+    formName: 'Votre Nom *', formEmail: 'Email *', formSubject: 'Sujet *',
+    formMessage: 'Votre Message *', formPlaceholder: 'Decrivez votre question ou probleme...',
+    submit: 'Envoyer le Message', sending: 'Envoi en cours...',
+    successTitle: 'Message envoye !', successDesc: 'Nous vous repondrons dans les plus brefs delais.',
+    errorTitle: 'Erreur', errorDesc: 'Une erreur est survenue lors de l\'envoi.',
+  },
+  ru: {
+    seoTitle: 'Помощь и Поддержка - Свяжитесь с Zont | FAQ',
+    seoDesc: 'Нужна помощь? Свяжитесь с поддержкой Zont 24/7. Ответы на частые вопросы о бронированиях, оплате и отменах.',
+    heroTitle: 'Помощь и Поддержка',
+    heroSub: 'Мы здесь, чтобы помочь вам 24/7. Найдите ответы ниже или свяжитесь с нашей командой.',
+    faqTitle: 'Часто Задаваемые Вопросы',
+    faqs: [
+      { q: 'Как забронировать поездку?', a: 'Скачайте приложение Zont, создайте аккаунт, введите места отправления и прибытия и подтвердите бронирование. Вы получите данные водителя за 3 часа до поездки.' },
+      { q: 'Какие способы оплаты вы принимаете?', a: 'Мы принимаем кредитные карты, дебетовые карты и мобильные платежи через приложение. Оплата обрабатывается безопасно после поездки.' },
+      { q: 'Могу ли я отменить бронирование?', a: 'Да, вы можете отменить бронирование через приложение. Могут применяться штрафы за отмену в зависимости от времени до подачи.' },
+      { q: 'Как стать водителем?', a: 'Посетите страницу "Стать Водителем" и заполните форму заявки. Мы рассмотрим вашу заявку и свяжемся с вами в течение 24 часов.' },
+      { q: 'Работает ли Zont в моем городе?', a: 'Zont работает в 120+ городах. Проверьте страницу "Направления" или приложение для уточнения доступности.' },
+      { q: 'Что делать при проблеме во время поездки?', a: 'Свяжитесь с нашей поддержкой 24/7 через приложение или позвоните на горячую линию. Мы всегда готовы помочь.' },
+    ],
+    contactTitle: 'Свяжитесь с Нами',
+    contactSub: 'Не нашли ответ? Обратитесь к нашей команде.',
+    contactInfo: [
+      { type: 'email', label: 'Email Поддержки', value: 'support@zont.cab' },
+      { type: 'phone', label: 'Телефон', value: '+33 1 23 45 67 89' },
+      { type: 'address', label: 'Офис', value: 'Париж, Франция' },
+    ],
+    formName: 'Ваше Имя *', formEmail: 'Email *', formSubject: 'Тема *',
+    formMessage: 'Ваше Сообщение *', formPlaceholder: 'Опишите ваш вопрос или проблему...',
+    submit: 'Отправить Сообщение', sending: 'Отправка...',
+    successTitle: 'Сообщение отправлено!', successDesc: 'Мы ответим как можно скорее.',
+    errorTitle: 'Ошибка', errorDesc: 'Произошла ошибка при отправке.',
+  },
+};
+
 const Help = () => {
+  const { language } = useLanguage();
+  const c = content[language] || content.en;
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  });
+  const [openFaq, setOpenFaq] = useState(null);
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      // TODO: Connecter à l'API C# réelle pour envoyer le message
-      console.log('Contact form:', formData);
-      
-      toast({
-        title: 'Message envoyé !',
-        description: 'Nous vous répondrons dans les plus brefs délais.',
-      });
-      
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: '',
-      });
-    } catch (error) {
-      toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors de l\'envoi du message',
-        variant: 'destructive',
-      });
+      toast({ title: c.successTitle, description: c.successDesc });
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch {
+      toast({ title: c.errorTitle, description: c.errorDesc, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const faqs = [
-    {
-      question: 'How do I book a ride?',
-      answer:
-        'Download the Zont app, create an account, enter your pickup and drop-off locations, and confirm your booking. You\'ll receive driver details 3 hours before your trip.',
-    },
-    {
-      question: 'What payment methods do you accept?',
-      answer:
-        'We accept credit cards, debit cards, and mobile payment options through our app. Payment is processed securely at the end of your ride.',
-    },
-    {
-      question: 'Can I cancel my booking?',
-      answer:
-        'Yes, you can cancel your booking through the app. Cancellation fees may apply depending on how close to the pickup time you cancel.',
-    },
-    {
-      question: 'How do I become a driver?',
-      answer:
-        'Visit our "Become a Driver" page and fill out the application form. We\'ll review your application and contact you within 24 hours with next steps.',
-    },
-    {
-      question: 'Is Zont available in my city?',
-      answer:
-        'Zont operates in 120+ cities worldwide. Check our "Countries" page or the app to see if we\'re available in your location.',
-    },
-    {
-      question: 'What if I have an issue during my ride?',
-      answer:
-        'Contact our 24/7 support team through the app or call our emergency hotline. We\'re always here to help ensure your safety and satisfaction.',
-    },
-  ];
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" data-testid="help-page">
       <SEO
-        title="Help & Support - Contact Zont | FAQ"
-        description="Need help? Contact Zont support 24/7. Find answers to common questions about bookings, payments, cancellations. Call, email or live chat."
+        title={c.seoTitle}
+        description={c.seoDesc}
         canonical="https://zont.cab/help"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          "mainEntity": faqs.map(faq => ({
+          "mainEntity": c.faqs.map(faq => ({
             "@type": "Question",
-            "name": faq.question,
-            "acceptedAnswer": { "@type": "Answer", "text": faq.answer }
+            "name": faq.q,
+            "acceptedAnswer": { "@type": "Answer", "text": faq.a }
           }))
         }}
       />
       <Header />
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-12 px-4 bg-gradient-to-br from-purple-600 to-indigo-700 text-white">
+      <section className="pt-32 pb-12 px-4 bg-gradient-to-br from-[#2ecc71] to-[#27ae60] text-white">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">How Can We Help?</h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-            We're here to assist you 24/7. Get answers to common questions or reach out to our support team.
-          </p>
-        </div>
-      </section>
-
-      {/* Contact Info Cards */}
-      <section className="py-12 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <Phone className="w-12 h-12 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Call Us</h3>
-              <p className="text-gray-600">+33 1 23 45 67 89</p>
-              <p className="text-sm text-gray-500 mt-1">Available 24/7</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <Mail className="w-12 h-12 text-green-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Email Us</h3>
-              <p className="text-gray-600">support@zont.cab</p>
-              <p className="text-sm text-gray-500 mt-1">Response within 24 hours</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 text-center hover:shadow-lg transition-shadow">
-              <div className="flex justify-center mb-4">
-                <MessageCircle className="w-12 h-12 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Live Chat</h3>
-              <p className="text-gray-600">Chat with us in the app</p>
-              <p className="text-sm text-gray-500 mt-1">Instant support</p>
-            </div>
-          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4" data-testid="help-h1">{c.heroTitle}</h1>
+          <p className="text-lg max-w-2xl mx-auto">{c.heroSub}</p>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 text-center mb-12">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-6">
-            {faqs.map((faq, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{faq.question}</h3>
-                <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-10">{c.faqTitle}</h2>
+          <div className="space-y-3">
+            {c.faqs.map((faq, i) => (
+              <div key={i} className="border border-gray-200 rounded-xl overflow-hidden" data-testid={`faq-${i}`}>
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 transition-colors">
+                  <span className="font-semibold text-gray-900">{faq.q}</span>
+                  {openFaq === i ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
+                </button>
+                {openFaq === i && (
+                  <div className="px-5 pb-5 text-gray-600 text-sm leading-relaxed">{faq.a}</div>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Contact Form Section */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center">Send Us a Message</h2>
-            <p className="text-gray-600 mb-8 text-center">
-              Can't find what you're looking for? Fill out the form below and we'll get back to you.
-            </p>
+      {/* Contact Section */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-3">{c.contactTitle}</h2>
+          <p className="text-gray-600 text-center mb-10">{c.contactSub}</p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    placeholder="John Doe"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    placeholder="john@example.com"
-                  />
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {c.contactInfo.map((info, i) => (
+              <div key={i} className="bg-white rounded-xl p-6 text-center shadow-sm">
+                {info.type === 'email' && <Mail className="w-8 h-8 text-[#2ecc71] mx-auto mb-3" />}
+                {info.type === 'phone' && <Phone className="w-8 h-8 text-[#2ecc71] mx-auto mb-3" />}
+                {info.type === 'address' && <MapPin className="w-8 h-8 text-[#2ecc71] mx-auto mb-3" />}
+                <h3 className="font-semibold text-gray-900 mb-1">{info.label}</h3>
+                <p className="text-gray-600 text-sm">{info.value}</p>
               </div>
+            ))}
+          </div>
 
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                  Subject *
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  placeholder="How can we help?"
-                />
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm p-8">
+            <form onSubmit={handleSubmit} className="space-y-5" data-testid="help-form">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">{c.formName}</label><input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="help-name" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">{c.formEmail}</label><input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="help-email" /></div>
               </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows="5"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  placeholder="Tell us more about your question or issue..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                <Send size={20} />
-                <span>{loading ? 'Sending...' : 'Send Message'}</span>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{c.formSubject}</label><input type="text" name="subject" value={formData.subject} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="help-subject" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{c.formMessage}</label><textarea name="message" value={formData.message} onChange={handleChange} required rows="5" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" placeholder={c.formPlaceholder} data-testid="help-message" /></div>
+              <button type="submit" disabled={loading} className="w-full py-3 bg-[#2ecc71] text-white font-semibold rounded-lg hover:bg-[#27ae60] transition-colors disabled:bg-gray-400 flex items-center justify-center gap-2" data-testid="help-submit">
+                <Send className="w-4 h-4" />
+                {loading ? c.sending : c.submit}
               </button>
             </form>
           </div>
-        </div>
-      </section>
-
-      {/* Business Section */}
-      <section className="py-20 px-4 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">Business Solutions</h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
-            Are you a hotel, tour operator, or business looking for reliable transportation solutions?
-            Contact us for special B2B packages and corporate accounts.
-          </p>
-          <button className="bg-white text-gray-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors">
-            Learn More About B2B Services
-          </button>
         </div>
       </section>
 
