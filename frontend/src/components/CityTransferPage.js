@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -54,10 +54,35 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const bookingFormRef = useRef(null);
   const [formData, setFormData] = useState({ pickup: '', dropoff: '', date: '', time: '' });
+  const [cmsPage, setCmsPage] = useState(null);
+  const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
+
+  const API = process.env.REACT_APP_BACKEND_URL;
+
+  useEffect(() => {
+    // Fetch CMS page data by slug
+    const slug = seoUrls?.[language] || seoUrls?.fr || seoUrls?.en;
+    if (slug) {
+      const cleanSlug = slug.startsWith('/') ? slug.slice(1) : slug;
+      fetch(`${API}/api/public/pages/by-slug/${cleanSlug}`).then(r => r.json()).then(d => {
+        if (d && d.id) setCmsPage(d);
+      }).catch(() => {});
+    }
+    // Fetch CMS trust blocks
+    fetch(`${API}/api/public/trust-blocks`).then(r => r.json()).then(setCmsTrustBlocks).catch(() => {});
+  }, [API, language, seoUrls]);
 
   const c = content[language] || content.en;
   const tr = trustLabels[language] || trustLabels.en;
   const revs = reviewsData[language] || reviewsData.en;
+
+  // CMS overrides for SEO fields
+  const seoTitle = (cmsPage?.seo?.title?.[language]) || c.title;
+  const seoDesc = (cmsPage?.seo?.meta_description?.[language]) || c.description;
+  const heroTitle = (cmsPage?.seo?.h1?.[language]) || c.title;
+  const heroSubtitle = (cmsPage?.seo?.h2?.[language]) || c.subtitle;
+  const introText = (cmsPage?.intro?.[language]) || c.description;
+  const mainContent = (cmsPage?.main_content?.[language]) || c.description2;
 
   if (!formData.pickup && c.defaultPickup) {
     setFormData(prev => ({ ...prev, pickup: c.defaultPickup }));
@@ -95,8 +120,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="city-transfer-page">
       <SEO
-        title={c.title}
-        description={c.description}
+        title={seoTitle}
+        description={seoDesc}
         canonical={seoUrls ? `https://zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
         ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
         hreflang={seoUrls ? [
@@ -146,10 +171,10 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
                     </div>
                   </div>
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight" data-testid="city-hero-title">
-                    {c.title}
+                    {heroTitle}
                   </h1>
                   <p className="text-base md:text-lg text-gray-300 mb-6 max-w-xl mx-auto lg:mx-0">
-                    {c.subtitle}
+                    {heroSubtitle}
                   </p>
 
                   {/* Trust Stats - Mobile */}
@@ -278,11 +303,11 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
           </div>
         </section>
 
-        {/* SEO Description */}
+        {/* SEO Description - Dynamic from CMS */}
         <section className="py-10 px-4 bg-[#0f1419]">
           <div className="max-w-4xl mx-auto">
-            <p className="text-base text-gray-300 leading-relaxed">{c.description}</p>
-            {c.description2 && <p className="text-sm text-gray-400 leading-relaxed mt-3">{c.description2}</p>}
+            <p className="text-base text-gray-300 leading-relaxed">{introText}</p>
+            {mainContent && <p className="text-sm text-gray-400 leading-relaxed mt-3">{mainContent}</p>}
           </div>
         </section>
 

@@ -239,19 +239,21 @@ const Home = () => {
                     </div>
                   </div>
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 leading-tight" data-testid="home-hero-title">
-                    {c.heroTitle}
+                    {(cmsHomepage?.title?.[language]) || c.heroTitle}
                   </h1>
                   <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#2ecc71] mb-4">{c.heroAccent}</h2>
-                  <p className="text-base md:text-lg text-gray-300 mb-6 max-w-xl mx-auto lg:mx-0">{c.heroSub}</p>
+                  <p className="text-base md:text-lg text-gray-300 mb-6 max-w-xl mx-auto lg:mx-0">{(cmsHomepage?.subtitle?.[language]) || c.heroSub}</p>
 
-                  {/* Trust Stats */}
+                  {/* Trust Stats - Dynamic from CMS */}
                   <div className="grid grid-cols-4 gap-2 mb-6 max-w-md mx-auto lg:mx-0">
-                    {[
+                    {(cmsHomepage?.stats && cmsHomepage.stats.length > 0 ? cmsHomepage.stats.map((s, i) => ({
+                      val: s.value, lbl: (s.label?.[language]) || s.label?.fr || ''
+                    })) : [
                       { val: c.stats.trips, lbl: c.stats.tripsLabel },
                       { val: c.stats.cities, lbl: c.stats.citiesLabel },
                       { val: c.stats.available, lbl: c.stats.availableLabel },
                       { val: c.stats.rating, lbl: c.stats.ratingLabel },
-                    ].map((s, i) => (
+                    ]).map((s, i) => (
                       <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-2.5 text-center">
                         <div className="text-lg font-bold text-[#2ecc71]">{s.val}</div>
                         <div className="text-[10px] text-gray-400">{s.lbl}</div>

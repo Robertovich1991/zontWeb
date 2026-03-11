@@ -1,37 +1,42 @@
 # Zont.cab - React Clone PRD
 
 ## Original Problem Statement
-Convert the Angular website zont.cab into a React application connected to the existing C# backend. Key requirements:
-- Multilingual support (French, English, Russian, Armenian)
-- SEO-optimized landing pages for airport transfers
-- B2B section, CMS/Admin Panel for content management
-- Dynamic content: admin modifications reflected on public site
+Convert zont.cab into React with CMS, multilingual support (FR/EN/RU/HY), and SEO optimization.
 
 ## What's Been Implemented
 
 ### CMS / Admin Panel - COMPLETE
 - JWT auth, Dashboard, CRUD for Pages/Places/Trust Blocks/FAQ/Homepage/SEO
-- 15 pages, 27 places, 6 trust blocks, 6 FAQs seeded with real data
+- 15 pages, 27 places, 6 trust blocks, 6 FAQs with real site data
 - Credentials: admin@zont.cab / admin123
+- URL: /admin/login
 
 ### CMS-to-Public Connection - COMPLETE (Mar 2026)
-- Public APIs at /api/public/ (no auth): homepage, trust-blocks, faqs, pages, places
-- Home.js trust blocks section dynamically loaded from CMS
-- Home.js CTA section dynamically loaded from CMS
-- **Tested**: Modified trust block in admin -> verified change visible on public site
+All pages dynamically connected to CMS. Admin modifications are reflected on the public site.
 
-### BecomeDriver Page Restyle - COMPLETE (Mar 2026)
-- Restyled with dark theme (#1a2332) matching other pages
-- Link removed from Header, added to Footer
+**Connected pages and sections:**
+- **Homepage**: Hero title, subtitle, stats, Trust Blocks section, CTA
+- **All 15 city/airport pages** (Nice, CDG, Orly, Beauvais, Paris Train Stations, Monaco, Cannes, Berlin, Munich, Rome, Milan, Alicante, Barcelona, Yerevan, Paris Airport Transfer): SEO title, meta description, H1, H2, intro text, main content
+- **Trust Blocks**: Displayed on Homepage from CMS
+- **Public APIs** at /api/public/ (no auth required): homepage, trust-blocks, faqs, pages, places, pages/by-slug/{slug}
+
+**How it works:**
+1. Each city page (`CityTransferPage.js`) fetches CMS data by its slug via `/api/public/pages/by-slug/`
+2. CMS fields override: SEO title, meta description, H1, H2, intro paragraph, main content paragraph
+3. If CMS has no data for a field, it falls back to the static content in the React component
+4. Trust blocks on homepage are fetched from `/api/public/trust-blocks`
+5. Homepage hero uses CMS homepage config for title, subtitle, stats
+
+### BecomeDriver Page - COMPLETE (Mar 2026)
+- Restyled with dark theme, link moved from Header to Footer
 
 ### Other Complete Features
 - Multilingual (FR/EN/RU/HY), Technical SEO, B2B Section, Static Pages
 
 ## Backlog
-- **P1**: Connect remaining pages to CMS (city pages, homepage hero, reviews)
 - **P2**: Connect to real C# backend (blocked on API documentation)
-- **P3**: Refactor CityTransferPage.js
+- **P3**: Refactor CityTransferPage.js into smaller components
 
-## Admin Panel Access
-- URL: /admin/login
-- Credentials: admin@zont.cab / admin123
+## Mocked Features
+- Main booking flow (search, results, payment) is mocked
+- B2B lead generation is REAL (connected to MongoDB)
