@@ -96,5 +96,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 55, luxury: 80, minivan: 110, minibus: 165 };
 
-const MunichTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} />;
+const seoUrls = { en: '/munich-airport-transfer', fr: '/transfert-aeroport-munich', ru: '/taksi-iz-aeroporta-munhen' };
+const MunichTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default MunichTransfer;

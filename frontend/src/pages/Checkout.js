@@ -4,6 +4,7 @@ import { useBooking } from '@/context/BookingContext';
 import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { useToast } from '@/hooks/use-toast';
 import { CreditCard, Calendar } from 'lucide-react';
 
@@ -62,6 +63,7 @@ const Checkout = () => {
   if (!searchData || !selectedCar) {
     return (
       <div className="min-h-screen flex flex-col bg-[#1a2332]">
+        <SEO title="Checkout - Zont" description="Complete your airport transfer booking." noindex={true} />
         <Header />
         <main className="flex-1 pt-16 flex items-center justify-center">
           <div className="text-center">
@@ -81,6 +83,7 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
+      <SEO title="Checkout - Zont" description="Complete your airport transfer booking." noindex={true} />
       <Header />
 
       <main className="flex-1 pt-16">

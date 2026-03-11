@@ -39,7 +39,7 @@ const reviewsData = {
   ],
 };
 
-const CityTransferPage = ({ content, vehicles: vehiclesPrices }) => {
+const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const navigate = useNavigate();
   const { startBooking } = useBooking();
   const { language } = useLanguage();
@@ -91,7 +91,29 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices }) => {
       <SEO
         title={c.title}
         description={c.description}
-        jsonLd={{ "@context": "https://schema.org", "@type": "Service", "name": c.title, "description": c.description, "provider": { "@type": "Organization", "name": "Zont", "url": "https://zont.cab" }, "serviceType": "Airport Transfer" }}
+        canonical={seoUrls ? `https://zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
+        ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
+        hreflang={seoUrls ? [
+          { lang: 'en', href: `https://zont.cab${seoUrls.en}` },
+          { lang: 'fr', href: `https://zont.cab${seoUrls.fr}` },
+          { lang: 'ru', href: `https://zont.cab${seoUrls.ru}` },
+        ] : undefined}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "name": c.title,
+          "description": c.description,
+          "provider": { "@type": "Organization", "name": "Zont", "url": "https://zont.cab" },
+          "serviceType": "Airport Transfer",
+          "areaServed": { "@type": "Place", "name": c.title.split(' - ')[0] },
+          "offers": vehiclesPrices ? {
+            "@type": "AggregateOffer",
+            "priceCurrency": "EUR",
+            "lowPrice": Math.min(...Object.values(vehiclesPrices)),
+            "highPrice": Math.max(...Object.values(vehiclesPrices)),
+          } : undefined,
+          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "10000", "bestRating": "5" }
+        }}
       />
       <Header />
       <main className="flex-1 pt-16">

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { CheckCircle, Calendar, MapPin } from 'lucide-react';
 
 const BookingConfirmation = () => {
@@ -17,6 +18,7 @@ const BookingConfirmation = () => {
   if (!bookingDetails) {
     return (
       <div className="min-h-screen flex flex-col bg-[#1a2332]">
+        <SEO title="Booking Confirmed - Zont" description="Your airport transfer is confirmed." noindex={true} />
         <Header />
         <main className="flex-1 pt-16 flex items-center justify-center">
           <div className="text-center">
@@ -36,6 +38,7 @@ const BookingConfirmation = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
+      <SEO title="Booking Confirmed - Zont" description="Your airport transfer is confirmed." noindex={true} />
       <Header />
 
       <main className="flex-1 pt-16">

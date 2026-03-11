@@ -96,5 +96,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 130, minibus: 190 };
 
-const CDGTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} />;
+const seoUrls = { en: '/cdg-airport-transfer', fr: '/transfert-aeroport-cdg', ru: '/taksi-iz-aeroporta-cdg' };
+const CDGTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default CDGTransfer;

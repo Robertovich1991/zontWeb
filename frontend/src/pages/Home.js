@@ -149,8 +149,36 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="home-page">
-      <SEO title={c.seoTitle} description={c.seoDesc} canonical="https://zont.cab"
-        jsonLd={{ "@context": "https://schema.org", "@type": "Organization", "name": "Zont", "url": "https://zont.cab", "description": c.seoDesc, "serviceType": "Airport Transfer", "areaServed": "Europe" }} />
+      <SEO
+        title={c.seoTitle}
+        description={c.seoDesc}
+        canonical="https://zont.cab"
+        ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
+        hreflang={[
+          { lang: 'fr', href: 'https://zont.cab/' },
+          { lang: 'en', href: 'https://zont.cab/' },
+          { lang: 'ru', href: 'https://zont.cab/' },
+        ]}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Zont",
+            "url": "https://zont.cab",
+            "logo": "https://zont.cab/logo.png",
+            "description": c.seoDesc,
+            "contactPoint": { "@type": "ContactPoint", "telephone": "+33-1-23-45-67-89", "contactType": "customer service", "availableLanguage": ["French", "English", "Russian"] },
+            "sameAs": ["https://apps.apple.com/am/app/zont-cab/id1468482270", "https://play.google.com/store/apps/details?id=com.zont.rider"]
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Zont",
+            "url": "https://zont.cab",
+            "potentialAction": { "@type": "SearchAction", "target": "https://zont.cab/countries?q={search_term_string}", "query-input": "required name=search_term_string" }
+          }
+        ]}
+      />
       <Header />
 
       <main className="flex-1 pt-16">

@@ -4,6 +4,7 @@ import { useBooking } from '@/context/BookingContext';
 import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { Users, Briefcase } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
 
@@ -58,6 +59,7 @@ const CarSelection = () => {
   if (!searchData) {
     return (
       <div className="min-h-screen flex flex-col bg-[#1a2332]">
+        <SEO title="Select Your Vehicle - Zont" description="Choose your vehicle for your airport transfer." noindex={true} />
         <Header />
         <main className="flex-1 pt-16 flex items-center justify-center">
           <div className="text-center">
@@ -77,6 +79,7 @@ const CarSelection = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
+      <SEO title="Select Your Vehicle - Zont" description="Choose your vehicle for your airport transfer. Premium sedan, luxury sedan, minivan or minibus." noindex={true} />
       <Header />
 
       <main className="flex-1 pt-16">

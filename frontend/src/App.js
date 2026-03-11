@@ -121,8 +121,6 @@ function App() {
                   <Route path="/become-client" element={<BecomeClient />} />
                   <Route path="/help" element={<Help />} />
                   <Route path="/countries" element={<Countries />} />
-                  <Route path="/how-it-works" element={<BecomeClient />} />
-                  <Route path="/hotels-b2b-tours-operators" element={<Help />} />
                 </Routes>
               </Suspense>
             </BrowserRouter>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { driverService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Car, Clock, DollarSign, Users } from 'lucide-react';
@@ -85,6 +86,12 @@ const BecomeDriver = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
+      <SEO
+        title="Become a Driver - Join Zont | Chauffeur Prive"
+        description="Join Zont as a professional driver. Flexible hours, competitive rates, work with your own car. Apply now to start earning with Zont airport transfer service."
+        canonical="https://zont.cab/become-driver"
+        noindex={false}
+      />
       <Header />
 
       {/* Hero Section */}

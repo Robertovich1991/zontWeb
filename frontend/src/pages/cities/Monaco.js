@@ -96,5 +96,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 120, minibus: 180 };
 
-const MonacoTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} />;
+const seoUrls = { en: '/monaco-airport-transfer', fr: '/transfert-aeroport-monaco', ru: '/taksi-iz-aeroporta-monako' };
+const MonacoTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default MonacoTransfer;

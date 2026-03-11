@@ -96,5 +96,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 25, luxury: 45, minivan: 60, minibus: 90 };
 
-const ParisTrainStationTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} />;
+const seoUrls = { en: '/paris-train-station-transfer', fr: '/transfert-gare-paris', ru: '/transfer-vokzal-parizh' };
+const ParisTrainStationTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default ParisTrainStationTransfer;

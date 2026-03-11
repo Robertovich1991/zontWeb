@@ -96,5 +96,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 39, luxury: 60, minivan: 85, minibus: 140 };
 
-const BarcelonaTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} />;
+const seoUrls = { en: '/barcelona-airport-transfer', fr: '/transfert-aeroport-barcelone', ru: '/taksi-iz-aeroporta-barselona' };
+const BarcelonaTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default BarcelonaTransfer;

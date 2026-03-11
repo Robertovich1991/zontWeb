@@ -96,5 +96,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 50, luxury: 75, minivan: 100, minibus: 160 };
 
-const RomeTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} />;
+const seoUrls = { en: '/rome-airport-transfer', fr: '/transfert-aeroport-rome', ru: '/taksi-iz-aeroporta-rim' };
+const RomeTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default RomeTransfer;

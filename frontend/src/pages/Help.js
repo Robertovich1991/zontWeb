@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { Mail, Phone, MapPin, MessageCircle, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -84,6 +85,20 @@ const Help = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="Help & Support - Contact Zont | FAQ"
+        description="Need help? Contact Zont support 24/7. Find answers to common questions about bookings, payments, cancellations. Call, email or live chat."
+        canonical="https://zont.cab/help"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": faqs.map(faq => ({
+            "@type": "Question",
+            "name": faq.question,
+            "acceptedAnswer": { "@type": "Answer", "text": faq.answer }
+          }))
+        }}
+      />
       <Header />
 
       {/* Hero Section */}

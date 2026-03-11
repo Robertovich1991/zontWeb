@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 import { Smartphone, Search, MapPin, CheckCircle } from 'lucide-react';
 
 const BecomeClient = () => {
@@ -38,6 +39,12 @@ const BecomeClient = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO
+        title="How It Works - Book Airport Transfer | Zont"
+        description="Learn how to book your airport transfer with Zont in 4 simple steps. Download the app, enter destination, meet your driver and enjoy premium ride."
+        canonical="https://zont.cab/become-client"
+        noindex={false}
+      />
       <Header />
 
       {/* Hero Section */}

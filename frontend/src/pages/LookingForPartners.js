@@ -2,12 +2,18 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/SEO';
 
 const LookingForPartners = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
+      <SEO
+        title="Looking for Partners - Drive with Zont"
+        description="Zont needs partners like you. Join our network of professional drivers. Quick and easy signup. Start earning with airport transfers across Europe."
+        canonical="https://zont.cab/looking-for-partners"
+      />
       <Header />
 
       <main className="flex-1 pt-16 flex items-center justify-center px-4">

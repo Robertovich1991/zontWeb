@@ -96,5 +96,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 30, luxury: 50, minivan: 75, minibus: 120 };
 
-const AlicanteTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} />;
+const seoUrls = { en: '/alicante-airport-transfer', fr: '/transfert-aeroport-alicante', ru: '/taksi-iz-aeroporta-alikante' };
+const AlicanteTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default AlicanteTransfer;

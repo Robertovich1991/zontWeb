@@ -96,5 +96,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 15, luxury: 25, minivan: 35, minibus: 55 };
 
-const YerevanTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} />;
+const seoUrls = { en: '/yerevan-airport-transfer', fr: '/transfert-aeroport-erevan', ru: '/taksi-iz-aeroporta-erevan' };
+const YerevanTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default YerevanTransfer;
