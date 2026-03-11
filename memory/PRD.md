@@ -27,13 +27,28 @@ Convert the existing Angular website zont.cab into a React frontend. The new sit
   - Orly Airport Transfer
   - Beauvais Airport Transfer
   - Paris Train Station Transfer (Gare du Nord, Lyon, Montparnasse, etc.)
+- **Mobile-First Conversion Redesign** (all city pages):
+  - Booking form above the fold on mobile (white card, clear CTA)
+  - Professional photos (Mercedes sedan, interior, airport)
+  - Trust elements: 50K+ trips, 24/7 available, 4.9/5 rating
+  - Security badges: Visa, Mastercard, PayPal, Apple Pay
+  - Verified Drivers, Flight Tracking, Free Cancellation badges
+  - Customer reviews section (3 reviews with star ratings)
+  - Sticky BOOK NOW button on mobile
+  - Photo gallery section with 4 professional images
+- **SEO Optimizations**:
+  - Custom SEO component (React 19 compatible, no react-helmet)
+  - Dynamic page titles and meta descriptions per page/language
+  - JSON-LD structured data (Schema.org) on all pages
+  - Open Graph tags (og:title, og:description, og:locale)
+  - Lazy loading for all routes except Home (code splitting)
+  - Non-render-blocking Google Fonts loading
+  - Proper HTML lang attribute per language
+- **Accessibility** improvements: aria-labels, roles, htmlFor/id on forms
 - **Reusable CityTransferPage component** for consistent city pages
-- **Vehicle RESERVER button** scrolls to booking form (not navigates away)
-- **Selected vehicle banner** shows above booking form after selection
-- **Countries page** listing all 16+ destinations grouped by country with links
+- **Vehicle RESERVER button** scrolls to booking form with selected vehicle banner
+- **Countries page** listing all 16+ destinations grouped by country
 - **All routes** registered in EN/FR/RU URL variants
-- **City data model** in `/frontend/src/data/cities.js`
-- **Booking flow**: form → car selection → checkout → confirmation
 
 ### Architecture
 - Frontend: React + Tailwind CSS + react-router-dom
