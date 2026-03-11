@@ -8,55 +8,45 @@ Convert the existing Angular website zont.cab into a React frontend. The new sit
 - Multilingual support: French, English, Russian
 - SEO landing pages for airport transfers in key cities
 - Connection to existing C# backend (future)
+- Professional B2B section for partnerships and transport solutions
 
 ## What's Been Implemented
 
-### Completed (Feb 2026)
-- **Home Page** redesigned mobile-first with booking form above the fold, photos, trust elements, popular destinations, reviews
-- **Paris Airport Transfer** converted to CityTransferPage component (same mobile-optimized design as all cities)
-- **Header/Footer** with navigation, language switcher (FR/EN/RU)
-- **Multilingual framework** using i18next (Home + Footer translated)
-- **15+ City SEO Landing Pages** (all tested and working):
-  - Paris CDG, Orly, Beauvais, Paris Train Station
-  - Nice, Monaco, Cannes (France/Riviera)
-  - Berlin, Munich (Germany)
-  - Rome, Milan (Italy)
-  - Alicante, Barcelona (Spain)
-  - Yerevan (Armenia)
-- **Mobile-First Conversion Redesign** (all city pages)
-- **Full Technical SEO Audit (March 2026):**
-  - Enhanced SEO component with: title, description, canonical, hreflang, og:url, og:image, og:type, og:site_name, robots meta, JSON-LD
-  - Unique `<title>` and `<meta description>` on every page (verified)
-  - Single `<h1>` per page (verified on all pages)
-  - Canonical URLs set on all public pages
-  - hreflang tags (en, fr, ru, x-default) on all multilingual city pages
-  - `robots.txt` created - blocks utility pages, references sitemap
-  - `sitemap.xml` created with all pages + hreflang annotations
-  - JSON-LD structured data: Organization+WebSite (Home), Service with AggregateOffer+Rating (city pages), FAQPage (Help)
-  - OG tags complete: title, description, type, url, image, locale, site_name
-  - noindex on utility pages (car-selection, checkout, booking-confirmation)
-  - Removed duplicate content routes (/how-it-works, /hotels-b2b-tours-operators)
-  - 404 catch-all route with noindex
-  - SEO testing agent: 44/44 checks passed (98% success rate)
+### Completed
+- **Home Page** redesigned mobile-first with booking form, photos, trust elements, reviews
+- **15+ City SEO Landing Pages** (CDG, Orly, Beauvais, Nice, Monaco, Cannes, Berlin, Munich, Rome, Milan, Alicante, Barcelona, Yerevan, Paris Train Station)
+- **Multilingual framework** (i18next) with FR/EN/RU content
+- **Full Technical SEO Audit** (March 2026): unique titles, meta descriptions, canonicals, hreflang, sitemap.xml, robots.txt, JSON-LD, OG tags, 404 page
+- **B2B Professional Section** (March 2026):
+  - Main page: /partners - Premium Transport Solutions overview with links to all 8 targets
+  - /travel-agencies - Airport transfer partner for travel agencies
+  - /tourism-agencies - Private transport for tourism professionals
+  - /hotels - Chauffeur and transfer for hotels
+  - /concierge-services - VIP transport for concierge professionals
+  - /event-agencies - Transport for events and corporate gatherings
+  - /corporate-clients - Executive transfers and corporate chauffeur
+  - /business-partners - Strategic B2B partnerships, white-label, API, referral
+  - /tour-operators - Private transfers for organized tours
+  - ALL pages have: unique SEO title/H1/description, 3 languages (FR/EN/RU), canonical, hreflang, JSON-LD, OG tags, B2B contact form, internal linking, responsive design
+  - Contact form on each page (MOCKED - not connected to backend)
+  - B2B navigation added to header
+  - All pages added to sitemap.xml
 
 ### Architecture
 - Frontend: React 19 + Tailwind CSS + react-router-dom
 - i18n: i18next + react-i18next
-- SEO: Custom SEO.js component (vanilla DOM manipulation, React 19 compatible)
-- Backend: FastAPI (unused, placeholder)
-- No database connected yet
+- SEO: Custom SEO.js component (vanilla DOM manipulation)
+- Backend: FastAPI (placeholder, not connected)
 
 ## Prioritized Backlog
 
-### P0 (Critical)
-- None currently blocking
-
 ### P1 (High)
 - Translate remaining pages (BecomeDriver, BecomeClient, Help, LookingForPartners) to FR/EN/RU
+- Connect B2B contact forms to backend for lead generation
 
 ### P2 (Medium)
 - Connect to C# backend (bookings, auth, dynamic data)
 
 ### P3 (Low)
-- Break down CityTransferPage.js into smaller sub-components
-- Add Cote d'Azur / French Riviera landing page
+- Break down CityTransferPage.js into sub-components
+- Add more European city landing pages
