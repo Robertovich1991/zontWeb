@@ -6,87 +6,69 @@ import { useLanguage } from '@/context/LanguageContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { Users, Briefcase, Car, Shield, Clock, Plane, ChevronRight, CheckCircle, ArrowRight, MapPin } from 'lucide-react';
+import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
 
 const labels = {
   en: {
     seoTitle: 'Select Your Vehicle - Zont Airport Transfer',
-    seoDesc: 'Choose your vehicle for your airport transfer.',
     title: 'Choose Your Vehicle',
-    subtitle: 'Select the vehicle that best suits your needs',
-    step1: 'Vehicle', step2: 'Login', step3: 'Checkout',
-    passengers: 'passengers', luggage: 'luggage',
-    vat: 'All prices include VAT and tolls',
-    choose: 'Choose',
+    step1: 'Vehicle', step2: 'Details', step3: 'Confirmation',
+    passengers: '', luggage: '',
+    minFare: 'Min fare',
+    preorder: 'Pre-order',
     noData: 'No search data found',
     goBack: 'Start a New Search',
-    routeFrom: 'From', routeTo: 'To',
-    features: ['Meet & Greet', 'Flight Tracking', 'Free Cancellation 24h', 'Fixed Price'],
-    premium: 'Premium Sedan', premiumDesc: 'Mercedes E-Class or similar. Comfortable sedan for up to 4 passengers.',
-    luxury: 'Luxury Sedan', luxuryDesc: 'Mercedes S-Class or similar. Premium luxury experience.',
-    van: 'Business Van', vanDesc: 'Mercedes V-Class or similar. Spacious van for groups.',
-    minibus: 'Minibus', minibusDesc: 'Comfortable minibus for larger groups up to 8 passengers.',
-    popular: 'Most Popular',
+    from: 'From', to: 'To',
   },
   fr: {
-    seoTitle: 'Choisir Votre Vehicule - Zont Transfert Aeroport',
-    seoDesc: 'Choisissez votre vehicule pour votre transfert aeroport.',
+    seoTitle: 'Choisir Votre Vehicule - Zont Transfert',
     title: 'Choisissez Votre Vehicule',
-    subtitle: 'Selectionnez le vehicule qui correspond le mieux a vos besoins',
-    step1: 'Vehicule', step2: 'Connexion', step3: 'Paiement',
-    passengers: 'passagers', luggage: 'bagages',
-    vat: 'Tous les prix incluent la TVA et les peages',
-    choose: 'Choisir',
+    step1: 'Vehicule', step2: 'Details', step3: 'Confirmation',
+    passengers: '', luggage: '',
+    minFare: 'Prix min',
+    preorder: 'Pre-order',
     noData: 'Aucune recherche trouvee',
     goBack: 'Nouvelle Recherche',
-    routeFrom: 'De', routeTo: 'Vers',
-    features: ['Accueil Personnalise', 'Suivi de Vol', 'Annulation Gratuite 24h', 'Prix Fixe'],
-    premium: 'Berline Premium', premiumDesc: 'Mercedes Classe E ou similaire. Berline confortable pour 4 passagers.',
-    luxury: 'Berline de Luxe', luxuryDesc: 'Mercedes Classe S ou similaire. Experience luxe premium.',
-    van: 'Van Business', vanDesc: 'Mercedes Classe V ou similaire. Van spacieux pour les groupes.',
-    minibus: 'Minibus', minibusDesc: 'Minibus confortable pour les grands groupes jusqu\'a 8 passagers.',
-    popular: 'Le Plus Populaire',
+    from: 'De', to: 'Vers',
   },
   ru: {
     seoTitle: 'Выберите Автомобиль - Zont Трансфер',
-    seoDesc: 'Выберите автомобиль для трансфера из аэропорта.',
     title: 'Выберите Автомобиль',
-    subtitle: 'Выберите автомобиль, подходящий вашим потребностям',
-    step1: 'Автомобиль', step2: 'Вход', step3: 'Оплата',
-    passengers: 'пассажиров', luggage: 'багаж',
-    vat: 'Все цены включают НДС и дорожные сборы',
-    choose: 'Выбрать',
-    noData: 'Данные поиска не найдены',
+    step1: 'Авто', step2: 'Детали', step3: 'Подтверждение',
+    passengers: '', luggage: '',
+    minFare: 'Мин. цена',
+    preorder: 'Пре-ордер',
+    noData: 'Данные не найдены',
     goBack: 'Новый Поиск',
-    routeFrom: 'Откуда', routeTo: 'Куда',
-    features: ['Встреча в аэропорту', 'Отслеживание рейса', 'Бесплатная отмена 24ч', 'Фикс. цена'],
-    premium: 'Премиум Седан', premiumDesc: 'Mercedes E-Class или аналог. Комфортный седан на 4 пассажира.',
-    luxury: 'Люкс Седан', luxuryDesc: 'Mercedes S-Class или аналог. Премиум люкс опыт.',
-    van: 'Бизнес Вэн', vanDesc: 'Mercedes V-Class или аналог. Просторный вэн для групп.',
-    minibus: 'Минибус', minibusDesc: 'Комфортный минибус для больших групп до 8 пассажиров.',
-    popular: 'Самый Популярный',
+    from: 'Откуда', to: 'Куда',
   },
   hy: {
     seoTitle: 'Delays delays - Zont delays',
-    seoDesc: 'Delays delays delays delays.',
-    title: 'Delays delays delays delays',
-    subtitle: 'Delays delays delays delays delays delays',
+    title: 'Delays delays delays',
     step1: 'Delays', step2: 'Delays', step3: 'Delays',
-    passengers: 'delays', luggage: 'delays',
-    vat: 'Delays delays delays delays delays',
-    choose: 'Delays',
-    noData: 'Delays delays delays delays',
-    goBack: 'Delays delays delays',
-    routeFrom: 'Delays', routeTo: 'Delays',
-    features: ['Delays delays', 'Delays delays', 'Delays delays 24delays', 'Delays delays'],
-    premium: 'Delays Delays', premiumDesc: 'Mercedes E-Class delays delays. Delays delays delays delays 4 delays.',
-    luxury: 'Delays Delays', luxuryDesc: 'Mercedes S-Class delays delays. Delays delays delays.',
-    van: 'Delays Delays', vanDesc: 'Mercedes V-Class delays delays. Delays delays delays delays.',
-    minibus: 'Delays', minibusDesc: 'Delays delays delays delays delays 8 delays.',
-    popular: 'Delays Delays Delays',
+    passengers: '', luggage: '',
+    minFare: 'Delays delays',
+    preorder: 'Pre-order',
+    noData: 'Delays delays',
+    goBack: 'Delays delays',
+    from: 'Delays', to: 'Delays',
   },
 };
+
+const VEHICLE_IMAGES = {
+  premium: 'https://static.prod-images.emergentagent.com/jobs/afb2332d-193f-433b-a93c-c37f4820b183/images/bb1a1b7fe2c71db2d7a306a5f75eb9ac1f7c5a5d1cdde133b752f19cb03438ab.png',
+  luxury: 'https://static.prod-images.emergentagent.com/jobs/afb2332d-193f-433b-a93c-c37f4820b183/images/f2261d5fd73800ca13948b063ce7a48b4d552493be6c554517974f6216740623.png',
+  sedan: 'https://static.prod-images.emergentagent.com/jobs/afb2332d-193f-433b-a93c-c37f4820b183/images/f4c843b8a5604ed350353dc428dd7bd4e326faab679f483dc4bb4ecb59392fcc.png',
+  minibus: 'https://static.prod-images.emergentagent.com/jobs/afb2332d-193f-433b-a93c-c37f4820b183/images/0c55d93337b26fdf7b01e5ac5a7dae05358b3b35731ead00951340e996af34ae.png',
+};
+
+const carClasses = [
+  { id: 1, key: 'premium', nameEn: 'Premium', nameFr: 'Premium', nameRu: 'Премиум', sub: 'Premium', passengers: 4, luggage: 4, price: 65, image: VEHICLE_IMAGES.premium },
+  { id: 2, key: 'luxury', nameEn: 'Luxury Sedan', nameFr: 'Berline de Luxe', nameRu: 'Люкс Седан', sub: 'Luxury Sedan', passengers: 3, luggage: 3, price: 95, image: VEHICLE_IMAGES.luxury },
+  { id: 3, key: 'sedan', nameEn: 'Business Van', nameFr: 'Van Business', nameRu: 'Бизнес Вэн', sub: 'Business Van', passengers: 6, luggage: 6, price: 120, image: VEHICLE_IMAGES.sedan },
+  { id: 4, key: 'minibus', nameEn: 'Minibus', nameFr: 'Minibus', nameRu: 'Минибус', sub: 'Minibus', passengers: 8, luggage: 10, price: 160, image: VEHICLE_IMAGES.minibus },
+];
 
 const CarSelection = () => {
   const navigate = useNavigate();
@@ -98,15 +80,14 @@ const CarSelection = () => {
 
   const c = labels[language] || labels.en;
 
-  const carClasses = [
-    { id: 1, name: c.premium, desc: c.premiumDesc, passengers: 4, luggage: 4, price: 88, popular: false },
-    { id: 2, name: c.luxury, desc: c.luxuryDesc, passengers: 3, luggage: 3, price: 123, popular: true },
-    { id: 3, name: c.van, desc: c.vanDesc, passengers: 6, luggage: 6, price: 156, popular: false },
-    { id: 4, name: c.minibus, desc: c.minibusDesc, passengers: 8, luggage: 8, price: 198, popular: false },
-  ];
+  const getCarName = (car) => {
+    if (language === 'fr') return car.nameFr;
+    if (language === 'ru') return car.nameRu;
+    return car.nameEn;
+  };
 
   const handleSelectCar = (car) => {
-    selectCar(car);
+    selectCar({ ...car, name: getCarName(car) });
     if (isAuthenticated) {
       navigate('/checkout');
     } else {
@@ -115,18 +96,11 @@ const CarSelection = () => {
     }
   };
 
-  const featureIcons = [
-    <Plane className="w-4 h-4" />,
-    <Clock className="w-4 h-4" />,
-    <Shield className="w-4 h-4" />,
-    <CheckCircle className="w-4 h-4" />,
-  ];
-
   // Empty state
   if (!searchData) {
     return (
       <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="car-selection-empty">
-        <SEO title={c.seoTitle} description={c.seoDesc} noindex={true} />
+        <SEO title={c.seoTitle} noindex={true} />
         <Header />
         <main className="flex-1 pt-16 flex items-center justify-center px-4">
           <div className="text-center max-w-md">
@@ -134,14 +108,8 @@ const CarSelection = () => {
               <Car className="w-10 h-10 text-[#2ecc71]" />
             </div>
             <p className="text-white text-xl font-semibold mb-2">{c.noData}</p>
-            <p className="text-gray-400 text-sm mb-6">{c.subtitle}</p>
-            <button
-              onClick={() => navigate('/')}
-              className="bg-[#2ecc71] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors inline-flex items-center gap-2"
-              data-testid="go-back-btn"
-            >
-              {c.goBack}
-              <ArrowRight className="w-5 h-5" />
+            <button onClick={() => navigate('/')} className="mt-4 bg-[#2ecc71] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors inline-flex items-center gap-2" data-testid="go-back-btn">
+              {c.goBack} <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         </main>
@@ -152,11 +120,11 @@ const CarSelection = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="car-selection-page">
-      <SEO title={c.seoTitle} description={c.seoDesc} noindex={true} />
+      <SEO title={c.seoTitle} noindex={true} />
       <Header />
 
       <main className="flex-1 pt-16">
-        {/* Progress Steps */}
+        {/* Progress Steps - Dark bar */}
         <div className="bg-[#0f1419] border-b border-white/10">
           <div className="max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-center justify-center gap-2 sm:gap-4">
@@ -164,9 +132,7 @@ const CarSelection = () => {
                 <React.Fragment key={i}>
                   {i > 0 && <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0" />}
                   <div className={`flex items-center gap-2 ${i === 0 ? 'text-[#2ecc71]' : 'text-gray-500'}`}>
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                      i === 0 ? 'bg-[#2ecc71] text-white' : 'bg-white/10 text-gray-500'
-                    }`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${i === 0 ? 'bg-[#2ecc71] text-white' : 'bg-white/10 text-gray-500'}`}>
                       {i + 1}
                     </div>
                     <span className="text-sm font-medium hidden sm:inline">{step}</span>
@@ -178,107 +144,72 @@ const CarSelection = () => {
         </div>
 
         {/* Route Summary */}
-        {searchData && (
-          <div className="bg-[#0f1419]/50 border-b border-white/5">
-            <div className="max-w-4xl mx-auto px-4 py-3">
-              <div className="flex items-center gap-3 text-sm">
-                <MapPin className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
-                <span className="text-gray-400">{c.routeFrom}:</span>
-                <span className="text-white font-medium truncate">{searchData.pickup}</span>
-                <ArrowRight className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                <span className="text-gray-400">{c.routeTo}:</span>
-                <span className="text-white font-medium truncate">{searchData.dropoff}</span>
-              </div>
+        <div className="bg-[#0f1419]/50 border-b border-white/5">
+          <div className="max-w-4xl mx-auto px-4 py-3">
+            <div className="flex items-center gap-3 text-sm">
+              <MapPin className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
+              <span className="text-gray-400">{c.from}:</span>
+              <span className="text-white font-medium truncate">{searchData.pickup}</span>
+              <ArrowRight className="w-4 h-4 text-gray-600 flex-shrink-0" />
+              <span className="text-gray-400">{c.to}:</span>
+              <span className="text-white font-medium truncate">{searchData.dropoff}</span>
             </div>
           </div>
-        )}
-
-        {/* Title */}
-        <div className="max-w-4xl mx-auto px-4 pt-8 pb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2" data-testid="car-selection-title">{c.title}</h1>
-          <p className="text-gray-400 text-sm">{c.subtitle}</p>
         </div>
 
-        {/* Features Strip */}
-        <div className="max-w-4xl mx-auto px-4 pb-6">
-          <div className="flex flex-wrap gap-3">
-            {c.features.map((feat, i) => (
-              <div key={i} className="flex items-center gap-1.5 text-xs text-gray-400 bg-white/5 px-3 py-1.5 rounded-full">
-                <span className="text-[#2ecc71]">{featureIcons[i]}</span>
-                {feat}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Car Cards */}
-        <div className="max-w-4xl mx-auto px-4 pb-12">
-          <div className="space-y-4">
-            {carClasses.map((car) => (
+        {/* Vehicle Cards - WHITE STYLE */}
+        <div className="max-w-3xl mx-auto px-4 py-6">
+          <div className="bg-white rounded-2xl overflow-hidden shadow-xl">
+            {carClasses.map((car, idx) => (
               <div
                 key={car.id}
-                className={`relative bg-white/5 border rounded-xl overflow-hidden hover:bg-white/[0.07] transition-all ${
-                  car.popular ? 'border-[#2ecc71]/50 ring-1 ring-[#2ecc71]/20' : 'border-white/10'
-                }`}
+                onClick={() => handleSelectCar(car)}
+                className={`cursor-pointer hover:bg-gray-50 transition-colors ${idx > 0 ? 'border-t border-gray-200' : ''}`}
                 data-testid={`car-card-${car.id}`}
               >
-                {/* Popular Badge */}
-                {car.popular && (
-                  <div className="absolute top-0 right-0 bg-[#2ecc71] text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                    {c.popular}
+                <div className="p-4 sm:p-5">
+                  {/* Top row: Name + Pre-order | Passengers + Luggage */}
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900">{getCarName(car)}</h3>
+                      <span className="text-[#2ecc71] text-sm font-semibold">{c.preorder}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-gray-500 text-sm flex-shrink-0">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4" />
+                        <span className="font-medium">{car.passengers}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Briefcase className="w-4 h-4" />
+                        <span className="font-medium">{car.luggage}</span>
+                      </div>
+                    </div>
                   </div>
-                )}
 
-                <div className="p-5 sm:p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                    {/* Car Icon */}
-                    <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Car className="w-7 h-7 text-[#2ecc71]" />
+                  {/* Subtitle */}
+                  <p className="text-gray-400 text-sm mb-2">{car.sub}</p>
+
+                  {/* Image + Price row */}
+                  <div className="flex items-end justify-between">
+                    <div className="w-[55%] sm:w-[50%]">
+                      <img
+                        src={car.image}
+                        alt={getCarName(car)}
+                        className="w-full h-auto object-contain"
+                        loading="lazy"
+                      />
                     </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xl font-bold text-white mb-1">{car.name}</h3>
-                      <p className="text-sm text-gray-400 mb-3 line-clamp-2">{car.desc}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-300">
-                        <div className="flex items-center gap-1.5">
-                          <Users className="w-4 h-4 text-gray-500" />
-                          <span>{car.passengers} {c.passengers}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Briefcase className="w-4 h-4 text-gray-500" />
-                          <span>{car.luggage} {c.luggage}</span>
-                        </div>
+                    <div className="text-right pb-2">
+                      <div className="text-3xl sm:text-4xl font-bold text-gray-900">
+                        {car.price} <span className="text-xl">&euro;</span>
                       </div>
-                    </div>
-
-                    {/* Price + Button */}
-                    <div className="flex sm:flex-col items-center sm:items-end gap-4 sm:gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-white/10">
-                      <div className="sm:text-right">
-                        <div className="text-3xl sm:text-4xl font-bold text-white">{car.price}<span className="text-lg text-gray-400 ml-1">&euro;</span></div>
-                        <p className="text-xs text-gray-500 hidden sm:block">{c.vat}</p>
-                      </div>
-                      <button
-                        onClick={() => handleSelectCar(car)}
-                        className={`px-6 py-3 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 whitespace-nowrap ${
-                          car.popular
-                            ? 'bg-[#2ecc71] text-white hover:bg-[#27ae60]'
-                            : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
-                        }`}
-                        data-testid={`choose-car-${car.id}`}
-                      >
-                        {c.choose}
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
+                      <p className="text-gray-400 text-sm">{c.minFare}</p>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* VAT Note Mobile */}
-          <p className="text-xs text-gray-500 text-center mt-4 sm:hidden">{c.vat}</p>
         </div>
       </main>
 
