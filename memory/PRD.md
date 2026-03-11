@@ -12,7 +12,8 @@ Convert the existing Angular website zont.cab into a React frontend. The new sit
 ## What's Been Implemented
 
 ### Completed (Feb 2026)
-- **Home page** with full layout matching zont.cab
+- **Home Page** redesigned mobile-first with booking form above the fold, photos, trust elements, popular destinations, reviews
+- **Paris Airport Transfer** converted to CityTransferPage component (same mobile-optimized design as all cities)
 - **Header/Footer** with navigation, language switcher (FR/EN/RU)
 - **Multilingual framework** using i18next (Home + Footer translated)
 - **Paris Airport Transfer** SEO landing page with booking form
