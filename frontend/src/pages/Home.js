@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -155,6 +155,15 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const bookingRef = useRef(null);
   const [formData, setFormData] = useState({ pickup: '', dropoff: '', date: '', time: '' });
+  const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
+  const [cmsHomepage, setCmsHomepage] = useState(null);
+
+  const API = process.env.REACT_APP_BACKEND_URL;
+
+  useEffect(() => {
+    fetch(`${API}/api/public/trust-blocks`).then(r => r.json()).then(setCmsTrustBlocks).catch(() => {});
+    fetch(`${API}/api/public/homepage`).then(r => r.json()).then(setCmsHomepage).catch(() => {});
+  }, [API]);
 
   const c = homeContent[language] || homeContent.en;
 
@@ -365,17 +374,26 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Why Trust */}
+        {/* Why Trust - Dynamic from CMS */}
         <section className="py-12 md:py-20 px-4 bg-[#0f1419]">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">{c.trustTitle}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {[
+              {(cmsTrustBlocks && cmsTrustBlocks.length > 0 ? cmsTrustBlocks.slice(0, 4).map((block, i) => ({
+                icon: block.icon === 'plane' ? <Plane className="w-10 h-10 text-[#2ecc71]" /> :
+                      block.icon === 'clock' ? <Clock className="w-10 h-10 text-[#2ecc71]" /> :
+                      block.icon === 'star' ? <Shield className="w-10 h-10 text-[#2ecc71]" /> :
+                      block.icon === 'shield' ? <CreditCard className="w-10 h-10 text-[#2ecc71]" /> :
+                      block.icon === 'credit-card' ? <CreditCard className="w-10 h-10 text-[#2ecc71]" /> :
+                      <CheckCircle className="w-10 h-10 text-[#2ecc71]" />,
+                t: (block.title && block.title[language]) || block.title?.fr || '',
+                d: (block.text && block.text[language]) || block.text?.fr || '',
+              })) : [
                 { icon: <CheckCircle className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f1Title, d: c.f1Desc },
                 { icon: <Plane className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f2Title, d: c.f2Desc },
                 { icon: <Shield className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f3Title, d: c.f3Desc },
                 { icon: <CreditCard className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f4Title, d: c.f4Desc },
-              ].map((f, i) => (
+              ]).map((f, i) => (
                 <div key={i} className="bg-[#1a2332] rounded-xl p-5 border border-gray-700">
                   <div className="mb-3">{f.icon}</div>
                   <h3 className="text-lg font-bold text-white mb-2">{f.t}</h3>
@@ -443,12 +461,14 @@ const Home = () => {
           </div>
         </section>
 
-        {/* CTA */}
+        {/* CTA - Dynamic from CMS */}
         <section className="py-16 px-4 bg-gradient-to-r from-[#2ecc71] to-[#27ae60]">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">{c.ctaTitle}</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
+              {(cmsHomepage?.cta_title && cmsHomepage.cta_title[language]) || c.ctaTitle}
+            </h2>
             <button onClick={scrollToBooking} className="bg-white text-[#2ecc71] px-10 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors shadow-xl" data-testid="cta-book-btn">
-              {c.ctaBtn} <ChevronRight className="w-5 h-5 ml-1 inline" aria-hidden="true" />
+              {(cmsHomepage?.cta_button && cmsHomepage.cta_button[language]) || c.ctaBtn} <ChevronRight className="w-5 h-5 ml-1 inline" aria-hidden="true" />
             </button>
           </div>
         </section>

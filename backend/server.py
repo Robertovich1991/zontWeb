@@ -113,12 +113,14 @@ from routes.admin_pages import router as pages_router
 from routes.admin_places import router as places_router
 from routes.admin_cms import router as cms_router
 from routes.admin_upload import router as upload_router
+from routes.public_cms import router as public_router
 
 app.include_router(auth_router)
 app.include_router(pages_router)
 app.include_router(places_router)
 app.include_router(cms_router)
 app.include_router(upload_router)
+app.include_router(public_router)
 
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"
