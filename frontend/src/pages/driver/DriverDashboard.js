@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
-import { Plus, LogOut, Car, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Navigation, Users, Route, User, Star } from 'lucide-react';
+import { Plus, LogOut, Car, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Navigation, Users, Route } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -14,14 +14,11 @@ const statusConfig = {
   cancelled: { label: 'Annulee', color: 'bg-gray-500/10 text-gray-400', icon: AlertCircle },
 };
 
-const RideCard = ({ ride, showPartner, clickable }) => {
-  const navigate = useNavigate();
+const RideCard = ({ ride, showPartner }) => {
   const sc = statusConfig[ride.status] || statusConfig.pending;
   const StatusIcon = sc.icon;
   return (
-    <div className={`bg-[#1a2332] rounded-xl p-4 border border-gray-800 ${clickable ? 'cursor-pointer active:bg-[#1a2332]/80 transition' : ''}`}
-      onClick={() => clickable && navigate(`/driver/ride/${ride.id}`)}
-      data-testid={`ride-card-${ride.id}`}>
+    <div className="bg-[#1a2332] rounded-xl p-4 border border-gray-800" data-testid={`ride-card-${ride.id}`}>
       <div className="flex items-start justify-between mb-2">
         <div className={`px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 ${sc.color}`}>
           <StatusIcon className="w-3 h-3" />{sc.label}
@@ -54,18 +51,6 @@ const RideCard = ({ ride, showPartner, clickable }) => {
       {ride.admin_notes && (
         <div className="mt-2 p-2 bg-amber-500/5 border border-amber-500/20 rounded-lg">
           <p className="text-xs text-amber-400">Note admin: {ride.admin_notes}</p>
-        </div>
-      )}
-      {ride.status === 'completed' && !ride.reviewed && (
-        <div className="mt-2 p-2 bg-[#2ecc71]/10 border border-[#2ecc71]/30 rounded-lg flex items-center gap-2" data-testid="review-prompt">
-          <Star className="w-3.5 h-3.5 text-yellow-400" />
-          <p className="text-xs text-[#2ecc71] font-medium">Avis requis - Notez cette course</p>
-        </div>
-      )}
-      {ride.reviewed && (
-        <div className="mt-2 flex items-center gap-1">
-          {[...Array(ride.review_rating || 0)].map((_, i) => <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />)}
-          {[...Array(5 - (ride.review_rating || 0))].map((_, i) => <Star key={`e${i}`} className="w-3 h-3 text-gray-600" />)}
         </div>
       )}
     </div>
@@ -128,9 +113,9 @@ const DriverDashboard = () => {
             <p className="text-xl font-bold text-yellow-400">{pending}</p>
             <p className="text-[10px] text-gray-400 mt-0.5">Attente</p>
           </div>
-          <div className="bg-[#1a2332] rounded-xl p-3 text-center border border-emerald-500/20">
-            <p className="text-xl font-bold text-emerald-400">{dispatched}</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">Dispatch</p>
+          <div className="bg-[#1a2332] rounded-xl p-3 text-center border border-green-500/20">
+            <p className="text-xl font-bold text-green-400">{rides.filter(r => r.status === 'accepted').length}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Acceptees</p>
           </div>
           <div className="bg-[#1a2332] rounded-xl p-3 text-center border border-blue-500/20">
             <p className="text-xl font-bold text-blue-400">{availableRides.length}</p>
@@ -187,7 +172,7 @@ const DriverDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {rides.map(ride => <RideCard key={ride.id} ride={ride} showPartner={false} clickable={true} />)}
+                  {rides.map(ride => <RideCard key={ride.id} ride={ride} showPartner={false} />)}
                 </div>
               )
             )}
@@ -201,7 +186,7 @@ const DriverDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {availableRides.map(ride => <RideCard key={ride.id} ride={ride} showPartner={true} clickable={false} />)}
+                  {availableRides.map(ride => <RideCard key={ride.id} ride={ride} showPartner={true} />)}
                 </div>
               )
             )}
