@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { transferService } from '@/services/api';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, Plane, CheckCircle, Wifi, Droplets } from 'lucide-react';
+import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, Plane, CheckCircle, Loader2 } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
 
 const labels = {
@@ -15,127 +16,115 @@ const labels = {
     title: 'Select your vehicle',
     subtitle: 'All prices are fixed and include VAT, tolls and meet & greet',
     step1: 'Vehicle', step2: 'Details', step3: 'Payment',
-    pax: 'Max', bags: 'Bags',
-    select: 'Select',
-    noData: 'No search data found',
-    goBack: 'Start a New Search',
+    pax: 'Max', bags: 'Bags', select: 'Select',
+    noData: 'No search data found', goBack: 'Start a New Search',
     from: 'Pick-up', to: 'Drop-off',
     estTime: 'Est. travel time', estDist: 'Distance',
     recommended: 'Recommended',
     trustItems: ['Free cancellation 24h', 'Fixed price guaranteed', 'Meet & greet included', 'Flight tracking'],
-    wifi: 'Free WiFi', water: 'Water', leather: 'Leather seats',
+    loading: 'Searching available vehicles...',
+    error: 'Unable to fetch vehicles. Please try again.',
+    retry: 'Retry', fixedPrice: 'Fixed price',
+    mins: 'min', km: 'km', orSimilar: 'or similar',
   },
   fr: {
     seoTitle: 'Choisir Votre Vehicule - Zont Transfert Aeroport',
     title: 'Selectionnez votre vehicule',
     subtitle: 'Tous les prix sont fixes et incluent TVA, peages et accueil personnalise',
     step1: 'Vehicule', step2: 'Details', step3: 'Paiement',
-    pax: 'Max', bags: 'Bagages',
-    select: 'Selectionner',
-    noData: 'Aucune recherche trouvee',
-    goBack: 'Nouvelle Recherche',
+    pax: 'Max', bags: 'Bagages', select: 'Selectionner',
+    noData: 'Aucune recherche trouvee', goBack: 'Nouvelle Recherche',
     from: 'Depart', to: 'Arrivee',
     estTime: 'Temps estime', estDist: 'Distance',
     recommended: 'Recommande',
     trustItems: ['Annulation gratuite 24h', 'Prix fixe garanti', 'Accueil personnalise', 'Suivi de vol'],
-    wifi: 'WiFi gratuit', water: 'Eau', leather: 'Sieges cuir',
+    loading: 'Recherche des vehicules disponibles...',
+    error: 'Impossible de charger les vehicules. Veuillez reessayer.',
+    retry: 'Reessayer', fixedPrice: 'Prix fixe',
+    mins: 'min', km: 'km', orSimilar: 'ou similaire',
   },
   ru: {
-    seoTitle: 'Выберите Автомобиль - Zont Трансфер',
-    title: 'Выберите автомобиль',
-    subtitle: 'Все цены фиксированные, включают НДС, дорожные сборы и встречу',
-    step1: 'Авто', step2: 'Детали', step3: 'Оплата',
-    pax: 'Макс', bags: 'Багаж',
-    select: 'Выбрать',
-    noData: 'Данные не найдены',
-    goBack: 'Новый Поиск',
-    from: 'Откуда', to: 'Куда',
-    estTime: 'Время в пути', estDist: 'Расстояние',
-    recommended: 'Рекомендуем',
-    trustItems: ['Бесплатная отмена 24ч', 'Фикс. цена', 'Встреча включена', 'Отслеживание рейса'],
-    wifi: 'WiFi', water: 'Вода', leather: 'Кожа',
+    seoTitle: '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0410\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u044c - Zont \u0422\u0440\u0430\u043d\u0441\u0444\u0435\u0440',
+    title: '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0430\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u044c',
+    subtitle: '\u0412\u0441\u0435 \u0446\u0435\u043d\u044b \u0444\u0438\u043a\u0441\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u044b\u0435, \u0432\u043a\u043b\u044e\u0447\u0430\u044e\u0442 \u041d\u0414\u0421, \u0434\u043e\u0440\u043e\u0436\u043d\u044b\u0435 \u0441\u0431\u043e\u0440\u044b \u0438 \u0432\u0441\u0442\u0440\u0435\u0447\u0443',
+    step1: '\u0410\u0432\u0442\u043e', step2: '\u0414\u0435\u0442\u0430\u043b\u0438', step3: '\u041e\u043f\u043b\u0430\u0442\u0430',
+    pax: '\u041c\u0430\u043a\u0441', bags: '\u0411\u0430\u0433\u0430\u0436', select: '\u0412\u044b\u0431\u0440\u0430\u0442\u044c',
+    noData: '\u0414\u0430\u043d\u043d\u044b\u0435 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u044b', goBack: '\u041d\u043e\u0432\u044b\u0439 \u041f\u043e\u0438\u0441\u043a',
+    from: '\u041e\u0442\u043a\u0443\u0434\u0430', to: '\u041a\u0443\u0434\u0430',
+    estTime: '\u0412\u0440\u0435\u043c\u044f \u0432 \u043f\u0443\u0442\u0438', estDist: '\u0420\u0430\u0441\u0441\u0442\u043e\u044f\u043d\u0438\u0435',
+    recommended: '\u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0443\u0435\u043c',
+    trustItems: ['\u0411\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u0430\u044f \u043e\u0442\u043c\u0435\u043d\u0430 24\u0447', '\u0424\u0438\u043a\u0441. \u0446\u0435\u043d\u0430', '\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432\u043a\u043b\u044e\u0447\u0435\u043d\u0430', '\u041e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u043d\u0438\u0435 \u0440\u0435\u0439\u0441\u0430'],
+    loading: '\u041f\u043e\u0438\u0441\u043a \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b\u0445 \u0430\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u0435\u0439...',
+    error: '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0441\u043d\u043e\u0432\u0430.',
+    retry: '\u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u044c', fixedPrice: '\u0424\u0438\u043a\u0441. \u0446\u0435\u043d\u0430',
+    mins: '\u043c\u0438\u043d', km: '\u043a\u043c', orSimilar: '\u0438\u043b\u0438 \u0430\u043d\u0430\u043b\u043e\u0433',
   },
   hy: {
-    seoTitle: 'Ընտրեք Մեքենա - Zont Տրանսֆեր',
-    title: 'Ընտրեք ձեր մեքենան',
-    subtitle: 'Բոլոր գները հաստատ են և ներառում են ԱԱՏ, ճանապարհային վճարներ և դիմավորում',
-    step1: 'Մեքենա', step2: 'Տվյալներ', step3: 'Վճարում',
-    pax: 'Առավ', bags: 'Պայուսակ',
-    select: 'Ընտրել',
-    noData: 'Որոնման տվյալներ չեն գտնվել',
-    goBack: 'Նոր որոնում',
-    from: 'Տեղից', to: 'Դեպի',
-    estTime: 'Մոտ. ժամանակ', estDist: 'Հեռավորութ',
-    recommended: 'Հանրակված',
-    trustItems: ['Անվճար չեղարկում 24ժ', 'Հաստատ գին', 'Դիմավորում ներառված', 'Թռիչքի հետեվում'],
-    wifi: 'Անվճար WiFi', water: 'Ջուր', leather: 'Կաշվե նստատեղ',
+    seoTitle: '\u0538\u0576\u057f\u0580\u0565\u0584 \u0544\u0565\u0584\u0565\u0576\u0561 - Zont \u054f\u0580\u0561\u0576\u057d\u0586\u0565\u0580',
+    title: '\u0538\u0576\u057f\u0580\u0565\u0584 \u0571\u0565\u0580 \u0574\u0565\u0584\u0565\u0576\u0561\u0576',
+    subtitle: '\u0532\u0578\u056c\u0578\u0580 \u0563\u0576\u0565\u0580\u0568 \u0570\u0561\u057d\u057f\u0561\u057f \u0565\u0576 \u0587 \u0576\u0565\u0580\u0561\u057c\u0578\u0582\u0574 \u0565\u0576 \u0531\u0531\u054f, \u0573\u0561\u0576\u0561\u057a\u0561\u0580\u0570\u0561\u0575\u056b\u0576 \u057e\u0573\u0561\u0580\u0576\u0565\u0580 \u0587 \u0564\u056b\u0574\u0561\u057e\u0578\u0580\u0578\u0582\u0574',
+    step1: '\u0544\u0565\u0584\u0565\u0576\u0561', step2: '\u054f\u057e\u0575\u0561\u056c\u0576\u0565\u0580', step3: '\u054e\u0573\u0561\u0580\u0578\u0582\u0574',
+    pax: '\u0531\u057c\u0561\u057e', bags: '\u054a\u0561\u0575\u0578\u0582\u057d\u0561\u056f', select: '\u0538\u0576\u057f\u0580\u0565\u056c',
+    noData: '\u0548\u0580\u0578\u0576\u0574\u0561\u0576 \u057f\u057e\u0575\u0561\u056c\u0576\u0565\u0580 \u0579\u0565\u0576 \u0563\u057f\u0576\u057e\u0565\u056c', goBack: '\u0546\u0578\u0580 \u0578\u0580\u0578\u0576\u0578\u0582\u0574',
+    from: '\u054f\u0565\u0572\u056b\u0581', to: '\u0534\u0565\u057a\u056b',
+    estTime: '\u0544\u0578\u057f. \u056a\u0561\u0574\u0561\u0576\u0561\u056f', estDist: '\u0540\u0565\u057c\u0561\u057e\u0578\u0580\u0578\u0582\u0569',
+    recommended: '\u0540\u0561\u0576\u0580\u0561\u056f\u057e\u0561\u056e',
+    trustItems: ['\u0531\u0576\u057e\u0573\u0561\u0580 \u0579\u0565\u0572\u0561\u0580\u056f\u0578\u0582\u0574 24\u056a', '\u0540\u0561\u057d\u057f\u0561\u057f \u0563\u056b\u0576', '\u0534\u056b\u0574\u0561\u057e\u0578\u0580\u0578\u0582\u0574 \u0576\u0565\u0580\u0561\u057c\u057e\u0561\u056e', '\u0539\u057c\u056b\u0579\u0584\u056b \u0570\u0565\u057f\u0587\u0578\u0582\u0574'],
+    loading: '\u0540\u0561\u057d\u0561\u0576\u0565\u056c\u056b \u0574\u0565\u0584\u0565\u0576\u0561\u0576\u0565\u0580\u056b \u0578\u0580\u0578\u0576\u0578\u0582\u0574...',
+    error: '\u0540\u0576\u0561\u0580\u0561\u057e\u0578\u0580 \u0579\u0567 \u0563\u057f\u0576\u0565\u056c \u0574\u0565\u0584\u0565\u0576\u0561\u0576\u0565\u0580. \u0553\u0578\u0580\u0571\u0565\u0584 \u056f\u0580\u056f\u056b\u0576.',
+    retry: '\u053f\u0580\u056f\u0576\u0565\u056c', fixedPrice: '\u0540\u0561\u057d\u057f\u0561\u057f \u0563\u056b\u0576',
+    mins: '\u0580\u0578\u057a', km: '\u056f\u0574', orSimilar: '\u056f\u0561\u0574 \u0576\u0574\u0561\u0576',
   },
-};
-
-const IMAGES = {
-  premium: 'https://static.prod-images.emergentagent.com/jobs/afb2332d-193f-433b-a93c-c37f4820b183/images/f4c843b8a5604ed350353dc428dd7bd4e326faab679f483dc4bb4ecb59392fcc.png',
-  luxury: 'https://static.prod-images.emergentagent.com/jobs/afb2332d-193f-433b-a93c-c37f4820b183/images/f2261d5fd73800ca13948b063ce7a48b4d552493be6c554517974f6216740623.png',
-  van: 'https://static.prod-images.emergentagent.com/jobs/afb2332d-193f-433b-a93c-c37f4820b183/images/bb1a1b7fe2c71db2d7a306a5f75eb9ac1f7c5a5d1cdde133b752f19cb03438ab.png',
-  minibus: 'https://static.prod-images.emergentagent.com/jobs/afb2332d-193f-433b-a93c-c37f4820b183/images/0c55d93337b26fdf7b01e5ac5a7dae05358b3b35731ead00951340e996af34ae.png',
-};
-
-const vehicles = [
-  {
-    id: 1, key: 'premium', image: IMAGES.premium,
-    name: { en: 'Business Sedan', fr: 'Berline Business', ru: 'Бизнес Седан' },
-    model: 'Mercedes E-Class',
-    pax: 3, bags: 3, price: 65, recommended: false,
-    features: ['leather', 'water'],
-  },
-  {
-    id: 2, key: 'luxury', image: IMAGES.luxury,
-    name: { en: 'First Class', fr: 'Premiere Classe', ru: 'Первый Класс' },
-    model: 'Mercedes S-Class',
-    pax: 3, bags: 3, price: 95, recommended: true,
-    features: ['leather', 'water', 'wifi'],
-  },
-  {
-    id: 3, key: 'van', image: IMAGES.van,
-    name: { en: 'Business Van', fr: 'Van Business', ru: 'Бизнес Вэн' },
-    model: 'Mercedes V-Class',
-    pax: 6, bags: 6, price: 120, recommended: false,
-    features: ['leather', 'water', 'wifi'],
-  },
-  {
-    id: 4, key: 'minibus', image: IMAGES.minibus,
-    name: { en: 'Minibus', fr: 'Minibus', ru: 'Минибус' },
-    model: 'Mercedes Sprinter',
-    pax: 8, bags: 10, price: 160, recommended: false,
-    features: ['water'],
-  },
-];
-
-const FeatureTag = ({ type, label }) => {
-  const icons = {
-    wifi: <Wifi className="w-3 h-3" />,
-    water: <Droplets className="w-3 h-3" />,
-    leather: <CheckCircle className="w-3 h-3" />,
-  };
-  return (
-    <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-      {icons[type]}{label}
-    </span>
-  );
 };
 
 const CarSelection = () => {
   const navigate = useNavigate();
-  const { searchData, selectCar } = useBooking();
+  const { searchData, selectCar, vehicleResults, setVehicleResults } = useBooking();
   const { isAuthenticated } = useAuth();
   const { language } = useLanguage();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('signin');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const c = labels[language] || labels.en;
-  const featureLabels = { wifi: c.wifi, water: c.water, leather: c.leather };
 
-  const handleSelectCar = (car) => {
-    selectCar({ ...car, name: car.name[language] || car.name.en });
+  // Fetch vehicles from C# API if we have search data but no results yet
+  useEffect(() => {
+    if (searchData?.pickupCoords && searchData?.dropoffCoords && !vehicleResults) {
+      fetchVehicles();
+    }
+  }, [searchData]);
+
+  const fetchVehicles = async () => {
+    if (!searchData?.pickupCoords || !searchData?.dropoffCoords) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const results = await transferService.calculatePreorderPrice(
+        searchData.pickupCoords,
+        searchData.dropoffCoords
+      );
+      setVehicleResults(results);
+    } catch (err) {
+      setError(c.error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectCar = (vehicle) => {
+    selectCar({
+      tripType: vehicle.tripType,
+      price: vehicle.minAmount,
+      maxPrice: vehicle.maxAmount,
+      duration: vehicle.duration,
+      distance: vehicle.distance,
+      passenger: vehicle.passenger,
+      luggage: vehicle.luggage,
+      description: vehicle.description,
+      imagePath: vehicle.imagePath,
+    });
     if (isAuthenticated) {
       navigate('/checkout');
     } else {
@@ -144,7 +133,7 @@ const CarSelection = () => {
     }
   };
 
-  // Empty state
+  // Empty state - no search data
   if (!searchData) {
     return (
       <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="car-selection-empty">
@@ -165,6 +154,10 @@ const CarSelection = () => {
       </div>
     );
   }
+
+  const vehicles = vehicleResults || [];
+  const duration = vehicles.length > 0 ? vehicles[0].duration : null;
+  const distance = vehicles.length > 0 ? vehicles[0].distance : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="car-selection-page">
@@ -191,7 +184,7 @@ const CarSelection = () => {
           </div>
         </div>
 
-        {/* Route Summary Card */}
+        {/* Route Summary */}
         <div className="max-w-5xl mx-auto px-4 pt-5 pb-2">
           <div className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex-1 flex items-center gap-3 min-w-0">
@@ -208,16 +201,22 @@ const CarSelection = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-4 text-xs text-gray-400 border-t sm:border-t-0 sm:border-l border-white/10 pt-2 sm:pt-0 sm:pl-4 flex-shrink-0">
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-gray-500" />
-                <span>{c.estTime}: <b className="text-white">~45 min</b></span>
+            {(duration || distance) && (
+              <div className="flex items-center gap-4 text-xs text-gray-400 border-t sm:border-t-0 sm:border-l border-white/10 pt-2 sm:pt-0 sm:pl-4 flex-shrink-0">
+                {duration && (
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-gray-500" />
+                    <span>{c.estTime}: <b className="text-white">~{duration} {c.mins}</b></span>
+                  </div>
+                )}
+                {distance && (
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-gray-500" />
+                    <span>{c.estDist}: <b className="text-white">~{distance} {c.km}</b></span>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-gray-500" />
-                <span>{c.estDist}: <b className="text-white">~35 km</b></span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -239,84 +238,128 @@ const CarSelection = () => {
           <p className="text-gray-500 text-xs mt-1">{c.subtitle}</p>
         </div>
 
-        {/* Vehicle Cards */}
-        <div className="max-w-5xl mx-auto px-4 pb-10">
-          <div className="space-y-3">
-            {vehicles.map((car) => (
-              <div
-                key={car.id}
-                className={`group relative bg-white rounded-xl overflow-hidden transition-all hover:shadow-lg hover:shadow-black/20 ${
-                  car.recommended ? 'ring-2 ring-[#2ecc71]' : 'ring-1 ring-gray-200'
-                }`}
-                data-testid={`car-card-${car.id}`}
-              >
-                {/* Recommended badge */}
-                {car.recommended && (
-                  <div className="bg-[#2ecc71] text-white text-[11px] font-bold tracking-wide uppercase text-center py-1">
-                    {c.recommended}
-                  </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row">
-                  {/* Image */}
-                  <div className="sm:w-[220px] md:w-[280px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-3 sm:p-4">
-                    <img src={car.image} alt={car.name[language] || car.name.en} className="w-full h-auto max-h-[120px] sm:max-h-[110px] object-contain" loading="lazy" />
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 p-4 sm:py-4 sm:px-5 flex flex-col justify-between min-w-0">
-                    <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <h3 className="text-lg font-bold text-gray-900">{car.name[language] || car.name.en}</h3>
-                      </div>
-                      <p className="text-xs text-gray-400 mb-2.5">{car.model} or similar</p>
-
-                      {/* Specs */}
-                      <div className="flex items-center gap-4 mb-2.5">
-                        <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                          <Users className="w-4 h-4 text-gray-400" />
-                          <span>{c.pax} <b>{car.pax}</b></span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                          <Briefcase className="w-4 h-4 text-gray-400" />
-                          <span>{c.bags} <b>{car.bags}</b></span>
-                        </div>
-                      </div>
-
-                      {/* Feature tags */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {car.features.map((f) => (
-                          <FeatureTag key={f} type={f} label={featureLabels[f]} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Price + CTA */}
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 px-4 pb-4 sm:p-5 sm:pl-0 sm:w-[170px] flex-shrink-0 border-t sm:border-t-0 sm:border-l border-gray-100">
-                    <div className="sm:text-right">
-                      <div className="text-3xl font-extrabold text-gray-900">
-                        {car.price}<span className="text-base font-normal text-gray-400 ml-0.5">&euro;</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleSelectCar(car)}
-                      className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-1.5 ${
-                        car.recommended
-                          ? 'bg-[#2ecc71] text-white hover:bg-[#27ae60] shadow-md shadow-green-500/20'
-                          : 'bg-gray-900 text-white hover:bg-gray-800'
-                      }`}
-                      data-testid={`choose-car-${car.id}`}
-                    >
-                      {c.select}
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {/* Loading State */}
+        {loading && (
+          <div className="max-w-5xl mx-auto px-4 pb-10">
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-10 h-10 text-[#2ecc71] animate-spin mb-4" />
+              <p className="text-gray-400 text-sm">{c.loading}</p>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="max-w-5xl mx-auto px-4 pb-10">
+            <div className="flex flex-col items-center justify-center py-20">
+              <p className="text-red-400 text-sm mb-4">{error}</p>
+              <button onClick={fetchVehicles} className="bg-[#2ecc71] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors" data-testid="retry-btn">
+                {c.retry}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Vehicle Cards - from C# API */}
+        {!loading && !error && vehicles.length > 0 && (
+          <div className="max-w-5xl mx-auto px-4 pb-10">
+            <div className="space-y-3">
+              {vehicles.map((vehicle, index) => {
+                const isRecommended = index === 0;
+                const imageUrl = transferService.getVehicleImageUrl(vehicle.imagePath);
+                const price = vehicle.minAmount;
+                const tripType = (vehicle.tripType || '').trim();
+
+                return (
+                  <div
+                    key={index}
+                    className={`group relative bg-white rounded-xl overflow-hidden transition-all hover:shadow-lg hover:shadow-black/20 ${
+                      isRecommended ? 'ring-2 ring-[#2ecc71]' : 'ring-1 ring-gray-200'
+                    }`}
+                    data-testid={`car-card-${index}`}
+                  >
+                    {isRecommended && (
+                      <div className="bg-[#2ecc71] text-white text-[11px] font-bold tracking-wide uppercase text-center py-1">
+                        {c.recommended}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row">
+                      {/* Image */}
+                      <div className="sm:w-[220px] md:w-[280px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-3 sm:p-4">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={tripType}
+                            className="w-full h-auto max-h-[120px] sm:max-h-[110px] object-contain"
+                            loading="lazy"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        ) : (
+                          <Car className="w-16 h-16 text-gray-300" />
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 p-4 sm:py-4 sm:px-5 flex flex-col justify-between min-w-0">
+                        <div>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <h3 className="text-lg font-bold text-gray-900">{tripType}</h3>
+                          </div>
+                          <p className="text-xs text-gray-400 mb-2.5">{vehicle.description || ''}</p>
+
+                          {/* Specs */}
+                          <div className="flex items-center gap-4 mb-2.5">
+                            {vehicle.passenger > 0 && (
+                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                <Users className="w-4 h-4 text-gray-400" />
+                                <span>{c.pax} <b>{vehicle.passenger}</b></span>
+                              </div>
+                            )}
+                            {vehicle.luggage > 0 && (
+                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                <Briefcase className="w-4 h-4 text-gray-400" />
+                                <span>{c.bags} <b>{vehicle.luggage}</b></span>
+                              </div>
+                            )}
+                            {vehicle.duration > 0 && (
+                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                                <Clock className="w-4 h-4 text-gray-400" />
+                                <span>~{vehicle.duration} {c.mins}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Price + CTA */}
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 px-4 pb-4 sm:p-5 sm:pl-0 sm:w-[170px] flex-shrink-0 border-t sm:border-t-0 sm:border-l border-gray-100">
+                        <div className="sm:text-right">
+                          <div className="text-3xl font-extrabold text-gray-900">
+                            {Math.round(price)}<span className="text-base font-normal text-gray-400 ml-0.5">&euro;</span>
+                          </div>
+                          <p className="text-[10px] text-gray-400 mt-0.5">{c.fixedPrice}</p>
+                        </div>
+                        <button
+                          onClick={() => handleSelectCar(vehicle)}
+                          className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-1.5 ${
+                            isRecommended
+                              ? 'bg-[#2ecc71] text-white hover:bg-[#27ae60] shadow-md shadow-green-500/20'
+                              : 'bg-gray-900 text-white hover:bg-gray-800'
+                          }`}
+                          data-testid={`choose-car-${index}`}
+                        >
+                          {c.select}
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />

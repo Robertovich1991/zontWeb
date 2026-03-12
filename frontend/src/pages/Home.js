@@ -6,6 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
+import PlacesAutocomplete from '@/components/PlacesAutocomplete';
+import { transferService } from '@/services/api';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight } from 'lucide-react';
 
 const IMAGES = {
@@ -149,12 +151,15 @@ const popularDest = [
 
 const Home = () => {
   const navigate = useNavigate();
-  const { startBooking } = useBooking();
+  const { startBooking, setVehicleResults } = useBooking();
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const bookingRef = useRef(null);
-  const [formData, setFormData] = useState({ pickup: '', dropoff: '', date: '', time: '' });
+  const [pickup, setPickup] = useState({ address: '', latitude: null, longitude: null });
+  const [dropoff, setDropoff] = useState({ address: '', latitude: null, longitude: null });
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
   const [cmsHomepage, setCmsHomepage] = useState(null);
 
@@ -167,20 +172,68 @@ const Home = () => {
 
   const c = homeContent[language] || homeContent.en;
 
+  const geocodeAddress = (address) => {
+    return new Promise((resolve, reject) => {
+      if (!window.google?.maps?.Geocoder) return reject('No geocoder');
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === 'OK' && results[0]?.geometry) {
+          resolve({
+            latitude: results[0].geometry.location.lat(),
+            longitude: results[0].geometry.location.lng(),
+          });
+        } else {
+          reject(status);
+        }
+      });
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    let pickupCoords = pickup.latitude ? { latitude: pickup.latitude, longitude: pickup.longitude } : null;
+    let dropoffCoords = dropoff.latitude ? { latitude: dropoff.latitude, longitude: dropoff.longitude } : null;
+    const pickupAddr = pickup.address || document.getElementById('h-pickup')?.value || '';
+    const dropoffAddr = dropoff.address || document.getElementById('h-dropoff')?.value || '';
+
+    if (!pickupAddr || !dropoffAddr) {
+      toast({ title: language === 'fr' ? 'Erreur' : 'Error', description: language === 'fr' ? 'Veuillez remplir les adresses' : 'Please fill in both addresses', variant: 'destructive' });
+      setLoading(false);
+      return;
+    }
+
     try {
-      startBooking({ ...formData });
+      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr);
+      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr);
+    } catch {
+      toast({ title: language === 'fr' ? 'Erreur' : 'Error', description: language === 'fr' ? 'Adresse introuvable. Veuillez reessayer.' : 'Address not found. Please try again.', variant: 'destructive' });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const vehicles = await transferService.calculatePreorderPrice(pickupCoords, dropoffCoords);
+      setVehicleResults(vehicles);
+      startBooking({
+        pickup: pickupAddr,
+        dropoff: dropoffAddr,
+        pickupCoords,
+        dropoffCoords,
+        date,
+        time,
+      });
       navigate('/car-selection');
     } catch (error) {
-      toast({ title: 'Error', description: 'An error occurred', variant: 'destructive' });
+      toast({ title: language === 'fr' ? 'Erreur' : 'Error', description: language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handlePickupChange = (data) => setPickup(data);
+  const handleDropoffChange = (data) => setDropoff(data);
 
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
 
@@ -285,29 +338,37 @@ const Home = () => {
                     <form onSubmit={handleSubmit} className="space-y-3" data-testid="home-booking-form" role="form" aria-label={c.bookingTitle}>
                       <div>
                         <label htmlFor="h-pickup" className="block text-gray-700 font-medium text-sm mb-1">{c.pickup}</label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 w-4 h-4 text-[#2ecc71]" aria-hidden="true" />
-                          <input type="text" id="h-pickup" name="pickup" value={formData.pickup} onChange={handleChange} required placeholder={c.pickupPh}
-                            className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-pickup-input" />
-                        </div>
+                        <PlacesAutocomplete
+                          id="h-pickup"
+                          value={pickup}
+                          onChange={handlePickupChange}
+                          placeholder={c.pickupPh}
+                          icon={<MapPin className="w-4 h-4 text-[#2ecc71]" aria-hidden="true" />}
+                          className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
+                          data-testid="home-pickup-input"
+                        />
                       </div>
                       <div>
                         <label htmlFor="h-dropoff" className="block text-gray-700 font-medium text-sm mb-1">{c.dropoff}</label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 w-4 h-4 text-red-500" aria-hidden="true" />
-                          <input type="text" id="h-dropoff" name="dropoff" value={formData.dropoff} onChange={handleChange} required placeholder={c.dropoffPh}
-                            className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-dropoff-input" />
-                        </div>
+                        <PlacesAutocomplete
+                          id="h-dropoff"
+                          value={dropoff}
+                          onChange={handleDropoffChange}
+                          placeholder={c.dropoffPh}
+                          icon={<MapPin className="w-4 h-4 text-red-500" aria-hidden="true" />}
+                          className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
+                          data-testid="home-dropoff-input"
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label htmlFor="h-date" className="block text-gray-700 font-medium text-sm mb-1">{c.date}</label>
-                          <input type="date" id="h-date" name="date" value={formData.date} onChange={handleChange} required
+                          <input type="date" id="h-date" name="date" value={date} onChange={(e) => setDate(e.target.value)} required
                             className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-date-input" />
                         </div>
                         <div>
                           <label htmlFor="h-time" className="block text-gray-700 font-medium text-sm mb-1">{c.time}</label>
-                          <input type="time" id="h-time" name="time" value={formData.time} onChange={handleChange} required
+                          <input type="time" id="h-time" name="time" value={time} onChange={(e) => setTime(e.target.value)} required
                             className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-time-input" />
                         </div>
                       </div>

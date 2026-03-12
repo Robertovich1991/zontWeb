@@ -14,6 +14,7 @@ export const BookingProvider = ({ children }) => {
   const [searchData, setSearchData] = useState(null);
   const [selectedCar, setSelectedCar] = useState(null);
   const [bookingDetails, setBookingDetails] = useState(null);
+  const [vehicleResults, setVehicleResults] = useState(null);
 
   const startBooking = (data) => {
     setSearchData(data);
@@ -31,16 +32,19 @@ export const BookingProvider = ({ children }) => {
     setSearchData(null);
     setSelectedCar(null);
     setBookingDetails(null);
+    setVehicleResults(null);
   };
 
   const value = {
     searchData,
     selectedCar,
     bookingDetails,
+    vehicleResults,
     startBooking,
     selectCar,
     completeBooking,
     resetBooking,
+    setVehicleResults,
   };
 
   return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>;
