@@ -130,6 +130,43 @@ async def get_vehicle_categories(request: Request):
         raise HTTPException(status_code=502, detail="Failed to fetch vehicle categories")
 
 
+class RouteRequest(BaseModel):
+    origin: str
+    destination: str
+
+
+@router.post("/calculate-route")
+async def calculate_route(req: RouteRequest, request: Request):
+    """Calculate distance and duration between two addresses using Google Directions API."""
+    await get_current_partner(request)
+    google_key = os.environ.get("GOOGLE_MAPS_KEY", "")
+    if not google_key:
+        raise HTTPException(status_code=500, detail="Google Maps API key not configured")
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                "https://maps.googleapis.com/maps/api/directions/json",
+                params={"origin": req.origin, "destination": req.destination, "key": google_key},
+            )
+            data = resp.json()
+            if data.get("status") != "OK" or not data.get("routes"):
+                return {"status": "error", "message": "Route not found"}
+            leg = data["routes"][0]["legs"][0]
+            return {
+                "status": "ok",
+                "distance": leg["distance"]["text"],
+                "distance_meters": leg["distance"]["value"],
+                "duration": leg["duration"]["text"],
+                "duration_seconds": leg["duration"]["value"],
+                "start_address": leg["start_address"],
+                "end_address": leg["end_address"],
+                "overview_polyline": data["routes"][0].get("overview_polyline", {}).get("points", ""),
+            }
+    except Exception as e:
+        logger.error(f"Route calculation error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to calculate route")
+
+
 # ---- Rides CRUD ----
 
 @router.post("/rides")
@@ -172,6 +209,17 @@ async def get_ride(ride_id: str, request: Request):
     if not ride:
         raise HTTPException(status_code=404, detail="Ride not found")
     return ride
+
+
+@router.get("/available-rides")
+async def get_available_rides(request: Request):
+    """Get pending rides from OTHER partners (visible to all authenticated partners)."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+    rides = await db.partner_rides.find(
+        {"status": "pending", "partner_id": {"$ne": user["sub"]}}, {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return rides
 
 
 # ---- Admin endpoints for partners & rides ----
