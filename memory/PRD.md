@@ -8,6 +8,7 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Backend**: FastAPI (Python) as CMS + proxy to C# backend at api.zont.cab
 - **Database**: MongoDB (CMS data), C# backend (operational data)
 - **External APIs**: Google Maps Places API, api.zont.cab (C# backend)
+- **Toast Library**: `sonner` (standardized across entire project - March 12, 2026)
 
 ## What's Been Implemented
 
@@ -32,6 +33,13 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
   - Login: `POST /api/Login/client`
   - Auto-login after registration with "NotVerified" status
   - Email verification step transitions account to "Verified" status
+
+### Phase 3.1 - Error Handling & Toast Standardization (Complete - March 12, 2026)
+- Fixed registration form error display (was using broken useToast, now uses sonner)
+- Inline error messages with AlertCircle icons below each form field
+- Toast notifications via sonner for all success/error feedback
+- Removed `required` HTML attribute from sign-in inputs for custom validation
+- Cleaned up ALL remaining useToast references across: CityTransferPage, SearchForm, Checkout, Help
 
 ## Key Proxy Endpoints
 - `POST /api/proxy/distance` - Trip pricing
@@ -66,3 +74,4 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Phone numbers in E.164 format (+33...)
 - Gender defaults to "male", dateOfBirth to "01/01/2000"
 - After registration, email verification changes role from "NotVerified" to "Verified"
+- **Toast Library**: ONLY use `toast()` from `sonner`. Do NOT use `useToast()` from hooks/use-toast.

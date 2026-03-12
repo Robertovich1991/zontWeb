@@ -255,13 +255,13 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
             <form onSubmit={handleSignIn} className="space-y-4" data-testid="signin-form">
               <div>
                 <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Email *</label>
-                <input type="text" name="email" value={formData.email} onChange={handleChange} required
+                <input type="text" name="email" value={formData.email} onChange={handleChange}
                   placeholder="email@exemple.com" className={inputCls('email')} data-testid="signin-email" />
                 <FieldError field="email" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Mot de passe *</label>
-                <input type="password" name="password" value={formData.password} onChange={handleChange} required
+                <input type="password" name="password" value={formData.password} onChange={handleChange}
                   placeholder="Votre mot de passe" className={inputCls('password')} data-testid="signin-password" />
                 <FieldError field="password" />
               </div>
