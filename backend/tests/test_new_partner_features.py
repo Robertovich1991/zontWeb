@@ -253,7 +253,7 @@ class TestStripePaymentCard:
         response = api_client.post(
             f"{BASE_URL}/api/partner/payment/add-card",
             headers={"Authorization": f"Bearer {partner_token}"},
-            json={"origin_url": "https://registration-verify-1.preview.emergentagent.com"}
+            json={"origin_url": "https://driver-reviews.preview.emergentagent.com"}
         )
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         data = response.json()
@@ -271,7 +271,7 @@ class TestStripePaymentCard:
         add_response = api_client.post(
             f"{BASE_URL}/api/partner/payment/add-card",
             headers={"Authorization": f"Bearer {partner_token}"},
-            json={"origin_url": "https://registration-verify-1.preview.emergentagent.com"}
+            json={"origin_url": "https://driver-reviews.preview.emergentagent.com"}
         )
         assert add_response.status_code == 200
         session_id = add_response.json()["session_id"]

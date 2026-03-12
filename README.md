@@ -81,7 +81,7 @@ tail -f /var/log/supervisor/frontend.out.log
 ## 🌐 Accès
 
 Une fois lancé, le site est accessible à :
-- **Frontend** : https://registration-verify-1.preview.emergentagent.com
+- **Frontend** : https://driver-reviews.preview.emergentagent.com
 
 ## 📁 Structure du projet
 

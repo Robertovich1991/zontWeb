@@ -146,7 +146,7 @@ Voici la liste des endpoints utilisés par l'application :
 ## CORS Configuration
 
 Assurez-vous que votre backend C# autorise les requêtes depuis :
-- `https://registration-verify-1.preview.emergentagent.com` (pendant le développement)
+- `https://driver-reviews.preview.emergentagent.com` (pendant le développement)
 - Votre domaine de production
 
 ## Dépannage

@@ -55,6 +55,11 @@ class RideUpdate(BaseModel):
     admin_notes: Optional[str] = None
 
 
+class ReviewCreate(BaseModel):
+    rating: int  # 1-5
+    comment: str = ""
+
+
 def create_partner_token(data: dict):
     expire = datetime.now(timezone.utc) + timedelta(days=7)
     return jwt.encode({**data, "exp": expire, "type": "partner"}, SECRET_KEY, algorithm="HS256")
@@ -310,3 +315,92 @@ async def admin_update_ride(ride_id: str, update: RideUpdate, request: Request):
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Ride not found")
     return {"success": True}
+
+
+# ---- Reviews ----
+
+@router.post("/rides/{ride_id}/review")
+async def create_review(ride_id: str, review: ReviewCreate, request: Request):
+    """Rate a driver after a completed ride. 1-4 stars require a comment."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+
+    ride = await db.partner_rides.find_one({"id": ride_id, "partner_id": user["sub"]}, {"_id": 0})
+    if not ride:
+        raise HTTPException(status_code=404, detail="Ride not found")
+    if ride["status"] != "completed":
+        raise HTTPException(status_code=400, detail="La course doit etre terminee pour laisser un avis")
+
+    existing = await db.reviews.find_one({"ride_id": ride_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Avis deja laisse pour cette course")
+
+    if review.rating < 1 or review.rating > 5:
+        raise HTTPException(status_code=400, detail="La note doit etre entre 1 et 5")
+    if review.rating < 5 and not review.comment.strip():
+        raise HTTPException(status_code=400, detail="Un commentaire est obligatoire pour une note inferieure a 5 etoiles")
+
+    review_doc = {
+        "id": str(uuid.uuid4()),
+        "ride_id": ride_id,
+        "partner_id": user["sub"],
+        "partner_name": user.get("name", ""),
+        "rating": review.rating,
+        "comment": review.comment.strip(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.reviews.insert_one(review_doc)
+    review_doc.pop("_id", None)
+
+    # Update ride with review info
+    await db.partner_rides.update_one({"id": ride_id}, {"$set": {
+        "reviewed": True, "review_rating": review.rating,
+    }})
+
+    return review_doc
+
+
+@router.get("/rides/{ride_id}/review")
+async def get_ride_review(ride_id: str, request: Request):
+    """Get review for a specific ride."""
+    await get_current_partner(request)
+    db = request.app.state.db
+    review = await db.reviews.find_one({"ride_id": ride_id}, {"_id": 0})
+    if not review:
+        raise HTTPException(status_code=404, detail="No review found")
+    return review
+
+
+@router.get("/reviews/my")
+async def get_my_reviews(request: Request):
+    """Get all reviews left by the current partner."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+    reviews = await db.reviews.find({"partner_id": user["sub"]}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    return reviews
+
+
+@router.get("/reviews/stats/{partner_id}")
+async def get_partner_review_stats(partner_id: str, request: Request):
+    """Get review stats for a partner (average rating, total reviews)."""
+    await get_current_partner(request)
+    db = request.app.state.db
+    reviews = await db.reviews.find({"partner_id": partner_id}, {"_id": 0}).to_list(500)
+    if not reviews:
+        return {"average_rating": 0, "total_reviews": 0, "ratings": {}}
+    total = len(reviews)
+    avg = sum(r["rating"] for r in reviews) / total
+    ratings = {}
+    for i in range(1, 6):
+        ratings[str(i)] = len([r for r in reviews if r["rating"] == i])
+    return {"average_rating": round(avg, 1), "total_reviews": total, "ratings": ratings}
+
+
+@router.get("/admin/reviews")
+async def admin_list_reviews(request: Request):
+    """List all reviews (admin only)."""
+    from middleware.auth import require_admin
+    await require_admin(request)
+    db = request.app.state.db
+    reviews = await db.reviews.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return reviews

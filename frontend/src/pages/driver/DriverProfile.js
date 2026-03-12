@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
-import { ArrowLeft, CreditCard, Loader2, CheckCircle, User, Building, Phone, Mail, Shield } from 'lucide-react';
+import { ArrowLeft, CreditCard, Loader2, CheckCircle, User, Building, Phone, Mail, Shield, Star } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -12,17 +12,25 @@ const DriverProfile = () => {
   const [loading, setLoading] = useState(true);
   const [addingCard, setAddingCard] = useState(false);
   const [polling, setPolling] = useState(false);
+  const [reviewStats, setReviewStats] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
-    const fetchCard = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch(`${API}/api/partner/payment/my-card`, { headers });
-        if (res.ok) setCardInfo(await res.json());
+        const [cardRes, statsRes, reviewsRes] = await Promise.all([
+          fetch(`${API}/api/partner/payment/my-card`, { headers }),
+          fetch(`${API}/api/partner/reviews/stats/${partner?.id}`, { headers }),
+          fetch(`${API}/api/partner/reviews/my`, { headers }),
+        ]);
+        if (cardRes.ok) setCardInfo(await cardRes.json());
+        if (statsRes.ok) setReviewStats(await statsRes.json());
+        if (reviewsRes.ok) setReviews(await reviewsRes.json());
       } catch {} finally { setLoading(false); }
     };
-    fetchCard();
+    fetchData();
 
     // Check if returning from Stripe
     const params = new URLSearchParams(window.location.search);
@@ -104,6 +112,60 @@ const DriverProfile = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Review Stats */}
+        <div className="bg-[#1a2332] rounded-xl p-5 border border-gray-800" data-testid="review-stats">
+          <h3 className="text-white font-semibold text-sm flex items-center gap-2 mb-4">
+            <Star className="w-4 h-4 text-yellow-400" /> Mes Avis
+          </h3>
+          {reviewStats && reviewStats.total_reviews > 0 ? (
+            <div>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-white">{reviewStats.average_rating}</p>
+                  <div className="flex gap-0.5 mt-1">
+                    {[1,2,3,4,5].map(i => (
+                      <Star key={i} className={`w-4 h-4 ${i <= Math.round(reviewStats.average_rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{reviewStats.total_reviews} avis</p>
+                </div>
+                <div className="flex-1 space-y-1">
+                  {[5,4,3,2,1].map(i => {
+                    const count = reviewStats.ratings?.[String(i)] || 0;
+                    const pct = reviewStats.total_reviews > 0 ? (count / reviewStats.total_reviews) * 100 : 0;
+                    return (
+                      <div key={i} className="flex items-center gap-2 text-xs">
+                        <span className="text-gray-400 w-3">{i}</span>
+                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                        <div className="flex-1 bg-gray-800 rounded-full h-1.5">
+                          <div className="bg-yellow-400 h-1.5 rounded-full transition-all" style={{width: `${pct}%`}} />
+                        </div>
+                        <span className="text-gray-500 w-5 text-right">{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {reviews.length > 0 && (
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {reviews.slice(0, 10).map(r => (
+                    <div key={r.id} className="bg-[#0f1419] rounded-lg p-3 border border-gray-800">
+                      <div className="flex items-center gap-1 mb-1">
+                        {[...Array(r.rating)].map((_, i) => <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />)}
+                        {[...Array(5 - r.rating)].map((_, i) => <Star key={`e${i}`} className="w-3 h-3 text-gray-600" />)}
+                        <span className="text-gray-500 text-xs ml-2">{new Date(r.created_at).toLocaleDateString('fr-FR')}</span>
+                      </div>
+                      {r.comment && <p className="text-gray-300 text-xs italic">"{r.comment}"</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm text-center py-4">Aucun avis pour le moment</p>
+          )}
         </div>
 
         {/* Card Management */}

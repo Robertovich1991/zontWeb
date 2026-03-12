@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
-import { Plus, LogOut, Car, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Navigation, Users, Route, User } from 'lucide-react';
+import { Plus, LogOut, Car, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Navigation, Users, Route, User, Star } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -53,6 +53,18 @@ const RideCard = ({ ride, showPartner, clickable }) => {
       {ride.admin_notes && (
         <div className="mt-2 p-2 bg-amber-500/5 border border-amber-500/20 rounded-lg">
           <p className="text-xs text-amber-400">Note admin: {ride.admin_notes}</p>
+        </div>
+      )}
+      {ride.status === 'completed' && !ride.reviewed && (
+        <div className="mt-2 p-2 bg-[#2ecc71]/10 border border-[#2ecc71]/30 rounded-lg flex items-center gap-2" data-testid="review-prompt">
+          <Star className="w-3.5 h-3.5 text-yellow-400" />
+          <p className="text-xs text-[#2ecc71] font-medium">Avis requis - Notez cette course</p>
+        </div>
+      )}
+      {ride.reviewed && (
+        <div className="mt-2 flex items-center gap-1">
+          {[...Array(ride.review_rating || 0)].map((_, i) => <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />)}
+          {[...Array(5 - (ride.review_rating || 0))].map((_, i) => <Star key={`e${i}`} className="w-3 h-3 text-gray-600" />)}
         </div>
       )}
     </div>
