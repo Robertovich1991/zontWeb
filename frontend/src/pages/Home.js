@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
@@ -153,7 +153,6 @@ const Home = () => {
   const navigate = useNavigate();
   const { startBooking, setVehicleResults } = useBooking();
   const { t, language } = useLanguage();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const bookingRef = useRef(null);
   const [pickup, setPickup] = useState({ address: '', latitude: null, longitude: null });
@@ -199,7 +198,7 @@ const Home = () => {
     const dropoffAddr = dropoff.address || document.getElementById('h-dropoff')?.value || '';
 
     if (!pickupAddr || !dropoffAddr) {
-      toast({ title: language === 'fr' ? 'Erreur' : 'Error', description: language === 'fr' ? 'Veuillez remplir les adresses' : 'Please fill in both addresses', variant: 'destructive' });
+      toast.error(language === 'fr' ? 'Veuillez remplir les adresses' : 'Please fill in both addresses');
       setLoading(false);
       return;
     }
@@ -208,7 +207,7 @@ const Home = () => {
       if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr);
       if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr);
     } catch {
-      toast({ title: language === 'fr' ? 'Erreur' : 'Error', description: language === 'fr' ? 'Adresse introuvable. Veuillez reessayer.' : 'Address not found. Please try again.', variant: 'destructive' });
+      toast.error(language === 'fr' ? 'Adresse introuvable. Veuillez reessayer.' : 'Address not found. Please try again.');
       setLoading(false);
       return;
     }
@@ -226,7 +225,7 @@ const Home = () => {
       });
       navigate('/car-selection');
     } catch (error) {
-      toast({ title: language === 'fr' ? 'Erreur' : 'Error', description: language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.', variant: 'destructive' });
+      toast.error(language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.');
     } finally {
       setLoading(false);
     }
