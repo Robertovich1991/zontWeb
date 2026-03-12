@@ -41,6 +41,14 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Removed `required` HTML attribute from sign-in inputs for custom validation
 - Cleaned up ALL remaining useToast references across: CityTransferPage, SearchForm, Checkout, Help
 
+### Phase 3.2 - Forgot Password (Complete - March 12, 2026)
+- **"Mot de passe oublie ?"** link on Sign-in form
+- Forgot password modal step: email input → sends reset email via C# API
+- Confirmation screen after email sent with resend option
+- **Reset Password page** (`/reset-password?token=xxx`) for entering new password
+- Backend proxy endpoints: `POST /api/proxy/auth/forgot-password`, `POST /api/proxy/auth/reset-password`
+- Connected to C# API: `GET /api/Account/{email}?host=zont.cab` and `POST /api/Account`
+
 ## Key Proxy Endpoints
 - `POST /api/proxy/distance` - Trip pricing
 - `POST /api/proxy/preorder-distance` - Preorder pricing
@@ -48,6 +56,8 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - `GET /api/proxy/vehicle-image/{path}` - Vehicle images
 - `POST /api/proxy/auth/register` - Client registration
 - `POST /api/proxy/auth/login` - Client login
+- `POST /api/proxy/auth/forgot-password` - Send password reset email
+- `POST /api/proxy/auth/reset-password` - Reset password with token
 - `GET /api/proxy/auth/send-verification?email=` - Send verification email
 - `GET /api/proxy/auth/verify/{code}` - Verify email code
 
