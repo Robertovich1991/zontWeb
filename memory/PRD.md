@@ -55,10 +55,18 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Admin > Courses Partenaires**: View all partner rides, filter by status, change status, add admin notes
 - **Driver PWA** (`/driver`): Mobile-first app for partners
   - Login page at `/driver/login`
-  - Dashboard with stats (total, pending, accepted), ride list
-  - Create ride form at `/driver/new-ride` with vehicle categories from C# API
-  - Proposed price, passenger details, flight number, notes
-- Vehicle categories fetched dynamically from C# backend and normalized
+  - Dashboard with stats (total, pending, accepted, available), ride list
+  - **Tabs: "Mes Courses" / "Disponibles"** (courses d'autres chauffeurs)
+  - Create ride form at `/driver/new-ride` with **Google Maps Autocomplete** + route calculation
+  - **Ride Detail** (`/driver/ride/:id`): Status, itinéraire (distance/durée via Google Directions API), véhicule, prix, détails passager, notes admin
+  - **Profil** (`/driver/profile`): Info partenaire + **carte bancaire Stripe** pour débit automatique
+  - Vehicle categories fetched dynamically from C# backend and normalized
+
+### Phase 4.1 - Stripe Card Management (Complete - March 12, 2026)
+- Stripe checkout session for card registration (€1 auth charge)
+- Card status tracking in partner profile
+- Admin can charge rides after completion via Stripe
+- Backend endpoints: `/api/partner/payment/add-card`, `/my-card`, `/card-status/{session_id}`, `/charge-ride/{ride_id}`
 
 ## Key Proxy Endpoints
 - `POST /api/proxy/distance` - Trip pricing

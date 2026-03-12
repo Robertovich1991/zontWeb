@@ -11,7 +11,9 @@ const DriverLogin = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (partner) { navigate('/driver', { replace: true }); return null; }
+  useEffect(() => {
+    if (partner) navigate('/driver', { replace: true });
+  }, [partner, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
