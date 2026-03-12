@@ -84,19 +84,37 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Admin CMS: admin@zont.cab / admin123
 - Google Maps API Key: In frontend/.env
 
+### Phase 4.2 - Driver Review/Rating System (Complete - March 12, 2026)
+- **Peer review system**: Partner who created a ride can rate the completed ride (1-5 stars)
+- **Comment validation**: Comment mandatory for ratings 1-4, optional for 5 stars
+- **Duplicate prevention**: Only one review per ride allowed
+- **Profile integration**: Review stats (average, total, rating breakdown chart) + individual review cards on `/driver/profile`
+- **Dashboard integration**: Star ratings shown on completed ride cards, "Avis requis" badge for unreviewed completed rides
+- **Backend endpoints**: `POST/GET /api/partner/rides/{id}/review`, `GET /api/partner/reviews/my`, `GET /api/partner/reviews/stats/{partner_id}`, `GET /api/partner/admin/reviews`
+- **Testing**: 100% pass rate - 14 backend tests, 12 frontend UI flows verified
+
 ## Backlog
 ### P1 - Booking Completion Flow
 - Booking confirmation page (passenger details, flight number)
 - Submit booking to C# API (POST /api/Auction/addAuction)
 
+### P1 - Partner Payment Debits
+- Charge partner's saved Stripe card when a ride they proposed is completed by another driver
+
+### P2 - Notifications
+- Email/push notifications for partners (ride status changes, admin notes)
+
 ### P2 - Company Dashboard
 - Company login via C# API
 - Vehicle/driver management
 
+### P2 - Client Ride History
+- Page for logged-in clients to view past and upcoming bookings
+
 ### P3 - Enhancements
-- Payment integration (Stripe)
-- Booking history
-- Multi-stop support
+- Client-side Stripe payments
+- PWA installability (manifest + service worker)
+- Full deployment to zont.cab production domain
 
 ## Technical Notes
 - C# API requires `Origin: https://zont.cab` header for client registration
