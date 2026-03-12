@@ -377,18 +377,45 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
                 },
             )
             body_text = resp.text
-            if resp.status_code == 200:
-                try:
-                    data = json.loads(body_text) if body_text.strip() else {}
-                except (json.JSONDecodeError, ValueError):
-                    data = {}
-                return {"success": True, "data": data}
+            logger.info(f"C# addAuction response: status={resp.status_code} body={body_text[:500]}")
+
             try:
-                error_data = json.loads(body_text) if body_text.strip() else {"error": "Booking failed"}
+                data = json.loads(body_text) if body_text.strip() else {}
             except (json.JSONDecodeError, ValueError):
-                error_data = {"error": body_text or "Booking failed"}
-            logger.error(f"C# booking error: {resp.status_code} - {error_data}")
-            raise HTTPException(status_code=resp.status_code, detail=error_data)
+                data = {"raw": body_text}
+
+            # Check for 3DS / requires_action in the response
+            client_secret = None
+            requires_action = False
+            if isinstance(data, dict):
+                client_secret = data.get("client_secret") or data.get("clientSecret")
+                status = data.get("status", "")
+                requires_action = status == "requires_action" or "requires_action" in str(data)
+                # Check nested payment_intent
+                pi = data.get("payment_intent") or data.get("paymentIntent") or {}
+                if isinstance(pi, dict):
+                    client_secret = client_secret or pi.get("client_secret")
+                    requires_action = requires_action or pi.get("status") == "requires_action"
+
+            if resp.status_code in (200, 201):
+                result = {"success": True, "data": data}
+                if client_secret:
+                    result["clientSecret"] = client_secret
+                    result["requiresAction"] = True
+                return result
+
+            # For non-200 responses that need 3DS
+            if client_secret or requires_action:
+                return {
+                    "success": False,
+                    "requiresAction": True,
+                    "clientSecret": client_secret,
+                    "data": data,
+                }
+
+            error_msg = data if isinstance(data, dict) else {"error": str(data) or "Booking failed"}
+            logger.error(f"C# booking error: {resp.status_code} - {error_msg}")
+            raise HTTPException(status_code=resp.status_code, detail=error_msg)
     except HTTPException:
         raise
     except Exception as e:

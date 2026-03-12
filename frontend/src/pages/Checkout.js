@@ -128,6 +128,7 @@ const CheckoutForm = ({ searchData, selectedCar, c }) => {
 
     setLoading(true);
     try {
+      // Step 1: Create PaymentMethod from card
       const { error, paymentMethod } = await stripe.createPaymentMethod({
         type: 'card',
         card: elements.getElement(CardElement),
@@ -139,6 +140,7 @@ const CheckoutForm = ({ searchData, selectedCar, c }) => {
         return;
       }
 
+      // Step 2: Send booking + PaymentMethod to C# backend
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
         startPointLongitude: searchData.pickupCoords.longitude,
@@ -156,6 +158,26 @@ const CheckoutForm = ({ searchData, selectedCar, c }) => {
       };
 
       const result = await transferService.submitBooking(bookingPayload);
+
+      // Step 3: Handle 3D Secure if required
+      if (result.requiresAction && result.clientSecret) {
+        const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
+          result.clientSecret
+        );
+        if (confirmError) {
+          toast.error(confirmError.message || c.cardError);
+          setLoading(false);
+          return;
+        }
+        if (paymentIntent.status === 'succeeded') {
+          completeBooking({ ...bookingPayload, result });
+          toast.success(c.bookingSuccess);
+          setTimeout(() => navigate('/booking-confirmation'), 1500);
+          return;
+        }
+      }
+
+      // Step 4: Direct success (no 3DS needed)
       completeBooking({ ...bookingPayload, result });
       toast.success(c.bookingSuccess);
       setTimeout(() => navigate('/booking-confirmation'), 1500);

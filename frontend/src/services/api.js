@@ -72,6 +72,11 @@ export const transferService = {
       xhr.onload = () => {
         let data;
         try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
+        // If 3DS is required, return the data with clientSecret (don't reject)
+        if (data?.requiresAction && data?.clientSecret) {
+          resolve(data);
+          return;
+        }
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve(data);
         } else {
