@@ -3,125 +3,154 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { useLanguage } from '@/context/LanguageContext';
-import { Mail, Phone, MapPin, MessageCircle, Send, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, ChevronRight, Headphones, Clock, Shield, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const content = {
   en: {
-    seoTitle: 'Help & Support - Contact Zont | FAQ',
-    seoDesc: 'Need help? Contact Zont support 24/7. Find answers to common questions about bookings, payments, cancellations. Call, email or live chat.',
+    seoTitle: 'Help & Support - Contact Zont | 24/7 Customer Service | FAQ',
+    seoDesc: 'Need help with your airport transfer? Contact Zont support 24/7. Find answers to common questions about bookings, payments, cancellations. Call, email or live chat.',
     heroTitle: 'Help & Support',
-    heroSub: 'We\'re here to help you 24/7. Find answers below or contact our team.',
+    heroSub: 'We\'re here to help you 24/7. Find answers below or contact our multilingual team.',
+    supportCards: [
+      { icon: 'headphones', title: '24/7 Support', desc: 'Our team is available round the clock, every day of the year.' },
+      { icon: 'clock', title: 'Quick Response', desc: 'Average response time under 5 minutes by phone and chat.' },
+      { icon: 'shield', title: 'Multilingual', desc: 'Support in French, English, Russian and Armenian.' },
+    ],
     faqTitle: 'Frequently Asked Questions',
     faqs: [
-      { q: 'How do I book a ride?', a: 'Download the Zont app, create an account, enter your pickup and drop-off locations, and confirm your booking. You\'ll receive driver details 3 hours before your trip.' },
-      { q: 'What payment methods do you accept?', a: 'We accept credit cards, debit cards, and mobile payment options through our app. Payment is processed securely at the end of your ride.' },
-      { q: 'Can I cancel my booking?', a: 'Yes, you can cancel your booking through the app. Cancellation fees may apply depending on how close to the pickup time you cancel.' },
-      { q: 'How do I become a driver?', a: 'Visit our "Become a Driver" page and fill out the application form. We\'ll review your application and contact you within 24 hours.' },
-      { q: 'Is Zont available in my city?', a: 'Zont operates in 120+ cities worldwide. Check our "Countries" page or the app to see if we\'re available in your location.' },
-      { q: 'What if I have an issue during my ride?', a: 'Contact our 24/7 support team through the app or call our emergency hotline. We\'re always here to help.' },
+      { q: 'How do I book a ride?', a: 'You can book directly on zont.cab or via our mobile app (iOS/Android). Enter your pickup and drop-off locations, choose your vehicle, and confirm. You\'ll receive driver details 3 hours before your trip.' },
+      { q: 'Can I book in advance?', a: 'Absolutely! You can book your transfer days, weeks or even months in advance. The price is locked at booking with no surge pricing. Early booking guarantees availability.' },
+      { q: 'What payment methods do you accept?', a: 'We accept Visa, Mastercard, PayPal and Apple Pay. All payments are processed securely with encryption. You can also pay in cash to the driver.' },
+      { q: 'Can I cancel my booking?', a: 'Yes, free cancellation is available up to 24 hours before your scheduled transfer. After that, cancellation fees may apply depending on the vehicle type.' },
+      { q: 'What happens if my flight is delayed?', a: 'We track all flights in real-time. If your flight is delayed, your driver automatically adjusts their arrival time at no extra cost. We include 60 minutes of free waiting time.' },
+      { q: 'How are your drivers verified?', a: 'All drivers undergo thorough background checks, have valid professional licenses, and are continuously rated by passengers. We only work with the highest-rated drivers.' },
+      { q: 'Is Zont available in my city?', a: 'Zont operates in 120+ cities across Europe including Paris, Nice, London, Berlin, Barcelona, Rome, and many more. Check our Countries page for the full list.' },
+      { q: 'What if I have an issue during my ride?', a: 'Contact our 24/7 support team through the app, call our hotline, or email us. We respond within minutes and will resolve any issue promptly.' },
     ],
     contactTitle: 'Contact Us',
-    contactSub: 'Can\'t find an answer? Reach out to our team.',
+    contactSub: 'Can\'t find an answer? Our team responds within minutes.',
     contactInfo: [
-      { type: 'email', label: 'Email Support', value: 'support@zont.cab' },
-      { type: 'phone', label: 'Phone Support', value: '+33 1 23 45 67 89' },
-      { type: 'address', label: 'Office', value: 'Paris, France' },
+      { type: 'email', label: 'Email Support', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
+      { type: 'phone', label: 'Phone Support', value: '+33 1 23 45 67 89', action: 'tel:+33123456789' },
+      { type: 'address', label: 'Office', value: 'Paris, France', action: null },
     ],
-    formName: 'Your Name *', formEmail: 'Email *', formSubject: 'Subject *',
-    formMessage: 'Your Message *', formPlaceholder: 'Describe your question or issue...',
+    formName: 'Your Name', formEmail: 'Email', formSubject: 'Subject',
+    formMessage: 'Your Message', formPlaceholder: 'Describe your question or issue...',
     submit: 'Send Message', sending: 'Sending...',
-    successTitle: 'Message sent!', successDesc: 'We will respond as soon as possible.',
-    errorTitle: 'Error', errorDesc: 'An error occurred while sending.',
+    successTitle: 'Message sent!',
+    errorTitle: 'Error sending message',
   },
   fr: {
-    seoTitle: 'Aide & Support - Contactez Zont | FAQ',
-    seoDesc: 'Besoin d\'aide ? Contactez le support Zont 24h/24. Trouvez les reponses aux questions frequentes sur les reservations, paiements et annulations.',
+    seoTitle: 'Aide & Support - Contactez Zont | Service Client 24h/24 | FAQ',
+    seoDesc: 'Besoin d\'aide pour votre transfert aeroport ? Contactez le support Zont 24h/24 7j/7. Reponses aux questions frequentes sur les reservations, paiements et annulations.',
     heroTitle: 'Aide & Support',
-    heroSub: 'Nous sommes la pour vous aider 24h/24. Trouvez des reponses ci-dessous ou contactez notre equipe.',
+    heroSub: 'Nous sommes la pour vous aider 24h/24 et 7j/7. Trouvez des reponses ci-dessous ou contactez notre equipe multilingue.',
+    supportCards: [
+      { icon: 'headphones', title: 'Support 24h/24', desc: 'Notre equipe est disponible jour et nuit, 365 jours par an.' },
+      { icon: 'clock', title: 'Reponse Rapide', desc: 'Temps de reponse moyen de moins de 5 minutes par telephone et chat.' },
+      { icon: 'shield', title: 'Multilingue', desc: 'Support en francais, anglais, russe et armenien.' },
+    ],
     faqTitle: 'Questions Frequentes',
     faqs: [
-      { q: 'Comment reserver une course ?', a: 'Telechargez l\'appli Zont, creez un compte, entrez vos lieux de depart et d\'arrivee, et confirmez votre reservation. Vous recevrez les details du chauffeur 3 heures avant votre trajet.' },
-      { q: 'Quels modes de paiement acceptez-vous ?', a: 'Nous acceptons les cartes de credit, cartes de debit et les paiements mobiles via notre application. Le paiement est traite de maniere securisee a la fin de votre course.' },
-      { q: 'Puis-je annuler ma reservation ?', a: 'Oui, vous pouvez annuler votre reservation via l\'application. Des frais d\'annulation peuvent s\'appliquer selon la proximite de l\'heure de prise en charge.' },
-      { q: 'Comment devenir chauffeur ?', a: 'Visitez notre page "Devenir Chauffeur" et remplissez le formulaire de candidature. Nous examinerons votre dossier et vous contacterons sous 24 heures.' },
-      { q: 'Zont est-il disponible dans ma ville ?', a: 'Zont opere dans plus de 120 villes. Consultez notre page "Destinations" ou l\'application pour verifier la disponibilite.' },
-      { q: 'Que faire en cas de probleme pendant la course ?', a: 'Contactez notre support 24/7 via l\'application ou appelez notre ligne d\'urgence. Nous sommes toujours la pour vous aider.' },
+      { q: 'Comment reserver une course ?', a: 'Reservez directement sur zont.cab ou via notre appli mobile (iOS/Android). Entrez vos lieux de depart et d\'arrivee, choisissez votre vehicule et confirmez. Vous recevrez les details du chauffeur 3 heures avant votre trajet.' },
+      { q: 'Puis-je reserver a l\'avance ?', a: 'Absolument ! Vous pouvez reserver votre transfert des jours, semaines ou meme des mois a l\'avance. Le prix est verrouille a la reservation sans majoration. La reservation anticipee garantit la disponibilite.' },
+      { q: 'Quels modes de paiement acceptez-vous ?', a: 'Nous acceptons Visa, Mastercard, PayPal et Apple Pay. Tous les paiements sont traites de maniere securisee avec chiffrement. Vous pouvez egalement payer en especes au chauffeur.' },
+      { q: 'Puis-je annuler ma reservation ?', a: 'Oui, l\'annulation gratuite est disponible jusqu\'a 24 heures avant votre transfert. Apres ce delai, des frais d\'annulation peuvent s\'appliquer selon le type de vehicule.' },
+      { q: 'Que se passe-t-il si mon vol est en retard ?', a: 'Nous suivons tous les vols en temps reel. Si votre vol est retarde, votre chauffeur ajuste automatiquement son heure d\'arrivee sans frais supplementaires. Nous incluons 60 minutes d\'attente gratuite.' },
+      { q: 'Comment sont verifies vos chauffeurs ?', a: 'Tous les chauffeurs passent des verifications approfondies, possedent des licences professionnelles valides et sont notes en continu par les passagers. Nous ne travaillons qu\'avec les chauffeurs les mieux notes.' },
+      { q: 'Zont est-il disponible dans ma ville ?', a: 'Zont opere dans plus de 120 villes en Europe dont Paris, Nice, Londres, Berlin, Barcelone, Rome et bien d\'autres. Consultez notre page Destinations pour la liste complete.' },
+      { q: 'Que faire en cas de probleme pendant la course ?', a: 'Contactez notre support 24/7 via l\'application, appelez notre ligne directe ou envoyez-nous un email. Nous repondons en quelques minutes.' },
     ],
     contactTitle: 'Contactez-Nous',
-    contactSub: 'Vous ne trouvez pas de reponse ? Contactez notre equipe.',
+    contactSub: 'Vous ne trouvez pas de reponse ? Notre equipe repond en quelques minutes.',
     contactInfo: [
-      { type: 'email', label: 'Support Email', value: 'support@zont.cab' },
-      { type: 'phone', label: 'Support Telephone', value: '+33 1 23 45 67 89' },
-      { type: 'address', label: 'Bureau', value: 'Paris, France' },
+      { type: 'email', label: 'Support Email', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
+      { type: 'phone', label: 'Support Telephone', value: '+33 1 23 45 67 89', action: 'tel:+33123456789' },
+      { type: 'address', label: 'Bureau', value: 'Paris, France', action: null },
     ],
-    formName: 'Votre Nom *', formEmail: 'Email *', formSubject: 'Sujet *',
-    formMessage: 'Votre Message *', formPlaceholder: 'Decrivez votre question ou probleme...',
-    submit: 'Envoyer le Message', sending: 'Envoi en cours...',
-    successTitle: 'Message envoye !', successDesc: 'Nous vous repondrons dans les plus brefs delais.',
-    errorTitle: 'Erreur', errorDesc: 'Une erreur est survenue lors de l\'envoi.',
+    formName: 'Votre Nom', formEmail: 'Email', formSubject: 'Sujet',
+    formMessage: 'Votre Message', formPlaceholder: 'Decrivez votre question ou probleme...',
+    submit: 'Envoyer', sending: 'Envoi en cours...',
+    successTitle: 'Message envoye !',
+    errorTitle: 'Erreur lors de l\'envoi',
   },
   ru: {
-    seoTitle: 'Помощь и Поддержка - Свяжитесь с Zont | FAQ',
-    seoDesc: 'Нужна помощь? Свяжитесь с поддержкой Zont 24/7. Ответы на частые вопросы о бронированиях, оплате и отменах.',
+    seoTitle: 'Помощь и Поддержка - Свяжитесь с Zont | Служба Поддержки 24/7 | FAQ',
+    seoDesc: 'Нужна помощь с трансфером из аэропорта? Свяжитесь с поддержкой Zont 24/7. Ответы на частые вопросы о бронированиях, оплате и отменах.',
     heroTitle: 'Помощь и Поддержка',
-    heroSub: 'Мы здесь, чтобы помочь вам 24/7. Найдите ответы ниже или свяжитесь с нашей командой.',
+    heroSub: 'Мы здесь, чтобы помочь вам 24/7. Найдите ответы ниже или свяжитесь с нашей многоязычной командой.',
+    supportCards: [
+      { icon: 'headphones', title: 'Поддержка 24/7', desc: 'Наша команда доступна круглосуточно, 365 дней в году.' },
+      { icon: 'clock', title: 'Быстрый Ответ', desc: 'Среднее время ответа менее 5 минут по телефону и в чате.' },
+      { icon: 'shield', title: 'Многоязычная', desc: 'Поддержка на французском, английском, русском и армянском.' },
+    ],
     faqTitle: 'Часто Задаваемые Вопросы',
     faqs: [
-      { q: 'Как забронировать поездку?', a: 'Скачайте приложение Zont, создайте аккаунт, введите места отправления и прибытия и подтвердите бронирование. Вы получите данные водителя за 3 часа до поездки.' },
-      { q: 'Какие способы оплаты вы принимаете?', a: 'Мы принимаем кредитные карты, дебетовые карты и мобильные платежи через приложение. Оплата обрабатывается безопасно после поездки.' },
-      { q: 'Могу ли я отменить бронирование?', a: 'Да, вы можете отменить бронирование через приложение. Могут применяться штрафы за отмену в зависимости от времени до подачи.' },
-      { q: 'Как стать водителем?', a: 'Посетите страницу "Стать Водителем" и заполните форму заявки. Мы рассмотрим вашу заявку и свяжемся с вами в течение 24 часов.' },
-      { q: 'Работает ли Zont в моем городе?', a: 'Zont работает в 120+ городах. Проверьте страницу "Направления" или приложение для уточнения доступности.' },
-      { q: 'Что делать при проблеме во время поездки?', a: 'Свяжитесь с нашей поддержкой 24/7 через приложение или позвоните на горячую линию. Мы всегда готовы помочь.' },
+      { q: 'Как забронировать поездку?', a: 'Забронируйте на zont.cab или через мобильное приложение (iOS/Android). Введите места отправления и прибытия, выберите автомобиль и подтвердите. Данные водителя вы получите за 3 часа до поездки.' },
+      { q: 'Можно ли забронировать заранее?', a: 'Конечно! Вы можете забронировать за дни, недели или даже месяцы. Цена фиксируется при бронировании без наценок.' },
+      { q: 'Какие способы оплаты вы принимаете?', a: 'Мы принимаем Visa, Mastercard, PayPal и Apple Pay. Все платежи обрабатываются безопасно с шифрованием.' },
+      { q: 'Могу ли я отменить бронирование?', a: 'Да, бесплатная отмена доступна за 24 часа до трансфера. После этого могут применяться штрафы.' },
+      { q: 'Что если рейс задерживается?', a: 'Мы отслеживаем все рейсы. Водитель автоматически корректирует время без доплаты. 60 минут бесплатного ожидания.' },
+      { q: 'Как проверяются водители?', a: 'Все водители проходят тщательную проверку, имеют лицензии и постоянно оцениваются пассажирами.' },
+      { q: 'Работает ли Zont в моем городе?', a: 'Zont работает в 120+ городах Европы: Париж, Ницца, Лондон, Берлин, Барселона, Рим и многие другие.' },
+      { q: 'Что делать при проблеме во время поездки?', a: 'Свяжитесь с поддержкой 24/7 через приложение, позвоните или напишите. Мы отвечаем в течение минут.' },
     ],
     contactTitle: 'Свяжитесь с Нами',
-    contactSub: 'Не нашли ответ? Обратитесь к нашей команде.',
+    contactSub: 'Не нашли ответ? Наша команда отвечает в течение минут.',
     contactInfo: [
-      { type: 'email', label: 'Email Поддержки', value: 'support@zont.cab' },
-      { type: 'phone', label: 'Телефон', value: '+33 1 23 45 67 89' },
-      { type: 'address', label: 'Офис', value: 'Париж, Франция' },
+      { type: 'email', label: 'Email Поддержки', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
+      { type: 'phone', label: 'Телефон', value: '+33 1 23 45 67 89', action: 'tel:+33123456789' },
+      { type: 'address', label: 'Офис', value: 'Париж, Франция', action: null },
     ],
-    formName: 'Ваше Имя *', formEmail: 'Email *', formSubject: 'Тема *',
-    formMessage: 'Ваше Сообщение *', formPlaceholder: 'Опишите ваш вопрос или проблему...',
-    submit: 'Отправить Сообщение', sending: 'Отправка...',
-    successTitle: 'Сообщение отправлено!', successDesc: 'Мы ответим как можно скорее.',
-    errorTitle: 'Ошибка', errorDesc: 'Произошла ошибка при отправке.',
+    formName: 'Ваше Имя', formEmail: 'Email', formSubject: 'Тема',
+    formMessage: 'Ваше Сообщение', formPlaceholder: 'Опишите ваш вопрос или проблему...',
+    submit: 'Отправить', sending: 'Отправка...',
+    successTitle: 'Сообщение отправлено!',
+    errorTitle: 'Ошибка при отправке',
   },
   hy: {
-    seoTitle: 'Օգնություն և Աջակցություն - Կապվեք Zont-ի Հետ | FAQ',
-    seoDesc: 'Օգնություն է պետք՞ Կապվեք Zont-ի աջակցության 24/7: Պատասխաններ ամրագրումների, վճարումների և չեղարկումների մասին:',
-    heroTitle: 'Օգնություն և Աջակցություն',
-    heroSub: 'Մենք այստեղ ենք ձեզ օգնելու 24/7: Գտեք պատասխաններ ստորև կամ կապվեք մեր թիմի հետ:',
-    faqTitle: 'Հաճախ Տրվող Հարցեր',
+    seoTitle: 'Օգնdelays և Աdelays - Կdelays Zont | 24/7 | FAQ',
+    seoDesc: 'Odunavakayani transferi het kapvats harcer? Kapveq Zont-i ajakcut yan 24/7.',
+    heroTitle: 'Ognut yun ev Ajakcut yun',
+    heroSub: 'Menq aystegh enq dzer ognel 24/7. Gteq pataskhannersterev kam kapveq mer timi het.',
+    supportCards: [
+      { icon: 'headphones', title: 'Ajakcut yun 24/7', desc: 'Mer timy hasaneli e shurjorayin, tarva 365 or.' },
+      { icon: 'clock', title: 'Arag Patasxan', desc: 'Mijin patasxani jamanakin 5 rope heraxosov ev chatov.' },
+      { icon: 'shield', title: 'Bazmalezvu', desc: 'Ajakcut yun hayeren, angleren, ruseren ev franseren.' },
+    ],
+    faqTitle: 'Hachakh Trvats Harcser',
     faqs: [
-      { q: 'Ինչպես ամրագրել ուղևորություն՞', a: 'Ներբեռնեք Zont հավելվածը, ստեղծեք հաշիվ, մուտքագրեք վերցնելու և իջնելու վայրերը և հաստատեք: Վարորդի տվյալները կստանաք 3 ժամ առաջ:' },
-      { q: 'Ինչ վճարման եղանակներ եք ընդունում՞', a: 'Մենք ընդունում ենք վարկային քարտեր, դեբիտ քարտեր և բջջային վճարման մեթոդներ: Վճարումը անվտանգ մշակվում է:' },
-      { q: 'Կարող՞ եմ չեղարկել ամրագրումը՞', a: 'Այո, դուք կարող եք չեղարկել հավելվածի միջոցով: Չեղարկման վճարներ կարող են կիրառվել:' },
-      { q: 'Ինչպես դառնալ վարորդ՞', a: 'Այցելեք Մեր "Դառնալ Վարորդ" էջը և լրացրեք հայտադիմումի ձևը: Մենք կքննարկենք և կկապվենք 24 ժամվա ընթացքում:' },
-      { q: 'Zont-ը հասանելի՞ է իմ քաղաքում՞', a: 'Zont-ը գործում է 120+ քաղաքներում: Ստուգեք Մեր "Երկրներ" էջը կամ հավելվածը:' },
-      { q: 'Ինչ անել ուղևորության ժամանակ խնդրի դեպքում՞', a: 'Կապվեք մեր 24/7 աջակցության թիմին հավելվածի միջոցով կամ զանգեք թեժ գծին: Մենք միշտ այստեղ ենք օգնելու:' },
+      { q: 'Inchpes amragrel ughevorut yun?', a: 'Amragreq zont.cab-um kam mobil havelvatsov (iOS/Android). Mtuqagreq vercnelu ev ijneluvayrery, yntrreq mequenay ev hastatreq.' },
+      { q: 'Karogh em arach amragrel?', a: 'Ayo! Karoq eq amragrel orery, shabatnery kam amis arach. Giny hastatvum e amragman pahin.' },
+      { q: 'Inch vcharman yeghanakner eq yndunum?', a: 'Menq yndunumenq Visa, Mastercard, PayPal ev Apple Pay. Bolorvcharumnery apahov en.' },
+      { q: 'Karogh em chegarkrel amragrumy?', a: 'Ayo, anvchar chegarkum 24 zham arach. Dranits heto vcharner karogh en kirarvel.' },
+      { q: 'Inch klini yete trchqs ushanum e?', a: 'Menq hetevm enq boloр trchqnery. Varordy avtomatikorun harmonvum e. 60 rope anvchar spasum.' },
+      { q: 'Inchpes en stugvum varorднery?', a: 'Boloр varorднery stugvats en, litsenziavorvats ev gnaatvats en ughevorнerov.' },
+      { q: 'Zont-y hasaneli e im qaghaqum?', a: 'Zont-y gordum e 120+ qaghaqnerum Europayov.' },
+      { q: 'Inch anel xndri depqum?', a: 'Kapveq mer 24/7 ajakcut yan timi het havelvatsov, zangahareq kam grreq.' },
     ],
-    contactTitle: 'Կապվեք Մեզ',
-    contactSub: 'Պատասխան չգտաք՞ Կապվեք մեր թիմի հետ:',
+    contactTitle: 'Kapveq Mez Het',
+    contactSub: 'Patasxan chgтaq? Mer timy patasxanum e ropeneri yntacqum.',
     contactInfo: [
-      { type: 'email', label: 'Email Աջակցություն', value: 'support@zont.cab' },
-      { type: 'phone', label: 'Հեռախոս', value: '+33 1 23 45 67 89' },
-      { type: 'address', label: 'Գրասենյակ', value: 'Փարիզ, Ֆրանսիա' },
+      { type: 'email', label: 'Email Ajakcut yun', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
+      { type: 'phone', label: 'Heraxos', value: '+33 1 23 45 67 89', action: 'tel:+33123456789' },
+      { type: 'address', label: 'Grasenyak', value: 'Pariz, Fransia', action: null },
     ],
-    formName: 'Ձեր Անունը *', formEmail: 'Email *', formSubject: 'Թեմա *',
-    formMessage: 'Ձեր Հաղորդագրությունը *', formPlaceholder: 'Նկարագրեք ձեր հարցը կամ խնդիրը...',
-    submit: 'Ուղարկել Հաղորդագրությունը', sending: 'Ուղարկվում է...',
-    successTitle: 'Հաղորդագրությունը ուղարկվեց!', successDesc: 'Մենք կպատասխանենք հնարավորինս շուտ:',
-    errorTitle: 'Սխալ', errorDesc: 'Սխալ տեղի ունեցավ ուղարկելիս:',
+    formName: 'Dzer Anuny', formEmail: 'Email', formSubject: 'Tema',
+    formMessage: 'Dzer Haghordagruty', formPlaceholder: 'Nkaragreq dzer harcy...',
+    submit: 'Ugharkel', sending: 'Ugharkvum e...',
+    successTitle: 'Haghordagrutywny ugharkvets!',
+    errorTitle: 'Sxal ugharkelin',
   },
 };
+
+const iconMap = { headphones: Headphones, clock: Clock, shield: Shield };
 
 const Help = () => {
   const { language } = useLanguage();
   const c = content[language] || content.en;
   const [loading, setLoading] = useState(false);
-  const [openFaq, setOpenFaq] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
 
   const handleSubmit = async (e) => {
@@ -139,8 +168,10 @@ const Help = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  const inputCls = 'w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent text-sm';
+
   return (
-    <div className="min-h-screen flex flex-col" data-testid="help-page">
+    <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="help-page">
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
@@ -157,60 +188,103 @@ const Help = () => {
       />
       <Header />
 
-      <section className="pt-32 pb-12 px-4 bg-gradient-to-br from-[#2ecc71] to-[#27ae60] text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4" data-testid="help-h1">{c.heroTitle}</h1>
-          <p className="text-lg max-w-2xl mx-auto">{c.heroSub}</p>
+      {/* Hero */}
+      <section className="relative pt-28 pb-14 md:pt-36 md:pb-20 px-4 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a2332] via-[#1a2332] to-[#0f1419]" />
+        <div className="absolute top-20 left-0 w-80 h-80 bg-[#2ecc71]/5 rounded-full blur-3xl" />
+        <div className="relative max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-[#2ecc71]/10 text-[#2ecc71] px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <MessageCircle className="w-4 h-4" />
+            <span>24/7</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4" data-testid="help-h1">{c.heroTitle}</h1>
+          <p className="text-base md:text-lg text-gray-300 max-w-2xl mx-auto">{c.heroSub}</p>
+        </div>
+      </section>
+
+      {/* Support Cards */}
+      <section className="py-8 px-4 bg-[#0f1419] border-y border-gray-800">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+          {c.supportCards.map((card, i) => {
+            const Icon = iconMap[card.icon] || Headphones;
+            return (
+              <div key={i} className="flex items-center gap-4 p-4" data-testid={`support-card-${i}`}>
+                <div className="w-11 h-11 bg-[#2ecc71]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-5 h-5 text-[#2ecc71]" />
+                </div>
+                <div>
+                  <h3 className="text-white font-semibold text-sm">{card.title}</h3>
+                  <p className="text-gray-400 text-xs">{card.desc}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 md:py-24 px-4 bg-[#1a2332]">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-10">{c.faqTitle}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">{c.faqTitle}</h2>
           <div className="space-y-3">
             {c.faqs.map((faq, i) => (
-              <div key={i} className="border border-gray-200 rounded-xl overflow-hidden" data-testid={`faq-${i}`}>
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 transition-colors">
-                  <span className="font-semibold text-gray-900">{faq.q}</span>
-                  {openFaq === i ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
-                </button>
-                {openFaq === i && (
-                  <div className="px-5 pb-5 text-gray-600 text-sm leading-relaxed">{faq.a}</div>
-                )}
-              </div>
+              <details key={i} className="group bg-[#0f1419] rounded-xl border border-gray-800" data-testid={`faq-${i}`}>
+                <summary className="flex items-center justify-between cursor-pointer p-5 text-white font-semibold text-sm list-none">
+                  {faq.q}
+                  <ChevronRight className="w-5 h-5 text-gray-500 group-open:rotate-90 transition-transform flex-shrink-0 ml-2" />
+                </summary>
+                <div className="px-5 pb-5 text-sm text-gray-400 leading-relaxed">{faq.a}</div>
+              </details>
             ))}
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-3">{c.contactTitle}</h2>
-          <p className="text-gray-600 text-center mb-10">{c.contactSub}</p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {c.contactInfo.map((info, i) => (
-              <div key={i} className="bg-white rounded-xl p-6 text-center shadow-sm">
-                {info.type === 'email' && <Mail className="w-8 h-8 text-[#2ecc71] mx-auto mb-3" />}
-                {info.type === 'phone' && <Phone className="w-8 h-8 text-[#2ecc71] mx-auto mb-3" />}
-                {info.type === 'address' && <MapPin className="w-8 h-8 text-[#2ecc71] mx-auto mb-3" />}
-                <h3 className="font-semibold text-gray-900 mb-1">{info.label}</h3>
-                <p className="text-gray-600 text-sm">{info.value}</p>
-              </div>
-            ))}
+      <section className="py-16 md:py-24 px-4 bg-[#0f1419]">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{c.contactTitle}</h2>
+            <p className="text-gray-400 text-sm">{c.contactSub}</p>
           </div>
 
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm p-8">
-            <form onSubmit={handleSubmit} className="space-y-5" data-testid="help-form">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">{c.formName}</label><input type="text" name="name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="help-name" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">{c.formEmail}</label><input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="help-email" /></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+            {c.contactInfo.map((info, i) => {
+              const content = (
+                <div className="bg-[#1a2332] rounded-xl p-5 text-center border border-gray-800 hover:border-[#2ecc71]/40 transition-colors" data-testid={`contact-${info.type}`}>
+                  {info.type === 'email' && <Mail className="w-7 h-7 text-[#2ecc71] mx-auto mb-3" />}
+                  {info.type === 'phone' && <Phone className="w-7 h-7 text-[#2ecc71] mx-auto mb-3" />}
+                  {info.type === 'address' && <MapPin className="w-7 h-7 text-[#2ecc71] mx-auto mb-3" />}
+                  <h3 className="font-semibold text-white text-sm mb-1">{info.label}</h3>
+                  <p className="text-gray-400 text-sm">{info.value}</p>
+                </div>
+              );
+              return info.action ? <a key={i} href={info.action}>{content}</a> : <div key={i}>{content}</div>;
+            })}
+          </div>
+
+          <div className="max-w-2xl mx-auto bg-[#1a2332] rounded-2xl border border-gray-800 p-6 md:p-8">
+            <form onSubmit={handleSubmit} className="space-y-4" data-testid="help-form">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">{c.formName} *</label>
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} required className={inputCls} data-testid="help-name" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">{c.formEmail} *</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} required className={inputCls} data-testid="help-email" />
+                </div>
               </div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">{c.formSubject}</label><input type="text" name="subject" value={formData.subject} onChange={handleChange} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="help-subject" /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">{c.formMessage}</label><textarea name="message" value={formData.message} onChange={handleChange} required rows="5" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" placeholder={c.formPlaceholder} data-testid="help-message" /></div>
-              <button type="submit" disabled={loading} className="w-full py-3 bg-[#2ecc71] text-white font-semibold rounded-lg hover:bg-[#27ae60] transition-colors disabled:bg-gray-400 flex items-center justify-center gap-2" data-testid="help-submit">
+              <div>
+                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">{c.formSubject} *</label>
+                <input type="text" name="subject" value={formData.subject} onChange={handleChange} required className={inputCls} data-testid="help-subject" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">{c.formMessage} *</label>
+                <textarea name="message" value={formData.message} onChange={handleChange} required rows="5" className={inputCls} placeholder={c.formPlaceholder} data-testid="help-message" />
+              </div>
+              <button type="submit" disabled={loading} data-testid="help-submit"
+                className="w-full py-3.5 bg-[#2ecc71] text-white font-semibold rounded-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-600 flex items-center justify-center gap-2 shadow-lg shadow-[#2ecc71]/20">
                 <Send className="w-4 h-4" />
                 {loading ? c.sending : c.submit}
               </button>
