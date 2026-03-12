@@ -55,6 +55,29 @@ export const transferService = {
     if (!resp.ok) throw new Error('Failed to fetch trip types');
     return resp.json();
   },
+
+  /**
+   * Submit a booking to the C# backend with Stripe payment method.
+   */
+  submitBooking: async (bookingData) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) throw new Error('Authentication required');
+
+    const resp = await fetch(`${API}/api/proxy/booking/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(bookingData),
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      const errorMsg = data?.detail?.invalidCard?.[0] || data?.detail?.error || data?.detail || 'Booking failed';
+      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+    }
+    return data;
+  },
 };
 
 export const authService = {

@@ -335,3 +335,79 @@ async def proxy_verify_code(code: str):
     except Exception as e:
         logger.error(f"Verify code error: {e}")
         raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+
+
+class AuctionAddRequest(BaseModel):
+    startPointLatitude: float
+    startPointLongitude: float
+    clientPrice: float
+    startDate: str
+    startAddress: Optional[str] = None
+    endAddress: Optional[str] = None
+    destination: Optional[str] = None
+    tripType: Optional[str] = None
+    carType: Optional[str] = None
+    distance: Optional[int] = None
+    duration: Optional[int] = None
+    additionalComments: Optional[str] = None
+    terminal: Optional[str] = None
+    cardId: Optional[str] = None
+    email: Optional[str] = None
+    utcOffset: Optional[int] = None
+
+
+@router.post("/booking/create")
+async def proxy_create_booking(req: AuctionAddRequest, request: Request):
+    """Create a new booking/auction in the C# backend."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+
+    try:
+        payload = req.dict(exclude_none=True)
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Auction/addAuction",
+                json=payload,
+                headers={
+                    "Authorization": auth_header,
+                    "Content-Type": "application/json",
+                    "Origin": "https://zont.cab",
+                },
+            )
+            if resp.status_code == 200:
+                data = resp.json() if resp.text else {"success": True}
+                return {"success": True, "data": data}
+            error_data = resp.json() if resp.text else {"error": "Booking failed"}
+            logger.error(f"C# booking error: {resp.status_code} - {error_data}")
+            raise HTTPException(status_code=resp.status_code, detail=error_data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Proxy booking error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+
+
+@router.get("/booking/upcoming")
+async def proxy_upcoming_auctions(request: Request):
+    """Get upcoming auctions for the logged-in client."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Auction/client/upcomingAuctions",
+                headers={
+                    "Authorization": auth_header,
+                    "Origin": "https://zont.cab",
+                },
+            )
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail="C# API error")
+    except Exception as e:
+        logger.error(f"Proxy upcoming auctions error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
