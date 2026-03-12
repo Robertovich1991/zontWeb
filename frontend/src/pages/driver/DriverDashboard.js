@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
-import { Plus, LogOut, Car, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Navigation, Users, Route } from 'lucide-react';
+import { Plus, LogOut, Car, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Navigation, Users, Route, User } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -13,11 +13,14 @@ const statusConfig = {
   cancelled: { label: 'Annulee', color: 'bg-gray-500/10 text-gray-400', icon: AlertCircle },
 };
 
-const RideCard = ({ ride, showPartner }) => {
+const RideCard = ({ ride, showPartner, clickable }) => {
+  const navigate = useNavigate();
   const sc = statusConfig[ride.status] || statusConfig.pending;
   const StatusIcon = sc.icon;
   return (
-    <div className="bg-[#1a2332] rounded-xl p-4 border border-gray-800" data-testid={`ride-card-${ride.id}`}>
+    <div className={`bg-[#1a2332] rounded-xl p-4 border border-gray-800 ${clickable ? 'cursor-pointer active:bg-[#1a2332]/80 transition' : ''}`}
+      onClick={() => clickable && navigate(`/driver/ride/${ride.id}`)}
+      data-testid={`ride-card-${ride.id}`}>
       <div className="flex items-start justify-between mb-2">
         <div className={`px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 ${sc.color}`}>
           <StatusIcon className="w-3 h-3" />{sc.label}
@@ -90,9 +93,14 @@ const DriverDashboard = () => {
             <p className="text-gray-500 text-xs">{partner?.company || 'Partenaire'}</p>
           </div>
         </div>
-        <button onClick={logout} className="text-gray-400 hover:text-red-400 transition" data-testid="driver-logout">
-          <LogOut className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-3">
+          <Link to="/driver/profile" className="text-gray-400 hover:text-[#2ecc71] transition" data-testid="profile-btn">
+            <User className="w-5 h-5" />
+          </Link>
+          <button onClick={logout} className="text-gray-400 hover:text-red-400 transition" data-testid="driver-logout">
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
       </header>
 
       {/* Stats */}
@@ -165,7 +173,7 @@ const DriverDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {rides.map(ride => <RideCard key={ride.id} ride={ride} showPartner={false} />)}
+                  {rides.map(ride => <RideCard key={ride.id} ride={ride} showPartner={false} clickable={true} />)}
                 </div>
               )
             )}
@@ -179,7 +187,7 @@ const DriverDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {availableRides.map(ride => <RideCard key={ride.id} ride={ride} showPartner={true} />)}
+                  {availableRides.map(ride => <RideCard key={ride.id} ride={ride} showPartner={true} clickable={false} />)}
                 </div>
               )
             )}

@@ -4,6 +4,8 @@ import { DriverAuthProvider, useDriverAuth } from './DriverAuthContext';
 import DriverLogin from './DriverLogin';
 import DriverDashboard from './DriverDashboard';
 import CreateRide from './CreateRide';
+import RideDetail from './RideDetail';
+import DriverProfile from './DriverProfile';
 
 const DriverGuard = ({ children }) => {
   const { partner, loading } = useDriverAuth();
@@ -22,6 +24,8 @@ const DriverApp = () => (
       <Route path="/login" element={<DriverLogin />} />
       <Route path="/" element={<DriverGuard><DriverDashboard /></DriverGuard>} />
       <Route path="/new-ride" element={<DriverGuard><CreateRide /></DriverGuard>} />
+      <Route path="/ride/:id" element={<DriverGuard><RideDetail /></DriverGuard>} />
+      <Route path="/profile" element={<DriverGuard><DriverProfile /></DriverGuard>} />
       <Route path="*" element={<Navigate to="/driver" replace />} />
     </Routes>
   </DriverAuthProvider>
