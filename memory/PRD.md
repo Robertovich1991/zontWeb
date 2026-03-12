@@ -79,6 +79,8 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - `POST /api/proxy/auth/reset-password` - Reset password with token
 - `GET /api/proxy/auth/send-verification?email=` - Send verification email
 - `GET /api/proxy/auth/verify/{code}` - Verify email code
+- `POST /api/proxy/booking/create` - Create booking/auction in C# backend (requires auth + Stripe cardId)
+- `GET /api/proxy/booking/upcoming` - Get client's upcoming auctions
 
 ## Credentials
 - Admin CMS: admin@zont.cab / admin123
@@ -93,11 +95,16 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Backend endpoints**: `POST/GET /api/partner/rides/{id}/review`, `GET /api/partner/reviews/my`, `GET /api/partner/reviews/stats/{partner_id}`, `GET /api/partner/admin/reviews`
 - **Testing**: 100% pass rate - 14 backend tests, 12 frontend UI flows verified
 
-## Backlog
-### P1 - Booking Completion Flow
-- Booking confirmation page (passenger details, flight number)
-- Submit booking to C# API (POST /api/Auction/addAuction)
+### Phase 5 - Client Stripe Payment & Booking Submission (Complete - March 12, 2026)
+- **Stripe Elements** integration on the Checkout page using the C# backend's live Stripe key (`pk_live_...`)
+- **Payment flow**: Client enters card via Stripe Elements -> creates PaymentMethod -> submits to C# API with card ID
+- **Backend proxy**: `POST /api/proxy/booking/create` proxies to C# `POST /api/Auction/addAuction`
+- **Backend proxy**: `GET /api/proxy/booking/upcoming` proxies to C# `GET /api/Auction/client/upcomingAuctions`
+- **C# API format discovered**: Date must be `dd/MM/yyyy HH:mm:ss`, required fields: `startPointLatitude`, `startPointLongitude`, `clientPrice`
+- **BookingConfirmation page**: Updated with dark theme, French translations, and new data format
+- **Testing**: 100% pass rate - 7 backend tests, code verification passed on all frontend files
 
+## Backlog
 ### P1 - Partner Payment Debits
 - Charge partner's saved Stripe card when a ride they proposed is completed by another driver
 
@@ -112,7 +119,6 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Page for logged-in clients to view past and upcoming bookings
 
 ### P3 - Enhancements
-- Client-side Stripe payments
 - PWA installability (manifest + service worker)
 - Full deployment to zont.cab production domain
 
