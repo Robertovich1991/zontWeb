@@ -81,7 +81,7 @@ tail -f /var/log/supervisor/frontend.out.log
 ## 🌐 Accès
 
 Une fois lancé, le site est accessible à :
-- **Frontend** : https://zont-cms-hub.preview.emergentagent.com
+- **Frontend** : https://cms-integration-test-1.preview.emergentagent.com
 
 ## 📁 Structure du projet
 
