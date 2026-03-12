@@ -1,58 +1,171 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
-import { User, Phone, Mail, Building2, Star, Shield, LogOut } from 'lucide-react';
+import { ArrowLeft, CreditCard, Loader2, CheckCircle, User, Building, Phone, Mail, Shield } from 'lucide-react';
 
-export default function DriverProfile() {
-  const { driver, driverType, logout } = useDriverAuth();
+const API = process.env.REACT_APP_BACKEND_URL;
 
-  const items = [
-    { icon: Mail, label: 'Email', value: driver?.email },
-    { icon: Phone, label: 'Telephone', value: driver?.phone },
-    { icon: Building2, label: 'Societe', value: driver?.companyName },
-    { icon: Star, label: 'Note', value: driver?.rank ? `${driver.rank}/5` : '-' },
-    { icon: Shield, label: 'Type', value: driverType === 'csharp' ? 'Chauffeur Zont' : 'Chauffeur Societe' },
-  ];
+const DriverProfile = () => {
+  const { partner, token, logout } = useDriverAuth();
+  const navigate = useNavigate();
+  const [cardInfo, setCardInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [addingCard, setAddingCard] = useState(false);
+  const [polling, setPolling] = useState(false);
+
+  const headers = { Authorization: `Bearer ${token}` };
+
+  useEffect(() => {
+    const fetchCard = async () => {
+      try {
+        const res = await fetch(`${API}/api/partner/payment/my-card`, { headers });
+        if (res.ok) setCardInfo(await res.json());
+      } catch {} finally { setLoading(false); }
+    };
+    fetchCard();
+
+    // Check if returning from Stripe
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    if (sessionId) {
+      setPolling(true);
+      pollStatus(sessionId, 0);
+      window.history.replaceState({}, '', '/driver/profile');
+    }
+  }, []);
+
+  const pollStatus = async (sessionId, attempts) => {
+    if (attempts >= 5) { setPolling(false); return; }
+    try {
+      const res = await fetch(`${API}/api/partner/payment/card-status/${sessionId}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.payment_status === 'paid') {
+          setCardInfo({ has_card: true, card_added_at: new Date().toISOString() });
+          setPolling(false);
+          return;
+        }
+      }
+    } catch {}
+    setTimeout(() => pollStatus(sessionId, attempts + 1), 2000);
+  };
+
+  const handleAddCard = async () => {
+    setAddingCard(true);
+    try {
+      const res = await fetch(`${API}/api/partner/payment/add-card`, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ origin_url: window.location.origin }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        window.location.href = data.url;
+      }
+    } catch {} finally { setAddingCard(false); }
+  };
 
   return (
-    <div className="px-4 py-6">
-      {/* Avatar */}
-      <div className="flex flex-col items-center mb-6">
-        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-3" style={{ background: '#262A36' }}>
-          <User className="w-10 h-10 text-gray-500" />
-        </div>
-        <h2 className="text-white text-lg font-semibold">
-          {driver?.firstName} {driver?.lastName}
-        </h2>
-        <span className={`text-[10px] mt-1 font-semibold uppercase px-2.5 py-0.5 rounded-full ${
-          driverType === 'csharp' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'
-        }`}>
-          {driverType === 'csharp' ? 'Chauffeur Zont' : 'Chauffeur Societe'}
-        </span>
-      </div>
+    <div className="min-h-screen bg-[#0f1419] flex flex-col" data-testid="driver-profile-page">
+      <header className="bg-[#1a2332] border-b border-gray-800 px-4 py-3 flex items-center gap-3 sticky top-0 z-20">
+        <button onClick={() => navigate('/driver')} className="text-gray-400 hover:text-white transition" data-testid="back-btn">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h1 className="text-white font-semibold text-sm">Mon Profil</h1>
+      </header>
 
-      {/* Info Cards */}
-      <div className="space-y-2 mb-8">
-        {items.map(({ icon: Icon, label, value }) => (
-          <div key={label} className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: '#1A1D29' }}>
-            <Icon className="w-4 h-4 text-gray-500 shrink-0" />
-            <div className="flex-1">
-              <p className="text-gray-500 text-[10px] uppercase tracking-wider">{label}</p>
-              <p className="text-white text-sm">{value || '-'}</p>
+      <div className="flex-1 px-4 py-5 space-y-4">
+        {/* Partner Info */}
+        <div className="bg-[#1a2332] rounded-xl p-5 border border-gray-800" data-testid="profile-info">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="w-14 h-14 bg-[#2ecc71] rounded-xl flex items-center justify-center text-white font-bold text-xl">
+              {partner?.name?.charAt(0) || 'P'}
+            </div>
+            <div>
+              <h2 className="text-white font-bold text-lg">{partner?.name}</h2>
+              <p className="text-gray-400 text-sm">{partner?.company || 'Partenaire'}</p>
             </div>
           </div>
-        ))}
-      </div>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-sm">
+              <Mail className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-300">{partner?.email}</span>
+            </div>
+            {partner?.phone && (
+              <div className="flex items-center gap-3 text-sm">
+                <Phone className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-300">{partner?.phone}</span>
+              </div>
+            )}
+            {partner?.company && (
+              <div className="flex items-center gap-3 text-sm">
+                <Building className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-300">{partner?.company}</span>
+              </div>
+            )}
+          </div>
+        </div>
 
-      {/* Logout */}
-      <button
-        data-testid="driver-logout-btn"
-        onClick={logout}
-        className="w-full py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
-        style={{ background: '#1A1D29', border: '1px solid #ef444433' }}
-      >
-        <LogOut className="w-4 h-4 text-red-400" />
-        <span className="text-red-400 text-sm font-medium">Se deconnecter</span>
-      </button>
+        {/* Card Management */}
+        <div className="bg-[#1a2332] rounded-xl p-5 border border-gray-800" data-testid="card-management">
+          <h3 className="text-white font-semibold text-sm flex items-center gap-2 mb-4">
+            <CreditCard className="w-4 h-4 text-[#2ecc71]" /> Carte Bancaire
+          </h3>
+
+          {loading || polling ? (
+            <div className="flex items-center gap-3 py-4">
+              <Loader2 className="w-5 h-5 text-[#2ecc71] animate-spin" />
+              <span className="text-gray-400 text-sm">{polling ? 'Verification du paiement...' : 'Chargement...'}</span>
+            </div>
+          ) : cardInfo?.has_card ? (
+            <div className="space-y-3">
+              <div className="bg-[#2ecc71]/10 border border-[#2ecc71]/30 rounded-xl p-4 flex items-center gap-3" data-testid="card-active">
+                <CheckCircle className="w-5 h-5 text-[#2ecc71]" />
+                <div>
+                  <p className="text-white font-medium text-sm">Carte enregistree</p>
+                  <p className="text-gray-400 text-xs">
+                    Ajoutee le {cardInfo.card_added_at ? new Date(cardInfo.card_added_at).toLocaleDateString('fr-FR') : '-'}
+                  </p>
+                </div>
+              </div>
+              <button onClick={handleAddCard} disabled={addingCard}
+                className="w-full py-3 bg-gray-700/50 text-gray-300 rounded-xl text-sm hover:bg-gray-700 transition flex items-center justify-center gap-2">
+                {addingCard ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
+                Changer de carte
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                <p className="text-amber-400 text-sm font-medium mb-1">Aucune carte enregistree</p>
+                <p className="text-gray-400 text-xs">Ajoutez une carte bancaire pour etre debite automatiquement apres chaque course effectuee.</p>
+              </div>
+              <button onClick={handleAddCard} disabled={addingCard} data-testid="add-card-btn"
+                className="w-full py-4 bg-[#2ecc71] text-white rounded-xl font-semibold text-sm hover:bg-[#27ae60] transition-all disabled:bg-gray-600 flex items-center justify-center gap-2 shadow-lg shadow-[#2ecc71]/20">
+                {addingCard ? <><Loader2 className="w-5 h-5 animate-spin" /> Redirection...</> : <><CreditCard className="w-5 h-5" /> Ajouter une Carte</>}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Security info */}
+        <div className="bg-[#1a2332] rounded-xl p-4 border border-gray-800">
+          <div className="flex items-start gap-3">
+            <Shield className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-gray-400 text-xs">Vos donnees de paiement sont securisees par <span className="text-white font-medium">Stripe</span>. Nous ne stockons jamais vos informations bancaires sur nos serveurs.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <button onClick={() => { logout(); navigate('/driver/login'); }} data-testid="profile-logout"
+          className="w-full py-3 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition">
+          Se deconnecter
+        </button>
+      </div>
     </div>
   );
-}
+};
+
+export default DriverProfile;

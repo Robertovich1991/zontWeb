@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,7 +7,8 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
+from datetime import datetime, timezone
 import uuid
 from datetime import datetime, timezone
 
@@ -69,6 +71,34 @@ async def get_status_checks():
 # Include the router in the main app
 app.include_router(api_router)
 
+# Admin routes
+from routes.admin_auth import router as auth_router
+from routes.admin_pages import router as pages_router
+from routes.admin_places import router as places_router
+from routes.admin_cms import router as cms_router
+from routes.admin_upload import router as upload_router
+from routes.public_cms import router as public_router
+from routes.company import router as company_router
+from routes.csharp_proxy import router as proxy_router
+from routes.partner import router as partner_router
+from routes.partner_payment import router as partner_payment_router
+
+app.include_router(auth_router)
+app.include_router(pages_router)
+app.include_router(places_router)
+app.include_router(cms_router)
+app.include_router(upload_router)
+app.include_router(public_router)
+app.include_router(company_router)
+app.include_router(proxy_router)
+app.include_router(partner_router)
+app.include_router(partner_payment_router)
+
+# Serve uploaded files
+UPLOAD_DIR = ROOT_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -83,6 +113,29 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+@app.post("/api/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhooks."""
+    try:
+        body = await request.body()
+        sig = request.headers.get("Stripe-Signature")
+        from emergentintegrations.payments.stripe.checkout import StripeCheckout
+        api_key = os.environ.get("STRIPE_API_KEY")
+        host_url = str(request.base_url).rstrip("/")
+        stripe_checkout = StripeCheckout(api_key=api_key, webhook_url=f"{host_url}/api/webhook/stripe")
+        webhook_response = await stripe_checkout.handle_webhook(body, sig)
+        if webhook_response.payment_status == "paid" and webhook_response.metadata.get("type") == "card_setup":
+            partner_id = webhook_response.metadata.get("partner_id")
+            if partner_id:
+                db = app.state.db
+                await db.partners.update_one({"id": partner_id}, {"$set": {"has_card": True, "card_added_at": datetime.now(timezone.utc).isoformat()}})
+                await db.payment_transactions.update_one({"session_id": webhook_response.session_id}, {"$set": {"payment_status": "paid", "status": "completed"}})
+        return {"status": "ok"}
+    except Exception as e:
+        logger.error(f"Stripe webhook error: {e}")
+        return {"status": "error"}
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
