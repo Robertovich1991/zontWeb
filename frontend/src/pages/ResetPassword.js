@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { authService } from '@/services/api';
 import Header from '@/components/layout/Header';
@@ -8,8 +8,9 @@ import { KeyRound, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
+  const { token: pathToken } = useParams();
   const navigate = useNavigate();
-  const token = searchParams.get('token') || searchParams.get('code') || '';
+  const token = pathToken || searchParams.get('token') || searchParams.get('code') || '';
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState({});
