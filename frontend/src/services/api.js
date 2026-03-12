@@ -71,10 +71,17 @@ export const transferService = {
       },
       body: JSON.stringify(bookingData),
     });
-    const data = await resp.json();
+    const text = await resp.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = { error: text || 'Unexpected response' };
+    }
     if (!resp.ok) {
-      const errorMsg = data?.detail?.invalidCard?.[0] || data?.detail?.error || data?.detail || 'Booking failed';
-      throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+      const detail = data?.detail;
+      const errorMsg = detail?.invalidCard?.[0] || detail?.error || (typeof detail === 'string' ? detail : null) || data?.error || 'Booking failed';
+      throw new Error(errorMsg);
     }
     return data;
   },

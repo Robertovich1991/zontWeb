@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 import httpx
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -375,10 +376,17 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
                     "Origin": "https://zont.cab",
                 },
             )
+            body_text = resp.text
             if resp.status_code == 200:
-                data = resp.json() if resp.text else {"success": True}
+                try:
+                    data = json.loads(body_text) if body_text.strip() else {}
+                except (json.JSONDecodeError, ValueError):
+                    data = {}
                 return {"success": True, "data": data}
-            error_data = resp.json() if resp.text else {"error": "Booking failed"}
+            try:
+                error_data = json.loads(body_text) if body_text.strip() else {"error": "Booking failed"}
+            except (json.JSONDecodeError, ValueError):
+                error_data = {"error": body_text or "Booking failed"}
             logger.error(f"C# booking error: {resp.status_code} - {error_data}")
             raise HTTPException(status_code=resp.status_code, detail=error_data)
     except HTTPException:
