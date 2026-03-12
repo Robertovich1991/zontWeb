@@ -58,32 +58,31 @@ export const transferService = {
 
   /**
    * Submit a booking to the C# backend with Stripe payment method.
+   * Uses XMLHttpRequest to avoid 'body stream already read' issues with fetch + Stripe.js
    */
-  submitBooking: async (bookingData) => {
-    const token = localStorage.getItem('auth_token');
-    if (!token) throw new Error('Authentication required');
+  submitBooking: (bookingData) => {
+    return new Promise((resolve, reject) => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return reject(new Error('Authentication required'));
 
-    const resp = await fetch(`${API}/api/proxy/booking/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(bookingData),
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${API}/api/proxy/booking/create`);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.onload = () => {
+        let data;
+        try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(data);
+        } else {
+          const detail = data?.detail;
+          const errorMsg = detail?.invalidCard?.[0] || detail?.error || (typeof detail === 'string' ? detail : null) || data?.error || 'Booking failed';
+          reject(new Error(errorMsg));
+        }
+      };
+      xhr.onerror = () => reject(new Error('Network error'));
+      xhr.send(JSON.stringify(bookingData));
     });
-    const text = await resp.text();
-    let data;
-    try {
-      data = text ? JSON.parse(text) : {};
-    } catch {
-      data = { error: text || 'Unexpected response' };
-    }
-    if (!resp.ok) {
-      const detail = data?.detail;
-      const errorMsg = detail?.invalidCard?.[0] || detail?.error || (typeof detail === 'string' ? detail : null) || data?.error || 'Booking failed';
-      throw new Error(errorMsg);
-    }
-    return data;
   },
 };
 
