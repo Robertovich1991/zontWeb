@@ -58,14 +58,57 @@ export const transferService = {
 };
 
 export const authService = {
-  login: async (credentials) => {
-    const token = localStorage.getItem('auth_token');
-    return { token };
+  registerPhone: async (phone) => {
+    const resp = await fetch(`${API}/api/proxy/auth/register-phone`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw { response: { data } };
+    return data;
   },
+
+  verifyPhone: async (phoneNumber, verificationCode) => {
+    const resp = await fetch(`${API}/api/proxy/auth/verify-phone`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phoneNumber, verificationCode }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw { response: { data } };
+    return data;
+  },
+
+  register: async (userData) => {
+    const resp = await fetch(`${API}/api/proxy/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw { response: { data } };
+    return data;
+  },
+
+  login: async (credentials) => {
+    const resp = await fetch(`${API}/api/proxy/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: credentials.email, password: credentials.password }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw { response: { data } };
+    localStorage.setItem('auth_token', data.accessToken);
+    localStorage.setItem('user', JSON.stringify({ token: data.accessToken, roles: data.roles }));
+    return { user: { token: data.accessToken, roles: data.roles }, token: data.accessToken };
+  },
+
   logout: () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
   },
+
   getCurrentUser: () => {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;

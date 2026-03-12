@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Vérifier si l'utilisateur est déjà connecté
     const currentUser = authService.getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
@@ -25,22 +24,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
-    try {
-      const data = await authService.login(credentials);
-      setUser(data.user);
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const register = async (userData) => {
-    try {
-      const data = await authService.register(userData);
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const data = await authService.login(credentials);
+    setUser(data.user);
+    return data;
   };
 
   const logout = () => {
@@ -51,7 +37,6 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     login,
-    register,
     logout,
     isAuthenticated: !!user,
     loading,
