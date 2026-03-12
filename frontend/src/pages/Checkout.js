@@ -128,19 +128,32 @@ const CheckoutForm = ({ searchData, selectedCar, c }) => {
 
     setLoading(true);
     try {
-      // Step 1: Create PaymentMethod from card
-      const { error, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: elements.getElement(CardElement),
+      // Step 1: Get SetupIntent for 3DS authentication
+      const token = localStorage.getItem('auth_token');
+      const setupResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-
-      if (error) {
-        toast.error(error.message || c.cardError);
+      const setupData = await setupResp.json();
+      if (!setupResp.ok || !setupData.clientSecret) {
+        toast.error(setupData?.detail || c.bookingError);
         setLoading(false);
         return;
       }
 
-      // Step 2: Send booking + PaymentMethod to C# backend
+      // Step 2: Confirm card setup with 3DS authentication
+      const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
+        setupData.clientSecret,
+        { payment_method: { card: elements.getElement(CardElement) } }
+      );
+
+      if (setupError) {
+        toast.error(setupError.message || c.cardError);
+        setLoading(false);
+        return;
+      }
+
+      // Step 3: Card is now authenticated - send the confirmed PaymentMethod to C# API
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
         startPointLongitude: searchData.pickupCoords.longitude,
@@ -153,31 +166,11 @@ const CheckoutForm = ({ searchData, selectedCar, c }) => {
         carType: selectedCar.tripType || '',
         distance: selectedCar.distance ? Math.round(selectedCar.distance) : 0,
         duration: selectedCar.duration ? Math.round(selectedCar.duration) : 0,
-        cardId: paymentMethod.id,
+        cardId: setupIntent.payment_method,
         utcOffset: new Date().getTimezoneOffset() * -1,
       };
 
       const result = await transferService.submitBooking(bookingPayload);
-
-      // Step 3: Handle 3D Secure if required
-      if (result.requiresAction && result.clientSecret) {
-        const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
-          result.clientSecret
-        );
-        if (confirmError) {
-          toast.error(confirmError.message || c.cardError);
-          setLoading(false);
-          return;
-        }
-        if (paymentIntent.status === 'succeeded') {
-          completeBooking({ ...bookingPayload, result });
-          toast.success(c.bookingSuccess);
-          setTimeout(() => navigate('/booking-confirmation'), 1500);
-          return;
-        }
-      }
-
-      // Step 4: Direct success (no 3DS needed)
       completeBooking({ ...bookingPayload, result });
       toast.success(c.bookingSuccess);
       setTimeout(() => navigate('/booking-confirmation'), 1500);

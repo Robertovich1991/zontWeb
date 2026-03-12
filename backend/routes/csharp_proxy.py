@@ -5,6 +5,8 @@ from typing import List, Optional
 import httpx
 import logging
 import json
+import os
+import stripe as stripe_lib
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +14,7 @@ router = APIRouter(prefix="/api/proxy", tags=["proxy"])
 
 CSHARP_API = "https://api.zont.cab"
 TIMEOUT = 15.0
+STRIPE_LIVE_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY")
 
 
 class Coordinate(BaseModel):
@@ -355,6 +358,40 @@ class AuctionAddRequest(BaseModel):
     cardId: Optional[str] = None
     email: Optional[str] = None
     utcOffset: Optional[int] = None
+
+
+
+@router.post("/booking/setup-intent")
+async def create_setup_intent(request: Request):
+    """Get a SetupIntent from the C# API for 3DS card authentication."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Client/addCard",
+                headers={
+                    "Authorization": auth_header,
+                    "Origin": "https://zont.cab",
+                },
+            )
+            body_text = resp.text
+            try:
+                data = json.loads(body_text) if body_text.strip() else {}
+            except (json.JSONDecodeError, ValueError):
+                raise HTTPException(status_code=502, detail="Invalid response from C# API")
+
+            if resp.status_code == 200 and data.get("client_secret"):
+                return {"clientSecret": data["client_secret"]}
+            raise HTTPException(status_code=resp.status_code, detail=data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"SetupIntent error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to create setup intent")
+
 
 
 @router.post("/booking/create")
