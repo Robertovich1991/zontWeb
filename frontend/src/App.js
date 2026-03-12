@@ -18,6 +18,7 @@ const Countries = lazy(() => import("@/pages/Countries"));
 const CarSelection = lazy(() => import("@/pages/CarSelection"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const BookingConfirmation = lazy(() => import("@/pages/BookingConfirmation"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const LookingForPartners = lazy(() => import("@/pages/LookingForPartners"));
 const ParisAirportTransfer = lazy(() => import("@/pages/ParisAirportTransfer"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -147,6 +148,7 @@ function App() {
                   <Route path="/car-selection" element={<CarSelection />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/looking-for-partners" element={<LookingForPartners />} />
                   <Route path="/become-driver" element={<BecomeDriver />} />
                   <Route path="/become-client" element={<BecomeClient />} />

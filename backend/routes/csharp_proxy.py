@@ -237,6 +237,57 @@ async def proxy_login(req: LoginRequest):
 
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    forgotPasswordToken: str
+    newPassword: str
+
+
+@router.post("/auth/forgot-password")
+async def proxy_forgot_password(req: ForgotPasswordRequest):
+    """Send password reset email to client."""
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Account/{req.email}",
+                params={"host": "zont.cab"},
+                headers={"Origin": "https://zont.cab"},
+            )
+            if resp.status_code == 200:
+                return {"success": True, "message": "Password reset email sent"}
+            error_data = resp.json() if resp.text else {"error": "Failed to send reset email"}
+            raise HTTPException(status_code=resp.status_code, detail=error_data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Forgot password error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+
+
+@router.post("/auth/reset-password")
+async def proxy_reset_password(req: ResetPasswordRequest):
+    """Reset password with token received by email."""
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Account",
+                json={"forgotPasswordToken": req.forgotPasswordToken, "newPassword": req.newPassword},
+                headers={"Origin": "https://zont.cab", "Content-Type": "application/json"},
+            )
+            if resp.status_code == 200:
+                return {"success": True, "message": "Password reset successfully"}
+            error_data = resp.json() if resp.text else {"error": "Failed to reset password"}
+            raise HTTPException(status_code=resp.status_code, detail=error_data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Reset password error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+
+
 @router.get("/auth/send-verification")
 async def proxy_send_verification(email: str):
     """Send email verification to client after registration."""

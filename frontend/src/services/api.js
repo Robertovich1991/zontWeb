@@ -118,6 +118,28 @@ export const authService = {
     return { user: { token: data.accessToken, roles: data.roles }, token: data.accessToken };
   },
 
+  forgotPassword: async (email) => {
+    const resp = await fetch(`${API}/api/proxy/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw { response: { data } };
+    return data;
+  },
+
+  resetPassword: async (forgotPasswordToken, newPassword) => {
+    const resp = await fetch(`${API}/api/proxy/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ forgotPasswordToken, newPassword }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw { response: { data } };
+    return data;
+  },
+
   logout: () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');

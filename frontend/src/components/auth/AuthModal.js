@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Loader2, Mail, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Loader2, Mail, CheckCircle, AlertCircle, ArrowLeft, KeyRound } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { authService } from '@/services/api';
@@ -27,7 +27,6 @@ const parseApiErrors = (error) => {
   if (typeof detail === 'object' && detail !== null) {
     for (const [key, val] of Object.entries(detail)) {
       const msg = Array.isArray(val) ? val[0] : val;
-      // Map error key to field name
       if (key.includes('UserName') || key.includes('Email') || key.includes('email')) {
         errors.email = errorTranslations[key] || msg;
       } else if (key.includes('Phone')) {
@@ -52,9 +51,10 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [step, setStep] = useState('form');
+  const [step, setStep] = useState('form'); // form | verify | verified | forgot | forgot-sent
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
+  const [forgotEmail, setForgotEmail] = useState('');
   const [formData, setFormData] = useState({
     email: '', password: '', firstName: '', lastName: '',
     phone: '', confirmPassword: '', agreeTerms: false,
@@ -65,6 +65,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     setErrors({});
     setRegisteredEmail('');
     setVerifyCode('');
+    setForgotEmail('');
     setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '', confirmPassword: '', agreeTerms: false });
   };
 
@@ -171,6 +172,31 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     }
   };
 
+  // Forgot Password - send email
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail.trim()) {
+      setErrors({ forgotEmail: 'L\'email est obligatoire' });
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(forgotEmail)) {
+      setErrors({ forgotEmail: 'L\'email est invalide' });
+      return;
+    }
+    setLoading(true);
+    setErrors({});
+    try {
+      await authService.forgotPassword(forgotEmail);
+      toast.success('Email de reinitialisation envoye !');
+      setStep('forgot-sent');
+    } catch {
+      setErrors({ forgotEmail: 'Impossible d\'envoyer l\'email. Verifiez l\'adresse.' });
+      toast.error('Erreur lors de l\'envoi de l\'email');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Sign In
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -216,6 +242,8 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     </div>
   ) : null;
 
+  const isFormStep = step === 'form' || step === 'forgot' || step === 'forgot-sent';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-testid="auth-modal">
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose} />
@@ -233,8 +261,17 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
                 Sign in
               </button>
             </div>
+          ) : step === 'forgot' || step === 'forgot-sent' ? (
+            <div className="flex items-center gap-2">
+              <button onClick={() => { setStep('form'); setErrors({}); setForgotEmail(''); }} className="text-gray-400 hover:text-white transition-colors" data-testid="back-to-signin">
+                <ArrowLeft size={20} />
+              </button>
+              <h3 className="text-lg font-medium text-white">Mot de passe oublie</h3>
+            </div>
           ) : (
-            <h3 className="text-lg font-medium text-white">Verification email</h3>
+            <h3 className="text-lg font-medium text-white">
+              {step === 'verify' ? 'Verification email' : step === 'verified' ? 'Compte active' : ''}
+            </h3>
           )}
           <button onClick={handleClose} className="text-gray-400 hover:text-white transition-colors" data-testid="close-auth-modal">
             <X size={22} />
@@ -264,6 +301,12 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
                 <input type="password" name="password" value={formData.password} onChange={handleChange}
                   placeholder="Votre mot de passe" className={inputCls('password')} data-testid="signin-password" />
                 <FieldError field="password" />
+              </div>
+              <div className="flex justify-end">
+                <button type="button" onClick={() => { setStep('forgot'); setErrors({}); setForgotEmail(formData.email); }}
+                  className="text-sm text-[#2ecc71] hover:text-[#27ae60] transition-colors" data-testid="forgot-password-link">
+                  Mot de passe oublie ?
+                </button>
               </div>
               <button type="submit" disabled={loading} data-testid="signin-submit"
                 className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
@@ -326,6 +369,56 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
                 {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Inscription...</> : 'S\'inscrire'}
               </button>
             </form>
+          )}
+
+          {/* ===== FORGOT PASSWORD - Enter email ===== */}
+          {step === 'forgot' && (
+            <div data-testid="forgot-password-step">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-[#2ecc71]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <KeyRound className="w-8 h-8 text-[#2ecc71]" />
+                </div>
+                <h3 className="text-white text-lg font-semibold mb-2">Reinitialiser votre mot de passe</h3>
+                <p className="text-sm text-gray-400">Entrez votre adresse email et nous vous enverrons un lien pour reinitialiser votre mot de passe.</p>
+              </div>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Email</label>
+                  <input type="text" value={forgotEmail}
+                    onChange={(e) => { setForgotEmail(e.target.value); if (errors.forgotEmail) setErrors({}); }}
+                    placeholder="email@exemple.com" className={inputCls('forgotEmail')} data-testid="forgot-email-input" />
+                  <FieldError field="forgotEmail" />
+                </div>
+                <button type="submit" disabled={loading} data-testid="forgot-submit"
+                  className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
+                  {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Envoi...</> : 'Envoyer le lien'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* ===== FORGOT PASSWORD - Email sent confirmation ===== */}
+          {step === 'forgot-sent' && (
+            <div className="text-center" data-testid="forgot-sent-step">
+              <div className="w-16 h-16 bg-[#2ecc71]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-8 h-8 text-[#2ecc71]" />
+              </div>
+              <h3 className="text-white text-lg font-semibold mb-2">Email envoye !</h3>
+              <p className="text-sm text-gray-400 mb-2">
+                Un lien de reinitialisation a ete envoye a <span className="text-white font-medium">{forgotEmail}</span>
+              </p>
+              <p className="text-xs text-gray-500 mb-6">Verifiez aussi votre dossier spam. Le lien expire apres un certain temps.</p>
+              <div className="space-y-3">
+                <button onClick={() => { setStep('forgot'); setErrors({}); }} disabled={loading}
+                  className="w-full bg-gray-700/50 text-white py-3 rounded-lg font-medium hover:bg-gray-700 transition-all flex items-center justify-center gap-2" data-testid="forgot-resend-btn">
+                  Renvoyer l'email
+                </button>
+                <button onClick={() => { setStep('form'); setErrors({}); }}
+                  className="w-full text-sm text-gray-400 hover:text-[#2ecc71] transition-colors py-2" data-testid="forgot-back-signin">
+                  Retour a la connexion
+                </button>
+              </div>
+            </div>
           )}
 
           {/* ===== VERIFY EMAIL ===== */}
