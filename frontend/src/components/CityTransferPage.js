@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
@@ -49,7 +49,6 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const navigate = useNavigate();
   const { startBooking } = useBooking();
   const { language } = useLanguage();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const bookingFormRef = useRef(null);
@@ -104,7 +103,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
       startBooking({ ...formData, selectedVehicle });
       navigate('/car-selection');
     } catch (error) {
-      toast({ title: 'Error', description: 'An error occurred', variant: 'destructive' });
+      toast.error('An error occurred');
     } finally {
       setLoading(false);
     }

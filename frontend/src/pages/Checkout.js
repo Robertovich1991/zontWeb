@@ -5,14 +5,13 @@ import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { CreditCard, Calendar } from 'lucide-react';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { searchData, selectedCar, completeBooking } = useBooking();
   const { user } = useAuth();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState({
     cardNumber: '',
@@ -36,21 +35,14 @@ const Checkout = () => {
 
       completeBooking(bookingData);
       
-      toast({
-        title: 'Booking Confirmed!',
-        description: 'Your ride has been booked successfully.',
-      });
+      toast.success('Booking Confirmed! Your ride has been booked successfully.');
 
       // Redirect to confirmation page
       setTimeout(() => {
         navigate('/booking-confirmation');
       }, 2000);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'An error occurred during checkout',
-        variant: 'destructive',
-      });
+      toast.error('An error occurred during checkout');
     } finally {
       setLoading(false);
     }

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Search, Calendar, Clock } from 'lucide-react';
 import { rideService } from '@/services/api';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const SearchForm = () => {
-  const { toast } = useToast();
   const [tripType, setTripType] = useState('oneway'); // 'oneway' or 'hourly'
   const [formData, setFormData] = useState({
     pickup: '',
@@ -27,18 +26,11 @@ const SearchForm = () => {
       
       // await rideService.searchRides(searchData);
       
-      toast({
-        title: 'Recherche en cours...',
-        description: 'Nous recherchons les meilleurs conducteurs pour vous.',
-      });
+      toast.success('Recherche en cours...');
       
       console.log('Search data:', searchData);
     } catch (error) {
-      toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue lors de la recherche',
-        variant: 'destructive',
-      });
+      toast.error('Une erreur est survenue lors de la recherche');
     } finally {
       setLoading(false);
     }

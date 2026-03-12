@@ -4,7 +4,7 @@ import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { useLanguage } from '@/context/LanguageContext';
 import { Mail, Phone, MapPin, MessageCircle, Send, ChevronDown, ChevronUp } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const content = {
   en: {
@@ -120,7 +120,6 @@ const content = {
 const Help = () => {
   const { language } = useLanguage();
   const c = content[language] || content.en;
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -129,10 +128,10 @@ const Help = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      toast({ title: c.successTitle, description: c.successDesc });
+      toast.success(c.successTitle);
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch {
-      toast({ title: c.errorTitle, description: c.errorDesc, variant: 'destructive' });
+      toast.error(c.errorTitle);
     } finally {
       setLoading(false);
     }
