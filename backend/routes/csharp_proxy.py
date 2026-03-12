@@ -247,13 +247,20 @@ class ResetPasswordRequest(BaseModel):
 
 
 @router.post("/auth/forgot-password")
-async def proxy_forgot_password(req: ForgotPasswordRequest):
+async def proxy_forgot_password(req: ForgotPasswordRequest, request: Request):
     """Send password reset email to client."""
     try:
+        # Use the current site's host so the reset link points here, not the old site
+        origin = request.headers.get("origin", "")
+        if "preview.emergentagent.com" in origin:
+            # Extract just the hostname from the origin
+            host = origin.replace("https://", "").replace("http://", "")
+        else:
+            host = "zont.cab"
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             resp = await client.get(
                 f"{CSHARP_API}/api/Account/{req.email}",
-                params={"host": "zont.cab"},
+                params={"host": host},
                 headers={"Origin": "https://zont.cab"},
             )
             if resp.status_code == 200:
