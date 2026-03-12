@@ -7,12 +7,7 @@ import httpx
 import logging
 import json
 import os
-import secrets
-import string
-from google.oauth2 import id_token as google_id_token
-from google.auth.transport import requests as google_requests
-import jwt
-from jwt import PyJWKClient, InvalidTokenError
+import stripe as stripe_lib
 
 logger = logging.getLogger(__name__)
 
@@ -54,10 +49,9 @@ async def lifespan_client(router_instance: APIRouter):
 
 router = APIRouter(prefix="/api/proxy", tags=["proxy"])
 
-GOOGLE_CLIENT_ID = "71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com"
-GOOGLE_CLIENT_ID_MOBILE = "71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com"
-FACEBOOK_APP_ID = os.environ.get("FACEBOOK_APP_ID", "")
-FACEBOOK_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "")
+CSHARP_API = "https://api.zont.cab"
+TIMEOUT = 15.0
+STRIPE_LIVE_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY")
 
 # ─── Apple Sign In configuration ───
 APPLE_JWKS_URL = "https://appleid.apple.com/auth/keys"
@@ -159,339 +153,46 @@ class AuctionAddRequest(BaseModel):
         extra = "ignore"
 
 
-# ---- Core Core API Proxies ----
 
-@router.post("/distance")
-async def proxy_distance(req: DistanceRequest):
-    """Calculate trip pricing between two or more points."""
+@router.post("/booking/setup-intent")
+async def create_setup_intent(request: Request):
+    """Get a SetupIntent from the C# API for 3DS card authentication."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+
     try:
-        coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        resp = await (await get_http_client()).post("/api/Distance", params={"radius": req.radius}, json=coords)
-        resp.raise_for_status()
-        return resp.json()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"C# Distance Error: {e.response.status_code} - {e.response.text}")
-        raise HTTPException(status_code=e.response.status_code, detail="Pricing calculation error")
-    except Exception as e:
-        logger.error(f"Proxy distance connection error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach core service backend")
-
-
-@router.post("/preorder-distance")
-async def proxy_preorder_distance(req: PreorderRequest):
-    """Get fixed pricing for preorder between two points."""
-    try:
-        coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        resp = await (await get_http_client()).post("/api/PreorderDistance/driverTypesTwo", json=coords)
-        resp.raise_for_status()
-        return resp.json()
-    except Exception as e:
-        logger.error(f"Proxy preorder error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach core service backend")
-
-
-@router.get("/trip-types")
-async def proxy_trip_types():
-    """Get available vehicle/trip types."""
-    try:
-        resp = await (await get_http_client()).get("/api/TripsPrice/gettypes")
-        resp.raise_for_status()
-        return resp.json()
-    except Exception as e:
-        logger.error(f"Proxy trip-types error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach core service backend")
-
-
-@router.get("/vehicle-image/{image_path:path}")
-async def proxy_vehicle_image(image_path: str):
-    """Proxy vehicle images from C# backend with local caching header optimizations."""
-    try:
-        resp = await (await get_http_client()).get(f"/api/File/{image_path}")
-        resp.raise_for_status()
-        return Response(
-            content=resp.content,
-            media_type=resp.headers.get("content-type", "image/png"),
-            headers={"Cache-Control": "public, max-age=86400"},
-        )
-    except Exception as e:
-        logger.error(f"Proxy image extraction error: {e}")
-        raise HTTPException(status_code=404, detail="Image asset not available")
-
-
-@router.post("/driver-types")
-async def proxy_driver_types(coord: Coordinate):
-    """Get available driver/vehicle types near a location."""
-    try:
-        resp = await (await get_http_client()).post(
-            "/api/Distance/driverTypesWithStatus",
-            json={"latitude": coord.latitude, "longitude": coord.longitude},
-        )
-        resp.raise_for_status()
-        return resp.json()
-    except Exception as e:
-        logger.error(f"Proxy driver-types error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach core service backend")
-
-
-# ---- Auth Proxy Endpoints ----
-
-@router.post("/auth/google-login")
-async def proxy_google_login(req: GoogleLoginRequest):
-    """Verify Google ID token, then manage automatic sign-in or account creation."""
-    # Step 1: Verify Google token (accept both web and mobile client IDs)
-    try:
-        try:
-            idinfo = google_id_token.verify_oauth2_token(
-                req.idToken, google_requests.Request(), GOOGLE_CLIENT_ID
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Client/addCard",
+                headers={
+                    "Authorization": auth_header,
+                    "Origin": "https://zont.cab",
+                },
             )
-        except Exception:
-            idinfo = google_id_token.verify_oauth2_token(
-                req.idToken, google_requests.Request(), GOOGLE_CLIENT_ID_MOBILE
-            )
+            body_text = resp.text
+            try:
+                data = json.loads(body_text) if body_text.strip() else {}
+            except (json.JSONDecodeError, ValueError):
+                raise HTTPException(status_code=502, detail="Invalid response from C# API")
+
+            if resp.status_code == 200 and data.get("client_secret"):
+                return {"clientSecret": data["client_secret"]}
+            raise HTTPException(status_code=resp.status_code, detail=data)
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Google token verification failed: {e}")
-        raise HTTPException(status_code=401, detail="Invalid Google token verification")
-
-    email = idinfo.get("email", "")
-    first_name = idinfo.get("given_name", "")
-    last_name = idinfo.get("family_name", "")
-
-    if not email:
-        raise HTTPException(status_code=400, detail="Identity mapping failed: Email missing from token")
-
-    default_headers = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
-
-    # Step 1: Try native C# googleLogin
-    try:
-        resp = await (await get_http_client()).post("/api/Client/googleLogin", json={"idToken": req.idToken}, headers=default_headers)
-        if resp.status_code == 200:
-            data = resp.json()
-            token = data.get("accessToken")
-            if token:
-                try:
-                    profile_resp = await (await get_http_client()).get("/api/Client", headers={"Authorization": f"Bearer {token}", **default_headers})
-                    if profile_resp.status_code == 200:
-                        profile = profile_resp.json()
-                        data["firstName"] = profile.get("firstName", first_name)
-                        data["lastName"] = profile.get("lastName", last_name)
-                    else:
-                        data["firstName"], data["lastName"] = first_name, last_name
-                except Exception:
-                    data["firstName"], data["lastName"] = first_name, last_name
-                return data
-    except Exception as e:
-        logger.warning(f"C# googleLogin failed, using fallback: {e}")
-
-    # Step 2: Check if we have a stored Google password for this user
-    if _google_db is not None:
-        stored = await _google_db.google_auth.find_one({"email": email}, {"_id": 0})
-        if stored and stored.get("password"):
-            login_resp = await (await get_http_client()).post(
-                "/api/Login/client",
-                json={"username": email, "password": stored["password"]},
-                headers=default_headers,
-            )
-            if login_resp.status_code == 200:
-                data = login_resp.json()
-                data["firstName"] = first_name
-                data["lastName"] = last_name
-                return data
-
-    # Step 3: Try register (new user)
-    random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
-    reg_resp = await (await get_http_client()).post(
-        "/api/Client",
-        json={
-            "firstName": first_name, "lastName": last_name, "email": email,
-            "phoneNumber": "", "password": random_pass, "gender": "male", "dateOfBirth": "01/01/2000",
-        },
-        headers=default_headers,
-    )
-    if reg_resp.status_code == 200:
-        # Store password in MongoDB for future Google logins
-        if _google_db is not None:
-            await _google_db.google_auth.update_one(
-                {"email": email},
-                {"$set": {"email": email, "password": random_pass, "provider": "google", "firstName": first_name, "lastName": last_name}},
-                upsert=True,
-            )
-        login_resp = await (await get_http_client()).post(
-            "/api/Login/client",
-            json={"username": email, "password": random_pass},
-            headers=default_headers,
-        )
-        if login_resp.status_code == 200:
-            data = login_resp.json()
-            data["firstName"], data["lastName"] = first_name, last_name
-            return data
-
-    # Step 4: Email exists in C# but no stored password — cannot auto-login
-    raise HTTPException(
-        status_code=400,
-        detail="This email is already registered. Please sign in with your email and password."
-    )
+        logger.error(f"SetupIntent error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to create setup intent")
 
 
-# ============================================================================
-# APPLE SIGN-IN — Standalone Python implementation
-# Verifies Apple identityToken, creates/finds user in MongoDB `apple_users`,
-# returns our own JWT. Does NOT depend on the C# backend.
-# ============================================================================
 
-@router.post("/auth/apple-login")
-async def proxy_apple_login(req: AppleLoginRequest):
-    """Verify Apple identityToken and provision/login user in our MongoDB."""
-    import time
-    import uuid
-    from datetime import datetime, timezone
-
-    # ─── Step 1: Verify Apple JWT against Apple's public keys (JWKS) ───
-    try:
-        signing_key = _get_apple_jwks_client().get_signing_key_from_jwt(req.identityToken)
-    except InvalidTokenError as e:
-        logger.warning(f"Apple token header invalid: {e}")
-        raise HTTPException(status_code=401, detail="Invalid Apple identity token")
-    except Exception as e:
-        logger.error(f"Apple JWKS key fetch failed: {e}")
-        raise HTTPException(status_code=503, detail="Unable to verify Apple token (JWKS unreachable)")
-
-    decoded: Dict[str, Any] | None = None
-    last_err: Exception | None = None
-    for aud in APPLE_AUDIENCES:
-        try:
-            decoded = jwt.decode(
-                req.identityToken,
-                key=signing_key.key,
-                algorithms=["RS256"],
-                audience=aud,
-                issuer=APPLE_ISSUER,
-                options={"require": ["exp", "iat", "iss", "aud", "sub"]},
-                leeway=300,
-            )
-            break
-        except InvalidTokenError as e:
-            last_err = e
-            continue
-    if decoded is None:
-        logger.error(f"Apple token invalid for all audiences ({APPLE_AUDIENCES}): {last_err}")
-        raise HTTPException(status_code=401, detail="Invalid Apple identity token")
-
-    apple_sub: str = decoded.get("sub", "")
-    if not apple_sub:
-        raise HTTPException(status_code=400, detail="Apple token missing 'sub' claim")
-
-    # Apple sends `email` only on the FIRST sign-in. After that, RN passes the
-    # email it stored locally (req.email). The Apple sub is the canonical key.
-    token_email = (decoded.get("email") or "").lower().strip()
-    body_email = (req.email or "").lower().strip()
-    email = token_email or body_email
-    first_name = (req.firstName or "").strip()
-    last_name = (req.lastName or "").strip()
-    is_private_relay = bool(decoded.get("is_private_email", False))
-
-    if _google_db is None:
-        raise HTTPException(status_code=503, detail="Database unavailable")
-
-    now_iso = datetime.now(timezone.utc).isoformat()
-
-    # ─── Step 2: Look up existing Apple user in MongoDB (primary key = apple_sub) ───
-    user = await _google_db.apple_users.find_one({"apple_sub": apple_sub}, {"_id": 0})
-
-    if user:
-        # Existing user — backfill missing fields if RN provided them this time
-        updates = {"last_login_at": now_iso}
-        if not user.get("email") and email:
-            updates["email"] = email
-        if not user.get("first_name") and first_name:
-            updates["first_name"] = first_name
-        if not user.get("last_name") and last_name:
-            updates["last_name"] = last_name
-        await _google_db.apple_users.update_one({"apple_sub": apple_sub}, {"$set": updates})
-        user.update(updates)
-        is_new_user = False
-    else:
-        # New user — create record
-        if not email:
-            raise HTTPException(
-                status_code=400,
-                detail="Email required on first Apple sign-in. Please grant email access and try again.",
-            )
-        user = {
-            "id": str(uuid.uuid4()),
-            "apple_sub": apple_sub,
-            "email": email,
-            "first_name": first_name or "Apple",
-            "last_name": last_name or "User",
-            "is_private_relay": is_private_relay,
-            "provider": "apple",
-            "created_at": now_iso,
-            "last_login_at": now_iso,
-        }
-        await _google_db.apple_users.insert_one(dict(user))  # copy to avoid mutation with _id
-        is_new_user = True
-
-    # ─── Step 3: Issue our own JWT (HS256, 30 days) ───
-    now_ts = int(time.time())
-    payload = {
-        "sub": user["id"],
-        "apple_sub": apple_sub,
-        "email": user["email"],
-        "provider": "apple",
-        "iat": now_ts,
-        "exp": now_ts + ZONT_JWT_EXP_SECONDS,
-        "type": "client",
-    }
-    access_token = jwt.encode(payload, ZONT_JWT_SECRET, algorithm=ZONT_JWT_ALG)
-
-    return {
-        "accessToken": access_token,
-        "tokenType": "Bearer",
-        "expiresIn": ZONT_JWT_EXP_SECONDS,
-        "isNewUser": is_new_user,
-        "user": {
-            "id": user["id"],
-            "email": user["email"],
-            "firstName": user["first_name"],
-            "lastName": user["last_name"],
-            "provider": "apple",
-        },
-        # Top-level fields for backwards compatibility with Google/Facebook response shape
-        "firstName": user["first_name"],
-        "lastName": user["last_name"],
-        "email": user["email"],
-    }
-
-
-@router.post("/auth/facebook-login")
-async def proxy_facebook_login(req: FacebookLoginRequest):
-    """Verify Facebook token correctly avoiding raw string delimiters, handling user initialization."""
-    # Fixed query parsing structural bugs by enforcing dict parameters
-    try:
-        verify_resp = await (await get_http_client()).get(
-            "https://graph.facebook.com/debug_token",
-            params={"input_token": req.accessToken, "access_token": f"{FACEBOOK_APP_ID}|{FACEBOOK_APP_SECRET}"}
-        )
-        verify_data = verify_resp.json().get("data", {})
-        if verify_resp.status_code != 200 or not verify_data.get("is_valid") or str(verify_data.get("user_id")) != str(req.userID):
-            raise HTTPException(status_code=401, detail="Facebook security token verification mismatch.")
-        
-        me_resp = await (await get_http_client()).get(
-            "https://graph.facebook.com/v25.0/me",
-            params={"fields": "id,first_name,last_name,email", "access_token": req.accessToken}
-        )
-        fb_user = me_resp.json()
-    except Exception as e:
-        logger.error(f"Facebook authentication loop failure: {e}")
-        raise HTTPException(status_code=401, detail="Graph API handshake rejected.")
-
-    email = fb_user.get("email", "")
-    first_name = fb_user.get("first_name", "")
-    last_name = fb_user.get("last_name", "")
-
-    if not email:
-        raise HTTPException(status_code=400, detail="No email profile linked with this Facebook Account.")
-
-    default_headers = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
+@router.post("/booking/create")
+async def proxy_create_booking(req: AuctionAddRequest, request: Request):
+    """Create a new booking/auction in the C# backend."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
 
     try:
         fb_resp = await (await get_http_client()).post("/api/Client/facebookLogin", json={"userId": req.userID, "facebookAccessToken": req.accessToken}, headers=default_headers)

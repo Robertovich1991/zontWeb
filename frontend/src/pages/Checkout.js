@@ -542,122 +542,32 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
 
     setLoading(true);
     try {
-      // Register or Login if needed
-      if (!isAuthenticated) {
-        if (authMode === 'signup') {
-          const formatted = formatPhone(form.phone, phoneCountry);
-          const { firstName, lastName } = splitFullName(form.fullName);
-          const generatedPassword = generateRandomPassword();
-          await authService.register({
-            firstName,
-            lastName,
-            email: form.email,
-            phoneNumber: formatted,
-            password: generatedPassword,
-            gender: 'male',
-          });
-          const loginResult = await authService.login({ email: form.email, password: generatedPassword });
-          onLoginDirect(loginResult.user);
-        } else {
-          const loginResult = await authService.login({ email: form.email, password: form.password });
-          onLoginDirect(loginResult.user);
-        }
-        try { await authService.sendVerificationEmail(form.email); } catch {}
-      }
-
-      // Create SetupIntent for new card + 3DS verification (0€)
+      // Step 1: Get SetupIntent for 3DS authentication
       const token = localStorage.getItem('auth_token');
-      const setupData = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`);
-        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-        xhr.onload = () => {
-          try {
-            const parsed = JSON.parse(xhr.responseText);
-            if (xhr.status === 401) {
-              localStorage.removeItem('auth_token');
-              localStorage.removeItem('user');
-              window.location.reload();
-              reject(new Error('Session expired'));
-              return;
-            }
-            resolve(parsed);
-          }
-          catch { reject(new Error('Invalid setup-intent response')); }
-        };
-        xhr.onerror = () => reject(new Error('Network error'));
-        xhr.send();
+      const setupResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (!setupData.clientSecret) {
-        const detail = setupData?.detail;
-        let errMsg = c.bookingError;
-        if (typeof detail === 'string' && detail.trim()) {
-          errMsg = detail;
-        } else if (typeof detail === 'object' && detail) {
-          errMsg = detail.message || detail.error || detail.title || c.bookingError;
-        }
-        toast.error(errMsg);
+      const setupData = await setupResp.json();
+      if (!setupResp.ok || !setupData.clientSecret) {
+        toast.error(setupData?.detail || c.bookingError);
         setLoading(false);
         return;
       }
 
-      // Confirm card setup with 3DS (0€ verification)
+      // Step 2: Confirm card setup with 3DS authentication
       const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
         setupData.clientSecret,
         { payment_method: { card: elements.getElement(CardElement) } }
       );
+
       if (setupError) {
         toast.error(setupError.message || c.cardError);
         setLoading(false);
         return;
       }
 
-      // Card verified! Show confirmation before payment
-      const cardId = setupIntent.payment_method;
-      setVerifiedCardId(cardId);
-      setCardAddedBrand(setupIntent.payment_method_types?.[0] || 'card');
-      toast.success(c.cardVerified || 'Carte verifiee !');
-      setLoading(false);
-      // Stop here — user sees "Card verified" and clicks "Pay" button
-
-    } catch (err) {
-      console.error('Card setup error:', err);
-      const msg = err?.response?.data?.detail;
-      if (typeof msg === 'object' && msg !== null) {
-        const apiErrors = {};
-        const toStr = (x) => {
-          if (typeof x === 'string') return x;
-          if (Array.isArray(x)) return x.map(toStr).join(', ');
-          if (x && typeof x === 'object') return x.message || x.error || x.detail || JSON.stringify(x);
-          return String(x);
-        };
-        for (const [key, val] of Object.entries(msg)) {
-          const v = toStr(val);
-          if (key.includes('Email') || key.includes('UserName')) apiErrors.email = v;
-          else if (key.includes('Phone')) apiErrors.phone = v;
-          else if (key.includes('Password')) apiErrors.password = v;
-          else apiErrors.general = v;
-        }
-        setErrors(apiErrors);
-        const firstErr = Object.values(apiErrors)[0];
-        toast.error(typeof firstErr === 'string' ? firstErr : c.bookingError);
-      } else {
-        const errorText = typeof msg === 'string' ? msg : (err.message || c.bookingError);
-        toast.error(errorText, { duration: 6000 });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Step 2: Submit booking with verified card
-  const handlePayWithCard = async (cardId, override = {}) => {
-    setLoading(true);
-    try {
-      const dropoffCoords = searchData.dropoffCoords;
-      const destinationStr = dropoffCoords
-        ? `${dropoffCoords.latitude},${dropoffCoords.longitude}`
-        : searchData.dropoff || '';
+      // Step 3: Card is now authenticated - send the confirmed PaymentMethod to C# API
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
         startPointLongitude: searchData.pickupCoords.longitude,
@@ -670,7 +580,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         carType: selectedCar.tripType || '',
         distance: selectedCar.distance ? Math.round(selectedCar.distance) : 0,
         duration: selectedCar.duration ? Math.round(selectedCar.duration) : 0,
-        cardId: cardId,
+        cardId: setupIntent.payment_method,
         utcOffset: new Date().getTimezoneOffset() * -1,
         endPointLatitude: dropoffCoords?.latitude,
         endPointLongitude: dropoffCoords?.longitude,
