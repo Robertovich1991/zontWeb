@@ -28,35 +28,48 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
   - `POST /api/proxy/preorder-distance` - Fixed preorder pricing
   - `GET /api/proxy/trip-types` - Vehicle types
   - `GET /api/proxy/vehicle-image/{path}` - Vehicle images
-  - `POST /api/proxy/driver-types` - Available driver types
-- **Google Maps Places Autocomplete** for address input
+  - `POST /api/proxy/auth/register` - Client registration
+  - `POST /api/proxy/auth/login` - Client login
+- **Google Maps Places Autocomplete** for address input with geocoding fallback
 - **Dynamic Car Selection page** - real vehicle categories, prices, images from C# API
-- **Full booking flow** - Home form → API call → Car Selection with live data
-- Geocoding fallback when autocomplete coordinates unavailable
+- **Client Authentication** - Registration & login connected to C# API
+  - Registration sends to `POST /api/Client` with Origin header for zont.cab
+  - Login sends to `POST /api/Login/client`
+  - Auto-login after successful registration
+  - JWT tokens stored in localStorage
 
 ## Key Endpoints
 - C# Backend: `https://api.zont.cab`
-- Proxy: `/api/proxy/distance`, `/api/proxy/preorder-distance`, `/api/proxy/trip-types`, `/api/proxy/vehicle-image/{path}`
+- Proxy: `/api/proxy/distance`, `/api/proxy/preorder-distance`, `/api/proxy/trip-types`
+- Auth Proxy: `/api/proxy/auth/register`, `/api/proxy/auth/login`
 - CMS: `/api/admin/*`, `/api/public/*`
 
 ## Credentials
-- Admin: admin@zont.cab / admin123
+- Admin CMS: admin@zont.cab / admin123
 - Google Maps API Key: In frontend/.env
+- Test Account: proxytest_2026@gmail.com / TestPass1
 
 ## Backlog (Priority Order)
 ### P0 - User Verification
-- User to verify the new booking flow with real API data
+- User to verify registration + login flow
 
 ### P1 - Booking Completion Flow
-- Client authentication (login/signup via C# API: POST /api/Login/client, POST /api/Client)
-- Booking confirmation page (passenger details, flight info)
+- Booking confirmation page (passenger details, flight number, notes)
 - Submit booking to C# API (POST /api/Auction/addAuction)
+- Checkout page with payment integration
 
 ### P2 - Company Dashboard
 - Company login via C# API (POST /api/Login/company)
 - Company dashboard (vehicle management, driver management)
 
 ### P3 - Enhancements
-- Payment integration
-- Booking history
+- Payment integration (Stripe - already used by old site)
+- Booking history (GET /api/Auction/client/auctions)
 - Multi-stop support
+- Flight tracking integration
+
+## Technical Notes
+- C# API `POST /api/Client` requires `Origin: https://zont.cab` header for registration
+- Phone numbers must be in E.164 format (+33...)
+- Gender defaults to "male", dateOfBirth to "01/01/2000"
+- Login works with both email and phone number as username

@@ -181,26 +181,31 @@ async def proxy_verify_phone(req: VerifyPhoneRequest):
 
 @router.post("/auth/register")
 async def proxy_register_client(req: RegisterClientRequest):
-    """Step 3: Create client account."""
+    """Create client account via C# API."""
     try:
         payload = {
             "firstName": req.firstName,
             "lastName": req.lastName,
+            "email": req.email or "",
             "phoneNumber": req.phoneNumber,
             "password": req.password,
             "gender": req.gender or "male",
+            "dateOfBirth": "01/01/2000",
+            "referalCode": "",
+            "bankCards": None,
         }
-        if req.email:
-            payload["email"] = req.email
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             resp = await client.post(
                 f"{CSHARP_API}/api/Client",
                 json=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "Origin": "https://zont.cab",
+                    "Referer": "https://zont.cab/",
+                },
             )
             if resp.status_code == 200:
                 return resp.json() if resp.text else {"success": True}
-            if resp.status_code == 500:
-                raise HTTPException(status_code=500, detail="Server error during registration. Please try again later.")
             error_data = resp.json() if resp.text else {"error": "Registration failed"}
             raise HTTPException(status_code=resp.status_code, detail=error_data)
     except HTTPException:

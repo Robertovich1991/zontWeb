@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Phone, Shield, User, ArrowLeft, Loader2 } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { authService } from '@/services/api';
@@ -8,30 +8,18 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
   const { login } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState('form'); // 'form' | 'verify' | 'details'
-  const [phone, setPhone] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [expectedCode, setExpectedCode] = useState('');
   const [formData, setFormData] = useState({
     email: '', password: '', firstName: '', lastName: '',
-    confirmPassword: '', agreeTerms: false,
+    phone: '', confirmPassword: '', agreeTerms: false,
   });
 
-  const resetForm = () => {
-    setStep('form');
-    setPhone('');
-    setVerificationCode('');
-    setExpectedCode('');
-    setFormData({ email: '', password: '', firstName: '', lastName: '', confirmPassword: '', agreeTerms: false });
-  };
-
   const handleClose = () => {
-    resetForm();
+    setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '', confirmPassword: '', agreeTerms: false });
     onClose();
   };
 
   const handleSwitchMode = (newMode) => {
-    resetForm();
+    setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '', confirmPassword: '', agreeTerms: false });
     onSwitchMode(newMode);
   };
 
@@ -39,50 +27,18 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     const cleaned = p.replace(/[^0-9+]/g, '');
     if (cleaned.startsWith('+')) return cleaned;
     if (cleaned.startsWith('0')) return '+33' + cleaned.slice(1);
-    return '+' + cleaned;
+    return '+33' + cleaned;
   };
 
-  // Step 1: Send phone verification
-  const handleSendCode = async (e) => {
-    e.preventDefault();
-    if (!phone.trim()) return;
-    setLoading(true);
-    try {
-      const formatted = formatPhone(phone);
-      const result = await authService.registerPhone(formatted);
-      setExpectedCode(result.phoneVerificationToken || '');
-      setStep('verify');
-      toast({ title: 'Code envoye', description: `Un code de verification a ete envoye au ${formatted}` });
-    } catch (error) {
-      const detail = error?.response?.data?.detail || error?.response?.data;
-      toast({ title: 'Erreur', description: typeof detail === 'string' ? detail : 'Impossible d\'envoyer le code', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Step 2: Verify code
-  const handleVerifyCode = async (e) => {
-    e.preventDefault();
-    if (!verificationCode.trim()) return;
-    setLoading(true);
-    try {
-      const formatted = formatPhone(phone);
-      await authService.verifyPhone(formatted, verificationCode);
-      setStep('details');
-      toast({ title: 'Telephone verifie', description: 'Completez votre inscription' });
-    } catch (error) {
-      toast({ title: 'Erreur', description: 'Code de verification invalide', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Step 3: Complete registration
-  const handleRegister = async (e) => {
+  // Sign Up - direct registration via C# API
+  const handleSignUp = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       toast({ title: 'Erreur', description: 'Les mots de passe ne correspondent pas', variant: 'destructive' });
+      return;
+    }
+    if (formData.password.length < 6) {
+      toast({ title: 'Erreur', description: 'Le mot de passe doit contenir au moins 6 caracteres', variant: 'destructive' });
       return;
     }
     if (!formData.agreeTerms) {
@@ -95,32 +51,51 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        phoneNumber: formatPhone(phone),
+        phoneNumber: formatPhone(formData.phone),
         password: formData.password,
         gender: 'male',
       });
-      toast({ title: 'Inscription reussie', description: 'Votre compte a ete cree. Connectez-vous.' });
-      resetForm();
-      onSwitchMode('signin');
+      toast({ title: 'Inscription reussie !', description: 'Un code de verification a ete envoye a ' + formData.email });
+      // Auto-login after registration
+      try {
+        await login({ email: formData.email, password: formData.password });
+        handleClose();
+      } catch {
+        handleSwitchMode('signin');
+      }
     } catch (error) {
-      const detail = error?.response?.data?.detail;
-      toast({ title: 'Erreur', description: typeof detail === 'string' ? detail : 'Erreur lors de l\'inscription. Veuillez reessayer.', variant: 'destructive' });
+      const detail = error?.response?.data?.detail || error?.response?.data;
+      let msg = 'Erreur lors de l\'inscription. Veuillez reessayer.';
+      if (typeof detail === 'object') {
+        const vals = Object.values(detail);
+        if (vals.length > 0 && Array.isArray(vals[0])) msg = vals[0][0];
+        else if (typeof vals[0] === 'string') msg = vals[0];
+      } else if (typeof detail === 'string') {
+        msg = detail;
+      }
+      toast({ title: 'Erreur', description: msg, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
-  // Login
-  const handleLogin = async (e) => {
+  // Sign In
+  const handleSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       await login({ email: formData.email, password: formData.password });
-      toast({ title: 'Connexion reussie', description: 'Bienvenue sur Zont!' });
+      toast({ title: 'Connexion reussie', description: 'Bienvenue sur Zont !' });
       handleClose();
     } catch (error) {
-      const detail = error?.response?.data?.detail;
-      const msg = detail?.cannotLogin?.[0] || (typeof detail === 'string' ? detail : 'Identifiants incorrects');
+      const detail = error?.response?.data?.detail || error?.response?.data;
+      let msg = 'Identifiants incorrects';
+      if (typeof detail === 'object') {
+        const vals = Object.values(detail);
+        if (vals.length > 0 && Array.isArray(vals[0])) msg = vals[0][0];
+      } else if (typeof detail === 'string') {
+        msg = detail;
+      }
       toast({ title: 'Erreur', description: msg, variant: 'destructive' });
     } finally {
       setLoading(false);
@@ -134,14 +109,14 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
 
   if (!isOpen) return null;
 
-  const inputCls = 'w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent text-sm';
+  const inputCls = 'w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent text-sm';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-testid="auth-modal">
-      <div className="fixed inset-0 bg-black/70" onClick={handleClose} />
-      <div className="relative bg-[#1a2332] rounded-xl shadow-2xl w-full max-w-md mx-4 z-10 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-[#1a2332] border-b border-gray-700/50 px-6 py-4 flex justify-between items-center z-10">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose} />
+      <div className="relative bg-[#1a2332] rounded-2xl shadow-2xl w-full max-w-md mx-4 z-10 max-h-[90vh] overflow-y-auto border border-white/10">
+        {/* Header Tabs */}
+        <div className="sticky top-0 bg-[#1a2332] border-b border-gray-700/50 px-6 py-4 flex justify-between items-center z-10 rounded-t-2xl">
           <div className="flex space-x-6">
             <button onClick={() => handleSwitchMode('signup')} data-testid="tab-signup"
               className={`text-lg font-medium pb-1 transition-colors ${mode === 'signup' ? 'text-[#2ecc71] border-b-2 border-[#2ecc71]' : 'text-gray-400 hover:text-white'}`}>
@@ -152,7 +127,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
               Sign in
             </button>
           </div>
-          <button onClick={handleClose} className="text-gray-400 hover:text-white" data-testid="close-auth-modal">
+          <button onClick={handleClose} className="text-gray-400 hover:text-white transition-colors" data-testid="close-auth-modal">
             <X size={22} />
           </button>
         </div>
@@ -160,11 +135,11 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
         <div className="px-6 py-5">
           {/* ===== SIGN IN ===== */}
           {mode === 'signin' && (
-            <form onSubmit={handleLogin} className="space-y-4" data-testid="signin-form">
+            <form onSubmit={handleSignIn} className="space-y-4" data-testid="signin-form">
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Email ou Telephone *</label>
+                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Email *</label>
                 <input type="text" name="email" value={formData.email} onChange={handleChange} required
-                  placeholder="email@exemple.com ou +33..." className={inputCls} data-testid="signin-email" />
+                  placeholder="email@exemple.com" className={inputCls} data-testid="signin-email" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Mot de passe *</label>
@@ -172,74 +147,15 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
                   placeholder="Votre mot de passe" className={inputCls} data-testid="signin-password" />
               </div>
               <button type="submit" disabled={loading} data-testid="signin-submit"
-                className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
                 {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Connexion...</> : 'Se connecter'}
               </button>
             </form>
           )}
 
-          {/* ===== SIGN UP - Step 1: Phone ===== */}
-          {mode === 'signup' && step === 'form' && (
-            <form onSubmit={handleSendCode} className="space-y-4" data-testid="signup-phone-form">
-              <div className="text-center mb-4">
-                <div className="w-14 h-14 bg-[#2ecc71]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Phone className="w-7 h-7 text-[#2ecc71]" />
-                </div>
-                <p className="text-sm text-gray-400">Entrez votre numero de telephone pour commencer</p>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Numero de telephone *</label>
-                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required
-                  placeholder="+33 6 12 34 56 78" className={inputCls} data-testid="signup-phone-input" />
-              </div>
-              <button type="submit" disabled={loading} data-testid="signup-send-code"
-                className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Envoi...</> : 'Envoyer le code'}
-              </button>
-            </form>
-          )}
-
-          {/* ===== SIGN UP - Step 2: Verify Code ===== */}
-          {mode === 'signup' && step === 'verify' && (
-            <form onSubmit={handleVerifyCode} className="space-y-4" data-testid="signup-verify-form">
-              <button type="button" onClick={() => setStep('form')} className="flex items-center gap-1 text-sm text-gray-400 hover:text-white mb-2">
-                <ArrowLeft className="w-4 h-4" /> Retour
-              </button>
-              <div className="text-center mb-4">
-                <div className="w-14 h-14 bg-[#2ecc71]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Shield className="w-7 h-7 text-[#2ecc71]" />
-                </div>
-                <p className="text-sm text-gray-400">Entrez le code envoye au <span className="text-white font-medium">{formatPhone(phone)}</span></p>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Code de verification *</label>
-                <input type="text" value={verificationCode} onChange={(e) => setVerificationCode(e.target.value)} required
-                  placeholder="1234" className={`${inputCls} text-center text-2xl tracking-[0.5em] font-bold`}
-                  maxLength={6} data-testid="signup-code-input" />
-              </div>
-              <button type="submit" disabled={loading} data-testid="signup-verify-btn"
-                className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Verification...</> : 'Verifier'}
-              </button>
-              <button type="button" onClick={handleSendCode} className="w-full text-sm text-gray-400 hover:text-[#2ecc71] transition-colors"
-                data-testid="resend-code-btn">
-                Renvoyer le code
-              </button>
-            </form>
-          )}
-
-          {/* ===== SIGN UP - Step 3: Details ===== */}
-          {mode === 'signup' && step === 'details' && (
-            <form onSubmit={handleRegister} className="space-y-3.5" data-testid="signup-details-form">
-              <button type="button" onClick={() => setStep('verify')} className="flex items-center gap-1 text-sm text-gray-400 hover:text-white mb-2">
-                <ArrowLeft className="w-4 h-4" /> Retour
-              </button>
-              <div className="text-center mb-3">
-                <div className="w-14 h-14 bg-[#2ecc71]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <User className="w-7 h-7 text-[#2ecc71]" />
-                </div>
-                <p className="text-sm text-gray-400">Completez votre profil</p>
-              </div>
+          {/* ===== SIGN UP ===== */}
+          {mode === 'signup' && (
+            <form onSubmit={handleSignUp} className="space-y-3.5" data-testid="signup-form">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Prenom *</label>
@@ -253,9 +169,14 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange}
-                  placeholder="email@exemple.com (optionnel)" className={inputCls} data-testid="signup-email" />
+                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Email *</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} required
+                  placeholder="email@exemple.com" className={inputCls} data-testid="signup-email" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Telephone *</label>
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required
+                  placeholder="+33 6 12 34 56 78" className={inputCls} data-testid="signup-phone" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Mot de passe *</label>
@@ -269,11 +190,11 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
               </div>
               <div className="flex items-start gap-2.5 pt-1">
                 <input type="checkbox" name="agreeTerms" checked={formData.agreeTerms} onChange={handleChange}
-                  className="mt-0.5 w-4 h-4 text-[#2ecc71] bg-gray-700 border-gray-600 rounded" data-testid="signup-terms" />
-                <label className="text-xs text-gray-400">J'accepte les Conditions d'utilisation et la Politique de confidentialite</label>
+                  className="mt-0.5 w-4 h-4 accent-[#2ecc71] bg-gray-700 border-gray-600 rounded" data-testid="signup-terms" />
+                <label className="text-xs text-gray-400">J'accepte les <span className="text-[#2ecc71] underline cursor-pointer">Conditions d'utilisation</span> et la <span className="text-[#2ecc71] underline cursor-pointer">Politique de confidentialite</span></label>
               </div>
               <button type="submit" disabled={loading} data-testid="signup-submit"
-                className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
                 {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Inscription...</> : 'S\'inscrire'}
               </button>
             </form>
