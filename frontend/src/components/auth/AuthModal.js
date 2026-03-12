@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Mail, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { authService } from '@/services/api';
@@ -8,20 +8,24 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
   const { login } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState('form'); // 'form' | 'verify' | 'verified'
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [verifyCode, setVerifyCode] = useState('');
   const [formData, setFormData] = useState({
     email: '', password: '', firstName: '', lastName: '',
     phone: '', confirmPassword: '', agreeTerms: false,
   });
 
-  const handleClose = () => {
+  const resetForm = () => {
+    setStep('form');
+    setRegisteredEmail('');
+    setVerifyCode('');
     setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '', confirmPassword: '', agreeTerms: false });
-    onClose();
   };
 
-  const handleSwitchMode = (newMode) => {
-    setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '', confirmPassword: '', agreeTerms: false });
-    onSwitchMode(newMode);
-  };
+  const handleClose = () => { resetForm(); onClose(); };
+
+  const handleSwitchMode = (newMode) => { resetForm(); onSwitchMode(newMode); };
 
   const formatPhone = (p) => {
     const cleaned = p.replace(/[^0-9+]/g, '');
@@ -30,7 +34,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     return '+33' + cleaned;
   };
 
-  // Sign Up - direct registration via C# API
+  // Sign Up → register + send verification email
   const handleSignUp = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
@@ -55,14 +59,16 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
         password: formData.password,
         gender: 'male',
       });
-      toast({ title: 'Inscription reussie !', description: 'Un code de verification a ete envoye a ' + formData.email });
-      // Auto-login after registration
+      // Send verification email
+      try {
+        await authService.sendVerificationEmail(formData.email);
+      } catch { /* email sending may fail silently */ }
+      setRegisteredEmail(formData.email);
+      // Auto-login (account works but as "NotVerified")
       try {
         await login({ email: formData.email, password: formData.password });
-        handleClose();
-      } catch {
-        handleSwitchMode('signin');
-      }
+      } catch { /* login might fail if email verification is needed first */ }
+      setStep('verify');
     } catch (error) {
       const detail = error?.response?.data?.detail || error?.response?.data;
       let msg = 'Erreur lors de l\'inscription. Veuillez reessayer.';
@@ -70,10 +76,43 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
         const vals = Object.values(detail);
         if (vals.length > 0 && Array.isArray(vals[0])) msg = vals[0][0];
         else if (typeof vals[0] === 'string') msg = vals[0];
-      } else if (typeof detail === 'string') {
-        msg = detail;
-      }
+      } else if (typeof detail === 'string') msg = detail;
       toast({ title: 'Erreur', description: msg, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Verify email code
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    if (!verifyCode.trim()) return;
+    setLoading(true);
+    try {
+      const result = await authService.verifyCode(verifyCode);
+      // Update tokens if returned
+      if (result.accessToken) {
+        localStorage.setItem('auth_token', result.accessToken);
+        localStorage.setItem('user', JSON.stringify({ token: result.accessToken }));
+      }
+      setStep('verified');
+      toast({ title: 'Email verifie !', description: 'Votre compte est maintenant actif.' });
+      setTimeout(() => { handleClose(); }, 2000);
+    } catch (error) {
+      toast({ title: 'Erreur', description: 'Code invalide. Verifiez votre email et reessayez.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Resend verification
+  const handleResend = async () => {
+    setLoading(true);
+    try {
+      await authService.sendVerificationEmail(registeredEmail);
+      toast({ title: 'Email renvoye', description: `Un nouveau code a ete envoye a ${registeredEmail}` });
+    } catch {
+      toast({ title: 'Erreur', description: 'Impossible de renvoyer l\'email', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -93,9 +132,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
       if (typeof detail === 'object') {
         const vals = Object.values(detail);
         if (vals.length > 0 && Array.isArray(vals[0])) msg = vals[0][0];
-      } else if (typeof detail === 'string') {
-        msg = detail;
-      }
+      } else if (typeof detail === 'string') msg = detail;
       toast({ title: 'Erreur', description: msg, variant: 'destructive' });
     } finally {
       setLoading(false);
@@ -115,18 +152,22 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-testid="auth-modal">
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose} />
       <div className="relative bg-[#1a2332] rounded-2xl shadow-2xl w-full max-w-md mx-4 z-10 max-h-[90vh] overflow-y-auto border border-white/10">
-        {/* Header Tabs */}
+        {/* Header */}
         <div className="sticky top-0 bg-[#1a2332] border-b border-gray-700/50 px-6 py-4 flex justify-between items-center z-10 rounded-t-2xl">
-          <div className="flex space-x-6">
-            <button onClick={() => handleSwitchMode('signup')} data-testid="tab-signup"
-              className={`text-lg font-medium pb-1 transition-colors ${mode === 'signup' ? 'text-[#2ecc71] border-b-2 border-[#2ecc71]' : 'text-gray-400 hover:text-white'}`}>
-              Sign up
-            </button>
-            <button onClick={() => handleSwitchMode('signin')} data-testid="tab-signin"
-              className={`text-lg font-medium pb-1 transition-colors ${mode === 'signin' ? 'text-[#2ecc71] border-b-2 border-[#2ecc71]' : 'text-gray-400 hover:text-white'}`}>
-              Sign in
-            </button>
-          </div>
+          {step === 'form' ? (
+            <div className="flex space-x-6">
+              <button onClick={() => handleSwitchMode('signup')} data-testid="tab-signup"
+                className={`text-lg font-medium pb-1 transition-colors ${mode === 'signup' ? 'text-[#2ecc71] border-b-2 border-[#2ecc71]' : 'text-gray-400 hover:text-white'}`}>
+                Sign up
+              </button>
+              <button onClick={() => handleSwitchMode('signin')} data-testid="tab-signin"
+                className={`text-lg font-medium pb-1 transition-colors ${mode === 'signin' ? 'text-[#2ecc71] border-b-2 border-[#2ecc71]' : 'text-gray-400 hover:text-white'}`}>
+                Sign in
+              </button>
+            </div>
+          ) : (
+            <h3 className="text-lg font-medium text-white">Verification email</h3>
+          )}
           <button onClick={handleClose} className="text-gray-400 hover:text-white transition-colors" data-testid="close-auth-modal">
             <X size={22} />
           </button>
@@ -134,7 +175,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
 
         <div className="px-6 py-5">
           {/* ===== SIGN IN ===== */}
-          {mode === 'signin' && (
+          {mode === 'signin' && step === 'form' && (
             <form onSubmit={handleSignIn} className="space-y-4" data-testid="signin-form">
               <div>
                 <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Email *</label>
@@ -154,7 +195,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
           )}
 
           {/* ===== SIGN UP ===== */}
-          {mode === 'signup' && (
+          {mode === 'signup' && step === 'form' && (
             <form onSubmit={handleSignUp} className="space-y-3.5" data-testid="signup-form">
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -198,6 +239,53 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
                 {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Inscription...</> : 'S\'inscrire'}
               </button>
             </form>
+          )}
+
+          {/* ===== VERIFY EMAIL ===== */}
+          {step === 'verify' && (
+            <div data-testid="verify-email-step">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-[#2ecc71]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="w-8 h-8 text-[#2ecc71]" />
+                </div>
+                <h3 className="text-white text-lg font-semibold mb-2">Verifiez votre email</h3>
+                <p className="text-sm text-gray-400">
+                  Un code de verification a ete envoye a{' '}
+                  <span className="text-white font-medium">{registeredEmail}</span>
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Verifiez aussi votre dossier spam</p>
+              </div>
+              <form onSubmit={handleVerify} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Code de verification</label>
+                  <input type="text" value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} required
+                    placeholder="Entrez le code recu par email" className={inputCls} data-testid="verify-code-input" />
+                </div>
+                <button type="submit" disabled={loading} data-testid="verify-submit"
+                  className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
+                  {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Verification...</> : 'Verifier'}
+                </button>
+              </form>
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-700/50">
+                <button onClick={handleResend} disabled={loading} className="text-sm text-gray-400 hover:text-[#2ecc71] transition-colors" data-testid="resend-email-btn">
+                  Renvoyer l'email
+                </button>
+                <button onClick={handleClose} className="text-sm text-gray-400 hover:text-white transition-colors" data-testid="skip-verify-btn">
+                  Continuer sans verifier
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ===== VERIFIED ===== */}
+          {step === 'verified' && (
+            <div className="text-center py-6" data-testid="verified-step">
+              <div className="w-16 h-16 bg-[#2ecc71]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-[#2ecc71]" />
+              </div>
+              <h3 className="text-white text-lg font-semibold mb-2">Email verifie !</h3>
+              <p className="text-sm text-gray-400">Votre compte est maintenant actif. Vous pouvez continuer votre reservation.</p>
+            </div>
           )}
         </div>
       </div>

@@ -91,6 +91,20 @@ export const authService = {
     return data;
   },
 
+  sendVerificationEmail: async (email) => {
+    const resp = await fetch(`${API}/api/proxy/auth/send-verification?email=${encodeURIComponent(email)}`);
+    const data = await resp.json();
+    if (!resp.ok) throw { response: { data } };
+    return data;
+  },
+
+  verifyCode: async (code) => {
+    const resp = await fetch(`${API}/api/proxy/auth/verify/${encodeURIComponent(code)}`);
+    const data = await resp.json();
+    if (!resp.ok) throw { response: { data } };
+    return data;
+  },
+
   login: async (credentials) => {
     const resp = await fetch(`${API}/api/proxy/auth/login`, {
       method: 'POST',

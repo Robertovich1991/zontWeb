@@ -15,7 +15,6 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Admin Panel (login, dashboard, CRUD for pages/places/trust-blocks/FAQs/homepage)
 - CMS data seeding with real website content
 - Public-facing pages dynamically connected to CMS
-- Company registration form + backend
 
 ### Phase 2 - UI/UX Redesign (Complete)
 - Professional redesign of Car Selection page (Blacklane-inspired)
@@ -24,52 +23,46 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 
 ### Phase 3 - C# API Integration (Complete - March 12, 2026)
 - **Backend proxy** routes (`/api/proxy/*`) forwarding to `api.zont.cab`
-  - `POST /api/proxy/distance` - Trip pricing calculation
-  - `POST /api/proxy/preorder-distance` - Fixed preorder pricing
-  - `GET /api/proxy/trip-types` - Vehicle types
-  - `GET /api/proxy/vehicle-image/{path}` - Vehicle images
-  - `POST /api/proxy/auth/register` - Client registration
-  - `POST /api/proxy/auth/login` - Client login
 - **Google Maps Places Autocomplete** for address input with geocoding fallback
 - **Dynamic Car Selection page** - real vehicle categories, prices, images from C# API
-- **Client Authentication** - Registration & login connected to C# API
-  - Registration sends to `POST /api/Client` with Origin header for zont.cab
-  - Login sends to `POST /api/Login/client`
-  - Auto-login after successful registration
-  - JWT tokens stored in localStorage
+- **Client Authentication** (registration + login + email verification)
+  - Registration: `POST /api/Client` (requires Origin: https://zont.cab header)
+  - Send verification email: `GET /api/Verification/clientVerifyEmail`
+  - Verify code: `GET /api/Verification/verify/{code}`
+  - Login: `POST /api/Login/client`
+  - Auto-login after registration with "NotVerified" status
+  - Email verification step transitions account to "Verified" status
 
-## Key Endpoints
-- C# Backend: `https://api.zont.cab`
-- Proxy: `/api/proxy/distance`, `/api/proxy/preorder-distance`, `/api/proxy/trip-types`
-- Auth Proxy: `/api/proxy/auth/register`, `/api/proxy/auth/login`
-- CMS: `/api/admin/*`, `/api/public/*`
+## Key Proxy Endpoints
+- `POST /api/proxy/distance` - Trip pricing
+- `POST /api/proxy/preorder-distance` - Preorder pricing
+- `GET /api/proxy/trip-types` - Vehicle types
+- `GET /api/proxy/vehicle-image/{path}` - Vehicle images
+- `POST /api/proxy/auth/register` - Client registration
+- `POST /api/proxy/auth/login` - Client login
+- `GET /api/proxy/auth/send-verification?email=` - Send verification email
+- `GET /api/proxy/auth/verify/{code}` - Verify email code
 
 ## Credentials
 - Admin CMS: admin@zont.cab / admin123
 - Google Maps API Key: In frontend/.env
-- Test Account: proxytest_2026@gmail.com / TestPass1
 
-## Backlog (Priority Order)
-### P0 - User Verification
-- User to verify registration + login flow
-
+## Backlog
 ### P1 - Booking Completion Flow
-- Booking confirmation page (passenger details, flight number, notes)
+- Booking confirmation page (passenger details, flight number)
 - Submit booking to C# API (POST /api/Auction/addAuction)
-- Checkout page with payment integration
 
 ### P2 - Company Dashboard
-- Company login via C# API (POST /api/Login/company)
-- Company dashboard (vehicle management, driver management)
+- Company login via C# API
+- Vehicle/driver management
 
 ### P3 - Enhancements
-- Payment integration (Stripe - already used by old site)
-- Booking history (GET /api/Auction/client/auctions)
+- Payment integration (Stripe)
+- Booking history
 - Multi-stop support
-- Flight tracking integration
 
 ## Technical Notes
-- C# API `POST /api/Client` requires `Origin: https://zont.cab` header for registration
-- Phone numbers must be in E.164 format (+33...)
+- C# API requires `Origin: https://zont.cab` header for client registration
+- Phone numbers in E.164 format (+33...)
 - Gender defaults to "male", dateOfBirth to "01/01/2000"
-- Login works with both email and phone number as username
+- After registration, email verification changes role from "NotVerified" to "Verified"

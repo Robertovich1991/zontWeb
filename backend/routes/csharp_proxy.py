@@ -234,3 +234,46 @@ async def proxy_login(req: LoginRequest):
     except Exception as e:
         logger.error(f"Login error: {e}")
         raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+
+
+
+@router.get("/auth/send-verification")
+async def proxy_send_verification(email: str):
+    """Send email verification to client after registration."""
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Verification/clientVerifyEmail",
+                params={"email": email, "host": "zont.cab"},
+                headers={"Origin": "https://zont.cab"},
+            )
+            if resp.status_code == 200:
+                return {"success": True, "message": "Verification email sent"}
+            error_data = resp.json() if resp.text else {"error": "Failed to send verification"}
+            raise HTTPException(status_code=resp.status_code, detail=error_data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Send verification error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+
+
+@router.get("/auth/verify/{code}")
+async def proxy_verify_code(code: str):
+    """Verify email with the code received by email."""
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Verification/verify/{code}",
+                headers={"Origin": "https://zont.cab"},
+            )
+            if resp.status_code == 200:
+                data = resp.json() if resp.text else {}
+                return {"success": True, **data}
+            error_data = resp.json() if resp.text else {"error": "Invalid code"}
+            raise HTTPException(status_code=resp.status_code, detail=error_data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Verify code error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
