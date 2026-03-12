@@ -1,47 +1,62 @@
-# Zont.cab - React Clone PRD
+# Zont.cab - React Migration PRD
 
 ## Original Problem Statement
-Convert zont.cab into React with CMS, multilingual support (FR/EN/RU/HY), SEO, and company registration.
+Migration of the Angular website zont.cab to a React frontend with a C# backend, including multilingual support (FR, EN, RU, HY). The project includes a full mobile-first redesign, SEO implementation, B2B lead generation, and a comprehensive CMS.
+
+## Architecture
+- **Frontend**: React + Tailwind CSS + i18next (multilingual)
+- **Backend**: FastAPI (Python) as CMS + proxy to C# backend at api.zont.cab
+- **Database**: MongoDB (CMS data), C# backend (operational data)
+- **External APIs**: Google Maps Places API, api.zont.cab (C# backend)
 
 ## What's Been Implemented
 
-### CMS / Admin Panel - COMPLETE
-- JWT auth, Dashboard, CRUD for Pages/Places/Trust Blocks/FAQ/Homepage/SEO
-- 15 pages, 27 places, 6 trust blocks, 6 FAQs with real site data
-- Credentials: admin@zont.cab / admin123 | URL: /admin/login
+### Phase 1 - CMS & Content (Complete)
+- Admin Panel (login, dashboard, CRUD for pages/places/trust-blocks/FAQs/homepage)
+- CMS data seeding with real website content
+- Public-facing pages dynamically connected to CMS
+- Company registration form + backend
 
-### CMS-to-Public Connection - COMPLETE
-- All 15 city/airport pages + Homepage dynamically connected to CMS
-- Public APIs at /api/public/ (no auth): homepage, trust-blocks, faqs, pages, places
+### Phase 2 - UI/UX Redesign (Complete)
+- Professional redesign of Car Selection page (Blacklane-inspired)
+- Become Driver page overhaul with company registration form
+- Full Armenian (hy) translations fix
 
-### Company Registration - COMPLETE (Mar 2026)
-- **Page /become-driver**: Full company registration form matching original zont.cab design
-- **Fields**: First Name*, Last Name*, Company Name*, Company Address, Email*, Phone (with country code selector), Password*, Confirm Password*, Terms checkbox
-- **Backend**: POST /api/company/register + POST /api/company/login
-- **MongoDB collection**: `companies` with status "pending"
-- **Multilingual**: FR, EN, RU, HY
-- **Validations**: Duplicate email, password match, terms acceptance
-- **Success flow**: Shows confirmation message after registration
-- **Note**: Vehicle and driver management will be handled by the existing C# backend
+### Phase 3 - C# API Integration (Complete - March 12, 2026)
+- **Backend proxy** routes (`/api/proxy/*`) forwarding to `api.zont.cab`
+  - `POST /api/proxy/distance` - Trip pricing calculation
+  - `POST /api/proxy/preorder-distance` - Fixed preorder pricing
+  - `GET /api/proxy/trip-types` - Vehicle types
+  - `GET /api/proxy/vehicle-image/{path}` - Vehicle images
+  - `POST /api/proxy/driver-types` - Available driver types
+- **Google Maps Places Autocomplete** for address input
+- **Dynamic Car Selection page** - real vehicle categories, prices, images from C# API
+- **Full booking flow** - Home form → API call → Car Selection with live data
+- Geocoding fallback when autocomplete coordinates unavailable
 
-### BecomeDriver Page Restyle - COMPLETE
-- Dark theme (#1a2332), link moved from Header to Footer
+## Key Endpoints
+- C# Backend: `https://api.zont.cab`
+- Proxy: `/api/proxy/distance`, `/api/proxy/preorder-distance`, `/api/proxy/trip-types`, `/api/proxy/vehicle-image/{path}`
+- CMS: `/api/admin/*`, `/api/public/*`
 
-### Other Complete Features
-- Multilingual (FR/EN/RU/HY), Technical SEO, B2B Section, Static Pages
+## Credentials
+- Admin: admin@zont.cab / admin123
+- Google Maps API Key: In frontend/.env
 
-## Backlog
-- **P1**: Connect company login to C# backend for vehicle/driver management
-- **P2**: Connect booking flow to C# backend (blocked on API docs)
-- **P3**: Refactor CityTransferPage.js
+## Backlog (Priority Order)
+### P0 - User Verification
+- User to verify the new booking flow with real API data
 
-## DB Schema: companies collection
-```
-{
-  id: uuid, first_name: str, last_name: str,
-  company_name: str, company_address: str,
-  email: str (unique), phone: str, phone_country: str,
-  hashed_password: str, status: "pending"|"active"|"rejected",
-  created_at: datetime
-}
-```
+### P1 - Booking Completion Flow
+- Client authentication (login/signup via C# API: POST /api/Login/client, POST /api/Client)
+- Booking confirmation page (passenger details, flight info)
+- Submit booking to C# API (POST /api/Auction/addAuction)
+
+### P2 - Company Dashboard
+- Company login via C# API (POST /api/Login/company)
+- Company dashboard (vehicle management, driver management)
+
+### P3 - Enhancements
+- Payment integration
+- Booking history
+- Multi-stop support
