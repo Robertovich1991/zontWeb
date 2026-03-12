@@ -45,9 +45,20 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **"Mot de passe oublie ?"** link on Sign-in form
 - Forgot password modal step: email input → sends reset email via C# API
 - Confirmation screen after email sent with resend option
-- **Reset Password page** (`/reset-password?token=xxx`) for entering new password
+- **Reset Password page** (`/reset-password?token=xxx` & `/forgetpassword/:token`) for entering new password
 - Backend proxy endpoints: `POST /api/proxy/auth/forgot-password`, `POST /api/proxy/auth/reset-password`
 - Connected to C# API: `GET /api/Account/{email}?host=zont.cab` and `POST /api/Account`
+
+### Phase 4 - Driver/Partner PWA App (Complete - March 12, 2026)
+- **Partner Auth** (MongoDB): Login system separate from C# client auth
+- **Admin > Partenaires**: CRUD for managing partners (name, email, phone, company, status)
+- **Admin > Courses Partenaires**: View all partner rides, filter by status, change status, add admin notes
+- **Driver PWA** (`/driver`): Mobile-first app for partners
+  - Login page at `/driver/login`
+  - Dashboard with stats (total, pending, accepted), ride list
+  - Create ride form at `/driver/new-ride` with vehicle categories from C# API
+  - Proposed price, passenger details, flight number, notes
+- Vehicle categories fetched dynamically from C# backend and normalized
 
 ## Key Proxy Endpoints
 - `POST /api/proxy/distance` - Trip pricing
