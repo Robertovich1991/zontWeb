@@ -36,6 +36,11 @@ const HomepageEditor = lazy(() => import("@/pages/admin/HomepageEditor"));
 const TrustBlocks = lazy(() => import("@/pages/admin/TrustBlocks"));
 const FaqManager = lazy(() => import("@/pages/admin/FaqManager"));
 const SeoOverview = lazy(() => import("@/pages/admin/SeoOverview"));
+const PartnersManager = lazy(() => import("@/pages/admin/PartnersManager"));
+const RidesManager = lazy(() => import("@/pages/admin/RidesManager"));
+
+// Driver App
+const DriverApp = lazy(() => import("@/pages/driver/DriverApp"));
 
 const AdminGuard = ({ children }) => {
   const { user, loading } = useAdminAuth();
@@ -178,7 +183,11 @@ function App() {
                     <Route path="trust-blocks" element={<TrustBlocks />} />
                     <Route path="faqs" element={<FaqManager />} />
                     <Route path="seo" element={<SeoOverview />} />
+                    <Route path="partners" element={<PartnersManager />} />
+                    <Route path="rides" element={<RidesManager />} />
                   </Route>
+                  {/* Driver PWA */}
+                  <Route path="/driver/*" element={<DriverApp />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

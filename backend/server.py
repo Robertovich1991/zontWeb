@@ -116,6 +116,7 @@ from routes.admin_upload import router as upload_router
 from routes.public_cms import router as public_router
 from routes.company import router as company_router
 from routes.csharp_proxy import router as proxy_router
+from routes.partner import router as partner_router
 
 app.include_router(auth_router)
 app.include_router(pages_router)
@@ -125,6 +126,7 @@ app.include_router(upload_router)
 app.include_router(public_router)
 app.include_router(company_router)
 app.include_router(proxy_router)
+app.include_router(partner_router)
 
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"

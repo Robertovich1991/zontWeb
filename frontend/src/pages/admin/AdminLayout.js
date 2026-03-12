@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAdminAuth } from './AdminAuthContext';
-import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight, Users, Car } from 'lucide-react';
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { path: '/admin/partners', icon: Users, label: 'Partenaires' },
+  { path: '/admin/rides', icon: Car, label: 'Courses Partenaires' },
   { path: '/admin/pages', icon: FileText, label: 'Pages SEO' },
   { path: '/admin/places', icon: MapPin, label: 'Lieux / Destinations' },
   { path: '/admin/homepage', icon: Home, label: 'Homepage' },
