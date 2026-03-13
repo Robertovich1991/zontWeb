@@ -7,8 +7,8 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Frontend**: React + Tailwind CSS + i18next (multilingual)
 - **Backend**: FastAPI (Python) as CMS + proxy to C# backend at api.zont.cab
 - **Database**: MongoDB (CMS data), C# backend (operational data)
-- **External APIs**: Google Maps Places API, api.zont.cab (C# backend)
-- **Toast Library**: `sonner` (standardized across entire project - March 12, 2026)
+- **External APIs**: Google Maps Places API, api.zont.cab (C# backend), Stripe
+- **Toast Library**: `sonner` (standardized across entire project)
 
 ## What's Been Implemented
 
@@ -22,89 +22,80 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Become Driver page overhaul with company registration form
 - Full Armenian (hy) translations fix
 
-### Phase 3 - C# API Integration (Complete - March 12, 2026)
-- **Backend proxy** routes (`/api/proxy/*`) forwarding to `api.zont.cab`
-- **Google Maps Places Autocomplete** for address input with geocoding fallback
-- **Dynamic Car Selection page** - real vehicle categories, prices, images from C# API
-- **Client Authentication** (registration + login + email verification)
-  - Registration: `POST /api/Client` (requires Origin: https://zont.cab header)
-  - Send verification email: `GET /api/Verification/clientVerifyEmail`
-  - Verify code: `GET /api/Verification/verify/{code}`
-  - Login: `POST /api/Login/client`
-  - Auto-login after registration with "NotVerified" status
-  - Email verification step transitions account to "Verified" status
+### Phase 3 - C# API Integration (Complete)
+- Backend proxy routes (`/api/proxy/*`) forwarding to `api.zont.cab`
+- Google Maps Places Autocomplete for address input with geocoding fallback
+- Dynamic Car Selection page - real vehicle categories, prices, images from C# API
+- Client Authentication (registration + login + email verification)
+- Forgot Password flow
 
-### Phase 3.1 - Error Handling & Toast Standardization (Complete - March 12, 2026)
-- Fixed registration form error display (was using broken useToast, now uses sonner)
-- Inline error messages with AlertCircle icons below each form field
-- Toast notifications via sonner for all success/error feedback
-- Removed `required` HTML attribute from sign-in inputs for custom validation
-- Cleaned up ALL remaining useToast references across: CityTransferPage, SearchForm, Checkout, Help
+### Phase 3.1 - Error Handling & Toast Standardization (Complete)
+- Sonner toast notifications across all pages
+- Inline error messages with AlertCircle icons
 
-### Phase 3.2 - Forgot Password (Complete - March 12, 2026)
-- **"Mot de passe oublie ?"** link on Sign-in form
-- Forgot password modal step: email input → sends reset email via C# API
-- Confirmation screen after email sent with resend option
-- **Reset Password page** (`/reset-password?token=xxx` & `/forgetpassword/:token`) for entering new password
-- Backend proxy endpoints: `POST /api/proxy/auth/forgot-password`, `POST /api/proxy/auth/reset-password`
-- Connected to C# API: `GET /api/Account/{email}?host=zont.cab` and `POST /api/Account`
-
-### Phase 4 - Driver/Partner PWA App (Complete - March 12, 2026)
-- **Partner Auth** (MongoDB): Login system separate from C# client auth
-- **Admin > Partenaires**: CRUD for managing partners (name, email, phone, company, status)
-- **Admin > Courses Partenaires**: View all partner rides, filter by status, change status, add admin notes
-- **Driver PWA** (`/driver`): Mobile-first app for partners
+### Phase 4 - Driver/Partner PWA App (Complete)
+- Partner Auth (MongoDB): Login system separate from C# client auth
+- Admin > Partenaires: CRUD for managing partners
+- Admin > Courses Partenaires: View all partner rides, filter by status, change status, add admin notes
+- Driver PWA (`/driver`): Mobile-first app for partners
   - Login page at `/driver/login`
-  - Dashboard with stats (total, pending, accepted, available), ride list
-  - **Tabs: "Mes Courses" / "Disponibles"** (courses d'autres chauffeurs)
-  - Create ride form at `/driver/new-ride` with **Google Maps Autocomplete** + route calculation
-  - **Ride Detail** (`/driver/ride/:id`): Status, itinéraire (distance/durée via Google Directions API), véhicule, prix, détails passager, notes admin
-  - **Profil** (`/driver/profile`): Info partenaire + **carte bancaire Stripe** pour débit automatique
-  - Vehicle categories fetched dynamically from C# backend and normalized
+  - Dashboard with stats, ride list, tabs (Mes Courses / Disponibles)
+  - Create ride form at `/driver/new-ride` with Google Maps Autocomplete + route calculation
+  - Ride Detail (`/driver/ride/:id`): Full ride info with status
+  - Profile (`/driver/profile`): Partner info + Stripe card management
 
-### Phase 4.1 - Stripe Card Management (Complete - March 12, 2026)
-- Stripe checkout session for card registration (€1 auth charge)
+### Phase 4.1 - Stripe Card Management (Complete)
+- Stripe checkout session for card registration
 - Card status tracking in partner profile
-- Admin can charge rides after completion via Stripe
-- Backend endpoints: `/api/partner/payment/add-card`, `/my-card`, `/card-status/{session_id}`, `/charge-ride/{ride_id}`
+
+### Phase 4.2 - Driver Review/Rating System (Complete)
+- Peer review system (1-5 stars, comment validation)
+- Profile & dashboard integration
+
+### Phase 5 - Client Stripe Payment & Booking Submission (Complete)
+- Stripe Elements integration on Checkout page
+- 3D Secure (3DS) authentication
+- Booking submission to C# auction system
+
+### Phase 5.1 - Partner Ride Proposal & Payment Flow (Complete - March 13, 2026)
+- **Dual Authentication**: Partners get both PWA JWT and C# client JWT on login
+- **C# Client Registration**: When admin creates a partner, a corresponding client account is created in C# system
+- **Stripe SetupIntent**: Partners can enter card via Stripe Elements with 3DS authentication
+- **Ride Creation with C# Dispatch**: Partners propose rides with their own price, submitted to C# auction system
+- **Status Tracking**: New `submitted_csharp` status shows rides dispatched to C# system
+- **Stats Dashboard**: Updated with Total, Attente, Dispatch, Dispo counters
+- **Admin Panel**: Rides manager updated with Dispatch filter and status display
+- **Testing**: 100% pass rate - 27 backend tests, all frontend UI flows verified
 
 ## Key Proxy Endpoints
 - `POST /api/proxy/distance` - Trip pricing
 - `POST /api/proxy/preorder-distance` - Preorder pricing
 - `GET /api/proxy/trip-types` - Vehicle types
-- `GET /api/proxy/vehicle-image/{path}` - Vehicle images
 - `POST /api/proxy/auth/register` - Client registration
 - `POST /api/proxy/auth/login` - Client login
-- `POST /api/proxy/auth/forgot-password` - Send password reset email
-- `POST /api/proxy/auth/reset-password` - Reset password with token
-- `GET /api/proxy/auth/send-verification?email=` - Send verification email
-- `GET /api/proxy/auth/verify/{code}` - Verify email code
-- `POST /api/proxy/booking/create` - Create booking/auction in C# backend (requires auth + Stripe cardId)
-- `GET /api/proxy/booking/upcoming` - Get client's upcoming auctions
+- `POST /api/proxy/booking/create` - Create booking/auction in C# backend
+- `POST /api/proxy/booking/setup-intent` - Get SetupIntent for 3DS
+
+## Partner PWA Endpoints
+- `POST /api/partner/auth/login` - Returns both PWA and C# tokens
+- `GET /api/partner/auth/me` - Current partner info
+- `GET /api/partner/vehicle-categories` - Vehicle types from C#
+- `POST /api/partner/calculate-route` - Google Directions API
+- `POST /api/partner/booking/setup-intent` - Stripe SetupIntent via C#
+- `POST /api/partner/rides` - Create ride + submit to C# auction
+- `GET /api/partner/rides` - Partner's rides
+- `GET /api/partner/available-rides` - Other partners' pending rides
+- `POST/GET /api/partner/rides/{id}/review` - Review system
+- Admin: `GET/POST/PUT/DELETE /api/partner/admin/partners`
+- Admin: `GET/PUT /api/partner/admin/rides`
 
 ## Credentials
 - Admin CMS: admin@zont.cab / admin123
-- Google Maps API Key: In frontend/.env
-
-### Phase 4.2 - Driver Review/Rating System (Complete - March 12, 2026)
-- **Peer review system**: Partner who created a ride can rate the completed ride (1-5 stars)
-- **Comment validation**: Comment mandatory for ratings 1-4, optional for 5 stars
-- **Duplicate prevention**: Only one review per ride allowed
-- **Profile integration**: Review stats (average, total, rating breakdown chart) + individual review cards on `/driver/profile`
-- **Dashboard integration**: Star ratings shown on completed ride cards, "Avis requis" badge for unreviewed completed rides
-- **Backend endpoints**: `POST/GET /api/partner/rides/{id}/review`, `GET /api/partner/reviews/my`, `GET /api/partner/reviews/stats/{partner_id}`, `GET /api/partner/admin/reviews`
-- **Testing**: 100% pass rate - 14 backend tests, 12 frontend UI flows verified
-
-### Phase 5 - Client Stripe Payment & Booking Submission (Complete - March 12, 2026)
-- **Stripe Elements** integration on the Checkout page using the C# backend's live Stripe key (`pk_live_...`)
-- **Payment flow**: Client enters card via Stripe Elements -> creates PaymentMethod -> submits to C# API with card ID
-- **Backend proxy**: `POST /api/proxy/booking/create` proxies to C# `POST /api/Auction/addAuction`
-- **Backend proxy**: `GET /api/proxy/booking/upcoming` proxies to C# `GET /api/Auction/client/upcomingAuctions`
-- **C# API format discovered**: Date must be `dd/MM/yyyy HH:mm:ss`, required fields: `startPointLatitude`, `startPointLongitude`, `clientPrice`
-- **BookingConfirmation page**: Updated with dark theme, French translations, and new data format
-- **Testing**: 100% pass rate - 7 backend tests, code verification passed on all frontend files
+- Test partner: partner_test_1773438684@test.com / Test1234!
+- C# Test Client: arthurhayy@gmail.com / 12345678
 
 ## Backlog
+
 ### P1 - Partner Payment Debits
 - Charge partner's saved Stripe card when a ride they proposed is completed by another driver
 
@@ -123,8 +114,9 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Full deployment to zont.cab production domain
 
 ## Technical Notes
-- C# API requires `Origin: https://zont.cab` header for client registration
+- C# API requires `Origin: https://zont.cab` and `Referer: https://zont.cab/` headers
 - Phone numbers in E.164 format (+33...)
-- Gender defaults to "male", dateOfBirth to "01/01/2000"
 - After registration, email verification changes role from "NotVerified" to "Verified"
-- **Toast Library**: ONLY use `toast()` from `sonner`. Do NOT use `useToast()` from hooks/use-toast.
+- **Toast Library**: ONLY use `toast()` from `sonner`. Do NOT use `useToast()`.
+- **Dual Auth**: Partners hold both MongoDB JWT and C# JWT simultaneously
+- **Stripe**: Uses LIVE keys (pk_live_lX3FXPqGIJLP5NgXomcdpcWO)
