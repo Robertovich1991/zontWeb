@@ -392,6 +392,7 @@ async def create_ride(ride: RideCreate, request: Request):
                         "Authorization": f"Bearer {csharp_token}",
                         "Content-Type": "application/json",
                         "Origin": "https://zont.cab",
+                        "Referer": "https://zont.cab/",
                     },
                 )
                 logger.info(f"C# partner auction: {resp.status_code} {resp.text[:300]}")
@@ -400,6 +401,23 @@ async def create_ride(ride: RideCreate, request: Request):
                     ride_doc["status"] = "submitted_csharp"
                 else:
                     ride_doc["csharp_error"] = resp.text[:500]
+                    # Detect card/payment errors and return them to the user
+                    error_detail = None
+                    try:
+                        err_data = resp.json()
+                        if isinstance(err_data, dict) and "invalidCard" in err_data:
+                            card_errors = err_data["invalidCard"]
+                            error_detail = card_errors[0] if card_errors else "Erreur de carte bancaire"
+                    except Exception:
+                        pass
+                    if error_detail:
+                        raise HTTPException(status_code=402, detail=f"Paiement refuse: {error_detail}")
+                    elif resp.status_code == 404:
+                        raise HTTPException(status_code=402, detail="Erreur de paiement: carte non reconnue par le systeme. Veuillez reessayer.")
+                    elif resp.status_code >= 400:
+                        raise HTTPException(status_code=502, detail=f"Erreur du systeme de dispatch (code {resp.status_code}). Veuillez reessayer.")
+        except HTTPException:
+            raise
         except Exception as e:
             logger.error(f"C# auction submit error: {e}")
             ride_doc["csharp_error"] = str(e)
