@@ -75,6 +75,15 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Auto-login**: After registration, partner is automatically logged in with both PWA and C# tokens
 - **Validation**: Duplicate email check, password length (min 6 chars), confirmation match
 - **Backend endpoint**: `POST /api/partner/auth/register`
+
+### Phase 5.3 - Card Management & Saved Cards (Complete - March 13, 2026)
+- **Profile card management**: Partners add/delete cards on `/driver/profile` using C# SetupIntent + Stripe 3DS (0 EUR verification)
+- **Saved cards stored in MongoDB**: `partner.saved_cards[]` array with pm_id, brand, added_at
+- **Card selector on CreateRide**: Radio buttons to select saved card, no more inline Stripe input
+- **Multiple cards support**: Partners can add and manage multiple cards
+- **Ride creation simplified**: Select saved card → submit ride → C# verifies funds → dispatch
+- **Error handling**: Card errors (insufficient funds, invalid card) shown clearly to partner
+- **Backend endpoints**: `POST /api/partner/cards/setup-intent`, `POST /api/partner/cards/save`, `GET /api/partner/cards`, `DELETE /api/partner/cards/{card_id}`
 - `POST /api/proxy/distance` - Trip pricing
 - `POST /api/proxy/preorder-distance` - Preorder pricing
 - `GET /api/proxy/trip-types` - Vehicle types
