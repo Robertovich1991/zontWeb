@@ -44,6 +44,24 @@ export const DriverAuthProvider = ({ children }) => {
     return data;
   };
 
+  const register = async (regData) => {
+    const res = await fetch(`${API}/api/partner/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(regData),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Erreur lors de l\'inscription');
+    setToken(data.token);
+    setPartner(data.partner);
+    localStorage.setItem('driver_token', data.token);
+    localStorage.setItem('driver_partner', JSON.stringify(data.partner));
+    if (data.csharpToken) {
+      localStorage.setItem('driver_csharp_token', data.csharpToken);
+    }
+    return data;
+  };
+
   const logout = () => {
     setToken(null);
     setPartner(null);
@@ -52,7 +70,7 @@ export const DriverAuthProvider = ({ children }) => {
   };
 
   return (
-    <DriverAuthContext.Provider value={{ partner, token, loading, login, logout }}>
+    <DriverAuthContext.Provider value={{ partner, token, loading, login, register, logout }}>
       {children}
     </DriverAuthContext.Provider>
   );

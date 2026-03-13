@@ -68,7 +68,13 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Bug Fix**: "body stream already read" error fixed by using XMLHttpRequest instead of fetch (Stripe.js conflict)
 - **Testing**: 100% pass rate - 27 backend tests, all frontend UI flows verified
 
-## Key Proxy Endpoints
+### Phase 5.2 - Partner Self-Registration (Complete - March 13, 2026)
+- **Self-registration form** on `/driver/login` page with tabs (Connexion / Inscription)
+- **Registration fields**: Nom, Email, Telephone, Entreprise (optional), Mot de passe + confirmation
+- **Dual creation**: Creates partner in MongoDB + client account in C# system automatically
+- **Auto-login**: After registration, partner is automatically logged in with both PWA and C# tokens
+- **Validation**: Duplicate email check, password length (min 6 chars), confirmation match
+- **Backend endpoint**: `POST /api/partner/auth/register`
 - `POST /api/proxy/distance` - Trip pricing
 - `POST /api/proxy/preorder-distance` - Preorder pricing
 - `GET /api/proxy/trip-types` - Vehicle types

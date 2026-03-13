@@ -26,6 +26,13 @@ class PartnerLogin(BaseModel):
     email: str
     password: str
 
+class PartnerRegister(BaseModel):
+    email: str
+    password: str
+    name: str
+    phone: str = ""
+    company: str = ""
+
 class PartnerOut(BaseModel):
     id: str
     email: str
@@ -179,6 +186,65 @@ async def partner_me(request: Request):
     if not partner:
         raise HTTPException(status_code=404, detail="Partner not found")
     return partner
+
+
+@router.post("/auth/register")
+async def partner_register(req: PartnerRegister, request: Request):
+    """Self-registration for partner drivers. Creates account in MongoDB + C# system."""
+    db = request.app.state.db
+    existing = await db.partners.find_one({"email": req.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Cet email est deja utilise")
+
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins 6 caracteres")
+
+    # Register in C# system as client (for auction/booking creation)
+    csharp_registered = await register_partner_in_csharp(
+        email=req.email,
+        password=req.password,
+        name=req.name or "Partner",
+        phone=req.phone or "",
+    )
+
+    partner_doc = {
+        "id": str(uuid.uuid4()),
+        "email": req.email,
+        "password_hash": pwd_context.hash(req.password),
+        "name": req.name,
+        "phone": req.phone,
+        "company": req.company,
+        "status": "active",
+        "csharp_registered": csharp_registered,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "last_login": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.partners.insert_one(partner_doc)
+    partner_doc.pop("_id", None)
+
+    # Auto-login: generate token + get C# token
+    token = create_partner_token({
+        "sub": partner_doc["id"], "email": partner_doc["email"],
+        "name": partner_doc["name"], "company": partner_doc.get("company", "")
+    })
+
+    csharp_token = await get_csharp_client_token(req.email, req.password)
+    if csharp_token:
+        await db.partners.update_one(
+            {"id": partner_doc["id"]},
+            {"$set": {"csharp_token": csharp_token, "csharp_token_at": datetime.now(timezone.utc).isoformat()}}
+        )
+
+    return {
+        "token": token,
+        "csharpToken": csharp_token,
+        "partner": {
+            "id": partner_doc["id"], "email": partner_doc["email"],
+            "name": partner_doc["name"], "phone": partner_doc.get("phone", ""),
+            "company": partner_doc.get("company", ""), "status": partner_doc["status"],
+            "hasCsharpAccount": bool(csharp_token),
+        }
+    }
 
 
 # ---- Vehicle Categories (from C#) ----
