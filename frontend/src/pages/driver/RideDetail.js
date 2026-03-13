@@ -8,6 +8,7 @@ const API = process.env.REACT_APP_BACKEND_URL;
 
 const statusConfig = {
   pending: { label: 'En attente', color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30', icon: Clock, desc: 'Votre course est en attente de validation par l\'admin.' },
+  submitted_csharp: { label: 'Envoyee au dispatch', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30', icon: Navigation, desc: 'Votre course a ete envoyee au systeme de dispatch. En attente d\'un chauffeur.' },
   accepted: { label: 'Acceptee', color: 'bg-green-500/10 text-green-400 border-green-500/30', icon: CheckCircle, desc: 'Votre course a ete acceptee ! Un chauffeur sera assigne.' },
   rejected: { label: 'Refusee', color: 'bg-red-500/10 text-red-400 border-red-500/30', icon: XCircle, desc: 'Votre course a ete refusee. Contactez l\'admin pour plus d\'infos.' },
   completed: { label: 'Terminee', color: 'bg-blue-500/10 text-blue-400 border-blue-500/30', icon: CheckCircle, desc: 'Course terminee avec succes.' },

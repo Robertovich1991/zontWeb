@@ -9,6 +9,7 @@ import os
 import uuid
 import httpx
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +41,9 @@ class RideCreate(BaseModel):
     dropoff_address: str
     dropoff_lat: Optional[float] = None
     dropoff_lng: Optional[float] = None
-    vehicle_category_id: str
-    vehicle_category_name: str
+    vehicle_category: str = ""
+    vehicle_category_id: Optional[str] = ""
+    vehicle_category_name: Optional[str] = ""
     proposed_price: float
     currency: str = "EUR"
     passenger_name: Optional[str] = ""
@@ -49,6 +51,9 @@ class RideCreate(BaseModel):
     pickup_datetime: Optional[str] = ""
     notes: Optional[str] = ""
     flight_number: Optional[str] = ""
+    card_id: Optional[str] = None
+    distance_km: Optional[float] = None
+    duration_min: Optional[float] = None
 
 class RideUpdate(BaseModel):
     status: Optional[str] = None
@@ -81,6 +86,55 @@ async def get_current_partner(request: Request):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
+async def register_partner_in_csharp(email: str, password: str, name: str, phone: str):
+    """Register a partner as a client in the C# system."""
+    parts = name.strip().split(" ", 1)
+    first_name = parts[0] if parts else "Partner"
+    last_name = parts[1] if len(parts) > 1 else "Driver"
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Client",
+                json={
+                    "firstName": first_name,
+                    "lastName": last_name,
+                    "email": email,
+                    "password": password,
+                    "gender": "male",
+                    "phoneNumber": phone or "+33600000000",
+                    "dateOfBirth": "01/01/2000",
+                    "referalCode": "",
+                    "bankCards": None,
+                },
+                headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+            logger.info(f"C# register partner: {resp.status_code} {resp.text[:200]}")
+            if resp.status_code in (200, 201):
+                return True
+            # If registration fails (email exists), try to login instead
+            token = await get_csharp_client_token(email, password)
+            return token is not None
+    except Exception as e:
+        logger.error(f"C# register partner error: {e}")
+        return False
+
+
+async def get_csharp_client_token(email: str, password: str):
+    """Login as client in the C# system and return the access token."""
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Login/client",
+                json={"username": email, "password": password},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return data.get("accessToken")
+    except Exception as e:
+        logger.error(f"C# login error: {e}")
+    return None
+
+
 # ---- Partner Auth ----
 
 @router.post("/auth/login")
@@ -96,12 +150,23 @@ async def partner_login(req: PartnerLogin, request: Request):
         "name": partner["name"], "company": partner.get("company", "")
     })
     await db.partners.update_one({"id": partner["id"]}, {"$set": {"last_login": datetime.now(timezone.utc).isoformat()}})
+
+    # Also get C# client token for auction creation
+    csharp_token = await get_csharp_client_token(req.email, req.password)
+    if csharp_token:
+        await db.partners.update_one(
+            {"id": partner["id"]},
+            {"$set": {"csharp_token": csharp_token, "csharp_token_at": datetime.now(timezone.utc).isoformat()}}
+        )
+
     return {
         "token": token,
+        "csharpToken": csharp_token,
         "partner": {
             "id": partner["id"], "email": partner["email"],
             "name": partner["name"], "phone": partner.get("phone", ""),
-            "company": partner.get("company", ""), "status": partner["status"]
+            "company": partner.get("company", ""), "status": partner["status"],
+            "hasCsharpAccount": bool(csharp_token),
         }
     }
 
@@ -174,10 +239,43 @@ async def calculate_route(req: RouteRequest, request: Request):
 
 # ---- Rides CRUD ----
 
+@router.post("/booking/setup-intent")
+async def partner_setup_intent(request: Request):
+    """Get a Stripe SetupIntent for 3DS card authentication."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+    partner = await db.partners.find_one({"id": user["sub"]}, {"_id": 0})
+    csharp_token = partner.get("csharp_token") if partner else None
+    if not csharp_token:
+        raise HTTPException(status_code=400, detail="Compte C# non connecte. Reconnectez-vous.")
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Client/addCard",
+                headers={"Authorization": f"Bearer {csharp_token}", "Origin": "https://zont.cab"},
+            )
+            body = resp.text
+            data = json.loads(body) if body.strip() else {}
+            if resp.status_code == 200 and data.get("client_secret"):
+                return {"clientSecret": data["client_secret"]}
+            raise HTTPException(status_code=resp.status_code, detail=data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Partner SetupIntent error: {e}")
+        raise HTTPException(status_code=502, detail="Erreur SetupIntent")
+
+
 @router.post("/rides")
 async def create_ride(ride: RideCreate, request: Request):
     user = await get_current_partner(request)
     db = request.app.state.db
+
+    # Get C# token for auction submission
+    partner = await db.partners.find_one({"id": user["sub"]}, {"_id": 0})
+    csharp_token = partner.get("csharp_token") if partner else None
+
+    # Save ride in MongoDB
     ride_doc = {
         "id": str(uuid.uuid4()),
         "partner_id": user["sub"],
@@ -185,10 +283,61 @@ async def create_ride(ride: RideCreate, request: Request):
         "partner_company": user.get("company", ""),
         **ride.model_dump(),
         "status": "pending",
+        "csharp_submitted": False,
         "admin_notes": "",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
+
+    # Submit to C# API if we have a token and a card ID
+    if csharp_token and ride.card_id:
+        try:
+            pickup_date = ride.pickup_datetime or ""
+            # Convert from ISO to dd/MM/yyyy HH:mm:ss
+            if "T" in pickup_date:
+                from datetime import datetime as dt
+                parsed = dt.fromisoformat(pickup_date.replace("Z", "+00:00"))
+                start_date = parsed.strftime("%d/%m/%Y %H:%M:%S")
+            else:
+                start_date = pickup_date
+
+            auction_payload = {
+                "startPointLatitude": ride.pickup_lat or 48.8566,
+                "startPointLongitude": ride.pickup_lng or 2.3522,
+                "clientPrice": ride.proposed_price,
+                "startDate": start_date,
+                "startAddress": ride.pickup_address,
+                "endAddress": ride.dropoff_address,
+                "destination": ride.dropoff_address,
+                "tripType": "Transfer",
+                "carType": ride.vehicle_category,
+                "distance": int(ride.distance_km or 0) if hasattr(ride, 'distance_km') else 0,
+                "duration": int(ride.duration_min or 0) if hasattr(ride, 'duration_min') else 0,
+                "cardId": ride.card_id,
+                "additionalComments": f"Course partenaire: {user.get('name', '')} - {ride.passenger_name or ''}",
+                "utcOffset": 60,
+            }
+
+            async with httpx.AsyncClient(timeout=httpx.Timeout(30.0)) as client:
+                resp = await client.post(
+                    f"{CSHARP_API}/api/Auction/addAuction",
+                    json=auction_payload,
+                    headers={
+                        "Authorization": f"Bearer {csharp_token}",
+                        "Content-Type": "application/json",
+                        "Origin": "https://zont.cab",
+                    },
+                )
+                logger.info(f"C# partner auction: {resp.status_code} {resp.text[:300]}")
+                if resp.status_code in (200, 201):
+                    ride_doc["csharp_submitted"] = True
+                    ride_doc["status"] = "submitted_csharp"
+                else:
+                    ride_doc["csharp_error"] = resp.text[:500]
+        except Exception as e:
+            logger.error(f"C# auction submit error: {e}")
+            ride_doc["csharp_error"] = str(e)
+
     await db.partner_rides.insert_one(ride_doc)
     ride_doc.pop("_id", None)
     return ride_doc
@@ -247,6 +396,15 @@ async def admin_create_partner(request: Request):
     existing = await db.partners.find_one({"email": body["email"]})
     if existing:
         raise HTTPException(status_code=400, detail="Email deja utilise")
+
+    # Register in C# as a client (for auction creation)
+    csharp_registered = await register_partner_in_csharp(
+        email=body["email"],
+        password=body["password"],
+        name=body.get("name", "Partner"),
+        phone=body.get("phone", ""),
+    )
+
     partner_doc = {
         "id": str(uuid.uuid4()),
         "email": body["email"],
@@ -255,6 +413,7 @@ async def admin_create_partner(request: Request):
         "phone": body.get("phone", ""),
         "company": body.get("company", ""),
         "status": "active",
+        "csharp_registered": csharp_registered,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "last_login": None,
     }

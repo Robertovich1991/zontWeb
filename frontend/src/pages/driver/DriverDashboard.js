@@ -7,6 +7,7 @@ const API = process.env.REACT_APP_BACKEND_URL;
 
 const statusConfig = {
   pending: { label: 'En attente', color: 'bg-yellow-500/10 text-yellow-400', icon: Clock },
+  submitted_csharp: { label: 'Envoyee au dispatch', color: 'bg-emerald-500/10 text-emerald-400', icon: Navigation },
   accepted: { label: 'Acceptee', color: 'bg-green-500/10 text-green-400', icon: CheckCircle },
   rejected: { label: 'Refusee', color: 'bg-red-500/10 text-red-400', icon: XCircle },
   completed: { label: 'Terminee', color: 'bg-blue-500/10 text-blue-400', icon: CheckCircle },
@@ -93,6 +94,7 @@ const DriverDashboard = () => {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const pending = rides.filter(r => r.status === 'pending').length;
+  const dispatched = rides.filter(r => r.status === 'submitted_csharp').length;
 
   return (
     <div className="min-h-screen bg-[#0f1419] flex flex-col" data-testid="driver-dashboard">
@@ -126,9 +128,9 @@ const DriverDashboard = () => {
             <p className="text-xl font-bold text-yellow-400">{pending}</p>
             <p className="text-[10px] text-gray-400 mt-0.5">Attente</p>
           </div>
-          <div className="bg-[#1a2332] rounded-xl p-3 text-center border border-green-500/20">
-            <p className="text-xl font-bold text-green-400">{rides.filter(r => r.status === 'accepted').length}</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">Acceptees</p>
+          <div className="bg-[#1a2332] rounded-xl p-3 text-center border border-emerald-500/20">
+            <p className="text-xl font-bold text-emerald-400">{dispatched}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Dispatch</p>
           </div>
           <div className="bg-[#1a2332] rounded-xl p-3 text-center border border-blue-500/20">
             <p className="text-xl font-bold text-blue-400">{availableRides.length}</p>

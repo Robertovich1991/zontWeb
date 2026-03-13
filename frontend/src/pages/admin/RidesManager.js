@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Car, Loader2, Clock, CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Car, Loader2, Clock, CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronUp, Navigation } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
 const statusConfig = {
   pending: { label: 'En attente', color: 'bg-yellow-500/10 text-yellow-400', icon: Clock },
+  submitted_csharp: { label: 'Dispatch', color: 'bg-emerald-500/10 text-emerald-400', icon: Navigation },
   accepted: { label: 'Acceptee', color: 'bg-green-500/10 text-green-400', icon: CheckCircle },
   rejected: { label: 'Refusee', color: 'bg-red-500/10 text-red-400', icon: XCircle },
   completed: { label: 'Terminee', color: 'bg-blue-500/10 text-blue-400', icon: CheckCircle },
@@ -54,7 +55,7 @@ const RidesManager = () => {
           <span className="bg-slate-800 text-slate-300 text-xs px-2 py-1 rounded-full">{rides.length}</span>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {['all', 'pending', 'accepted', 'rejected', 'completed'].map(f => (
+          {['all', 'pending', 'submitted_csharp', 'accepted', 'rejected', 'completed'].map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${filter === f ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>
               {f === 'all' ? 'Toutes' : statusConfig[f]?.label || f}

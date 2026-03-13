@@ -38,6 +38,9 @@ export const DriverAuthProvider = ({ children }) => {
     setPartner(data.partner);
     localStorage.setItem('driver_token', data.token);
     localStorage.setItem('driver_partner', JSON.stringify(data.partner));
+    if (data.csharpToken) {
+      localStorage.setItem('driver_csharp_token', data.csharpToken);
+    }
     return data;
   };
 

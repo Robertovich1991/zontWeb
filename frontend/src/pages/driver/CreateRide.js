@@ -2,9 +2,20 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, MapPin, Car, DollarSign, User, Plane, Calendar, Navigation, Clock, Route } from 'lucide-react';
+import { ArrowLeft, Loader2, MapPin, Car, DollarSign, User, Plane, Calendar, Clock, Route, CreditCard, Shield } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 const API = process.env.REACT_APP_BACKEND_URL;
+const STRIPE_PK = 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO';
+const stripePromise = loadStripe(STRIPE_PK);
+
+const cardStyle = {
+  style: {
+    base: { color: '#fff', fontFamily: 'system-ui, sans-serif', fontSize: '15px', '::placeholder': { color: '#6b7280' } },
+    invalid: { color: '#ef4444' },
+  },
+};
 
 const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
   const inputRef = useRef(null);
@@ -44,18 +55,21 @@ const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
   );
 };
 
-const CreateRide = () => {
+const CreateRideForm = () => {
   const { token } = useDriverAuth();
   const navigate = useNavigate();
+  const stripe = useStripe();
+  const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loadingCat, setLoadingCat] = useState(true);
   const [routeInfo, setRouteInfo] = useState(null);
   const [calculatingRoute, setCalculatingRoute] = useState(false);
+  const [cardComplete, setCardComplete] = useState(false);
   const [form, setForm] = useState({
     pickup_address: '', pickup_lat: null, pickup_lng: null,
     dropoff_address: '', dropoff_lat: null, dropoff_lng: null,
-    vehicle_category_id: '', vehicle_category_name: '',
+    vehicle_category: '', vehicle_category_id: '', vehicle_category_name: '',
     proposed_price: '', currency: 'EUR',
     passenger_name: '', passenger_phone: '',
     pickup_datetime: '', notes: '', flight_number: '',
@@ -84,9 +98,7 @@ const CreateRide = () => {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.status === 'ok') {
-          setRouteInfo(data);
-        }
+        if (data.status === 'ok') setRouteInfo(data);
       }
     } catch {} finally { setCalculatingRoute(false); }
   }, [token]);
@@ -104,177 +116,193 @@ const CreateRide = () => {
   const handleCategoryChange = (e) => {
     const id = e.target.value;
     const cat = categories.find(c => String(c.id) === id);
-    setForm(prev => ({ ...prev, vehicle_category_id: id, vehicle_category_name: cat?.name || id }));
+    setForm(prev => ({
+      ...prev,
+      vehicle_category_id: id,
+      vehicle_category_name: cat?.name || id,
+      vehicle_category: cat?.name || id,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.pickup_address || !form.dropoff_address || !form.vehicle_category_id || !form.proposed_price) {
+    if (!form.pickup_address || !form.dropoff_address || !form.proposed_price) {
       toast.error('Veuillez remplir les champs obligatoires');
       return;
     }
+    if (!stripe || !elements || !cardComplete) {
+      toast.error('Veuillez entrer vos informations de carte');
+      return;
+    }
+
     setLoading(true);
     try {
+      // Step 1: Get SetupIntent for 3DS
+      const setupRes = await fetch(`${API}/api/partner/booking/setup-intent`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const setupData = await setupRes.json();
+      if (!setupRes.ok || !setupData.clientSecret) {
+        toast.error(setupData?.detail || 'Erreur: reconnectez-vous pour lier votre compte');
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Confirm card with 3DS
+      const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
+        setupData.clientSecret,
+        { payment_method: { card: elements.getElement(CardElement) } }
+      );
+      if (setupError) {
+        toast.error(setupError.message || 'Erreur de carte');
+        setLoading(false);
+        return;
+      }
+
+      // Step 3: Create ride with authenticated card
       const payload = {
         ...form,
         proposed_price: parseFloat(form.proposed_price),
+        card_id: setupIntent.payment_method,
+        distance_km: routeInfo?.distance_meters ? routeInfo.distance_meters / 1000 : null,
+        duration_min: routeInfo?.duration_seconds ? routeInfo.duration_seconds / 60 : null,
         notes: form.notes + (routeInfo ? ` | Distance: ${routeInfo.distance}, Duree: ${routeInfo.duration}` : ''),
       };
+
       const res = await fetch(`${API}/api/partner/rides`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+      const data = await res.json();
       if (res.ok) {
-        toast.success('Course proposee avec succes !');
+        if (data.csharp_submitted) {
+          toast.success('Course envoyee au dispatch avec succes !');
+        } else {
+          toast.success('Course proposee ! En attente de validation.');
+        }
         navigate('/driver');
       } else {
-        const data = await res.json();
         toast.error(data.detail || 'Erreur lors de la creation');
       }
-    } catch {
-      toast.error('Erreur de connexion');
+    } catch (err) {
+      toast.error(err.message || 'Erreur de connexion');
     } finally {
       setLoading(false);
     }
   };
 
-  const inputCls = 'w-full px-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent text-sm';
-
   return (
-    <div className="min-h-screen bg-[#0f1419] flex flex-col" data-testid="create-ride-page">
-      <header className="bg-[#1a2332] border-b border-gray-800 px-4 py-3 flex items-center gap-3 sticky top-0 z-20">
-        <button onClick={() => navigate('/driver')} className="text-gray-400 hover:text-white transition" data-testid="back-btn">
+    <div className="min-h-screen bg-[#0f1923] text-white">
+      <div className="sticky top-0 z-10 bg-[#1a2332] border-b border-gray-800 px-4 py-3 flex items-center gap-3">
+        <button onClick={() => navigate('/driver')} className="p-2 hover:bg-white/10 rounded-lg" data-testid="back-btn">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-white font-semibold text-sm">Proposer une Course</h1>
-      </header>
+        <h1 className="text-lg font-bold">Proposer une Course</h1>
+      </div>
 
-      <div className="flex-1 px-4 py-5 space-y-4 pb-24">
+      <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto pb-24">
         {/* Addresses */}
-        <div className="bg-[#1a2332] rounded-xl p-4 border border-gray-800 space-y-3">
-          <h3 className="text-white font-semibold text-sm flex items-center gap-2"><MapPin className="w-4 h-4 text-[#2ecc71]" /> Trajet</h3>
-          <AddressInput label="Adresse de depart *" placeholder="Ex: Aeroport CDG, Terminal 2"
-            value={form.pickup_address} onChange={handlePickupChange} testId="pickup-address" />
-          <AddressInput label="Adresse d'arrivee *" placeholder="Ex: 15 Rue de Rivoli, Paris"
-            value={form.dropoff_address} onChange={handleDropoffChange} testId="dropoff-address" />
-
-          {/* Route Info */}
-          {calculatingRoute && (
-            <div className="flex items-center gap-2 text-[#2ecc71] text-sm py-2">
-              <Loader2 className="w-4 h-4 animate-spin" /> Calcul de l'itineraire...
-            </div>
-          )}
-          {routeInfo && !calculatingRoute && (
-            <div className="bg-[#2ecc71]/10 border border-[#2ecc71]/30 rounded-xl p-3 space-y-2" data-testid="route-info">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Navigation className="w-4 h-4 text-[#2ecc71]" />
-                  <span className="text-white font-semibold text-sm">{routeInfo.distance}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#2ecc71]" />
-                  <span className="text-white font-semibold text-sm">{routeInfo.duration}</span>
-                </div>
-              </div>
-              <div className="text-xs text-gray-400">
-                <div className="flex items-start gap-2 mb-1">
-                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1 flex-shrink-0" />
-                  <span>{routeInfo.start_address}</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-red-400 rounded-full mt-1 flex-shrink-0" />
-                  <span>{routeInfo.end_address}</span>
-                </div>
-              </div>
-            </div>
-          )}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-[#2ecc71]"><MapPin className="w-4 h-4" /> <span className="text-sm font-medium">Itineraire</span></div>
+          <AddressInput label="Adresse de depart *" placeholder="Adresse de depart" value={form.pickup_address} onChange={handlePickupChange} testId="pickup-input" />
+          <AddressInput label="Adresse d'arrivee *" placeholder="Adresse d'arrivee" value={form.dropoff_address} onChange={handleDropoffChange} testId="dropoff-input" />
         </div>
+
+        {/* Route info */}
+        {calculatingRoute && <div className="flex items-center gap-2 text-sm text-gray-400"><Loader2 className="w-4 h-4 animate-spin" /> Calcul de l'itineraire...</div>}
+        {routeInfo && (
+          <div className="bg-[#1a2332] border border-[#2ecc71]/30 rounded-xl p-3 flex gap-4" data-testid="route-info">
+            <div className="flex items-center gap-1.5 text-sm"><Route className="w-4 h-4 text-[#2ecc71]" /> <span className="text-white">{routeInfo.distance}</span></div>
+            <div className="flex items-center gap-1.5 text-sm"><Clock className="w-4 h-4 text-blue-400" /> <span className="text-white">{routeInfo.duration}</span></div>
+          </div>
+        )}
 
         {/* Vehicle & Price */}
-        <div className="bg-[#1a2332] rounded-xl p-4 border border-gray-800 space-y-3">
-          <h3 className="text-white font-semibold text-sm flex items-center gap-2"><Car className="w-4 h-4 text-[#2ecc71]" /> Vehicule & Prix</h3>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-[#2ecc71]"><Car className="w-4 h-4" /> <span className="text-sm font-medium">Vehicule & Prix</span></div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Categorie de vehicule *</label>
-            {loadingCat ? (
-              <div className="flex items-center gap-2 text-gray-400 text-sm py-3"><Loader2 className="w-4 h-4 animate-spin" /> Chargement...</div>
-            ) : (
-              <select value={form.vehicle_category_id} onChange={handleCategoryChange} required
-                className={`${inputCls} appearance-none`} data-testid="vehicle-category">
-                <option value="">Selectionner une categorie</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name || `Cat ${cat.id}`}</option>
-                ))}
-              </select>
-            )}
+            <label className="block text-xs text-gray-400 mb-1">Categorie de vehicule</label>
+            <select value={form.vehicle_category_id} onChange={handleCategoryChange}
+              className="w-full px-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]"
+              data-testid="category-select">
+              <option value="">Selectionner</option>
+              {loadingCat ? <option>Chargement...</option> : categories.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Prix propose * ({form.currency})</label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
-                <input type="number" step="0.01" min="1" value={form.proposed_price}
-                  onChange={e => setForm({...form, proposed_price: e.target.value})}
-                  placeholder="0.00" className={`${inputCls} pl-10`} required data-testid="proposed-price" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Devise</label>
-              <select value={form.currency} onChange={e => setForm({...form, currency: e.target.value})}
-                className={`${inputCls} appearance-none`} data-testid="currency">
-                <option value="EUR">EUR</option>
-                <option value="USD">USD</option>
-                <option value="GBP">GBP</option>
-                <option value="AMD">AMD</option>
-              </select>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Prix propose (EUR) *</label>
+            <div className="relative">
+              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input type="number" step="0.01" min="1" value={form.proposed_price}
+                onChange={(e) => setForm(prev => ({ ...prev, proposed_price: e.target.value }))}
+                placeholder="Ex: 85.00"
+                className="w-full pl-10 pr-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]"
+                data-testid="price-input" />
             </div>
           </div>
         </div>
 
-        {/* Passenger & Details */}
-        <div className="bg-[#1a2332] rounded-xl p-4 border border-gray-800 space-y-3">
-          <h3 className="text-white font-semibold text-sm flex items-center gap-2"><User className="w-4 h-4 text-[#2ecc71]" /> Details</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Nom du passager</label>
-              <input value={form.passenger_name} onChange={e => setForm({...form, passenger_name: e.target.value})}
-                placeholder="Nom" className={inputCls} data-testid="passenger-name" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Tel passager</label>
-              <input value={form.passenger_phone} onChange={e => setForm({...form, passenger_phone: e.target.value})}
-                placeholder="+33..." className={inputCls} data-testid="passenger-phone" />
-            </div>
+        {/* Date/Time */}
+        <div>
+          <div className="flex items-center gap-2 text-[#2ecc71] mb-2"><Calendar className="w-4 h-4" /> <span className="text-sm font-medium">Date & Heure</span></div>
+          <input type="datetime-local" value={form.pickup_datetime}
+            onChange={(e) => setForm(prev => ({ ...prev, pickup_datetime: e.target.value }))}
+            className="w-full px-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]"
+            data-testid="datetime-input" />
+        </div>
+
+        {/* Passenger Info */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-[#2ecc71]"><User className="w-4 h-4" /> <span className="text-sm font-medium">Passager</span></div>
+          <input value={form.passenger_name} onChange={(e) => setForm(prev => ({ ...prev, passenger_name: e.target.value }))}
+            placeholder="Nom du passager" data-testid="passenger-name"
+            className="w-full px-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" />
+          <input value={form.passenger_phone} onChange={(e) => setForm(prev => ({ ...prev, passenger_phone: e.target.value }))}
+            placeholder="Tel passager" data-testid="passenger-phone"
+            className="w-full px-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" />
+        </div>
+
+        {/* Flight number */}
+        <div>
+          <div className="flex items-center gap-2 text-gray-400 mb-2"><Plane className="w-4 h-4" /> <span className="text-sm">N. de vol (optionnel)</span></div>
+          <input value={form.flight_number} onChange={(e) => setForm(prev => ({ ...prev, flight_number: e.target.value }))}
+            placeholder="Ex: AF1234" data-testid="flight-input"
+            className="w-full px-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" />
+        </div>
+
+        {/* Stripe Card */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-[#2ecc71]"><CreditCard className="w-4 h-4" /> <span className="text-sm font-medium">Carte de paiement</span></div>
+          <div className="bg-[#1a2332] border border-gray-700 rounded-xl p-4">
+            <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} data-testid="stripe-card" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Date/Heure</label>
-              <input type="datetime-local" value={form.pickup_datetime}
-                onChange={e => setForm({...form, pickup_datetime: e.target.value})}
-                className={inputCls} data-testid="pickup-datetime" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">N de vol</label>
-              <input value={form.flight_number} onChange={e => setForm({...form, flight_number: e.target.value})}
-                placeholder="AF1234" className={inputCls} data-testid="flight-number" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Notes</label>
-            <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
-              placeholder="Instructions supplementaires..." className={`${inputCls} resize-none`} rows={3} data-testid="notes" />
+          <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+            <Shield className="w-3 h-3" />
+            <span>Paiement securise via Stripe - Debite a l'acceptation par un chauffeur</span>
           </div>
         </div>
-      </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0f1419] border-t border-gray-800 px-4 py-4 z-30">
-        <button onClick={handleSubmit} disabled={loading} data-testid="submit-ride"
-          className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-semibold text-sm hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#2ecc71]/20">
-          {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Envoi en cours...</> : 'Proposer la Course'}
-        </button>
-      </div>
+        {/* Submit */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#0f1923] border-t border-gray-800">
+          <button type="submit" disabled={loading || !cardComplete}
+            className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-base hover:bg-[#27ae60] disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            data-testid="submit-ride-btn">
+            {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Traitement...</> : <>Proposer - {form.proposed_price || '0'} EUR</>}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
+
+const CreateRide = () => (
+  <Elements stripe={stripePromise}>
+    <CreateRideForm />
+  </Elements>
+);
 
 export default CreateRide;
