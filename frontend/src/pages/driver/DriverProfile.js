@@ -1,17 +1,120 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
-import { ArrowLeft, CreditCard, Loader2, CheckCircle, User, Building, Phone, Mail, Shield, Star } from 'lucide-react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { ArrowLeft, CreditCard, Loader2, CheckCircle, User, Building, Phone, Mail, Shield, Star, Plus, Trash2, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 const API = process.env.REACT_APP_BACKEND_URL;
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PK || 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO');
+
+const cardStyle = {
+  style: {
+    base: { color: '#ffffff', fontSize: '16px', '::placeholder': { color: '#6b7280' }, iconColor: '#2ecc71' },
+    invalid: { color: '#ef4444', iconColor: '#ef4444' },
+  },
+};
+
+// XHR wrapper to avoid Stripe.js body stream conflict
+const xhrRequest = (method, url, headers, body) => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+    xhr.onload = () => {
+      let data;
+      try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
+      resolve({ ok: xhr.status >= 200 && xhr.status < 300, data });
+    };
+    xhr.onerror = () => reject(new Error('Erreur reseau'));
+    xhr.send(body || null);
+  });
+};
+
+const AddCardForm = ({ token, onCardAdded, onCancel }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [cardComplete, setCardComplete] = useState(false);
+  const [cardBrand, setCardBrand] = useState('unknown');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!stripe || !elements || !cardComplete) return;
+    setLoading(true);
+    try {
+      // Step 1: Get SetupIntent from C#
+      const setupResp = await xhrRequest('POST', `${API}/api/partner/cards/setup-intent`, {
+        Authorization: `Bearer ${token}`,
+      });
+      if (!setupResp.ok || !setupResp.data.clientSecret) {
+        toast.error(setupResp.data?.detail || 'Erreur: reconnectez-vous');
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Confirm card with 3DS
+      const { error, setupIntent } = await stripe.confirmCardSetup(
+        setupResp.data.clientSecret,
+        { payment_method: { card: elements.getElement(CardElement) } }
+      );
+      if (error) {
+        toast.error(error.message || 'Erreur de carte');
+        setLoading(false);
+        return;
+      }
+
+      // Step 3: Save card in our DB
+      const saveResp = await xhrRequest('POST', `${API}/api/partner/cards/save`, {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }, JSON.stringify({ pm_id: setupIntent.payment_method, brand: cardBrand }));
+
+      if (saveResp.ok) {
+        toast.success('Carte ajoutee avec succes !');
+        onCardAdded(saveResp.data);
+      } else {
+        toast.error('Erreur lors de la sauvegarde');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Erreur');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="bg-[#0f1419] border border-gray-700 rounded-xl p-4">
+        <CardElement options={cardStyle} onChange={e => { setCardComplete(e.complete); if (e.brand) setCardBrand(e.brand); }} />
+      </div>
+      <p className="text-xs text-gray-500">Verification 0 EUR - Aucun debit lors de l'ajout</p>
+      <div className="flex gap-2">
+        <button type="button" onClick={onCancel}
+          className="flex-1 py-3 bg-gray-700/50 text-gray-300 rounded-xl text-sm hover:bg-gray-700 transition flex items-center justify-center gap-2">
+          <X className="w-4 h-4" /> Annuler
+        </button>
+        <button type="submit" disabled={loading || !cardComplete} data-testid="confirm-add-card"
+          className="flex-1 py-3 bg-[#2ecc71] text-white rounded-xl text-sm font-semibold hover:bg-[#27ae60] transition disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#2ecc71]/20">
+          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verification...</> : <><CheckCircle className="w-4 h-4" /> Ajouter</>}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const brandIcons = {
+  visa: 'VISA', mastercard: 'MC', amex: 'AMEX', discover: 'DISC', unknown: 'CARD'
+};
 
 const DriverProfile = () => {
   const { partner, token, logout } = useDriverAuth();
   const navigate = useNavigate();
-  const [cardInfo, setCardInfo] = useState(null);
+  const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [addingCard, setAddingCard] = useState(false);
-  const [polling, setPolling] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [deletingCard, setDeletingCard] = useState(null);
   const [reviewStats, setReviewStats] = useState(null);
   const [reviews, setReviews] = useState([]);
 
@@ -20,57 +123,33 @@ const DriverProfile = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [cardRes, statsRes, reviewsRes] = await Promise.all([
-          fetch(`${API}/api/partner/payment/my-card`, { headers }),
+        const [cardsRes, statsRes, reviewsRes] = await Promise.all([
+          fetch(`${API}/api/partner/cards`, { headers }),
           fetch(`${API}/api/partner/reviews/stats/${partner?.id}`, { headers }),
           fetch(`${API}/api/partner/reviews/my`, { headers }),
         ]);
-        if (cardRes.ok) setCardInfo(await cardRes.json());
+        if (cardsRes.ok) setCards(await cardsRes.json());
         if (statsRes.ok) setReviewStats(await statsRes.json());
         if (reviewsRes.ok) setReviews(await reviewsRes.json());
       } catch {} finally { setLoading(false); }
     };
     fetchData();
-
-    // Check if returning from Stripe
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
-    if (sessionId) {
-      setPolling(true);
-      pollStatus(sessionId, 0);
-      window.history.replaceState({}, '', '/driver/profile');
-    }
   }, []);
 
-  const pollStatus = async (sessionId, attempts) => {
-    if (attempts >= 5) { setPolling(false); return; }
+  const handleDeleteCard = async (cardId) => {
+    setDeletingCard(cardId);
     try {
-      const res = await fetch(`${API}/api/partner/payment/card-status/${sessionId}`, { headers });
+      const res = await fetch(`${API}/api/partner/cards/${cardId}`, { method: 'DELETE', headers });
       if (res.ok) {
-        const data = await res.json();
-        if (data.payment_status === 'paid') {
-          setCardInfo({ has_card: true, card_added_at: new Date().toISOString() });
-          setPolling(false);
-          return;
-        }
+        setCards(prev => prev.filter(c => c.id !== cardId));
+        toast.success('Carte supprimee');
       }
-    } catch {}
-    setTimeout(() => pollStatus(sessionId, attempts + 1), 2000);
+    } catch {} finally { setDeletingCard(null); }
   };
 
-  const handleAddCard = async () => {
-    setAddingCard(true);
-    try {
-      const res = await fetch(`${API}/api/partner/payment/add-card`, {
-        method: 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ origin_url: window.location.origin }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        window.location.href = data.url;
-      }
-    } catch {} finally { setAddingCard(false); }
+  const handleCardAdded = (card) => {
+    setCards(prev => [...prev, card]);
+    setShowAddForm(false);
   };
 
   return (
@@ -171,41 +250,46 @@ const DriverProfile = () => {
         {/* Card Management */}
         <div className="bg-[#1a2332] rounded-xl p-5 border border-gray-800" data-testid="card-management">
           <h3 className="text-white font-semibold text-sm flex items-center gap-2 mb-4">
-            <CreditCard className="w-4 h-4 text-[#2ecc71]" /> Carte Bancaire
+            <CreditCard className="w-4 h-4 text-[#2ecc71]" /> Mes Cartes Bancaires
           </h3>
 
-          {loading || polling ? (
+          {loading ? (
             <div className="flex items-center gap-3 py-4">
               <Loader2 className="w-5 h-5 text-[#2ecc71] animate-spin" />
-              <span className="text-gray-400 text-sm">{polling ? 'Verification du paiement...' : 'Chargement...'}</span>
-            </div>
-          ) : cardInfo?.has_card ? (
-            <div className="space-y-3">
-              <div className="bg-[#2ecc71]/10 border border-[#2ecc71]/30 rounded-xl p-4 flex items-center gap-3" data-testid="card-active">
-                <CheckCircle className="w-5 h-5 text-[#2ecc71]" />
-                <div>
-                  <p className="text-white font-medium text-sm">Carte enregistree</p>
-                  <p className="text-gray-400 text-xs">
-                    Ajoutee le {cardInfo.card_added_at ? new Date(cardInfo.card_added_at).toLocaleDateString('fr-FR') : '-'}
-                  </p>
-                </div>
-              </div>
-              <button onClick={handleAddCard} disabled={addingCard}
-                className="w-full py-3 bg-gray-700/50 text-gray-300 rounded-xl text-sm hover:bg-gray-700 transition flex items-center justify-center gap-2">
-                {addingCard ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />}
-                Changer de carte
-              </button>
+              <span className="text-gray-400 text-sm">Chargement...</span>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
-                <p className="text-amber-400 text-sm font-medium mb-1">Aucune carte enregistree</p>
-                <p className="text-gray-400 text-xs">Ajoutez une carte bancaire pour etre debite automatiquement apres chaque course effectuee.</p>
-              </div>
-              <button onClick={handleAddCard} disabled={addingCard} data-testid="add-card-btn"
-                className="w-full py-4 bg-[#2ecc71] text-white rounded-xl font-semibold text-sm hover:bg-[#27ae60] transition-all disabled:bg-gray-600 flex items-center justify-center gap-2 shadow-lg shadow-[#2ecc71]/20">
-                {addingCard ? <><Loader2 className="w-5 h-5 animate-spin" /> Redirection...</> : <><CreditCard className="w-5 h-5" /> Ajouter une Carte</>}
-              </button>
+            <div className="space-y-3">
+              {/* Saved cards list */}
+              {cards.map(card => (
+                <div key={card.id} className="bg-[#0f1419] border border-gray-700 rounded-xl p-4 flex items-center justify-between" data-testid={`card-${card.id}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-7 bg-gradient-to-br from-blue-600 to-blue-800 rounded flex items-center justify-center">
+                      <span className="text-white text-[9px] font-bold">{brandIcons[card.brand] || 'CARD'}</span>
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium capitalize">{card.brand || 'Carte'}</p>
+                      <p className="text-gray-500 text-xs">Ajoutee le {new Date(card.added_at).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                  </div>
+                  <button onClick={() => handleDeleteCard(card.id)} disabled={deletingCard === card.id}
+                    className="text-gray-500 hover:text-red-400 transition p-2" data-testid={`delete-card-${card.id}`}>
+                    {deletingCard === card.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </button>
+                </div>
+              ))}
+
+              {/* Add card form or button */}
+              {showAddForm ? (
+                <Elements stripe={stripePromise}>
+                  <AddCardForm token={token} onCardAdded={handleCardAdded} onCancel={() => setShowAddForm(false)} />
+                </Elements>
+              ) : (
+                <button onClick={() => setShowAddForm(true)} data-testid="add-card-btn"
+                  className="w-full py-3.5 bg-[#2ecc71] text-white rounded-xl font-semibold text-sm hover:bg-[#27ae60] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#2ecc71]/20">
+                  <Plus className="w-4 h-4" /> Ajouter une Carte
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -215,7 +299,7 @@ const DriverProfile = () => {
           <div className="flex items-start gap-3">
             <Shield className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-gray-400 text-xs">Vos donnees de paiement sont securisees par <span className="text-white font-medium">Stripe</span>. Nous ne stockons jamais vos informations bancaires sur nos serveurs.</p>
+              <p className="text-gray-400 text-xs">Vos donnees de paiement sont securisees par <span className="text-white font-medium">Stripe</span>. Verification a 0 EUR - aucun debit lors de l'ajout. Le debit se fait uniquement lors de l'acceptation d'une course par un chauffeur.</p>
             </div>
           </div>
         </div>

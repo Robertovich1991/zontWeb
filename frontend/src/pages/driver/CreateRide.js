@@ -2,20 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, MapPin, Car, DollarSign, User, Plane, Calendar, Clock, Route, CreditCard, Shield } from 'lucide-react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { ArrowLeft, Loader2, MapPin, Car, DollarSign, User, Plane, Calendar, Clock, Route, CreditCard, Shield, Plus, CheckCircle } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
-const STRIPE_PK = 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO';
-const stripePromise = loadStripe(STRIPE_PK);
 
-const cardStyle = {
-  style: {
-    base: { color: '#fff', fontFamily: 'system-ui, sans-serif', fontSize: '15px', '::placeholder': { color: '#6b7280' } },
-    invalid: { color: '#ef4444' },
-  },
-};
+const brandLabels = { visa: 'Visa', mastercard: 'Mastercard', amex: 'Amex', discover: 'Discover', unknown: 'Carte' };
 
 const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
   const inputRef = useRef(null);
@@ -29,11 +20,11 @@ const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
     });
     ac.addListener('place_changed', () => {
       const place = ac.getPlace();
-      if (place?.formatted_address) {
+      if (place?.geometry) {
         onChange({
-          address: place.formatted_address,
-          lat: place.geometry?.location?.lat() || null,
-          lng: place.geometry?.location?.lng() || null,
+          address: place.formatted_address || place.name,
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
         });
       }
     });
@@ -45,6 +36,7 @@ const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
       <label className="block text-xs text-gray-400 mb-1">{label}</label>
       <input
         ref={inputRef}
+        type="text"
         defaultValue={value}
         onChange={(e) => onChange({ address: e.target.value, lat: null, lng: null })}
         placeholder={placeholder}
@@ -55,17 +47,33 @@ const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
   );
 };
 
-const CreateRideForm = () => {
+// XHR wrapper to avoid Stripe.js body stream conflict
+const xhrRequest = (method, url, headers, body) => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+    xhr.onload = () => {
+      let data;
+      try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
+      resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, data });
+    };
+    xhr.onerror = () => reject(new Error('Erreur reseau'));
+    xhr.send(body || null);
+  });
+};
+
+const CreateRide = () => {
   const { token } = useDriverAuth();
   const navigate = useNavigate();
-  const stripe = useStripe();
-  const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loadingCat, setLoadingCat] = useState(true);
   const [routeInfo, setRouteInfo] = useState(null);
   const [calculatingRoute, setCalculatingRoute] = useState(false);
-  const [cardComplete, setCardComplete] = useState(false);
+  const [savedCards, setSavedCards] = useState([]);
+  const [loadingCards, setLoadingCards] = useState(true);
+  const [selectedCard, setSelectedCard] = useState('');
   const [form, setForm] = useState({
     pickup_address: '', pickup_lat: null, pickup_lng: null,
     dropoff_address: '', dropoff_lat: null, dropoff_lng: null,
@@ -76,15 +84,15 @@ const CreateRideForm = () => {
   });
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await fetch(`${API}/api/partner/vehicle-categories`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setCategories(await res.json());
-      } catch {} finally { setLoadingCat(false); }
-    };
-    fetchCategories();
+    const headers = { Authorization: `Bearer ${token}` };
+    Promise.all([
+      fetch(`${API}/api/partner/vehicle-categories`, { headers }).then(r => r.ok ? r.json() : []),
+      fetch(`${API}/api/partner/cards`, { headers }).then(r => r.ok ? r.json() : []),
+    ]).then(([cats, cards]) => {
+      setCategories(cats);
+      setSavedCards(cards);
+      if (cards.length > 0) setSelectedCard(cards[0].pm_id);
+    }).catch(() => {}).finally(() => { setLoadingCat(false); setLoadingCards(false); });
   }, [token]);
 
   const calculateRoute = useCallback(async (pickup, dropoff) => {
@@ -124,61 +132,23 @@ const CreateRideForm = () => {
     }));
   };
 
-  // XMLHttpRequest wrapper to avoid Stripe.js intercepting fetch and causing "body stream already read"
-  const xhrRequest = (method, url, headers, body) => {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open(method, url);
-      Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
-      xhr.onload = () => {
-        let data;
-        try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
-        resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, data });
-      };
-      xhr.onerror = () => reject(new Error('Erreur reseau'));
-      xhr.send(body || null);
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.pickup_address || !form.dropoff_address || !form.proposed_price) {
       toast.error('Veuillez remplir les champs obligatoires');
       return;
     }
-    if (!stripe || !elements || !cardComplete) {
-      toast.error('Veuillez entrer vos informations de carte');
+    if (!selectedCard) {
+      toast.error('Veuillez selectionner une carte de paiement');
       return;
     }
 
     setLoading(true);
     try {
-      // Step 1: Get SetupIntent for 3DS (uses XHR to avoid Stripe.js body stream conflict)
-      const setupResp = await xhrRequest('POST', `${API}/api/partner/booking/setup-intent`, {
-        Authorization: `Bearer ${token}`,
-      });
-      if (!setupResp.ok || !setupResp.data.clientSecret) {
-        toast.error(setupResp.data?.detail || 'Erreur: reconnectez-vous pour lier votre compte');
-        setLoading(false);
-        return;
-      }
-
-      // Step 2: Confirm card with 3DS
-      const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
-        setupResp.data.clientSecret,
-        { payment_method: { card: elements.getElement(CardElement) } }
-      );
-      if (setupError) {
-        toast.error(setupError.message || 'Erreur de carte');
-        setLoading(false);
-        return;
-      }
-
-      // Step 3: Create ride with authenticated card (uses XHR to avoid Stripe.js body stream conflict)
       const payload = {
         ...form,
         proposed_price: parseFloat(form.proposed_price),
-        card_id: setupIntent.payment_method,
+        card_id: selectedCard,
         distance_km: routeInfo?.distance_meters ? routeInfo.distance_meters / 1000 : null,
         duration_min: routeInfo?.duration_seconds ? routeInfo.duration_seconds / 60 : null,
         notes: form.notes + (routeInfo ? ` | Distance: ${routeInfo.distance}, Duree: ${routeInfo.duration}` : ''),
@@ -287,12 +257,49 @@ const CreateRideForm = () => {
             className="w-full px-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" />
         </div>
 
-        {/* Stripe Card */}
+        {/* Card Selection */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-[#2ecc71]"><CreditCard className="w-4 h-4" /> <span className="text-sm font-medium">Carte de paiement</span></div>
-          <div className="bg-[#1a2332] border border-gray-700 rounded-xl p-4">
-            <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} data-testid="stripe-card" />
-          </div>
+
+          {loadingCards ? (
+            <div className="flex items-center gap-2 text-sm text-gray-400"><Loader2 className="w-4 h-4 animate-spin" /> Chargement des cartes...</div>
+          ) : savedCards.length === 0 ? (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+              <p className="text-amber-400 text-sm font-medium mb-2">Aucune carte enregistree</p>
+              <p className="text-gray-400 text-xs mb-3">Ajoutez une carte dans votre profil pour pouvoir proposer des courses.</p>
+              <button type="button" onClick={() => navigate('/driver/profile')}
+                className="w-full py-3 bg-[#2ecc71] text-white rounded-xl text-sm font-semibold hover:bg-[#27ae60] transition flex items-center justify-center gap-2"
+                data-testid="go-to-profile-btn">
+                <Plus className="w-4 h-4" /> Ajouter une carte
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {savedCards.map(card => (
+                <label key={card.pm_id}
+                  className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition ${selectedCard === card.pm_id ? 'bg-[#2ecc71]/10 border-[#2ecc71]/50' : 'bg-[#1a2332] border-gray-700 hover:border-gray-600'}`}
+                  data-testid={`card-option-${card.id}`}>
+                  <input type="radio" name="card" value={card.pm_id} checked={selectedCard === card.pm_id}
+                    onChange={() => setSelectedCard(card.pm_id)} className="sr-only" />
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedCard === card.pm_id ? 'border-[#2ecc71]' : 'border-gray-600'}`}>
+                    {selectedCard === card.pm_id && <CheckCircle className="w-4 h-4 text-[#2ecc71]" />}
+                  </div>
+                  <div className="w-10 h-7 bg-gradient-to-br from-blue-600 to-blue-800 rounded flex items-center justify-center">
+                    <span className="text-white text-[9px] font-bold">{card.brand === 'visa' ? 'VISA' : card.brand === 'mastercard' ? 'MC' : 'CARD'}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white text-sm font-medium">{brandLabels[card.brand] || 'Carte'}</p>
+                    <p className="text-gray-500 text-xs">Ajoutee le {new Date(card.added_at).toLocaleDateString('fr-FR')}</p>
+                  </div>
+                </label>
+              ))}
+              <button type="button" onClick={() => navigate('/driver/profile')}
+                className="w-full py-2.5 text-[#2ecc71] text-xs font-medium flex items-center justify-center gap-1 hover:underline">
+                <Plus className="w-3 h-3" /> Ajouter une autre carte
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-1.5 text-gray-500 text-xs">
             <Shield className="w-3 h-3" />
             <span>Paiement securise via Stripe - Debite a l'acceptation par un chauffeur</span>
@@ -301,7 +308,7 @@ const CreateRideForm = () => {
 
         {/* Submit */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#0f1923] border-t border-gray-800">
-          <button type="submit" disabled={loading || !cardComplete}
+          <button type="submit" disabled={loading || !selectedCard}
             className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-base hover:bg-[#27ae60] disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             data-testid="submit-ride-btn">
             {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Traitement...</> : <>Proposer - {form.proposed_price || '0'} EUR</>}
@@ -311,11 +318,5 @@ const CreateRideForm = () => {
     </div>
   );
 };
-
-const CreateRide = () => (
-  <Elements stripe={stripePromise}>
-    <CreateRideForm />
-  </Elements>
-);
 
 export default CreateRide;
