@@ -124,6 +124,22 @@ const CreateRideForm = () => {
     }));
   };
 
+  // XMLHttpRequest wrapper to avoid Stripe.js intercepting fetch and causing "body stream already read"
+  const xhrRequest = (method, url, headers, body) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(method, url);
+      Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+      xhr.onload = () => {
+        let data;
+        try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
+        resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, data });
+      };
+      xhr.onerror = () => reject(new Error('Erreur reseau'));
+      xhr.send(body || null);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.pickup_address || !form.dropoff_address || !form.proposed_price) {
@@ -137,21 +153,19 @@ const CreateRideForm = () => {
 
     setLoading(true);
     try {
-      // Step 1: Get SetupIntent for 3DS
-      const setupRes = await fetch(`${API}/api/partner/booking/setup-intent`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+      // Step 1: Get SetupIntent for 3DS (uses XHR to avoid Stripe.js body stream conflict)
+      const setupResp = await xhrRequest('POST', `${API}/api/partner/booking/setup-intent`, {
+        Authorization: `Bearer ${token}`,
       });
-      const setupData = await setupRes.json();
-      if (!setupRes.ok || !setupData.clientSecret) {
-        toast.error(setupData?.detail || 'Erreur: reconnectez-vous pour lier votre compte');
+      if (!setupResp.ok || !setupResp.data.clientSecret) {
+        toast.error(setupResp.data?.detail || 'Erreur: reconnectez-vous pour lier votre compte');
         setLoading(false);
         return;
       }
 
       // Step 2: Confirm card with 3DS
       const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
-        setupData.clientSecret,
+        setupResp.data.clientSecret,
         { payment_method: { card: elements.getElement(CardElement) } }
       );
       if (setupError) {
@@ -160,7 +174,7 @@ const CreateRideForm = () => {
         return;
       }
 
-      // Step 3: Create ride with authenticated card
+      // Step 3: Create ride with authenticated card (uses XHR to avoid Stripe.js body stream conflict)
       const payload = {
         ...form,
         proposed_price: parseFloat(form.proposed_price),
@@ -170,21 +184,20 @@ const CreateRideForm = () => {
         notes: form.notes + (routeInfo ? ` | Distance: ${routeInfo.distance}, Duree: ${routeInfo.duration}` : ''),
       };
 
-      const res = await fetch(`${API}/api/partner/rides`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        if (data.csharp_submitted) {
+      const rideResp = await xhrRequest('POST', `${API}/api/partner/rides`, {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }, JSON.stringify(payload));
+
+      if (rideResp.ok) {
+        if (rideResp.data.csharp_submitted) {
           toast.success('Course envoyee au dispatch avec succes !');
         } else {
           toast.success('Course proposee ! En attente de validation.');
         }
         navigate('/driver');
       } else {
-        toast.error(data.detail || 'Erreur lors de la creation');
+        toast.error(rideResp.data.detail || 'Erreur lors de la creation');
       }
     } catch (err) {
       toast.error(err.message || 'Erreur de connexion');

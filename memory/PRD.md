@@ -65,6 +65,7 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Status Tracking**: New `submitted_csharp` status shows rides dispatched to C# system
 - **Stats Dashboard**: Updated with Total, Attente, Dispatch, Dispo counters
 - **Admin Panel**: Rides manager updated with Dispatch filter and status display
+- **Bug Fix**: "body stream already read" error fixed by using XMLHttpRequest instead of fetch (Stripe.js conflict)
 - **Testing**: 100% pass rate - 27 backend tests, all frontend UI flows verified
 
 ## Key Proxy Endpoints
