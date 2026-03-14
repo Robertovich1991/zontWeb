@@ -81,7 +81,7 @@ tail -f /var/log/supervisor/frontend.out.log
 ## 🌐 Accès
 
 Une fois lancé, le site est accessible à :
-- **Frontend** : https://driver-auction-flow.preview.emergentagent.com
+- **Frontend** : https://full-stack-taxi.preview.emergentagent.com
 
 ## 📁 Structure du projet
 

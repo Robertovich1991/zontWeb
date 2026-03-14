@@ -430,6 +430,84 @@ async def proxy_client_profile(request: Request):
         raise HTTPException(status_code=502, detail="Erreur serveur")
 
 
+@router.get("/client/cards")
+async def proxy_client_cards(request: Request):
+    """List client's saved cards from C# (Stripe)."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Client/cards",
+                headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+            if resp.status_code == 200:
+                cards_raw = resp.json()
+                return [
+                    {
+                        "id": c.get("id"),
+                        "brand": c.get("card", {}).get("brand", "unknown"),
+                        "last4": c.get("card", {}).get("last4", "****"),
+                        "exp_month": c.get("card", {}).get("exp_month"),
+                        "exp_year": c.get("card", {}).get("exp_year"),
+                    }
+                    for c in cards_raw
+                ]
+            return []
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Cards list error: {e}")
+        return []
+
+
+@router.get("/client/add-card")
+async def proxy_client_add_card(request: Request):
+    """Get SetupIntent to add a new card via C#."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Client/addCard",
+                headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return {"clientSecret": data.get("client_secret")}
+            raise HTTPException(status_code=resp.status_code, detail="Erreur SetupIntent")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Add card error: {e}")
+        raise HTTPException(status_code=502, detail="Erreur serveur")
+
+
+@router.delete("/client/cards/{card_id}")
+async def proxy_delete_card(card_id: str, request: Request):
+    """Delete a client card via C#."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.delete(
+                f"{CSHARP_API}/api/Client/cards/{card_id}",
+                headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+            if resp.status_code in (200, 204):
+                return {"ok": True}
+            raise HTTPException(status_code=resp.status_code, detail="Impossible de supprimer la carte")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Delete card error: {e}")
+        raise HTTPException(status_code=502, detail="Erreur serveur")
+
+
+
 
 @router.post("/booking/create")
 async def proxy_create_booking(req: AuctionAddRequest, request: Request):

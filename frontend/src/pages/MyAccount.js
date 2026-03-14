@@ -1,10 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import Header from '../components/layout/Header';
-import { User, Mail, Phone, CreditCard, Calendar, Car, MapPin, Navigation, Loader2, AlertCircle, ChevronRight, Shield } from 'lucide-react';
+import { toast } from 'sonner';
+import { User, Mail, Phone, CreditCard, Calendar, Car, Navigation, Loader2, Shield, Plus, Trash2, X, CheckCircle } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PK || 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO');
+
+const cardStyle = {
+  style: {
+    base: { color: '#ffffff', fontSize: '16px', '::placeholder': { color: '#6b7280' }, iconColor: '#c8a951' },
+    invalid: { color: '#ef4444', iconColor: '#ef4444' },
+  },
+};
+
+// XHR wrapper to avoid Stripe.js body stream conflict
+const xhr = (method, url, headers, body) => {
+  return new Promise((resolve, reject) => {
+    const x = new XMLHttpRequest();
+    x.open(method, url);
+    Object.entries(headers).forEach(([k, v]) => x.setRequestHeader(k, v));
+    x.onload = () => {
+      let data; try { data = JSON.parse(x.responseText); } catch { data = {}; }
+      resolve({ ok: x.status >= 200 && x.status < 300, data });
+    };
+    x.onerror = () => reject(new Error('Erreur reseau'));
+    x.send(body || null);
+  });
+};
+
+const brandLabels = { visa: 'Visa', mastercard: 'Mastercard', amex: 'American Express', discover: 'Discover' };
+
+const AddCardInline = ({ token, onDone, onCancel }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [complete, setComplete] = useState(false);
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!stripe || !elements || !complete) return;
+    setLoading(true);
+    try {
+      const setup = await xhr('GET', `${API}/api/proxy/client/add-card`, { Authorization: `Bearer ${token}` });
+      if (!setup.ok || !setup.data.clientSecret) { toast.error('Erreur SetupIntent'); setLoading(false); return; }
+      const { error, setupIntent } = await stripe.confirmCardSetup(setup.data.clientSecret, { payment_method: { card: elements.getElement(CardElement) } });
+      if (error) { toast.error(error.message); setLoading(false); return; }
+      toast.success('Carte ajoutee avec succes !');
+      onDone();
+    } catch (err) { toast.error(err.message || 'Erreur'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <form onSubmit={handleAdd} className="space-y-4 mt-4">
+      <div className="bg-[#0f1419] border border-gray-700 rounded-xl p-4">
+        <CardElement options={cardStyle} onChange={e => setComplete(e.complete)} />
+      </div>
+      <p className="text-xs text-gray-500">Verification 0 EUR — aucun debit lors de l'ajout</p>
+      <div className="flex gap-2">
+        <button type="button" onClick={onCancel} className="flex-1 py-3 bg-gray-700/50 text-gray-300 rounded-xl text-sm hover:bg-gray-700 transition flex items-center justify-center gap-2">
+          <X className="w-4 h-4" /> Annuler
+        </button>
+        <button type="submit" disabled={loading || !complete} data-testid="confirm-add-card"
+          className="flex-1 py-3 bg-[#c8a951] text-black rounded-xl text-sm font-semibold hover:bg-[#d4b85c] transition disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verification...</> : <><CheckCircle className="w-4 h-4" /> Ajouter</>}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  try { return new Date(dateStr).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  catch { return dateStr; }
+};
 
 const statusLabels = {
   0: { label: 'Nouvelle', color: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
@@ -18,45 +92,66 @@ const statusLabels = {
   Cancelled: { label: 'Annulee', color: 'bg-red-500/10 text-red-400 border-red-500/30' },
 };
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return '';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  } catch { return dateStr; }
-};
-
 const MyAccount = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [bookings, setBookings] = useState([]);
+  const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
+  const [showAddCard, setShowAddCard] = useState(false);
+  const [deletingCard, setDeletingCard] = useState(null);
+
+  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+
+  const fetchCards = async () => {
+    try {
+      const res = await xhr('GET', `${API}/api/proxy/client/cards`, { Authorization: `Bearer ${token}` });
+      if (res.ok && Array.isArray(res.data)) setCards(res.data);
+    } catch {}
+  };
 
   useEffect(() => {
     if (!isAuthenticated) { navigate('/'); return; }
-    const token = localStorage.getItem('auth_token');
-    const headers = { Authorization: `Bearer ${token}` };
-
+    const h = { Authorization: `Bearer ${token}` };
     Promise.all([
-      fetch(`${API}/api/proxy/client/profile`, { headers }).then(r => r.ok ? r.json() : null),
-      fetch(`${API}/api/proxy/booking/upcoming`, { headers }).then(r => r.ok ? r.json() : []),
-    ]).then(([prof, bk]) => {
-      setProfile(prof);
-      setBookings(Array.isArray(bk) ? bk : []);
+      xhr('GET', `${API}/api/proxy/client/profile`, h),
+      xhr('GET', `${API}/api/proxy/booking/upcoming`, h),
+      xhr('GET', `${API}/api/proxy/client/cards`, h),
+    ]).then(([profRes, bkRes, cdsRes]) => {
+      setProfile(profRes.ok ? profRes.data : null);
+      setBookings(bkRes.ok && Array.isArray(bkRes.data) ? bkRes.data : []);
+      setCards(cdsRes.ok && Array.isArray(cdsRes.data) ? cdsRes.data : []);
     }).catch(() => {}).finally(() => setLoading(false));
   }, [isAuthenticated, navigate]);
+
+  const handleDeleteCard = async (cardId) => {
+    if (!window.confirm('Supprimer cette carte ?')) return;
+    setDeletingCard(cardId);
+    try {
+      const res = await xhr('DELETE', `${API}/api/proxy/client/cards/${cardId}`, { Authorization: `Bearer ${token}` });
+      if (res.ok) {
+        setCards(prev => prev.filter(c => c.id !== cardId));
+        toast.success('Carte supprimee');
+      } else {
+        toast.error('Impossible de supprimer cette carte');
+      }
+    } catch { toast.error('Erreur'); }
+    finally { setDeletingCard(null); }
+  };
+
+  const handleCardAdded = () => {
+    setShowAddCard(false);
+    fetchCards();
+  };
 
   const handleLogout = () => { logout(); navigate('/'); };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0f1a]">
-        <Header />
-        <div className="flex items-center justify-center pt-40">
-          <Loader2 className="w-8 h-8 text-[#c8a951] animate-spin" />
-        </div>
+      <div className="min-h-screen bg-[#0a0f1a]"><Header />
+        <div className="flex items-center justify-center pt-40"><Loader2 className="w-8 h-8 text-[#c8a951] animate-spin" /></div>
       </div>
     );
   }
@@ -81,7 +176,7 @@ const MyAccount = () => {
               <h1 className="text-xl font-bold text-white">
                 {profile ? `${profile.firstName} ${profile.lastName}`.trim() : user?.name || 'Client'}
               </h1>
-              <p className="text-gray-400 text-sm">{profile?.email || user?.email || ''}</p>
+              <p className="text-gray-400 text-sm">{profile?.email || ''}</p>
             </div>
           </div>
         </div>
@@ -102,27 +197,19 @@ const MyAccount = () => {
             <div className="bg-[#1a2332] rounded-xl p-6 border border-gray-800">
               <h2 className="text-white font-semibold mb-4">Informations personnelles</h2>
               <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 bg-[#0f1419] rounded-xl">
-                  <User className="w-5 h-5 text-[#c8a951]" />
-                  <div>
-                    <p className="text-xs text-gray-500">Nom complet</p>
-                    <p className="text-white font-medium">{profile ? `${profile.firstName} ${profile.lastName}`.trim() : '-'}</p>
+                {[
+                  { icon: User, label: 'Nom complet', value: profile ? `${profile.firstName} ${profile.lastName}`.trim() : '-' },
+                  { icon: Mail, label: 'Email', value: profile?.email || '-' },
+                  { icon: Phone, label: 'Telephone', value: profile?.phoneNumber || '-' },
+                ].map(({ icon: Icon, label, value }) => (
+                  <div key={label} className="flex items-center gap-4 p-4 bg-[#0f1419] rounded-xl">
+                    <Icon className="w-5 h-5 text-[#c8a951]" />
+                    <div>
+                      <p className="text-xs text-gray-500">{label}</p>
+                      <p className="text-white font-medium">{value}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-4 p-4 bg-[#0f1419] rounded-xl">
-                  <Mail className="w-5 h-5 text-[#c8a951]" />
-                  <div>
-                    <p className="text-xs text-gray-500">Email</p>
-                    <p className="text-white font-medium">{profile?.email || '-'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 p-4 bg-[#0f1419] rounded-xl">
-                  <Phone className="w-5 h-5 text-[#c8a951]" />
-                  <div>
-                    <p className="text-xs text-gray-500">Telephone</p>
-                    <p className="text-white font-medium">{profile?.phoneNumber || '-'}</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
             <button onClick={handleLogout} data-testid="logout-btn"
@@ -148,32 +235,18 @@ const MyAccount = () => {
               bookings.map((b, i) => {
                 const st = statusLabels[b.status ?? b.auctionStatus] || { label: 'En cours', color: 'bg-gray-500/10 text-gray-400 border-gray-500/30' };
                 return (
-                  <div key={b.id || i} className="bg-[#1a2332] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition" data-testid={`booking-${i}`}>
+                  <div key={b.id || i} className="bg-[#1a2332] border border-gray-800 rounded-xl p-5" data-testid={`booking-${i}`}>
                     <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Car className="w-5 h-5 text-[#c8a951]" />
-                        <span className="text-white font-semibold text-sm">{b.carType || b.tripType || 'VTC'}</span>
-                      </div>
+                      <div className="flex items-center gap-2"><Car className="w-5 h-5 text-[#c8a951]" /><span className="text-white font-semibold text-sm">{b.carType || b.tripType || 'VTC'}</span></div>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border ${st.color}`}>{st.label}</span>
                     </div>
                     <div className="space-y-2 mb-3">
-                      <div className="flex items-start gap-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full mt-1.5 flex-shrink-0" />
-                        <p className="text-gray-300 text-sm">{b.startAddress || b.fromAddress || 'Depart'}</p>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <div className="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0" />
-                        <p className="text-gray-300 text-sm">{b.endAddress || b.destination || 'Arrivee'}</p>
-                      </div>
+                      <div className="flex items-start gap-2"><div className="w-2 h-2 bg-green-400 rounded-full mt-1.5 flex-shrink-0" /><p className="text-gray-300 text-sm">{b.startAddress || b.fromAddress || 'Depart'}</p></div>
+                      <div className="flex items-start gap-2"><div className="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0" /><p className="text-gray-300 text-sm">{b.endAddress || b.destination || 'Arrivee'}</p></div>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>{formatDate(b.startDate || b.date)}</span>
-                      </div>
-                      {(b.clientPrice || b.price) && (
-                        <span className="ml-auto text-[#c8a951] font-bold text-sm">{b.clientPrice || b.price} EUR</span>
-                      )}
+                      <Calendar className="w-3.5 h-3.5" /><span>{formatDate(b.startDate || b.date)}</span>
+                      {(b.clientPrice || b.price) && <span className="ml-auto text-[#c8a951] font-bold text-sm">{b.clientPrice || b.price} EUR</span>}
                     </div>
                   </div>
                 );
@@ -186,32 +259,50 @@ const MyAccount = () => {
         {activeTab === 'payment' && (
           <div className="space-y-4" data-testid="payment-section">
             <div className="bg-[#1a2332] rounded-xl p-6 border border-gray-800">
-              <h2 className="text-white font-semibold mb-4">Carte bancaire</h2>
-              {profile?.defaultCardId ? (
-                <div className="bg-[#0f1419] border border-gray-700 rounded-xl p-5 flex items-center gap-4">
-                  <div className="w-12 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
-                    <CreditCard className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-white font-medium">Carte enregistree</p>
-                    <p className="text-gray-500 text-xs">ID: {profile.defaultCardId.slice(-8)}</p>
-                  </div>
-                  <div className="px-3 py-1 bg-green-500/10 text-green-400 rounded-full text-xs border border-green-500/30">
-                    Active
-                  </div>
+              <h2 className="text-white font-semibold mb-4">Mes cartes bancaires</h2>
+
+              {cards.length > 0 ? (
+                <div className="space-y-3">
+                  {cards.map(card => (
+                    <div key={card.id} className="bg-[#0f1419] border border-gray-700 rounded-xl p-4 flex items-center gap-4" data-testid={`card-${card.last4}`}>
+                      <div className="w-12 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                        <span className="text-white text-[9px] font-bold">{card.brand === 'visa' ? 'VISA' : card.brand === 'mastercard' ? 'MC' : 'CARD'}</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-white font-medium text-sm">{brandLabels[card.brand] || card.brand} **** {card.last4}</p>
+                        <p className="text-gray-500 text-xs">Expire {card.exp_month}/{card.exp_year}</p>
+                      </div>
+                      <button onClick={() => handleDeleteCard(card.id)} disabled={deletingCard === card.id}
+                        className="text-gray-500 hover:text-red-400 transition p-2" data-testid={`delete-card-${card.last4}`}>
+                        {deletingCard === card.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-6">
                   <CreditCard className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400 text-sm mb-4">Aucune carte enregistree</p>
-                  <p className="text-gray-500 text-xs">Votre carte sera enregistree lors de votre premiere reservation.</p>
+                  <p className="text-gray-400 text-sm">Aucune carte enregistree</p>
                 </div>
               )}
+
+              {/* Add card */}
+              {showAddCard ? (
+                <Elements stripe={stripePromise}>
+                  <AddCardInline token={token} onDone={handleCardAdded} onCancel={() => setShowAddCard(false)} />
+                </Elements>
+              ) : (
+                <button onClick={() => setShowAddCard(true)} data-testid="add-card-btn"
+                  className="w-full mt-4 py-3.5 bg-[#c8a951] text-black rounded-xl font-semibold text-sm hover:bg-[#d4b85c] transition flex items-center justify-center gap-2">
+                  <Plus className="w-4 h-4" /> Ajouter une carte
+                </button>
+              )}
             </div>
+
             <div className="bg-[#1a2332] rounded-xl p-4 border border-gray-800">
               <div className="flex items-start gap-3">
                 <Shield className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
-                <p className="text-gray-400 text-xs">Vos donnees de paiement sont securisees par <span className="text-white font-medium">Stripe</span>. Nous ne stockons jamais vos informations bancaires.</p>
+                <p className="text-gray-400 text-xs">Vos donnees de paiement sont securisees par <span className="text-white font-medium">Stripe</span>. Verification a 0 EUR — aucun debit lors de l'ajout.</p>
               </div>
             </div>
           </div>
