@@ -128,7 +128,7 @@ const CarSelection = () => {
     if (isAuthenticated) {
       navigate('/checkout');
     } else {
-      setAuthMode('signin');
+      setAuthMode('signup');
       setAuthModalOpen(true);
     }
   };
