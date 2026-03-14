@@ -110,10 +110,27 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Test partner: partner_test_1773438684@test.com / Test1234!
 - C# Test Client: arthurhayy@gmail.com / 12345678
 
+### Phase 6 - Client Account Management (Complete - March 14, 2026)
+- **My Account page** (`/my-account`) with 3 tabs: Profil, Reservations, Paiement
+- **Profile tab**: Displays name, email, phone from C# API
+- **Reservations tab**: Shows upcoming bookings from C# auction system
+- **Payment tab**: Full card management — view saved cards (brand, last4, expiry), add new card via Stripe Elements + 3D Secure, delete cards
+- **XHR pattern**: All fetch calls converted to XMLHttpRequest helper to avoid Stripe.js "body stream already read" conflict
+- **Date validation**: Frontend + backend prevent booking with past dates
+- **Header improvements**: Greets logged-in user by first name ("Bonjour, Arthur")
+- **Default to Sign Up**: Auth modal defaults to registration form
+- **Backend endpoints**: `GET /api/proxy/client/cards`, `GET /api/proxy/client/add-card`, `DELETE /api/proxy/client/cards/{card_id}`, `GET /api/proxy/client/profile`, `GET /api/proxy/booking/upcoming`
+- **Testing**: 100% pass rate — 10 backend tests, all frontend UI flows verified
+
 ## Backlog
 
-### P1 - Partner Payment Debits
+### P1 - Partner Payment Debits (ON HOLD by user)
 - Charge partner's saved Stripe card when a ride they proposed is completed by another driver
+- User needs to coordinate with C# developer first
+
+### P1 - Ride Cancellation via C# API (BLOCKED)
+- C# backend does not expose a cancellation endpoint yet
+- Current cancellation is local-only (MongoDB status update)
 
 ### P2 - Notifications
 - Email/push notifications for partners (ride status changes, admin notes)
@@ -122,12 +139,10 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Company login via C# API
 - Vehicle/driver management
 
-### P2 - Client Ride History
-- Page for logged-in clients to view past and upcoming bookings
-
 ### P3 - Enhancements
 - PWA installability (manifest + service worker)
 - Full deployment to zont.cab production domain
+- Centralize XMLHttpRequest helper into a reusable utility (currently duplicated in MyAccount.js, CreateRide.js, api.js)
 
 ## Technical Notes
 - C# API requires `Origin: https://zont.cab` and `Referer: https://zont.cab/` headers
