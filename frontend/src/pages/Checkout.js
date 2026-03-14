@@ -35,6 +35,7 @@ const labels = {
     cardError: 'Please check your card details.',
     bookingSuccess: 'Booking confirmed! Your ride has been reserved.',
     bookingError: 'Booking failed. Please try again.',
+    pastDateError: 'The booking date has passed. Please choose a future date.',
   },
   fr: {
     title: 'Finalisez Votre Reservation',
@@ -55,6 +56,7 @@ const labels = {
     cardError: 'Veuillez verifier vos informations de carte.',
     bookingSuccess: 'Reservation confirmee ! Votre course a ete reservee.',
     bookingError: 'Erreur lors de la reservation. Veuillez reessayer.',
+    pastDateError: 'La date de reservation est passee. Veuillez choisir une date future.',
   },
   ru: {
     title: '\u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u0435 \u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435',
@@ -125,6 +127,15 @@ const CheckoutForm = ({ searchData, selectedCar, c }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!stripe || !elements) return;
+
+    // Date validation - block past dates
+    if (searchData.date && searchData.time) {
+      const bookingDate = new Date(`${searchData.date}T${searchData.time}`);
+      if (bookingDate <= new Date()) {
+        toast.error(c.pastDateError || 'La date de reservation est passee. Veuillez choisir une date future.');
+        return;
+      }
+    }
 
     setLoading(true);
     try {

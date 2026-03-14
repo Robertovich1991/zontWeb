@@ -419,6 +419,15 @@ async def create_ride(ride: RideCreate, request: Request):
     user = await get_current_partner(request)
     db = request.app.state.db
 
+    # Date validation - block past dates
+    if ride.pickup_datetime:
+        try:
+            pickup_dt = datetime.fromisoformat(ride.pickup_datetime.replace("Z", "+00:00"))
+            if pickup_dt < datetime.now(timezone.utc):
+                raise HTTPException(status_code=400, detail="La date de prise en charge est passee. Veuillez choisir une date future.")
+        except ValueError:
+            pass
+
     # Get C# token for auction submission
     partner = await db.partners.find_one({"id": user["sub"]}, {"_id": 0})
     csharp_token = partner.get("csharp_token") if partner else None

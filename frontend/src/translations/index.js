@@ -14,6 +14,7 @@ export const translations = {
       signup: 'SIGN UP',
       signout: 'Sign out',
       hello: 'Hello',
+      myBookings: 'My Bookings',
     },
     hero: {
       title1: 'Press a Button,',
@@ -110,6 +111,7 @@ export const translations = {
       signup: "S'INSCRIRE",
       signout: 'Se deconnecter',
       hello: 'Bonjour',
+      myBookings: 'Mes Reservations',
     },
     hero: {
       title1: 'Appuyez sur un Bouton,',
@@ -206,6 +208,7 @@ export const translations = {
       signup: 'РЕГИСТРАЦИЯ',
       signout: 'Выйти',
       hello: 'Здравствуйте',
+      myBookings: 'Мои бронирования',
     },
     hero: {
       title1: 'Нажмите Кнопку,',
@@ -302,6 +305,7 @@ export const translations = {
       signup: 'ԳՌԱՆՑՎԵԼ',
       signout: 'Ելք',
       hello: 'Բարև',
+      myBookings: 'Ամրագրումներ',
     },
     hero: {
       title1: 'Սեղմեք Կոճակը,',

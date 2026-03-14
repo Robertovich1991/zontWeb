@@ -142,6 +142,14 @@ const CreateRide = () => {
       toast.error('Veuillez selectionner une carte de paiement');
       return;
     }
+    // Date validation - block past dates
+    if (form.pickup_datetime) {
+      const pickupDate = new Date(form.pickup_datetime);
+      if (pickupDate <= new Date()) {
+        toast.error('La date de prise en charge est passee. Veuillez choisir une date future.');
+        return;
+      }
+    }
 
     setLoading(true);
     try {
