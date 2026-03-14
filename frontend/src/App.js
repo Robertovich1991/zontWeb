@@ -18,6 +18,7 @@ const Countries = lazy(() => import("@/pages/Countries"));
 const CarSelection = lazy(() => import("@/pages/CarSelection"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const MyBookings = lazy(() => import("@/pages/MyBookings"));
+const MyAccount = lazy(() => import("@/pages/MyAccount"));
 const BookingConfirmation = lazy(() => import("@/pages/BookingConfirmation"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 
@@ -157,6 +158,7 @@ function App() {
                   <Route path="/car-selection" element={<CarSelection />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/my-bookings" element={<MyBookings />} />
+                  <Route path="/my-account" element={<MyAccount />} />
                   <Route path="/booking-confirmation" element={<BookingConfirmation />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/forgetpassword/:token" element={<ResetPassword />} />

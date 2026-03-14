@@ -408,6 +408,29 @@ async def create_setup_intent(request: Request):
 
 
 
+@router.get("/client/profile")
+async def proxy_client_profile(request: Request):
+    """Get client profile from C# API."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Client",
+                headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+            if resp.status_code == 200:
+                return resp.json()
+            raise HTTPException(status_code=resp.status_code, detail="Impossible de charger le profil")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Profile error: {e}")
+        raise HTTPException(status_code=502, detail="Erreur serveur")
+
+
+
 @router.post("/booking/create")
 async def proxy_create_booking(req: AuctionAddRequest, request: Request):
     """Create a new booking/auction in the C# backend."""

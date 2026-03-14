@@ -153,8 +153,8 @@ const Header = () => {
               {isAuthenticated ? (
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-300 text-sm">{t('nav.hello')}, {user?.firstName || user?.name || 'Client'}</span>
-                  <a href="/my-bookings" className="px-4 py-2 text-sm font-medium text-[#c8a951] hover:text-[#d4b85c] transition-colors" data-testid="my-bookings-link">
-                    {t('nav.myBookings')}
+                  <a href="/my-account" className="px-4 py-2 text-sm font-medium text-[#c8a951] hover:text-[#d4b85c] transition-colors" data-testid="my-account-link">
+                    {t('nav.myAccount')}
                   </a>
                   <button
                     onClick={handleLogout}
@@ -253,8 +253,8 @@ const Header = () => {
               {isAuthenticated ? (
                 <>
                   <div className="text-gray-300 py-2 text-sm">{t('nav.hello')}, {user?.firstName || user?.name || 'Client'}</div>
-                  <a href="/my-bookings" className="block w-full px-4 py-2 text-sm font-medium text-[#c8a951] border border-[#c8a951]/30 rounded hover:bg-[#c8a951]/10 text-center" data-testid="my-bookings-link-mobile">
-                    {t('nav.myBookings')}
+                  <a href="/my-account" className="block w-full px-4 py-2 text-sm font-medium text-[#c8a951] border border-[#c8a951]/30 rounded hover:bg-[#c8a951]/10 text-center" data-testid="my-account-link-mobile">
+                    {t('nav.myAccount')}
                   </a>
                   <button
                     onClick={handleLogout}
