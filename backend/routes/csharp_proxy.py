@@ -230,6 +230,20 @@ async def proxy_login(req: LoginRequest):
             )
             if resp.status_code == 200:
                 data = resp.json()
+                # Fetch user profile to get firstName
+                token = data.get("accessToken")
+                if token:
+                    try:
+                        profile_resp = await client.get(
+                            f"{CSHARP_API}/api/Client",
+                            headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+                        )
+                        if profile_resp.status_code == 200:
+                            profile = profile_resp.json()
+                            data["firstName"] = profile.get("firstName", "")
+                            data["lastName"] = profile.get("lastName", "")
+                    except Exception:
+                        pass
                 return data
             error_data = resp.json() if resp.text else {"error": "Login failed"}
             raise HTTPException(status_code=resp.status_code, detail=error_data)

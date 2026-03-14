@@ -147,9 +147,12 @@ export const authService = {
     });
     const data = await resp.json();
     if (!resp.ok) throw { response: { data } };
+    const firstName = data.firstName || '';
+    const lastName = data.lastName || '';
+    const name = firstName ? `${firstName} ${lastName}`.trim() : '';
     localStorage.setItem('auth_token', data.accessToken);
-    localStorage.setItem('user', JSON.stringify({ token: data.accessToken, roles: data.roles }));
-    return { user: { token: data.accessToken, roles: data.roles }, token: data.accessToken };
+    localStorage.setItem('user', JSON.stringify({ token: data.accessToken, roles: data.roles, name, firstName, lastName }));
+    return { user: { token: data.accessToken, roles: data.roles, name, firstName, lastName }, token: data.accessToken };
   },
 
   forgotPassword: async (email) => {
