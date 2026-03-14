@@ -531,6 +531,23 @@ async def get_ride(ride_id: str, request: Request):
     return ride
 
 
+@router.post("/rides/{ride_id}/cancel")
+async def cancel_ride(ride_id: str, request: Request):
+    """Cancel a ride if it hasn't been accepted yet."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+    ride = await db.partner_rides.find_one({"id": ride_id, "partner_id": user["sub"]}, {"_id": 0})
+    if not ride:
+        raise HTTPException(status_code=404, detail="Course introuvable")
+    if ride["status"] not in ("pending", "submitted_csharp"):
+        raise HTTPException(status_code=400, detail="Cette course ne peut plus etre annulee")
+    await db.partner_rides.update_one(
+        {"id": ride_id},
+        {"$set": {"status": "cancelled", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"ok": True, "status": "cancelled"}
+
+
 @router.get("/available-rides")
 async def get_available_rides(request: Request):
     """Get pending rides from OTHER partners (visible to all authenticated partners)."""

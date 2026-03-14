@@ -39,6 +39,7 @@ const RideDetail = () => {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -116,6 +117,25 @@ const RideDetail = () => {
   const StatusIcon = sc.icon;
   const showReviewForm = ride.status === 'completed' && !existingReview;
   const commentRequired = reviewRating > 0 && reviewRating < 5;
+  const canCancel = ride.status === 'pending' || ride.status === 'submitted_csharp';
+
+  const handleCancel = async () => {
+    if (!window.confirm('Etes-vous sur de vouloir annuler cette course ?')) return;
+    setCancelling(true);
+    try {
+      const res = await fetch(`${API}/api/partner/rides/${id}/cancel`, {
+        method: 'POST', headers,
+      });
+      if (res.ok) {
+        setRide(prev => ({ ...prev, status: 'cancelled' }));
+        toast.success('Course annulee');
+      } else {
+        const data = await res.json();
+        toast.error(data.detail || 'Erreur lors de l\'annulation');
+      }
+    } catch { toast.error('Erreur de connexion'); }
+    finally { setCancelling(false); }
+  };
 
   return (
     <div className="min-h-screen bg-[#0f1419] flex flex-col" data-testid="ride-detail-page">
@@ -135,6 +155,15 @@ const RideDetail = () => {
           </div>
           <p className="text-xs opacity-80">{sc.desc}</p>
         </div>
+
+        {/* Cancel button */}
+        {canCancel && (
+          <button onClick={handleCancel} disabled={cancelling} data-testid="cancel-ride-btn"
+            className="w-full py-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-sm font-medium hover:bg-red-500/20 transition flex items-center justify-center gap-2 disabled:opacity-50">
+            {cancelling ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+            Annuler cette course
+          </button>
+        )}
 
         {/* Route */}
         <div className="bg-[#1a2332] rounded-xl p-4 border border-gray-800 space-y-3">
