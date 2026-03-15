@@ -1,0 +1,125 @@
+{
+  "general": {
+    "theme": "dark",
+    "style": "luxury_minimalist",
+    "mood": "exclusive_concierge",
+    "description": "A premium 'Executive Lounge' feel. Deep blacks, rich navy, and metallic gold accents. The interface should feel quiet, expensive, and frictionless."
+  },
+  "typography": {
+    "font_family_primary": "Manrope, sans-serif",
+    "font_family_secondary": "Playfair Display, serif (for Greetings/Headings if available)",
+    "headings": {
+      "h1": "text-4xl md:text-5xl font-light tracking-tight text-white",
+      "h2": "text-2xl md:text-3xl font-medium tracking-normal text-white",
+      "h3": "text-xl font-medium text-white/90",
+      "label": "text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground"
+    },
+    "body": {
+      "base": "text-base font-normal text-slate-300 leading-relaxed",
+      "small": "text-sm text-slate-400"
+    }
+  },
+  "colors": {
+    "background": {
+      "app": "#0a0f1a",
+      "card": "#1a2332",
+      "glass": "rgba(26, 35, 50, 0.6)"
+    },
+    "accent": {
+      "gold": "#c8a951",
+      "gold_dim": "#a08640",
+      "gold_light": "#e0c065"
+    },
+    "text": {
+      "primary": "#f8fafc",
+      "secondary": "#94a3b8",
+      "tertiary": "#64748b",
+      "gold": "#c8a951"
+    },
+    "status": {
+      "success": "#10b981",
+      "warning": "#f59e0b",
+      "error": "#ef4444",
+      "info": "#3b82f6"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-[#1a2332]/80 border border-white/5 shadow-2xl",
+    "gold_glow": "shadow-[0_0_15px_rgba(200,169,81,0.15)]",
+    "gradients": {
+      "gold_text": "bg-clip-text text-transparent bg-gradient-to-r from-[#c8a951] to-[#e0c065]",
+      "card_hover": "hover:bg-[#1a2332]/90 hover:border-[#c8a951]/30 transition-all duration-300"
+    },
+    "borders": "border border-white/5",
+    "rounded": "rounded-2xl"
+  },
+  "layout_strategy": {
+    "container": "max-w-md mx-auto md:max-w-4xl px-4 py-8 min-h-screen bg-[#0a0f1a]",
+    "spacing": "space-y-6 md:space-y-8",
+    "grid": "grid grid-cols-1 md:grid-cols-12 gap-6"
+  },
+  "components": {
+    "ProfileHeader": {
+      "structure": "flex flex-col items-center md:flex-row md:items-start gap-6 mb-8",
+      "avatar": "w-24 h-24 rounded-full border-2 border-[#c8a951] shadow-[0_0_20px_rgba(200,169,81,0.2)] object-cover",
+      "name": "text-2xl font-light text-white mt-4 md:mt-0",
+      "badge": "inline-flex items-center px-3 py-1 rounded-full bg-[#c8a951]/10 text-[#c8a951] text-xs font-medium tracking-wide mt-2 border border-[#c8a951]/20"
+    },
+    "TabSwitcher": {
+      "container": "flex space-x-1 bg-[#1a2332]/50 p-1 rounded-full mb-8 backdrop-blur-md border border-white/5 w-full md:w-auto",
+      "tab": "flex-1 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 text-center",
+      "active": "bg-[#c8a951] text-[#0a0f1a] shadow-lg",
+      "inactive": "text-slate-400 hover:text-white hover:bg-white/5"
+    },
+    "ReservationCard": {
+      "container": "group relative overflow-hidden bg-[#1a2332]/60 backdrop-blur-md border border-white/5 rounded-2xl p-6 hover:border-[#c8a951]/30 transition-all duration-300",
+      "layout": "flex flex-col md:flex-row justify-between items-start md:items-center gap-4",
+      "date_block": "flex flex-col items-center justify-center w-16 h-16 bg-white/5 rounded-xl border border-white/5",
+      "route_line": "hidden md:block w-px h-12 bg-gradient-to-b from-[#c8a951] to-transparent mx-4",
+      "status_badge": "px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider",
+      "price": "text-xl font-light text-[#c8a951]"
+    },
+    "PaymentCard": {
+      "container": "relative w-full aspect-[1.586] bg-gradient-to-br from-[#1a2332] to-[#0a0f1a] rounded-2xl p-6 border border-white/10 shadow-xl overflow-hidden group hover:border-[#c8a951]/30 transition-all",
+      "chip": "w-12 h-10 bg-gradient-to-tr from-[#e0c065] to-[#c8a951] rounded-md mb-8 opacity-80",
+      "number": "text-xl md:text-2xl font-mono text-white/90 tracking-widest mb-6",
+      "details": "flex justify-between text-xs text-white/50 uppercase tracking-wider"
+    }
+  },
+  "images": {
+    "avatar_placeholder": "https://images.unsplash.com/photo-1767175620484-1ed37931a0d1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzF8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdCUyMG1hbiUyMHN1aXQlMjBtaW5pbWFsaXN0fGVufDB8fHx8MTc3MzYwODY5NXww&ixlib=rb-4.1.0&q=85",
+    "background_texture": "https://images.unsplash.com/photo-1761437855598-011cf89b2ad4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzZ8MHwxfHNlYXJjaHwxfHxibGFjayUyMGdvbGQlMjBsdXh1cnklMjB0ZXh0dXJlJTIwYWJzdHJhY3R8ZW58MHx8fHwxNzczNjA4Njk2fDA&ixlib=rb-4.1.0&q=85"
+  },
+  "instructions_to_main_agent": [
+    "Retain all existing functionality (Stripe, API calls, Tabs logic). This is a VISUAL upgrade.",
+    "Use 'Manrope' or 'Inter' for fonts. If Manrope is not installed, use Inter but style it with wide tracking for uppercase labels.",
+    "Implement the 'Gold' accent carefully. Do not overuse it. It should feel like jewelry—small, precious touches.",
+    "Ensure the layout is responsive. On mobile, tabs should be easy to tap (min 44px height).",
+    "For the 'Reservations' list, use a staggered animation delay for each item entrance if possible.",
+    "Use the 'background_texture' image as a very subtle overlay on the main background (opacity 5-10%) if it adds depth, otherwise stick to the deep navy gradient.",
+    "Ensure all text remains in FRENCH as per the existing app.",
+    "CRITICAL: Do NOT break the existing 'my-account' route or component structure. Just replace the JSX/CSS within the component.",
+    "For the avatar, use the provided Unsplash URL as the default source if the user has no avatar.",
+    "Use Lucide-react icons with stroke-width={1.5} for a refined look."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use sonner for toasts"
+  ]
+}
