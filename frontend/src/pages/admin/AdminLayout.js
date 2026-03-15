@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAdminAuth } from './AdminAuthContext';
-import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight, Users, Car, Building2, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight, Users, Car, Building2, BarChart3, Monitor, BookOpen } from 'lucide-react';
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
@@ -10,6 +10,8 @@ const navItems = [
   { type: 'divider', label: 'Hotel Kiosk' },
   { path: '/admin/hotels-dashboard', icon: BarChart3, label: 'Dashboard Hotels' },
   { path: '/admin/hotels', icon: Building2, label: 'Gestion Hotels' },
+  { path: '/admin/hotel-kiosks', icon: Monitor, label: 'Bornes Tactiles' },
+  { path: '/admin/hotel-bookings', icon: BookOpen, label: 'Reservations Hotels' },
   { type: 'divider', label: 'CMS' },
   { path: '/admin/pages', icon: FileText, label: 'Pages SEO' },
   { path: '/admin/places', icon: MapPin, label: 'Lieux / Destinations' },

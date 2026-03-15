@@ -42,6 +42,8 @@ const PartnersManager = lazy(() => import("@/pages/admin/PartnersManager"));
 const RidesManager = lazy(() => import("@/pages/admin/RidesManager"));
 const HotelsManager = lazy(() => import("@/pages/admin/HotelsManager"));
 const HotelsDashboard = lazy(() => import("@/pages/admin/HotelsDashboard"));
+const KiosksManager = lazy(() => import("@/pages/admin/KiosksManager"));
+const HotelBookingsManager = lazy(() => import("@/pages/admin/HotelBookingsManager"));
 
 // Driver App
 const DriverApp = lazy(() => import("@/pages/driver/DriverApp"));
@@ -193,6 +195,8 @@ function App() {
                     <Route path="rides" element={<RidesManager />} />
                     <Route path="hotels-dashboard" element={<HotelsDashboard />} />
                     <Route path="hotels" element={<HotelsManager />} />
+                    <Route path="hotel-kiosks" element={<KiosksManager />} />
+                    <Route path="hotel-bookings" element={<HotelBookingsManager />} />
                   </Route>
                   {/* Driver PWA */}
                   <Route path="/driver/*" element={<DriverApp />} />

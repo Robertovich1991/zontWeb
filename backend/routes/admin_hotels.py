@@ -267,13 +267,37 @@ async def list_kiosks(request: Request):
     await require_admin(request)
     db = request.app.state.db
     kiosks = await db.kiosks.find({}, {"_id": 0}).to_list(500)
-    # Add hotel name
     hotel_ids = list(set(k["hotel_id"] for k in kiosks))
     hotels = await db.hotels.find({"id": {"$in": hotel_ids}}, {"_id": 0, "id": 1, "name": 1}).to_list(500)
     hmap = {h["id"]: h["name"] for h in hotels}
     for k in kiosks:
         k["hotel_name"] = hmap.get(k["hotel_id"], "Inconnu")
     return kiosks
+
+
+@router.put("/kiosks/{kiosk_id}/status")
+async def toggle_kiosk_status(kiosk_id: str, request: Request):
+    await require_admin(request)
+    db = request.app.state.db
+    body = await request.json()
+    new_status = body.get("status", "offline")
+    result = await db.kiosks.update_one(
+        {"id": kiosk_id},
+        {"$set": {"status": new_status, "last_sync": datetime.now(timezone.utc).isoformat()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(404, "Borne introuvable")
+    return {"ok": True}
+
+
+@router.delete("/kiosks/{kiosk_id}")
+async def delete_kiosk(kiosk_id: str, request: Request):
+    await require_admin(request)
+    db = request.app.state.db
+    result = await db.kiosks.delete_one({"id": kiosk_id})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Borne introuvable")
+    return {"ok": True}
 
 # ── Hotel Bookings ──
 @router.get("/bookings/all")

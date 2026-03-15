@@ -1,0 +1,111 @@
+{
+  "summary": "Phase 2 Hotel Kiosk Management Testing COMPLETE. Backend: 17/17 API tests passed. Frontend: All 15 features verified. Kiosks page has CRUD, status toggle, filters. Bookings page has summary stats, filters (hotel, status, period), search, sort.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "KiosksManager / HotelBookingsManager",
+        "issues": ["React hydration warnings in console due to <span> elements inside <select>, <option>, <tbody>, <tr> - cosmetic warning from Emergent preview system wrapper elements, does NOT affect functionality"]
+      }
+    ]
+  },
+  "test_results": {
+    "backend_tests": {
+      "kiosks_list_all": {
+        "test_kiosks_all_returns_list": "PASS - Returns list of kiosks",
+        "test_kiosks_have_hotel_name": "PASS - Each kiosk has hotel_name enrichment",
+        "test_kiosks_have_correct_status_values": "PASS - Status is 'online' or 'offline'"
+      },
+      "kiosk_create": {
+        "test_create_kiosk_success": "PASS - Creates kiosk linked to hotel, defaults to online",
+        "test_create_kiosk_with_empty_name": "PASS - Auto-generates name if empty",
+        "test_create_kiosk_invalid_hotel": "PASS - Returns 404 for non-existent hotel"
+      },
+      "kiosk_status_toggle": {
+        "test_toggle_kiosk_to_offline": "PASS - PUT /api/admin/hotels/kiosks/{id}/status toggles to offline",
+        "test_toggle_kiosk_to_online": "PASS - Toggles back to online",
+        "test_toggle_nonexistent_kiosk": "PASS - Returns 404"
+      },
+      "kiosk_delete": {
+        "test_delete_kiosk_success": "PASS - Removes kiosk, verified via GET",
+        "test_delete_nonexistent_kiosk": "PASS - Returns 404"
+      },
+      "bookings_all": {
+        "test_bookings_all_returns_list": "PASS - Returns list of 50 bookings",
+        "test_bookings_have_hotel_name": "PASS - Each booking has hotel_name field",
+        "test_bookings_have_commission_calculations": "PASS - hotel_commission + zont_commission + driver_amount = total_price",
+        "test_bookings_have_required_fields": "PASS - All fields: id, hotel_id, hotel_name, client_name, pickup/dropoff, ride_date/time, total_price, status",
+        "test_bookings_have_valid_status": "PASS - Status values: pending, confirmed, assigned, completed, cancelled, refunded"
+      }
+    },
+    "frontend_tests": {
+      "sidebar_navigation": {
+        "hotel_kiosk_section_divider": "PASS - 'HOTEL KIOSK' divider label visible",
+        "bornes_tactiles_link": "PASS - 'Bornes Tactiles' link navigates to /admin/hotel-kiosks",
+        "reservations_hotels_link": "PASS - 'Reservations Hotels' link navigates to /admin/hotel-bookings",
+        "dashboard_hotels_link": "PASS - 'Dashboard Hotels' link visible",
+        "gestion_hotels_link": "PASS - 'Gestion Hotels' link visible"
+      },
+      "kiosks_manager_page": {
+        "page_loads": "PASS - data-testid='kiosks-manager' found",
+        "stat_cards": "PASS - Shows Total bornes (4), En ligne (4), Hors ligne (0)",
+        "create_button": "PASS - 'Ajouter une borne' button visible",
+        "kiosk_form": "PASS - Form with hotel selector, name input, location input, submit button",
+        "filter_hotel": "PASS - Hotel filter dropdown works (4 → 1 kiosk)",
+        "filter_status": "PASS - Status filter (online/offline) works",
+        "kiosk_cards": "PASS - 4 cards showing hotel_name, location, ID, install date, status badge",
+        "toggle_status_button": "PASS - Toggles kiosk online/offline with toast message",
+        "delete_button": "PASS - Delete button visible on each card"
+      },
+      "hotel_bookings_page": {
+        "page_loads": "PASS - data-testid='hotel-bookings-manager' found",
+        "summary_cards": "PASS - 4 cards: Resultats filtres (50), CA Total (7,291 EUR), Comm. Hotels (1,069 EUR), Rev. Zont (729 EUR)",
+        "search_input": "PASS - Searches by client name ('Client 11' → 3 results) and ID",
+        "filter_hotel": "PASS - Hotel filter reduces results (50 → 15)",
+        "filter_status": "PASS - Status filter works (completed → 23)",
+        "filter_period": "PASS - Date period filter works (7d → 6, 30d → 17)",
+        "sort_toggle": "PASS - Toggles between 'Par date' and 'Par prix'",
+        "bookings_table": "PASS - Table columns: ID, Hotel, Client, Trajet, Date, Prix, Comm. H., Rev. Zont, Statut",
+        "status_badges": "PASS - Shows Terminee (green), Assignee (cyan), Confirmee (blue), En attente (yellow), Annulee (red)"
+      }
+    }
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_kiosks_bookings_phase2.py",
+    "/app/test_reports/pytest/kiosks_bookings_phase2_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "React hydration warnings appear in console due to Emergent preview system wrapper elements (<span> inside <select>, <tbody>) - these are cosmetic and do NOT affect functionality",
+    "All data-testid attributes correctly implemented for testing on kiosks and bookings pages",
+    "Commission calculations are mathematically correct on bookings list",
+    "Kiosk status toggle updates correctly with proper toast feedback",
+    "Filter combinations work correctly (hotel + status + period + search)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_kiosks_bookings_phase2.py"
+  ],
+  "success_rate": {
+    "backend": "100% (17/17 tests passed)",
+    "frontend": "100% (all 15 feature checks passed)"
+  },
+  "test_credentials": {
+    "admin_login": {
+      "email": "admin@zont.cab",
+      "password": "admin123"
+    }
+  },
+  "seed_data_creation": "Used existing seeded demo data: 4 kiosks (3 from seed + 1 test), 50 demo bookings across 3 hotels",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Phase 2 complete. Kiosks Management page (/admin/hotel-kiosks) has: stats (total/online/offline), create form with hotel selector, filters (hotel/status), kiosk cards with toggle status and delete buttons. Hotel Bookings page (/admin/hotel-bookings) has: summary cards (count/CA/comm hotels/rev zont), filters (search/hotel/status/period), sort toggle (date/price), table with all booking info and status badges. 50 demo bookings exist with commission calculations. React hydration warnings in console are from Emergent preview system, not actual bugs.",
+  "mocked_api": {
+    "has_mocked_apis": true,
+    "note": "Hotel bookings are DEMO/SEEDED data stored in MongoDB, not connected to real booking system. Commission calculations are done in real-time based on hotel rates."
+  }
+}
