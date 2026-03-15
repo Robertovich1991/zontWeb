@@ -5,7 +5,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import Header from '../components/layout/Header';
 import { toast } from 'sonner';
-import { User, Mail, Phone, CreditCard, Calendar, Car, Navigation, Loader2, Shield, Plus, Trash2, X, CheckCircle } from 'lucide-react';
+import { User, Mail, Phone, CreditCard, Calendar, Car, Navigation, Loader2, Shield, Plus, Trash2, X, CheckCircle, XCircle, PhoneCall } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PK || 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO');
@@ -102,6 +102,7 @@ const MyAccount = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showAddCard, setShowAddCard] = useState(false);
   const [deletingCard, setDeletingCard] = useState(null);
+  const [cancellingBooking, setCancellingBooking] = useState(null);
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
 
@@ -110,6 +111,46 @@ const MyAccount = () => {
       const res = await xhr('GET', `${API}/api/proxy/client/cards`, { Authorization: `Bearer ${token}` });
       if (res.ok && Array.isArray(res.data)) setCards(res.data);
     } catch {}
+  };
+
+  const fetchBookings = async () => {
+    try {
+      const res = await xhr('GET', `${API}/api/proxy/booking/upcoming`, { Authorization: `Bearer ${token}` });
+      if (res.ok && Array.isArray(res.data)) setBookings(res.data);
+    } catch {}
+  };
+
+  const canCancelBooking = (booking) => {
+    const dateStr = booking.startDate || booking.date;
+    if (!dateStr) return false;
+    const rideDate = new Date(dateStr);
+    const now = new Date();
+    const diffMs = rideDate.getTime() - now.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+    return diffHours > 24;
+  };
+
+  const handleCancelBooking = async (booking) => {
+    const bookingId = booking.id || booking.auctionId;
+    if (!bookingId) { toast.error('ID de reservation introuvable'); return; }
+
+    if (!canCancelBooking(booking)) {
+      toast.error('Annulation impossible moins de 24h avant le depart. Veuillez contacter notre service client.', { duration: 6000 });
+      return;
+    }
+
+    if (!window.confirm('Etes-vous sur de vouloir annuler cette reservation ?')) return;
+    setCancellingBooking(bookingId);
+    try {
+      const res = await xhr('DELETE', `${API}/api/proxy/booking/cancel/${bookingId}`, { Authorization: `Bearer ${token}` });
+      if (res.ok) {
+        toast.success('Reservation annulee avec succes');
+        fetchBookings();
+      } else {
+        toast.error(res.data?.detail || 'Impossible d\'annuler cette reservation');
+      }
+    } catch { toast.error('Erreur reseau'); }
+    finally { setCancellingBooking(null); }
   };
 
   useEffect(() => {
@@ -234,6 +275,10 @@ const MyAccount = () => {
             ) : (
               bookings.map((b, i) => {
                 const st = statusLabels[b.status ?? b.auctionStatus] || { label: 'En cours', color: 'bg-gray-500/10 text-gray-400 border-gray-500/30' };
+                const isCancelled = (b.status === 4 || b.status === 'Cancelled' || b.auctionStatus === 4 || b.auctionStatus === 'Cancelled');
+                const bookingId = b.id || b.auctionId;
+                const canCancel = !isCancelled && canCancelBooking(b);
+                const isLessThan24h = !isCancelled && !canCancel;
                 return (
                   <div key={b.id || i} className="bg-[#1a2332] border border-gray-800 rounded-xl p-5" data-testid={`booking-${i}`}>
                     <div className="flex items-start justify-between mb-3">
@@ -244,10 +289,28 @@ const MyAccount = () => {
                       <div className="flex items-start gap-2"><div className="w-2 h-2 bg-green-400 rounded-full mt-1.5 flex-shrink-0" /><p className="text-gray-300 text-sm">{b.startAddress || b.fromAddress || 'Depart'}</p></div>
                       <div className="flex items-start gap-2"><div className="w-2 h-2 bg-red-400 rounded-full mt-1.5 flex-shrink-0" /><p className="text-gray-300 text-sm">{b.endAddress || b.destination || 'Arrivee'}</p></div>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
                       <Calendar className="w-3.5 h-3.5" /><span>{formatDate(b.startDate || b.date)}</span>
                       {(b.clientPrice || b.price) && <span className="ml-auto text-[#c8a951] font-bold text-sm">{b.clientPrice || b.price} EUR</span>}
                     </div>
+
+                    {/* Cancel section */}
+                    {!isCancelled && (
+                      canCancel ? (
+                        <button onClick={() => handleCancelBooking(b)} disabled={cancellingBooking === bookingId}
+                          data-testid={`cancel-booking-${i}`}
+                          className="w-full py-2.5 bg-red-500/10 text-red-400 rounded-xl text-xs font-medium hover:bg-red-500/20 transition border border-red-500/20 flex items-center justify-center gap-2">
+                          {cancellingBooking === bookingId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                          Annuler la reservation
+                        </button>
+                      ) : isLessThan24h && (
+                        <div className="w-full py-2.5 bg-yellow-500/10 text-yellow-400 rounded-xl text-xs border border-yellow-500/20 flex items-center justify-center gap-2"
+                          data-testid={`cancel-contact-${i}`}>
+                          <PhoneCall className="w-3.5 h-3.5" />
+                          Moins de 24h — contactez le service client pour annuler
+                        </div>
+                      )
+                    )}
                   </div>
                 );
               })

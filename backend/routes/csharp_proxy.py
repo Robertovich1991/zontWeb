@@ -575,6 +575,39 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
         raise HTTPException(status_code=502, detail="Failed to reach C# backend")
 
 
+@router.delete("/booking/cancel/{auction_id}")
+async def proxy_cancel_auction(auction_id: str, request: Request):
+    """Cancel a booking/auction in the C# backend."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.delete(
+                f"{CSHARP_API}/api/Auction/cancel/{auction_id}",
+                headers={
+                    "Authorization": auth_header,
+                    "Origin": "https://zont.cab",
+                    "Referer": "https://zont.cab/",
+                },
+            )
+            if resp.status_code in (200, 204):
+                return {"ok": True, "message": "Reservation annulee"}
+            if resp.status_code == 404:
+                raise HTTPException(status_code=404, detail="Reservation introuvable")
+            body = resp.text
+            try:
+                data = json.loads(body) if body.strip() else {}
+            except (json.JSONDecodeError, ValueError):
+                data = {"error": body}
+            raise HTTPException(status_code=resp.status_code, detail=data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Cancel auction error: {e}")
+        raise HTTPException(status_code=502, detail="Erreur serveur")
+
+
 @router.get("/booking/upcoming")
 async def proxy_upcoming_auctions(request: Request):
     """Get upcoming auctions for the logged-in client."""
