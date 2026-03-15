@@ -75,7 +75,7 @@ const AddCardInline = ({ token, onDone, onCancel }) => {
           <X className="w-4 h-4" strokeWidth={1.5} /> Annuler
         </button>
         <button type="submit" disabled={loading || !complete} data-testid="confirm-add-card"
-          className="flex-1 py-3 bg-[#c8a951] text-[#0a0f1a] rounded-full text-sm font-semibold hover:bg-[#e0c065] transition-colors duration-300 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          className="flex-1 py-3 bg-emerald-500 text-white rounded-full text-sm font-semibold hover:bg-emerald-400 transition-colors duration-300 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed flex items-center justify-center gap-2">
           {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Verification...</> : <><CheckCircle className="w-4 h-4" strokeWidth={1.5} /> Confirmer</>}
         </button>
       </div>
@@ -168,14 +168,16 @@ const MyAccount = () => {
     return (rideDate.getTime() - now.getTime()) / (1000 * 60 * 60) > 24;
   };
 
-  const isLessThan24h = (booking) => {
+  const shouldShowContactMessage = (booking) => {
+    const isCancelled = [4, 'Cancelled'].includes(booking.status) || [4, 'Cancelled'].includes(booking.auctionStatus);
+    if (isCancelled) return false;
     const dateStr = booking.startDate || booking.date;
-    if (!dateStr) return false;
+    if (!dateStr) return true; // No date = show contact message as fallback
     const rideDate = new Date(dateStr);
-    if (isNaN(rideDate.getTime())) return false;
+    if (isNaN(rideDate.getTime())) return true; // Invalid date = show contact message
     const now = new Date();
     const diff = (rideDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-    return diff > 0 && diff <= 24;
+    return diff > 0 && diff <= 24; // Less than 24h
   };
 
   const handleCancelBooking = async (booking) => {
@@ -290,7 +292,7 @@ const MyAccount = () => {
             <button key={tab.id} onClick={() => setActiveTab(tab.id)} data-testid={`tab-${tab.id}`}
               className={`flex-1 py-3 rounded-full text-sm font-medium transition-colors duration-300 flex items-center justify-center gap-2
                 ${activeTab === tab.id
-                  ? 'bg-[#c8a951] text-[#0a0f1a] shadow-lg shadow-[#c8a951]/20'
+                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
               <tab.icon className="w-4 h-4" strokeWidth={1.5} /> {tab.label}
             </button>
@@ -339,7 +341,7 @@ const MyAccount = () => {
                 <h2 className="text-white font-medium text-lg mb-2">Aucune reservation</h2>
                 <p className="text-slate-400 text-sm mb-8 max-w-xs mx-auto">Vous n'avez pas encore de courses a venir.</p>
                 <button onClick={() => navigate('/')}
-                  className="px-8 py-3.5 bg-[#c8a951] text-[#0a0f1a] rounded-full font-semibold text-sm hover:bg-[#e0c065] transition-colors duration-300 shadow-lg shadow-[#c8a951]/20">
+                  className="px-8 py-3.5 bg-emerald-500 text-white rounded-full font-semibold text-sm hover:bg-emerald-400 transition-colors duration-300 shadow-lg shadow-emerald-500/20">
                   Reserver une course
                 </button>
               </div>
@@ -350,7 +352,7 @@ const MyAccount = () => {
                 const bookingId = b.id || b.auctionId;
                 const dateInfo = formatDateShort(b.startDate || b.date);
                 const canCancel = !isCancelled && canCancelBooking(b);
-                const showContact = !isCancelled && isLessThan24h(b);
+                const showContact = shouldShowContactMessage(b);
 
                 return (
                   <div key={b.id || i}
@@ -476,7 +478,7 @@ const MyAccount = () => {
                 </Elements>
               ) : (
                 <button onClick={() => setShowAddCard(true)} data-testid="add-card-btn"
-                  className="w-full mt-5 py-3.5 bg-[#c8a951] text-[#0a0f1a] rounded-full font-semibold text-sm hover:bg-[#e0c065] transition-colors duration-300 shadow-lg shadow-[#c8a951]/20 flex items-center justify-center gap-2">
+                  className="w-full mt-5 py-3.5 bg-emerald-500 text-white rounded-full font-semibold text-sm hover:bg-emerald-400 transition-colors duration-300 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
                   <Plus className="w-4 h-4" strokeWidth={2} /> Ajouter une carte
                 </button>
               )}
