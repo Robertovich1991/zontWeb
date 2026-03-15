@@ -54,35 +54,35 @@ const HotelForm = ({ hotel, onSave, onCancel }) => {
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
 
   return (
-    <div className="max-w-3xl" data-testid="hotel-form">
-      <button onClick={onCancel} className="flex items-center gap-2 text-slate-400 hover:text-white text-sm mb-6 transition" data-testid="hotel-form-back">
+    <div className="min-h-screen bg-gray-50 -m-4 lg:-m-6 p-4 lg:p-6 max-w-3xl" data-testid="hotel-form">
+      <button onClick={onCancel} className="flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm mb-6 transition" data-testid="hotel-form-back">
         <ArrowLeft className="w-4 h-4" /> Retour a la liste
       </button>
-      <h1 className="text-2xl font-semibold text-white mb-6">{isEdit ? 'Modifier l\'hotel' : 'Creer un hotel'}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">{isEdit ? 'Modifier l\'hotel' : 'Creer un hotel'}</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {fields.map(section => (
-          <div key={section.section} className="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">{section.section}</h2>
+          <div key={section.section} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">{section.section}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {section.items.map(f => (
                 <div key={f.key} className={f.type === 'textarea' ? 'sm:col-span-2' : ''}>
-                  <label className="block text-xs text-slate-400 mb-1.5">
-                    {f.label} {f.required && <span className="text-red-400">*</span>}
+                  <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                    {f.label} {f.required && <span className="text-red-500">*</span>}
                   </label>
                   {f.type === 'select' ? (
                     <select value={form[f.key]} onChange={e => set(f.key, e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                      className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                       data-testid={`hotel-field-${f.key}`}>
                       {f.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                   ) : f.type === 'textarea' ? (
                     <textarea value={form[f.key]} onChange={e => set(f.key, e.target.value)} rows={3}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none resize-none"
+                      className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none resize-none"
                       data-testid={`hotel-field-${f.key}`} />
                   ) : (
                     <input type={f.type || 'text'} step={f.step} value={form[f.key]} onChange={e => set(f.key, f.type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                      className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                       data-testid={`hotel-field-${f.key}`} />
                   )}
                 </div>
@@ -92,28 +92,28 @@ const HotelForm = ({ hotel, onSave, onCancel }) => {
         ))}
 
         {/* Commission preview */}
-        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-3">Apercu commission (pour 100 EUR)</h2>
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-3">Apercu commission (pour 100 EUR)</h2>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-light text-amber-400">{form.commission_rate} EUR</p>
-              <p className="text-xs text-slate-400 mt-1">Hotel</p>
+              <p className="text-2xl font-bold text-amber-600">{form.commission_rate} EUR</p>
+              <p className="text-xs text-gray-500 mt-1">Hotel</p>
             </div>
             <div>
-              <p className="text-2xl font-light text-emerald-400">{form.zont_commission_rate} EUR</p>
-              <p className="text-xs text-slate-400 mt-1">Zont</p>
+              <p className="text-2xl font-bold text-emerald-600">{form.zont_commission_rate} EUR</p>
+              <p className="text-xs text-gray-500 mt-1">Zont</p>
             </div>
             <div>
-              <p className="text-2xl font-light text-white">{(100 - form.commission_rate - form.zont_commission_rate).toFixed(1)} EUR</p>
-              <p className="text-xs text-slate-400 mt-1">Chauffeur</p>
+              <p className="text-2xl font-bold text-gray-900">{(100 - form.commission_rate - form.zont_commission_rate).toFixed(1)} EUR</p>
+              <p className="text-xs text-gray-500 mt-1">Chauffeur</p>
             </div>
           </div>
         </div>
 
         <div className="flex gap-3">
-          <button type="button" onClick={onCancel} className="px-6 py-2.5 bg-slate-800 text-slate-300 rounded-lg text-sm hover:bg-slate-700 transition">Annuler</button>
+          <button type="button" onClick={onCancel} className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50 transition shadow-sm">Annuler</button>
           <button type="submit" disabled={saving} data-testid="hotel-form-submit"
-            className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-400 transition disabled:opacity-50">
+            className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition shadow-sm disabled:opacity-50">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {isEdit ? 'Enregistrer' : 'Creer l\'hotel'}
           </button>

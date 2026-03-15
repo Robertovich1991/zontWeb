@@ -52,24 +52,24 @@ const HotelsManager = () => {
   if (showForm || editingHotel) return <HotelForm hotel={editingHotel} onSave={handleSaved} onCancel={() => { setShowForm(false); setEditingHotel(null); }} />;
 
   return (
-    <div className="space-y-6" data-testid="hotels-manager">
+    <div className="min-h-screen bg-gray-50 -m-4 lg:-m-6 p-4 lg:p-6 space-y-6" data-testid="hotels-manager">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white" data-testid="hotels-title">Hotels Partenaires</h1>
-          <p className="text-slate-400 text-sm mt-1">{hotels.length} hotel{hotels.length > 1 ? 's' : ''} enregistre{hotels.length > 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-bold text-gray-900" data-testid="hotels-title">Hotels Partenaires</h1>
+          <p className="text-gray-500 text-sm mt-1">{hotels.length} hotel{hotels.length > 1 ? 's' : ''} enregistre{hotels.length > 1 ? 's' : ''}</p>
         </div>
         <button onClick={() => setShowForm(true)} data-testid="create-hotel-btn"
-          className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-white rounded-lg font-medium text-sm hover:bg-emerald-400 transition">
+          className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-white rounded-lg font-medium text-sm hover:bg-emerald-600 transition shadow-sm">
           <Plus className="w-4 h-4" /> Creer un hotel
         </button>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input type="text" placeholder="Rechercher par nom, ville, groupe..." value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm placeholder-gray-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none shadow-sm"
           data-testid="hotel-search-input" />
       </div>
 
@@ -77,15 +77,15 @@ const HotelsManager = () => {
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-emerald-500 animate-spin" /></div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20">
-          <Building2 className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400">Aucun hotel trouve</p>
+        <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+          <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500">Aucun hotel trouve</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
           <table className="w-full text-sm" data-testid="hotels-table">
             <thead>
-              <tr className="bg-slate-900/50 text-slate-400 text-xs uppercase tracking-wider">
+              <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
                 <th className="text-left px-4 py-3">Hotel</th>
                 <th className="text-left px-4 py-3 hidden md:table-cell">Ville</th>
                 <th className="text-center px-4 py-3">Reservations</th>
@@ -96,53 +96,53 @@ const HotelsManager = () => {
                 <th className="text-center px-4 py-3 w-10"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/50">
+            <tbody className="divide-y divide-gray-100">
               {filtered.map(h => (
-                <tr key={h.id} className="hover:bg-slate-900/30 transition" data-testid={`hotel-row-${h.id}`}>
+                <tr key={h.id} className="hover:bg-gray-50 transition" data-testid={`hotel-row-${h.id}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                        <Building2 className="w-4 h-4 text-emerald-400" />
+                      <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-4 h-4 text-emerald-600" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-white font-medium truncate">{h.name}</p>
-                        {h.hotel_group && <p className="text-slate-500 text-xs truncate">{h.hotel_group}</p>}
+                        <p className="text-gray-900 font-medium truncate">{h.name}</p>
+                        {h.hotel_group && <p className="text-gray-400 text-xs truncate">{h.hotel_group}</p>}
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <MapPin className="w-3 h-3 text-slate-500" />{h.city}
+                    <div className="flex items-center gap-1.5 text-gray-600">
+                      <MapPin className="w-3 h-3 text-gray-400" />{h.city}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-center text-white font-medium">{h.total_bookings}</td>
-                  <td className="px-4 py-3 text-right text-white font-medium hidden lg:table-cell">{h.total_revenue?.toLocaleString()} EUR</td>
+                  <td className="px-4 py-3 text-center text-gray-900 font-semibold">{h.total_bookings}</td>
+                  <td className="px-4 py-3 text-right text-gray-900 font-medium hidden lg:table-cell">{h.total_revenue?.toLocaleString()} EUR</td>
                   <td className="px-4 py-3 text-center hidden lg:table-cell">
-                    <span className="text-amber-400 font-medium">{h.commission_rate}%</span>
-                    <span className="text-slate-600 mx-1">/</span>
-                    <span className="text-emerald-400 font-medium">{h.zont_commission_rate}%</span>
+                    <span className="text-amber-600 font-medium">{h.commission_rate}%</span>
+                    <span className="text-gray-300 mx-1">/</span>
+                    <span className="text-emerald-600 font-medium">{h.zont_commission_rate}%</span>
                   </td>
-                  <td className="px-4 py-3 text-right text-emerald-400 font-medium hidden lg:table-cell">{h.zont_commission_total?.toLocaleString()} EUR</td>
+                  <td className="px-4 py-3 text-right text-emerald-600 font-medium hidden lg:table-cell">{h.zont_commission_total?.toLocaleString()} EUR</td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${h.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${h.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
                       {h.status === 'active' ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
                       {h.status === 'active' ? 'Actif' : 'Inactif'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center relative">
-                    <button onClick={() => setActionMenu(actionMenu === h.id ? null : h.id)} className="text-slate-500 hover:text-white p-1 rounded">
+                    <button onClick={() => setActionMenu(actionMenu === h.id ? null : h.id)} className="text-gray-400 hover:text-gray-700 p-1 rounded">
                       <MoreVertical className="w-4 h-4" />
                     </button>
                     {actionMenu === h.id && (
-                      <div className="absolute right-4 top-full z-20 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 w-44" data-testid={`hotel-actions-${h.id}`}>
-                        <button onClick={() => { setViewingHotel(h.id); setActionMenu(null); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-700"><Eye className="w-3.5 h-3.5" /> Voir details</button>
-                        <button onClick={() => { setEditingHotel(h); setActionMenu(null); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-700"><Pencil className="w-3.5 h-3.5" /> Modifier</button>
-                        <button onClick={() => handleToggleStatus(h)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-700">
+                      <div className="absolute right-4 top-full z-20 bg-white border border-gray-200 rounded-xl shadow-lg py-1 w-44" data-testid={`hotel-actions-${h.id}`}>
+                        <button onClick={() => { setViewingHotel(h.id); setActionMenu(null); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><Eye className="w-3.5 h-3.5" /> Voir details</button>
+                        <button onClick={() => { setEditingHotel(h); setActionMenu(null); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><Pencil className="w-3.5 h-3.5" /> Modifier</button>
+                        <button onClick={() => handleToggleStatus(h)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           {h.status === 'active' ? <ToggleLeft className="w-3.5 h-3.5" /> : <ToggleRight className="w-3.5 h-3.5" />}
                           {h.status === 'active' ? 'Desactiver' : 'Activer'}
                         </button>
-                        <hr className="border-slate-700 my-1" />
-                        <button onClick={() => handleDelete(h.id)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-slate-700"><Trash2 className="w-3.5 h-3.5" /> Supprimer</button>
+                        <hr className="border-gray-100 my-1" />
+                        <button onClick={() => handleDelete(h.id)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50"><Trash2 className="w-3.5 h-3.5" /> Supprimer</button>
                       </div>
                     )}
                   </td>
