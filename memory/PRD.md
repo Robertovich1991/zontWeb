@@ -150,6 +150,13 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Sidebar**: New "HOTEL KIOSK" section with Dashboard Hotels + Gestion Hotels
 - **Testing**: 100% pass rate — 20 backend + 16 frontend checks
 
+### Phase 7.2 - Hotel Kiosk Phase 2 (Complete - March 15, 2026)
+- **Bornes Tactiles page** (`/admin/hotel-kiosks`): stats (total/online/offline), create form, filters (hotel/status), kiosk cards with toggle + delete
+- **Reservations Hotels page** (`/admin/hotel-bookings`): summary cards (count/CA/comm/rev), search, filters (hotel/status/period 7d-30d-90d), sort (date/prix), full table with commission calculs
+- **Backend endpoints**: PUT kiosk status toggle, DELETE kiosk, enriched bookings with commission calculations
+- **Sidebar**: 4 items under "HOTEL KIOSK" section (Dashboard, Gestion, Bornes, Reservations)
+- **Testing**: 100% pass rate — 17 backend + 15 frontend checks
+
 ## Backlog
 
 ### P1 - Partner Payment Debits (ON HOLD by user)
