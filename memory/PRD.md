@@ -122,6 +122,13 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Backend endpoints**: `GET /api/proxy/client/cards`, `GET /api/proxy/client/add-card`, `DELETE /api/proxy/client/cards/{card_id}`, `GET /api/proxy/client/profile`, `GET /api/proxy/booking/upcoming`
 - **Testing**: 100% pass rate — 10 backend tests, all frontend UI flows verified
 
+### Phase 6.1 - Ride Cancellation (Complete - March 14, 2026)
+- **Cancel endpoint**: `DELETE /api/proxy/booking/cancel/{auction_id}` proxies to C# `DELETE /api/Auction/cancel/{id}`
+- **24h business rule**: Cancellation allowed if >24h before ride, otherwise shows "contactez le service client" warning
+- **Frontend UI**: Cancel button (red) on each booking card for >24h, yellow warning banner for <24h
+- **Error handling**: 401 without auth, 404 for invalid booking, confirmation dialog before cancel
+- **Testing**: 100% pass rate — 6 backend tests + all frontend UI flows verified
+
 ## Backlog
 
 ### P1 - Partner Payment Debits (ON HOLD by user)
