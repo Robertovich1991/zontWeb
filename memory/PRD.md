@@ -138,6 +138,18 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Fade-in animations**: Smooth entrance effects on tab content
 - **Testing**: 100% pass rate — 8 backend + 12 frontend checks
 
+### Phase 7 - Hotel Kiosk Management System - Phase 1 (Complete - March 15, 2026)
+- **Backend**: Full CRUD hotels, kiosks, hotel bookings with commission calculation
+- **MongoDB Collections**: `hotels`, `hotel_users`, `kiosks`, `hotel_bookings`
+- **Auto-create hotel admin**: When creating a hotel, auto-generates admin account
+- **Commission engine**: Calculates hotel %, Zont %, driver amount per booking
+- **Super Admin Dashboard**: 6 stat cards, monthly revenue chart, hotel ranking table
+- **Hotel Management**: List, create, edit, toggle status, delete hotels with search
+- **Hotel Detail**: Stats, contact info, commission rates, kiosks status, recent bookings
+- **Demo data**: 3 hotels seeded (Le Bristol Paris 15%, Negresco Nice 12%, W Barcelona 18%)
+- **Sidebar**: New "HOTEL KIOSK" section with Dashboard Hotels + Gestion Hotels
+- **Testing**: 100% pass rate — 20 backend + 16 frontend checks
+
 ## Backlog
 
 ### P1 - Partner Payment Debits (ON HOLD by user)
