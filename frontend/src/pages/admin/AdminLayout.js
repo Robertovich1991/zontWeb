@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAdminAuth } from './AdminAuthContext';
-import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight, Users, Car } from 'lucide-react';
+import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight, Users, Car, Building2, BarChart3 } from 'lucide-react';
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { path: '/admin/partners', icon: Users, label: 'Partenaires' },
   { path: '/admin/rides', icon: Car, label: 'Courses Partenaires' },
+  { type: 'divider', label: 'Hotel Kiosk' },
+  { path: '/admin/hotels-dashboard', icon: BarChart3, label: 'Dashboard Hotels' },
+  { path: '/admin/hotels', icon: Building2, label: 'Gestion Hotels' },
+  { type: 'divider', label: 'CMS' },
   { path: '/admin/pages', icon: FileText, label: 'Pages SEO' },
   { path: '/admin/places', icon: MapPin, label: 'Lieux / Destinations' },
   { path: '/admin/homepage', icon: Home, label: 'Homepage' },
@@ -33,7 +37,9 @@ const AdminLayout = () => {
           </Link>
         </div>
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto" data-testid="admin-sidebar-nav">
-          {navItems.map(item => (
+          {navItems.map((item, i) => item.type === 'divider' ? (
+            <div key={`div-${i}`} className="pt-4 pb-1 px-3"><p className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest">{item.label}</p></div>
+          ) : (
             <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${isActive(item) ? 'bg-amber-500/10 text-amber-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
               <item.icon className="w-4 h-4 shrink-0" />
