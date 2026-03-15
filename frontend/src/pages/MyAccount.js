@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import Header from '../components/layout/Header';
+import SEO from '../components/SEO';
 import { toast } from 'sonner';
 import { User, Mail, Phone, CreditCard, Calendar, Car, Navigation, Loader2, Shield, Plus, Trash2, X, CheckCircle, XCircle, PhoneCall, MapPin, Clock, LogOut, ChevronRight } from 'lucide-react';
 
@@ -261,6 +262,7 @@ const MyAccount = () => {
 
   return (
     <div className={`min-h-screen bg-[#0a0f1a] ${FONT}`} data-testid="my-account-page">
+      <SEO title="Mon Compte - Zont" noindex={true} />
       <Header />
 
       <div className="max-w-2xl mx-auto px-4 pt-24 pb-16">

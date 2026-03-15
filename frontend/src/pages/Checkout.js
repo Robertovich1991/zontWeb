@@ -237,7 +237,7 @@ const Checkout = () => {
   if (!searchData || !selectedCar) {
     return (
       <div className="min-h-screen flex flex-col bg-[#1a2332]">
-        <SEO title="Checkout - Zont" noindex={true} />
+        <SEO title={`${c.title} - Zont`} noindex={true} />
         <Header />
         <main className="flex-1 pt-16 flex items-center justify-center">
           <div className="text-center">
@@ -254,7 +254,7 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
-      <SEO title="Checkout - Zont" noindex={true} />
+      <SEO title={`${c.title} - Zont`} noindex={true} />
       <Header />
 
       <main className="flex-1 pt-16">

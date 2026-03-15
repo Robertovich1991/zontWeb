@@ -48,6 +48,46 @@ const labels = {
     noBooking: 'Aucune reservation trouvee',
     startNew: 'Nouvelle reservation',
   },
+  ru: {
+    title: 'Бронирование Подтверждено!',
+    subtitle: 'Ваша поездка успешно забронирована',
+    details: 'Детали Бронирования',
+    route: 'Маршрут',
+    dateTime: 'Дата и Время',
+    vehicle: 'Автомобиль',
+    totalPaid: 'Итого Оплачено',
+    whatsNext: 'Что дальше?',
+    nextItems: [
+      'Вы получите подтверждение по электронной почте',
+      'Данные водителя будут отправлены за 3 часа до поездки',
+      'Отслеживайте водителя в реальном времени',
+    ],
+    newBooking: 'Забронировать еще',
+    home: 'На главную',
+    hourly: 'Почасовая аренда',
+    noBooking: 'Бронирование не найдено',
+    startNew: 'Новое бронирование',
+  },
+  hy: {
+    title: 'Ամրագրումը Հաստատված Է!',
+    subtitle: 'Ձեր ուղևորությունը հաջողությամբ ամրագրված է',
+    details: 'Ամրագրի Մանրամասներ',
+    route: 'Ուղեգիծ',
+    dateTime: 'Ամսաթիվ և Ժամ',
+    vehicle: 'Մեքենա',
+    totalPaid: 'Ընդհանուր Վճարված',
+    whatsNext: 'Ինչ է հաջորդը:',
+    nextItems: [
+      'Դուկ կստանաք հաստատման նամակ',
+      'Վարորդի տվյալները 3 ժամ առաջ',
+      'Հետևեք վարորդին իրականում',
+    ],
+    newBooking: 'Այլ ամրագրում',
+    home: 'Գլխավոր էջ',
+    hourly: 'Ժամայինային վարձույթ',
+    noBooking: 'Ամրագրում չի գտնվել',
+    startNew: 'Նոր ամրագրում',
+  },
 };
 
 const BookingConfirmation = () => {
@@ -64,7 +104,7 @@ const BookingConfirmation = () => {
   if (!bookingDetails) {
     return (
       <div className="min-h-screen flex flex-col bg-[#1a2332]">
-        <SEO title="Booking Confirmed - Zont" noindex={true} />
+        <SEO title={`${c.title} - Zont`} noindex={true} />
         <Header />
         <main className="flex-1 pt-16 flex items-center justify-center">
           <div className="text-center">
@@ -83,7 +123,7 @@ const BookingConfirmation = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]">
-      <SEO title="Booking Confirmed - Zont" noindex={true} />
+      <SEO title={`${c.title} - Zont`} noindex={true} />
       <Header />
 
       <main className="flex-1 pt-16">

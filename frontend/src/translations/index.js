@@ -309,7 +309,7 @@ export const translations = {
       signout: 'Ելք',
       hello: 'Բարև',
       myBookings: 'Ամրագրումներ',
-      myAccount: 'Իdelays Հdelays',
+      myAccount: 'Իմ Հաշիվ',
     },
     hero: {
       title1: 'Սեղմեք Կոճակը,',
