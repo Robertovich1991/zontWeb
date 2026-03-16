@@ -81,7 +81,7 @@ tail -f /var/log/supervisor/frontend.out.log
 ## 🌐 Accès
 
 Une fois lancé, le site est accessible à :
-- **Frontend** : https://full-stack-taxi.preview.emergentagent.com
+- **Frontend** : https://partner-hotel-portal.preview.emergentagent.com
 
 ## 📁 Structure du projet
 

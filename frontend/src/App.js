@@ -6,6 +6,7 @@ import { BookingProvider } from "@/context/BookingContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminAuthProvider, useAdminAuth } from "@/pages/admin/AdminAuthContext";
+import { HotelAuthProvider, useHotelAuth } from "@/pages/hotel/HotelAuthContext";
 
 // Core pages (eager load)
 import Home from "@/pages/Home";
@@ -45,6 +46,13 @@ const HotelsDashboard = lazy(() => import("@/pages/admin/HotelsDashboard"));
 const KiosksManager = lazy(() => import("@/pages/admin/KiosksManager"));
 const HotelBookingsManager = lazy(() => import("@/pages/admin/HotelBookingsManager"));
 
+// Hotel Admin Portal
+const HotelLogin = lazy(() => import("@/pages/hotel/HotelLogin"));
+const HotelLayout = lazy(() => import("@/pages/hotel/HotelLayout"));
+const HotelDashboard = lazy(() => import("@/pages/hotel/HotelDashboard"));
+const HotelBookings = lazy(() => import("@/pages/hotel/HotelBookings"));
+const HotelRevenue = lazy(() => import("@/pages/hotel/HotelRevenue"));
+
 // Driver App
 const DriverApp = lazy(() => import("@/pages/driver/DriverApp"));
 
@@ -52,6 +60,12 @@ const AdminGuard = ({ children }) => {
   const { user, loading } = useAdminAuth();
   if (loading) return <Loading />;
   if (!user) return <Navigate to="/admin/login" replace />;
+  return children;
+};
+
+const HotelGuard = ({ children }) => {
+  const { isAuthenticated } = useHotelAuth();
+  if (!isAuthenticated) return <Navigate to="/hotel/login" replace />;
   return children;
 };
 
@@ -200,6 +214,13 @@ function App() {
                   </Route>
                   {/* Driver PWA */}
                   <Route path="/driver/*" element={<DriverApp />} />
+                  {/* Hotel Admin Portal */}
+                  <Route path="/hotel/login" element={<HotelAuthProvider><HotelLogin /></HotelAuthProvider>} />
+                  <Route path="/hotel" element={<HotelAuthProvider><HotelGuard><HotelLayout /></HotelGuard></HotelAuthProvider>}>
+                    <Route index element={<HotelDashboard />} />
+                    <Route path="bookings" element={<HotelBookings />} />
+                    <Route path="revenue" element={<HotelRevenue />} />
+                  </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
