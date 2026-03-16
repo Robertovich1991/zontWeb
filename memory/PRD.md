@@ -157,6 +157,18 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Sidebar**: 4 items under "HOTEL KIOSK" section (Dashboard, Gestion, Bornes, Reservations)
 - **Testing**: 100% pass rate — 17 backend + 15 frontend checks
 
+### Phase 7.3 - Hotel Admin Portal (Complete - March 16, 2026)
+- **Hotel Login** (`/hotel/login`): Dedicated login page for hotel administrators with email/password auth
+- **Hotel Layout** (`/hotel`): Sidebar with navigation (Dashboard, Reservations, Revenus), hotel branding, user info, logout
+- **Hotel Dashboard** (`/hotel`): Stats cards (bookings today/month, CA, commission), monthly revenue highlight, revenue chart (6 months), kiosks status
+- **Hotel Bookings** (`/hotel/bookings`): Full bookings table with search, status/period filters, sort toggle, CSV export
+- **Hotel Revenue** (`/hotel/revenue`): 4 stat cards, monthly comparison (current vs previous), revenue chart, monthly breakdown table
+- **Auth Guard**: Unauthenticated users redirected to `/hotel/login`
+- **CSV Export**: Backend supports token via query param for `window.open()` downloads
+- **Backend endpoints**: `POST /api/hotel/auth/login`, `GET /api/hotel/dashboard`, `GET /api/hotel/bookings`, `GET /api/hotel/bookings/export`, `GET /api/hotel/profile`
+- **Testing**: 100% pass rate — 12 backend + 9 frontend scenarios verified
+- **Credentials**: Each hotel admin uses `hotel{hotel_id}` as default password (e.g., `admin@bristol.fr` / `hotelc9baf685`)
+
 ## Backlog
 
 ### P1 - Partner Payment Debits (ON HOLD by user)
