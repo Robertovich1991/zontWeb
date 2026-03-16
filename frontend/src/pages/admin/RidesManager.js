@@ -4,11 +4,11 @@ import { Car, Loader2, Clock, CheckCircle, XCircle, AlertCircle, ChevronDown, Ch
 const API = process.env.REACT_APP_BACKEND_URL;
 
 const statusConfig = {
-  pending: { label: 'En attente', color: 'bg-yellow-500/10 text-yellow-400', icon: Clock },
-  submitted_csharp: { label: 'Dispatch', color: 'bg-emerald-500/10 text-emerald-400', icon: Navigation },
-  accepted: { label: 'Acceptee', color: 'bg-green-500/10 text-green-400', icon: CheckCircle },
-  rejected: { label: 'Refusee', color: 'bg-red-500/10 text-red-400', icon: XCircle },
-  completed: { label: 'Terminee', color: 'bg-blue-500/10 text-blue-400', icon: CheckCircle },
+  pending: { label: 'En attente', color: 'bg-yellow-50 text-yellow-700', icon: Clock },
+  submitted_csharp: { label: 'Dispatch', color: 'bg-emerald-50 text-emerald-700', icon: Navigation },
+  accepted: { label: 'Acceptee', color: 'bg-green-50 text-green-700', icon: CheckCircle },
+  rejected: { label: 'Refusee', color: 'bg-red-50 text-red-600', icon: XCircle },
+  completed: { label: 'Terminee', color: 'bg-blue-50 text-blue-700', icon: CheckCircle },
   cancelled: { label: 'Annulee', color: 'bg-gray-100 text-gray-500', icon: AlertCircle },
 };
 
@@ -85,7 +85,7 @@ const RidesManager = () => {
                       <StatusIcon className="w-3 h-3" />{sc.label}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-white text-sm font-medium truncate">{ride.pickup_address} → {ride.dropoff_address}</div>
+                      <div className="text-gray-900 text-sm font-medium truncate">{ride.pickup_address} → {ride.dropoff_address}</div>
                       <div className="text-gray-400 text-xs mt-0.5">Par {ride.partner_name} {ride.partner_company ? `(${ride.partner_company})` : ''} - {new Date(ride.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
                     </div>
                   </div>
@@ -99,16 +99,16 @@ const RidesManager = () => {
                   <div className="border-t border-gray-200 p-4 bg-white/50">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
                       <div>
-                        <span className="text-gray-400">Depart:</span> <span className="text-white ml-1">{ride.pickup_address}</span>
+                        <span className="text-gray-400">Depart:</span> <span className="text-gray-900 ml-1">{ride.pickup_address}</span>
                       </div>
                       <div>
-                        <span className="text-gray-400">Arrivee:</span> <span className="text-white ml-1">{ride.dropoff_address}</span>
+                        <span className="text-gray-400">Arrivee:</span> <span className="text-gray-900 ml-1">{ride.dropoff_address}</span>
                       </div>
-                      {ride.passenger_name && <div><span className="text-gray-400">Passager:</span> <span className="text-white ml-1">{ride.passenger_name}</span></div>}
-                      {ride.passenger_phone && <div><span className="text-gray-400">Tel passager:</span> <span className="text-white ml-1">{ride.passenger_phone}</span></div>}
-                      {ride.pickup_datetime && <div><span className="text-gray-400">Date/Heure:</span> <span className="text-white ml-1">{ride.pickup_datetime}</span></div>}
-                      {ride.flight_number && <div><span className="text-gray-400">Vol:</span> <span className="text-white ml-1">{ride.flight_number}</span></div>}
-                      {ride.notes && <div className="md:col-span-2"><span className="text-gray-400">Notes:</span> <span className="text-white ml-1">{ride.notes}</span></div>}
+                      {ride.passenger_name && <div><span className="text-gray-400">Passager:</span> <span className="text-gray-900 ml-1">{ride.passenger_name}</span></div>}
+                      {ride.passenger_phone && <div><span className="text-gray-400">Tel passager:</span> <span className="text-gray-900 ml-1">{ride.passenger_phone}</span></div>}
+                      {ride.pickup_datetime && <div><span className="text-gray-400">Date/Heure:</span> <span className="text-gray-900 ml-1">{ride.pickup_datetime}</span></div>}
+                      {ride.flight_number && <div><span className="text-gray-400">Vol:</span> <span className="text-gray-900 ml-1">{ride.flight_number}</span></div>}
+                      {ride.notes && <div className="md:col-span-2"><span className="text-gray-400">Notes:</span> <span className="text-gray-900 ml-1">{ride.notes}</span></div>}
                     </div>
                     <div className="flex flex-wrap gap-2 mb-3">
                       {['pending', 'accepted', 'rejected', 'completed', 'cancelled'].map(s => (

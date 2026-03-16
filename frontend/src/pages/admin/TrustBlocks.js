@@ -90,7 +90,7 @@ const TrustBlocks = () => {
               <GripVertical className="w-4 h-4 text-gray-400 shrink-0" />
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium ${b.active ? 'bg-amber-500/10 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>{b.icon?.slice(0, 2)}</div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium ${b.active ? 'text-white' : 'text-gray-400'}`}>{b.title?.fr || b.title?.en || 'Sans titre'}</p>
+                <p className={`text-sm font-medium ${b.active ? 'text-gray-900' : 'text-gray-400'}`}>{b.title?.fr || b.title?.en || 'Sans titre'}</p>
                 <p className="text-gray-400 text-xs truncate">{b.text?.fr || b.text?.en || ''}</p>
               </div>
               <span className={`text-xs px-2 py-0.5 rounded-full ${b.active ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-200 text-gray-500'}`}>{b.active ? 'Actif' : 'Inactif'}</span>

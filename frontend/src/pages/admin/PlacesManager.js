@@ -135,7 +135,7 @@ const PlacesManager = () => {
               : places.map(p => (
                 <tr key={p.id} className="border-b border-gray-200/50 hover:bg-gray-100/30 transition">
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400 shrink-0" /><span className="text-white text-sm">{p.name?.fr || p.name?.en || '-'}</span></div>
+                    <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-gray-400 shrink-0" /><span className="text-gray-900 text-sm">{p.name?.fr || p.name?.en || '-'}</span></div>
                     {p.airport_code && <span className="text-gray-400 text-xs ml-6">{p.airport_code}</span>}
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell"><TypeBadge type={p.place_type} /></td>

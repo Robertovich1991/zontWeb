@@ -72,7 +72,7 @@ const FaqManager = () => {
               <div className="flex items-start gap-3">
                 <HelpCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium">{f.question?.fr || f.question?.en || 'Sans question'}</p>
+                  <p className="text-gray-900 text-sm font-medium">{f.question?.fr || f.question?.en || 'Sans question'}</p>
                   <p className="text-gray-500 text-xs mt-1 line-clamp-2">{f.answer?.fr || f.answer?.en || ''}</p>
                   <div className="flex gap-2 mt-2">
                     {f.page_id && <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded">Page: {f.page_id.slice(0, 8)}...</span>}

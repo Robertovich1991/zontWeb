@@ -38,7 +38,7 @@ const HomepageEditor = () => {
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-        <h3 className="text-white font-medium">Section Hero</h3>
+        <h3 className="text-gray-900 font-medium">Section Hero</h3>
         <MultiLangInput label="Titre principal" value={config.title} onChange={v => update('title', v)} />
         <MultiLangInput label="Sous-titre" value={config.subtitle} onChange={v => update('subtitle', v)} textarea rows={2} />
         <MultiLangInput label="Badge avis" value={config.review_badge} onChange={v => update('review_badge', v)} />
@@ -46,7 +46,7 @@ const HomepageEditor = () => {
 
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-white font-medium">Statistiques</h3>
+          <h3 className="text-gray-900 font-medium">Statistiques</h3>
           <button onClick={() => update('stats', [...(config.stats || []), { value: '', label: {} }])} className="text-emerald-600 text-sm flex items-center gap-1"><Plus className="w-4 h-4" />Ajouter</button>
         </div>
         {(config.stats || []).map((stat, i) => (
@@ -62,7 +62,7 @@ const HomepageEditor = () => {
 
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-white font-medium">Blocs Avantages</h3>
+          <h3 className="text-gray-900 font-medium">Blocs Avantages</h3>
           <button onClick={() => update('advantages', [...(config.advantages || []), { title: {}, text: {}, icon: '' }])} className="text-emerald-600 text-sm flex items-center gap-1"><Plus className="w-4 h-4" />Ajouter</button>
         </div>
         {(config.advantages || []).map((adv, i) => (
@@ -79,19 +79,19 @@ const HomepageEditor = () => {
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-        <h3 className="text-white font-medium">CTA (Call to Action)</h3>
+        <h3 className="text-gray-900 font-medium">CTA (Call to Action)</h3>
         <MultiLangInput label="Titre CTA" value={config.cta_title} onChange={v => update('cta_title', v)} />
         <MultiLangInput label="Texte du bouton" value={config.cta_button} onChange={v => update('cta_button', v)} />
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-        <h3 className="text-white font-medium">Ordre des sections</h3>
+        <h3 className="text-gray-900 font-medium">Ordre des sections</h3>
         <p className="text-gray-500 text-sm">Glissez pour rearanger les sections</p>
         <div className="space-y-1">
           {(config.sections_order || []).map((section, i) => (
             <div key={section} className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2">
               <GripVertical className="w-4 h-4 text-gray-400" />
-              <span className="text-white text-sm">{section}</span>
+              <span className="text-gray-900 text-sm">{section}</span>
             </div>
           ))}
         </div>

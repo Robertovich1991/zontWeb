@@ -69,7 +69,7 @@ const PartnersManager = () => {
       {showForm && (
         <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-semibold">{editId ? 'Modifier' : 'Nouveau'} Partenaire</h3>
+            <h3 className="text-gray-900 font-semibold">{editId ? 'Modifier' : 'Nouveau'} Partenaire</h3>
             <button onClick={() => setShowForm(false)} className="text-gray-500 hover:text-gray-900"><X className="w-5 h-5" /></button>
           </div>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -120,7 +120,7 @@ const PartnersManager = () => {
             <tbody>
               {partners.map(p => (
                 <tr key={p.id} className="border-b border-gray-200/50 hover:bg-white/50">
-                  <td className="py-3 px-3 text-white">{p.name}</td>
+                  <td className="py-3 px-3 text-gray-900">{p.name}</td>
                   <td className="py-3 px-3 text-gray-600">{p.email}</td>
                   <td className="py-3 px-3 text-gray-600">{p.company || '-'}</td>
                   <td className="py-3 px-3 text-gray-600">{p.phone || '-'}</td>
