@@ -33,7 +33,7 @@ const AdminLayout = () => {
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-4 border-b border-gray-100">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/admin" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">Z</div>
             <span className="text-gray-900 font-semibold">Zont CMS</span>
           </Link>
