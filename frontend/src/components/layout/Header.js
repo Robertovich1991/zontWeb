@@ -14,6 +14,7 @@ const Header = () => {
   const [authMode, setAuthMode] = useState('signin');
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('France');
 
   const languages = [
@@ -80,6 +81,37 @@ const Header = () => {
               >
                 {t('nav.countries')}
               </Link>
+              {/* Services Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setServicesDropdownOpen(!servicesDropdownOpen)}
+                  className="flex items-center space-x-1 text-white hover:text-gray-300 transition-colors text-sm font-medium"
+                  data-testid="nav-services-dropdown"
+                >
+                  <span>Services</span>
+                  <ChevronDown size={16} />
+                </button>
+                {servicesDropdownOpen && (
+                  <div className="absolute top-full mt-2 bg-[#1a2332] border border-gray-700 rounded shadow-lg py-2 min-w-[200px]">
+                    <Link
+                      to="/vtc-7-places"
+                      onClick={() => setServicesDropdownOpen(false)}
+                      className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors text-sm"
+                      data-testid="nav-vtc-7-places"
+                    >
+                      VTC 7 Places
+                    </Link>
+                    <Link
+                      to="/vtc-8-places"
+                      onClick={() => setServicesDropdownOpen(false)}
+                      className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors text-sm"
+                      data-testid="nav-vtc-8-places"
+                    >
+                      VTC 8 Places
+                    </Link>
+                  </div>
+                )}
+              </div>
               <Link
                 to="/help"
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
@@ -209,6 +241,11 @@ const Header = () => {
               >
                 {t('nav.countries')}
               </Link>
+              <div className="py-1 pl-2 border-l-2 border-gray-600 space-y-1">
+                <p className="text-gray-400 text-xs uppercase tracking-wider">Services</p>
+                <Link to="/vtc-7-places" onClick={() => setMobileMenuOpen(false)} className="block text-white hover:text-gray-300 py-1 text-sm" data-testid="nav-vtc-7-mobile">VTC 7 Places</Link>
+                <Link to="/vtc-8-places" onClick={() => setMobileMenuOpen(false)} className="block text-white hover:text-gray-300 py-1 text-sm" data-testid="nav-vtc-8-mobile">VTC 8 Places</Link>
+              </div>
               <Link
                 to="/help"
                 onClick={() => setMobileMenuOpen(false)}
