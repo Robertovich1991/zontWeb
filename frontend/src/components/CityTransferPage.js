@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
+import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
 
 const IMAGES = {
@@ -52,7 +53,10 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const [loading, setLoading] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const bookingFormRef = useRef(null);
-  const [formData, setFormData] = useState({ pickup: '', dropoff: '', date: '', time: '' });
+  const [pickup, setPickup] = useState({ address: '', latitude: null, longitude: null, placeId: null });
+  const [dropoff, setDropoff] = useState({ address: '', latitude: null, longitude: null, placeId: null });
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
   const [cmsPage, setCmsPage] = useState(null);
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
 
@@ -83,8 +87,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const introText = (cmsPage?.intro?.[language]) || c.description;
   const mainContent = (cmsPage?.main_content?.[language]) || c.description2;
 
-  if (!formData.pickup && c.defaultPickup) {
-    setFormData(prev => ({ ...prev, pickup: c.defaultPickup }));
+  if (!pickup.address && c.defaultPickup) {
+    setPickup({ address: c.defaultPickup, latitude: null, longitude: null, placeId: null });
   }
 
   const vehicles = [
@@ -98,9 +102,13 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!pickup.address || !dropoff.address) {
+      toast.error(language === 'fr' ? 'Veuillez remplir les adresses' : 'Please fill in the addresses');
+      return;
+    }
     setLoading(true);
     try {
-      startBooking({ ...formData, selectedVehicle });
+      startBooking({ pickup, dropoff, date, time, selectedVehicle });
       navigate('/car-selection');
     } catch (error) {
       toast.error('An error occurred');
@@ -109,7 +117,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
     }
   };
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handlePickupChange = (val) => setPickup(val);
+  const handleDropoffChange = (val) => setDropoff(val);
 
   const scrollToBooking = (v) => {
     if (v) setSelectedVehicle(v);
@@ -232,29 +241,37 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
                     <form onSubmit={handleSubmit} className="space-y-3" data-testid="booking-form" role="form" aria-label={c.bookingForm}>
                       <div>
                         <label htmlFor="pickup" className="block text-gray-700 font-medium text-sm mb-1">{c.pickupLabel}</label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 w-4 h-4 text-[#2ecc71]" aria-hidden="true" />
-                          <input type="text" id="pickup" name="pickup" value={formData.pickup} onChange={handleChange} required
-                            className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="pickup-input" aria-label={c.pickupLabel} />
-                        </div>
+                        <PlacesAutocomplete
+                          id="pickup"
+                          value={pickup}
+                          onChange={handlePickupChange}
+                          placeholder={c.pickupLabel}
+                          icon={<MapPin className="w-4 h-4 text-[#2ecc71]" />}
+                          className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
+                          data-testid="pickup-input"
+                        />
                       </div>
                       <div>
                         <label htmlFor="dropoff" className="block text-gray-700 font-medium text-sm mb-1">{c.dropoffLabel}</label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 w-4 h-4 text-red-500" aria-hidden="true" />
-                          <input type="text" id="dropoff" name="dropoff" value={formData.dropoff} onChange={handleChange} required
-                            className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="dropoff-input" aria-label={c.dropoffLabel} />
-                        </div>
+                        <PlacesAutocomplete
+                          id="dropoff"
+                          value={dropoff}
+                          onChange={handleDropoffChange}
+                          placeholder={c.dropoffLabel}
+                          icon={<MapPin className="w-4 h-4 text-red-500" />}
+                          className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
+                          data-testid="dropoff-input"
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label htmlFor="date" className="block text-gray-700 font-medium text-sm mb-1">{c.dateLabel}</label>
-                          <input type="date" id="date" name="date" value={formData.date} onChange={handleChange} required
+                          <input type="date" id="date" name="date" value={date} onChange={e => setDate(e.target.value)} required
                             className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="date-input" aria-label={c.dateLabel} />
                         </div>
                         <div>
                           <label htmlFor="time" className="block text-gray-700 font-medium text-sm mb-1">{c.timeLabel}</label>
-                          <input type="time" id="time" name="time" value={formData.time} onChange={handleChange} required
+                          <input type="time" id="time" name="time" value={time} onChange={e => setTime(e.target.value)} required
                             className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="time-input" aria-label={c.timeLabel} />
                         </div>
                       </div>
