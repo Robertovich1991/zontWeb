@@ -1,0 +1,173 @@
+"""Fleet Portal - Proxy routes to C# backend for company management."""
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel
+import httpx
+import logging
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/fleet", tags=["fleet"])
+
+CSHARP_API = "https://api.zont.cab"
+TIMEOUT = 15.0
+
+
+class FleetLoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+def get_token(request: Request) -> str:
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise HTTPException(401, "Token requis")
+    return auth.split(" ", 1)[1]
+
+
+async def csharp_get(path: str, token: str):
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+        resp = await client.get(
+            f"{CSHARP_API}{path}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        if resp.status_code == 401:
+            raise HTTPException(401, "Session expiree")
+        if resp.status_code != 200:
+            logger.warning(f"C# {path} -> {resp.status_code}: {resp.text[:200]}")
+            raise HTTPException(resp.status_code, f"Erreur API: {resp.status_code}")
+        return resp.json()
+
+
+@router.post("/auth/login")
+async def fleet_login(data: FleetLoginRequest):
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Login/company",
+                json={"username": data.username, "password": data.password},
+            )
+            if resp.status_code == 400:
+                detail = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+                raise HTTPException(400, "Email ou mot de passe incorrect")
+            if resp.status_code != 200:
+                raise HTTPException(resp.status_code, "Erreur de connexion")
+
+            tokens = resp.json()
+
+            # Fetch company profile with the new token
+            access = tokens.get("accessToken", "")
+            profile_resp = await client.get(
+                f"{CSHARP_API}/api/Company/getcompany",
+                headers={"Authorization": f"Bearer {access}"},
+            )
+            company = profile_resp.json() if profile_resp.status_code == 200 else {}
+
+            return {
+                "accessToken": access,
+                "refreshToken": tokens.get("refreshToken", ""),
+                "company": {
+                    "id": company.get("id", ""),
+                    "companyName": company.get("companyName", ""),
+                    "firstName": company.get("firstName", ""),
+                    "lastName": company.get("lastName", ""),
+                    "email": company.get("email", ""),
+                    "phone": company.get("phoneNumber", ""),
+                    "address": company.get("address", ""),
+                    "isActivated": company.get("isActivated", False),
+                    "isAdminActivated": company.get("isAdminActivated", False),
+                    "numberOfDrivers": company.get("numberOfDrivers", 0),
+                    "vehicleCount": company.get("vehicleCount", 0),
+                    "tripsCount": company.get("tripsCount", 0),
+                    "balance": company.get("balance", 0),
+                },
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Fleet login error: {e}")
+        raise HTTPException(500, "Erreur de connexion au serveur")
+
+
+@router.get("/company/profile")
+async def fleet_company_profile(request: Request):
+    token = get_token(request)
+    data = await csharp_get("/api/Company/getcompany", token)
+    return {
+        "id": data.get("id", ""),
+        "companyName": data.get("companyName", ""),
+        "firstName": data.get("firstName", ""),
+        "lastName": data.get("lastName", ""),
+        "email": data.get("email", ""),
+        "phone": data.get("phoneNumber", ""),
+        "address": data.get("address", ""),
+        "isActivated": data.get("isActivated", False),
+        "isAdminActivated": data.get("isAdminActivated", False),
+        "numberOfDrivers": data.get("numberOfDrivers", 0),
+        "vehicleCount": data.get("vehicleCount", 0),
+        "tripsCount": data.get("tripsCount", 0),
+        "balance": data.get("balance", 0),
+        "rank": data.get("rank", 0),
+        "referalCode": data.get("referalCode", ""),
+    }
+
+
+@router.get("/drivers")
+async def fleet_drivers(request: Request):
+    token = get_token(request)
+    drivers = await csharp_get("/api/Driver/company/getdriver", token)
+    return [
+        {
+            "id": d.get("id", ""),
+            "firstName": d.get("firstName", ""),
+            "lastName": d.get("lastName", ""),
+            "email": d.get("email", ""),
+            "phone": d.get("phoneNumber", ""),
+            "image": d.get("image"),
+            "rank": d.get("rank", 0),
+            "isActivated": d.get("isActivated", False),
+            "isAdminActivated": d.get("isAdminActivated", False),
+            "isCompanyActivated": d.get("isCompanyActivated", False),
+            "isVerified": d.get("isVerified", False),
+            "vehicle": d.get("vehicle"),
+        }
+        for d in (drivers if isinstance(drivers, list) else [])
+    ]
+
+
+@router.get("/drivers/{driver_id}")
+async def fleet_driver_detail(driver_id: str, request: Request):
+    token = get_token(request)
+    return await csharp_get(f"/api/Driver/getdriver/{driver_id}", token)
+
+
+@router.get("/vehicles")
+async def fleet_vehicles(request: Request):
+    token = get_token(request)
+    vehicles = await csharp_get("/api/Vehicle", token)
+    return [
+        {
+            "id": v.get("id", ""),
+            "plateNumber": v.get("number", ""),
+            "vim": v.get("vim", ""),
+            "color": v.get("color", ""),
+            "year": v.get("vehicleMakeModel", {}).get("year", ""),
+            "make": v.get("vehicleMakeModel", {}).get("make", {}).get("maker", ""),
+            "model": v.get("vehicleMakeModel", {}).get("model", ""),
+            "type": v.get("vehicleMakeModel", {}).get("type", ""),
+            "isVTC": v.get("vehicleMakeModel", {}).get("isVTC", False),
+            "isActivated": v.get("isActivated", False),
+            "isAdminActivated": v.get("isAdminActivated", False),
+            "driver": {
+                "id": v["driver"]["id"],
+                "firstName": v["driver"].get("firstName", ""),
+                "lastName": v["driver"].get("lastName", ""),
+            } if v.get("driver") else None,
+        }
+        for v in (vehicles if isinstance(vehicles, list) else [])
+    ]
+
+
+@router.get("/vehicles/{vehicle_id}")
+async def fleet_vehicle_detail(vehicle_id: int, request: Request):
+    token = get_token(request)
+    return await csharp_get(f"/api/Vehicle/{vehicle_id}", token)

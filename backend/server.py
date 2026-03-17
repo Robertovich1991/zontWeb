@@ -134,6 +134,8 @@ app.include_router(partner_router)
 app.include_router(partner_payment_router)
 app.include_router(admin_hotels_router)
 app.include_router(hotel_portal_router)
+from routes.fleet_portal import router as fleet_router
+app.include_router(fleet_router)
 
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"

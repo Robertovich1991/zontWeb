@@ -1,0 +1,201 @@
+"""Fleet Portal API Tests - Tests for fleet management portal proxy endpoints."""
+import pytest
+import requests
+import os
+
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
+
+# Fleet Test Credentials
+FLEET_EMAIL = "nandetiri1@gmail.com"
+FLEET_PASSWORD = "12345678"
+
+
+class TestFleetAuthentication:
+    """Fleet login/auth endpoint tests"""
+    
+    def test_fleet_login_success(self):
+        """POST /api/fleet/auth/login - Valid credentials returns token and company data"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": FLEET_EMAIL,
+            "password": FLEET_PASSWORD
+        })
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        # Verify accessToken present
+        assert "accessToken" in data, "Response should contain accessToken"
+        assert isinstance(data["accessToken"], str)
+        assert len(data["accessToken"]) > 0
+        
+        # Verify refreshToken present
+        assert "refreshToken" in data, "Response should contain refreshToken"
+        
+        # Verify company data
+        assert "company" in data, "Response should contain company data"
+        company = data["company"]
+        assert company["companyName"] == "comfort cars 1", f"Expected 'comfort cars 1', got {company.get('companyName')}"
+        assert company["email"] == FLEET_EMAIL
+        assert "id" in company
+        assert "isActivated" in company
+    
+    def test_fleet_login_invalid_credentials(self):
+        """POST /api/fleet/auth/login - Invalid credentials returns 400"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": "wrong@email.com",
+            "password": "wrongpassword"
+        })
+        
+        assert response.status_code == 400, f"Expected 400, got {response.status_code}"
+    
+    def test_fleet_login_missing_fields(self):
+        """POST /api/fleet/auth/login - Missing fields returns 422"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": FLEET_EMAIL
+        })
+        
+        assert response.status_code == 422, f"Expected 422, got {response.status_code}"
+
+
+class TestFleetDriversAPI:
+    """Fleet drivers endpoint tests"""
+    
+    @pytest.fixture
+    def auth_token(self):
+        """Get fleet auth token"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": FLEET_EMAIL,
+            "password": FLEET_PASSWORD
+        })
+        if response.status_code == 200:
+            return response.json().get("accessToken")
+        pytest.skip("Fleet authentication failed")
+    
+    def test_fleet_drivers_list(self, auth_token):
+        """GET /api/fleet/drivers - Returns array of drivers"""
+        response = requests.get(
+            f"{BASE_URL}/api/fleet/drivers",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        assert isinstance(data, list), "Response should be a list"
+        
+        # Verify at least one driver
+        assert len(data) >= 1, "Expected at least 1 driver"
+        
+        # Verify driver structure
+        driver = data[0]
+        assert "id" in driver
+        assert "firstName" in driver
+        assert "lastName" in driver
+        assert "email" in driver
+        assert "phone" in driver
+        assert "isActivated" in driver
+        assert "isVerified" in driver
+        assert "rank" in driver
+    
+    def test_fleet_drivers_unauthorized(self):
+        """GET /api/fleet/drivers - No token returns 401"""
+        response = requests.get(f"{BASE_URL}/api/fleet/drivers")
+        
+        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+
+
+class TestFleetVehiclesAPI:
+    """Fleet vehicles endpoint tests"""
+    
+    @pytest.fixture
+    def auth_token(self):
+        """Get fleet auth token"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": FLEET_EMAIL,
+            "password": FLEET_PASSWORD
+        })
+        if response.status_code == 200:
+            return response.json().get("accessToken")
+        pytest.skip("Fleet authentication failed")
+    
+    def test_fleet_vehicles_list(self, auth_token):
+        """GET /api/fleet/vehicles - Returns array of vehicles"""
+        response = requests.get(
+            f"{BASE_URL}/api/fleet/vehicles",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        assert isinstance(data, list), "Response should be a list"
+        
+        # Verify at least one vehicle
+        assert len(data) >= 1, "Expected at least 1 vehicle"
+        
+        # Verify vehicle structure
+        vehicle = data[0]
+        assert "id" in vehicle
+        assert "plateNumber" in vehicle
+        assert "make" in vehicle
+        assert "model" in vehicle
+        assert "year" in vehicle
+        assert "color" in vehicle
+        assert "type" in vehicle
+        assert "isActivated" in vehicle
+    
+    def test_fleet_vehicles_unauthorized(self):
+        """GET /api/fleet/vehicles - No token returns 401"""
+        response = requests.get(f"{BASE_URL}/api/fleet/vehicles")
+        
+        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+
+
+class TestFleetCompanyProfile:
+    """Fleet company profile endpoint tests"""
+    
+    @pytest.fixture
+    def auth_token(self):
+        """Get fleet auth token"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": FLEET_EMAIL,
+            "password": FLEET_PASSWORD
+        })
+        if response.status_code == 200:
+            return response.json().get("accessToken")
+        pytest.skip("Fleet authentication failed")
+    
+    def test_fleet_company_profile(self, auth_token):
+        """GET /api/fleet/company/profile - Returns company data"""
+        response = requests.get(
+            f"{BASE_URL}/api/fleet/company/profile",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        
+        # Verify company profile structure
+        assert data["companyName"] == "comfort cars 1"
+        assert data["email"] == FLEET_EMAIL
+        assert "phone" in data
+        assert "address" in data
+        assert "referalCode" in data
+        assert "isActivated" in data
+        assert "isAdminActivated" in data
+        assert "numberOfDrivers" in data
+        assert "vehicleCount" in data
+        assert "tripsCount" in data
+        assert "balance" in data
+        assert "rank" in data
+    
+    def test_fleet_profile_unauthorized(self):
+        """GET /api/fleet/company/profile - No token returns 401"""
+        response = requests.get(f"{BASE_URL}/api/fleet/company/profile")
+        
+        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

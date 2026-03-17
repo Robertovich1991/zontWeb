@@ -6,6 +6,7 @@ import { BookingProvider } from "@/context/BookingContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminAuthProvider, useAdminAuth } from "@/pages/admin/AdminAuthContext";
+import { FleetAuthProvider } from "@/pages/fleet/FleetAuthContext";
 import { HotelAuthProvider, useHotelAuth } from "@/pages/hotel/HotelAuthContext";
 
 // Core pages (eager load)
@@ -49,6 +50,14 @@ const HotelPayments = lazy(() => import("@/pages/admin/HotelPayments"));
 
 // Hotel Admin Portal
 const HotelLogin = lazy(() => import("@/pages/hotel/HotelLogin"));
+
+// Fleet Portal (Societe)
+const FleetLogin = lazy(() => import("@/pages/fleet/FleetLogin"));
+const FleetLayout = lazy(() => import("@/pages/fleet/FleetLayout"));
+const FleetDashboard = lazy(() => import("@/pages/fleet/FleetDashboard"));
+const FleetDrivers = lazy(() => import("@/pages/fleet/FleetDrivers"));
+const FleetVehicles = lazy(() => import("@/pages/fleet/FleetVehicles"));
+const FleetProfile = lazy(() => import("@/pages/fleet/FleetProfile"));
 
 // VTC Service Pages
 const VTC8Places = lazy(() => import("@/pages/services/VTC8Places"));
@@ -235,6 +244,14 @@ function App() {
                     <Route path="bookings" element={<HotelBookings />} />
                     <Route path="revenue" element={<HotelRevenue />} />
                     <Route path="invoices" element={<HotelInvoices />} />
+                  </Route>
+                  {/* Fleet Portal (Societe) */}
+                  <Route path="/fleet/login" element={<FleetAuthProvider><FleetLogin /></FleetAuthProvider>} />
+                  <Route path="/fleet" element={<FleetAuthProvider><FleetLayout /></FleetAuthProvider>}>
+                    <Route index element={<FleetDashboard />} />
+                    <Route path="drivers" element={<FleetDrivers />} />
+                    <Route path="vehicles" element={<FleetVehicles />} />
+                    <Route path="profile" element={<FleetProfile />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>
