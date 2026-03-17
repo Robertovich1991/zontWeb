@@ -195,9 +195,35 @@ async def fleet_add_driver(data: AddDriverRequest, request: Request):
 async def fleet_vehicles(request: Request):
     token = get_token(request)
     vehicles = await csharp_get("/api/Vehicle", token)
-    return [
-        {
-            "id": v.get("id", ""),
+    vehicle_list = vehicles if isinstance(vehicles, list) else []
+
+    # The company vehicle list endpoint doesn't populate the driver field.
+    # Fetch detail for each vehicle to get the actual driver assignment.
+    enriched = []
+    for v in vehicle_list:
+        driver_info = None
+        vid = v.get("id")
+        if not v.get("driver") and vid:
+            try:
+                detail = await csharp_get(f"/api/Vehicle/{vid}", token)
+                if isinstance(detail, dict) and detail.get("driver"):
+                    d = detail["driver"]
+                    driver_info = {
+                        "id": d.get("id", ""),
+                        "firstName": d.get("firstName", ""),
+                        "lastName": d.get("lastName", ""),
+                    }
+            except Exception:
+                pass
+        elif v.get("driver"):
+            driver_info = {
+                "id": v["driver"]["id"],
+                "firstName": v["driver"].get("firstName", ""),
+                "lastName": v["driver"].get("lastName", ""),
+            }
+
+        enriched.append({
+            "id": vid,
             "plateNumber": v.get("number", ""),
             "vim": v.get("vim", ""),
             "color": v.get("color", ""),
@@ -208,14 +234,10 @@ async def fleet_vehicles(request: Request):
             "isVTC": v.get("vehicleMakeModel", {}).get("isVTC", False),
             "isActivated": v.get("isActivated", False),
             "isAdminActivated": v.get("isAdminActivated", False),
-            "driver": {
-                "id": v["driver"]["id"],
-                "firstName": v["driver"].get("firstName", ""),
-                "lastName": v["driver"].get("lastName", ""),
-            } if v.get("driver") else None,
-        }
-        for v in (vehicles if isinstance(vehicles, list) else [])
-    ]
+            "isVehicleAvailable": v.get("isVehicleAvailable", True),
+            "driver": driver_info,
+        })
+    return enriched
 
 
 @router.get("/vehicles/ref/years")
@@ -332,7 +354,13 @@ async def fleet_assign_driver_to_vehicle(data: AssignDriverToVehicleRequest, req
                 logger.warning(f"Assign driver to vehicle failed ({resp.status_code}): {detail}")
                 try:
                     err_data = resp.json()
-                    msg = err_data.get("message") or err_data.get("title") or str(err_data) if isinstance(err_data, dict) else str(err_data)
+                    if isinstance(err_data, dict):
+                        if err_data.get("vehicleNotAvailable"):
+                            msg = "Ce vehicule est deja affecte a un chauffeur"
+                        else:
+                            msg = err_data.get("message") or err_data.get("title") or str(err_data)
+                    else:
+                        msg = str(err_data)
                 except Exception:
                     msg = detail
                 raise HTTPException(resp.status_code, f"Erreur: {msg}")
