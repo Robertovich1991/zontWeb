@@ -4,6 +4,7 @@ import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { useLanguage } from '@/context/LanguageContext';
 import { Car, Clock, DollarSign, Users, CheckCircle, Star, ArrowRight, Eye, EyeOff, Building2 } from 'lucide-react';
+import PhoneInput from '@/components/PhoneInput';
 
 const t = {
   en: {
@@ -340,21 +341,12 @@ const BecomeDriver = () => {
                         <label className="block text-sm font-medium text-gray-300 mb-1.5 uppercase tracking-wide">
                           {c.phone}
                         </label>
-                        <div className="flex gap-2">
-                          <select value={phoneCountry} onChange={(e) => setPhoneCountry(e.target.value)}
-                            className="w-28 px-2 py-3 bg-white/5 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]"
-                            data-testid="reg-phone-country">
-                            {COUNTRY_CODES.map((cc) => (
-                              <option key={cc.code} value={cc.code} className="bg-[#1a2332]">
-                                {cc.flag} {cc.code}
-                              </option>
-                            ))}
-                          </select>
-                          <input type="tel" name="phone" value={form.phone} onChange={handleChange}
-                            placeholder="01 23 45 67 89"
-                            className="flex-1 px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-transparent"
-                            data-testid="reg-phone" />
-                        </div>
+                        <PhoneInput
+                          value={form.phone}
+                          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                          onCountryChange={setPhoneCountry}
+                          darkMode={true}
+                        />
                       </div>
 
                       {/* Password */}

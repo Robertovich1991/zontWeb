@@ -3,6 +3,7 @@ import { X, Loader2, Mail, CheckCircle, AlertCircle, ArrowLeft, KeyRound } from 
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { authService } from '@/services/api';
+import PhoneInput from '@/components/PhoneInput';
 
 // Map C# API error keys to French messages
 const errorTranslations = {
@@ -59,6 +60,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     email: '', password: '', firstName: '', lastName: '',
     phone: '', confirmPassword: '', agreeTerms: false,
   });
+  const [phoneCountry, setPhoneCountry] = useState('+33');
 
   const resetForm = () => {
     setStep('form');
@@ -67,16 +69,17 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     setVerifyCode('');
     setForgotEmail('');
     setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '', confirmPassword: '', agreeTerms: false });
+    setPhoneCountry('+33');
   };
 
   const handleClose = () => { resetForm(); onClose(); };
   const handleSwitchMode = (newMode) => { resetForm(); onSwitchMode(newMode); };
 
   const formatPhone = (p) => {
-    const cleaned = p.replace(/[^0-9+]/g, '');
-    if (cleaned.startsWith('+')) return cleaned;
-    if (cleaned.startsWith('0')) return '+33' + cleaned.slice(1);
-    return '+33' + cleaned;
+    const cleaned = p.replace(/[^0-9]/g, '');
+    if (!cleaned) return '';
+    const num = cleaned.startsWith('0') ? cleaned.slice(1) : cleaned;
+    return phoneCountry + num;
   };
 
   // Client-side validation
@@ -340,8 +343,13 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Telephone *</label>
-                <input type="tel" name="phone" value={formData.phone} onChange={handleChange}
-                  placeholder="+33 6 12 34 56 78" className={inputCls('phone')} data-testid="signup-phone" />
+                <PhoneInput
+                  value={formData.phone}
+                  onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); if (errors.phone) setErrors({ ...errors, phone: null }); }}
+                  onCountryChange={setPhoneCountry}
+                  error={errors.phone}
+                  darkMode={true}
+                />
                 <FieldError field="phone" />
               </div>
               <div>
