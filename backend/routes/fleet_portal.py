@@ -140,6 +140,57 @@ async def fleet_driver_detail(driver_id: str, request: Request):
     return await csharp_get(f"/api/Driver/getdriver/{driver_id}", token)
 
 
+class AddDriverRequest(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
+    phone: str = ""
+    gender: str
+    password: str
+
+
+@router.post("/drivers")
+async def fleet_add_driver(data: AddDriverRequest, request: Request):
+    token = get_token(request)
+    payload = {
+        "firstName": data.firstName,
+        "lastName": data.lastName,
+        "email": data.email,
+        "phone": data.phone,
+        "gender": data.gender,
+        "password": data.password,
+        "canWatchAuctions": True,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Driver",
+                json=payload,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            if resp.status_code in (200, 201):
+                logger.info(f"Driver created: {data.email}")
+                return {"success": True, "message": "Chauffeur ajoute avec succes"}
+            else:
+                detail = resp.text[:300]
+                logger.warning(f"C# create driver failed ({resp.status_code}): {detail}")
+                # Try to extract a meaningful error message
+                try:
+                    err_data = resp.json()
+                    if isinstance(err_data, dict):
+                        msg = err_data.get("message") or err_data.get("title") or str(err_data)
+                    else:
+                        msg = str(err_data)
+                except Exception:
+                    msg = detail
+                raise HTTPException(resp.status_code, f"Erreur: {msg}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Create driver error: {e}")
+        raise HTTPException(500, "Erreur lors de la creation du chauffeur")
+
+
 @router.get("/vehicles")
 async def fleet_vehicles(request: Request):
     token = get_token(request)

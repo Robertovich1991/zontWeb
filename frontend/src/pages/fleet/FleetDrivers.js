@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { Users, Search, Loader2, CheckCircle, XCircle, ChevronRight, Phone, Mail } from 'lucide-react';
+import { Users, Search, Loader2, CheckCircle, XCircle, ChevronRight, Phone, Mail, UserPlus } from 'lucide-react';
 
 const FleetDrivers = () => {
   const { authFetch } = useFleetAuth();
+  const navigate = useNavigate();
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -34,6 +36,10 @@ const FleetDrivers = () => {
           <h1 className="text-2xl font-bold text-gray-900">Chauffeurs</h1>
           <p className="text-gray-500 text-sm mt-1">{drivers.length} chauffeur{drivers.length > 1 ? 's' : ''} dans votre societe</p>
         </div>
+        <button onClick={() => navigate('/fleet/drivers/add')} data-testid="add-driver-btn"
+          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2 shrink-0">
+          <UserPlus className="w-4 h-4" /> Ajouter un chauffeur
+        </button>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-wrap gap-3">

@@ -56,6 +56,7 @@ const FleetLogin = lazy(() => import("@/pages/fleet/FleetLogin"));
 const FleetLayout = lazy(() => import("@/pages/fleet/FleetLayout"));
 const FleetDashboard = lazy(() => import("@/pages/fleet/FleetDashboard"));
 const FleetDrivers = lazy(() => import("@/pages/fleet/FleetDrivers"));
+const FleetAddDriver = lazy(() => import("@/pages/fleet/FleetAddDriver"));
 const FleetVehicles = lazy(() => import("@/pages/fleet/FleetVehicles"));
 const FleetProfile = lazy(() => import("@/pages/fleet/FleetProfile"));
 
@@ -250,6 +251,7 @@ function App() {
                   <Route path="/fleet" element={<FleetAuthProvider><FleetLayout /></FleetAuthProvider>}>
                     <Route index element={<FleetDashboard />} />
                     <Route path="drivers" element={<FleetDrivers />} />
+                    <Route path="drivers/add" element={<FleetAddDriver />} />
                     <Route path="vehicles" element={<FleetVehicles />} />
                     <Route path="profile" element={<FleetProfile />} />
                   </Route>

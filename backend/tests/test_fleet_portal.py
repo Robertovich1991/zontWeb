@@ -197,5 +197,74 @@ class TestFleetCompanyProfile:
         assert response.status_code == 401, f"Expected 401, got {response.status_code}"
 
 
+class TestFleetAddDriverAPI:
+    """Fleet add driver endpoint tests - POST /api/fleet/drivers"""
+    
+    @pytest.fixture
+    def auth_token(self):
+        """Get fleet auth token"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": FLEET_EMAIL,
+            "password": FLEET_PASSWORD
+        })
+        if response.status_code == 200:
+            return response.json().get("accessToken")
+        pytest.skip("Fleet authentication failed")
+    
+    def test_add_driver_unauthorized(self):
+        """POST /api/fleet/drivers - No token returns 401"""
+        response = requests.post(f"{BASE_URL}/api/fleet/drivers", json={
+            "firstName": "Test",
+            "lastName": "Driver",
+            "email": "test@test.com",
+            "phone": "+33612345678",
+            "gender": "Male",
+            "password": "testpass123"
+        })
+        
+        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+    
+    def test_add_driver_missing_required_fields(self, auth_token):
+        """POST /api/fleet/drivers - Missing required fields returns 422"""
+        # Only firstName provided, missing lastName, email, gender, password
+        response = requests.post(
+            f"{BASE_URL}/api/fleet/drivers",
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json={"firstName": "Test"}
+        )
+        
+        assert response.status_code == 422, f"Expected 422, got {response.status_code}"
+        
+        # Verify error mentions missing fields
+        data = response.json()
+        assert "detail" in data
+    
+    def test_add_driver_validation_structure(self, auth_token):
+        """POST /api/fleet/drivers - Validates request body structure"""
+        # Valid structure but might fail on C# side - we test that our proxy handles it
+        test_payload = {
+            "firstName": "TestFirst",
+            "lastName": "TestLast",
+            "email": "invalid-email",  # Invalid email format
+            "phone": "+33612345678",
+            "gender": "Male",
+            "password": "short"  # Might be too short
+        }
+        
+        response = requests.post(
+            f"{BASE_URL}/api/fleet/drivers",
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json=test_payload
+        )
+        
+        # Either 200/201 (C# accepted) or 4xx (C# validation failed)
+        # We're testing that our proxy passes the request correctly
+        assert response.status_code in [200, 201, 400, 409, 422], f"Unexpected status {response.status_code}: {response.text}"
+        
+        # Verify response is valid JSON
+        data = response.json()
+        assert isinstance(data, dict)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
