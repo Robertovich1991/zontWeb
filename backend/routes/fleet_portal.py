@@ -218,6 +218,90 @@ async def fleet_vehicles(request: Request):
     ]
 
 
+@router.get("/vehicles/ref/years")
+async def fleet_vehicle_years(request: Request):
+    token = get_token(request)
+    return await csharp_get("/api/VehicleMakeModel/getyears", token)
+
+
+@router.get("/vehicles/ref/makers/{year}")
+async def fleet_vehicle_makers(year: int, request: Request):
+    token = get_token(request)
+    return await csharp_get(f"/api/VehicleMakeModel/{year}", token)
+
+
+@router.get("/vehicles/ref/models/{year}/{make}")
+async def fleet_vehicle_models(year: int, make: str, request: Request):
+    token = get_token(request)
+    return await csharp_get(f"/api/VehicleMakeModel/{year}/{make}", token)
+
+
+@router.get("/vehicles/ref/types")
+async def fleet_vehicle_types(request: Request):
+    token = get_token(request)
+    return await csharp_get("/api/VehicleMakeModel/gettypes", token)
+
+
+class AddVehicleRequest(BaseModel):
+    vim: str
+    color: str
+    number: str
+    vehicleMakeModelId: int
+    year: int
+    makeId: int
+    maker: str
+    model: str
+    type: str
+    isVTC: bool = False
+
+
+@router.post("/vehicles")
+async def fleet_add_vehicle(data: AddVehicleRequest, request: Request):
+    token = get_token(request)
+    payload = {
+        "vim": data.vim,
+        "color": data.color,
+        "number": data.number,
+        "vehicleMakeModel": {
+            "id": data.vehicleMakeModelId,
+            "year": data.year,
+            "make": {"id": data.makeId, "maker": data.maker},
+            "model": data.model,
+            "type": data.type,
+            "isVTC": data.isVTC,
+        },
+    }
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Vehicle/Add",
+                json=payload,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            if resp.status_code in (200, 201):
+                logger.info(f"Vehicle created: {data.number}")
+                result = {}
+                try:
+                    result = resp.json()
+                except Exception:
+                    pass
+                return {"success": True, "message": "Vehicule ajoute avec succes", "data": result}
+            else:
+                detail = resp.text[:300]
+                logger.warning(f"C# create vehicle failed ({resp.status_code}): {detail}")
+                try:
+                    err_data = resp.json()
+                    msg = err_data.get("message") or err_data.get("title") or str(err_data) if isinstance(err_data, dict) else str(err_data)
+                except Exception:
+                    msg = detail
+                raise HTTPException(resp.status_code, f"Erreur: {msg}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Create vehicle error: {e}")
+        raise HTTPException(500, "Erreur lors de la creation du vehicule")
+
+
 @router.get("/vehicles/{vehicle_id}")
 async def fleet_vehicle_detail(vehicle_id: int, request: Request):
     token = get_token(request)

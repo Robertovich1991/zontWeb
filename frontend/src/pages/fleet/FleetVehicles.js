@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { Car, Search, Loader2, CheckCircle, XCircle, ChevronRight, User } from 'lucide-react';
+import { Car, Search, Loader2, CheckCircle, XCircle, ChevronRight, User, Plus } from 'lucide-react';
 
 const FleetVehicles = () => {
   const { authFetch } = useFleetAuth();
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -29,9 +31,15 @@ const FleetVehicles = () => {
 
   return (
     <div className="space-y-5" data-testid="fleet-vehicles">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Vehicules</h1>
-        <p className="text-gray-500 text-sm mt-1">{vehicles.length} vehicule{vehicles.length > 1 ? 's' : ''} dans votre flotte</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Vehicules</h1>
+          <p className="text-gray-500 text-sm mt-1">{vehicles.length} vehicule{vehicles.length > 1 ? 's' : ''} dans votre flotte</p>
+        </div>
+        <button onClick={() => navigate('/fleet/vehicles/add')} data-testid="add-vehicle-btn"
+          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2 shrink-0">
+          <Plus className="w-4 h-4" /> Ajouter un vehicule
+        </button>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-wrap gap-3">

@@ -57,6 +57,7 @@ const FleetLayout = lazy(() => import("@/pages/fleet/FleetLayout"));
 const FleetDashboard = lazy(() => import("@/pages/fleet/FleetDashboard"));
 const FleetDrivers = lazy(() => import("@/pages/fleet/FleetDrivers"));
 const FleetAddDriver = lazy(() => import("@/pages/fleet/FleetAddDriver"));
+const FleetAddVehicle = lazy(() => import("@/pages/fleet/FleetAddVehicle"));
 const FleetVehicles = lazy(() => import("@/pages/fleet/FleetVehicles"));
 const FleetProfile = lazy(() => import("@/pages/fleet/FleetProfile"));
 
@@ -253,6 +254,7 @@ function App() {
                     <Route path="drivers" element={<FleetDrivers />} />
                     <Route path="drivers/add" element={<FleetAddDriver />} />
                     <Route path="vehicles" element={<FleetVehicles />} />
+                    <Route path="vehicles/add" element={<FleetAddVehicle />} />
                     <Route path="profile" element={<FleetProfile />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
