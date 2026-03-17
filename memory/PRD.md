@@ -47,13 +47,15 @@ Build a "Hotel Kiosk" management system that has evolved into a multi-portal pla
 - `/app/frontend/src/pages/fleet/FleetDrivers.js` - Drivers list
 - `/app/frontend/src/pages/fleet/FleetVehicles.js` - Vehicles list
 
+- `/app/frontend/src/pages/fleet/FleetBookings.js` - Reservations with dispatch
+- `/app/frontend/src/pages/fleet/FleetTrips.js` - Trips history
+
 ## Prioritized Backlog
 
 ### P1 - Next
 - Fleet Portal: Company Profile edit page
 
 ### P2 - Upcoming
-- Fleet Portal: Booking & Dispatch modules
 - Partner Ride Cancellation sync with C# backend
 
 ### P3 - Future
