@@ -197,6 +197,143 @@ async def hotel_dashboard_stats(request: Request):
         "monthly_revenue": list(reversed(monthly_rev)),
     }
 
+# ── Invoice Management (MUST be before /{hotel_id} route) ──
+
+class MarkPaidRequest(BaseModel):
+    payment_method: str = "virement"
+    payment_reference: str = ""
+
+
+@router.get("/invoices/summary")
+async def invoices_summary(request: Request):
+    await require_admin(request)
+    db = request.app.state.db
+    total = await db.hotel_invoices.count_documents({})
+    pending = await db.hotel_invoices.count_documents({"status": "pending"})
+    paid = await db.hotel_invoices.count_documents({"status": "paid"})
+
+    pending_agg = await db.hotel_invoices.aggregate([
+        {"$match": {"status": "pending"}},
+        {"$group": {"_id": None, "total": {"$sum": "$commission_amount"}}},
+    ]).to_list(1)
+    paid_agg = await db.hotel_invoices.aggregate([
+        {"$match": {"status": "paid"}},
+        {"$group": {"_id": None, "total": {"$sum": "$commission_amount"}}},
+    ]).to_list(1)
+
+    return {
+        "total_invoices": total,
+        "pending_count": pending,
+        "paid_count": paid,
+        "pending_amount": round(pending_agg[0]["total"], 2) if pending_agg else 0,
+        "paid_amount": round(paid_agg[0]["total"], 2) if paid_agg else 0,
+    }
+
+
+@router.get("/invoices")
+async def list_invoices(request: Request):
+    await require_admin(request)
+    db = request.app.state.db
+    invoices = await db.hotel_invoices.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return invoices
+
+
+@router.post("/invoices/generate")
+async def generate_invoices(request: Request):
+    await require_admin(request)
+    db = request.app.state.db
+    body = await request.json()
+    period = body.get("period")
+    if not period:
+        now = datetime.now(timezone.utc)
+        period = f"{now.year}-{now.month:02d}"
+
+    existing = await db.hotel_invoices.count_documents({"period": period})
+    if existing > 0:
+        raise HTTPException(400, f"Les factures pour {period} existent deja")
+
+    hotels = await db.hotels.find({"status": "active"}, {"_id": 0}).to_list(500)
+    created = []
+    now_str = datetime.now(timezone.utc).isoformat()
+
+    year, month = int(period[:4]), int(period[5:7])
+    due_month = month + 1 if month < 12 else 1
+    due_year = year if month < 12 else year + 1
+    import calendar
+    due_day = calendar.monthrange(due_year, due_month)[1]
+    due_date = f"{due_year}-{due_month:02d}-{due_day:02d}"
+
+    for hotel in hotels:
+        hotel_id = hotel["id"]
+        rate_h = hotel.get("commission_rate", 0)
+        rate_z = hotel.get("zont_commission_rate", 0)
+
+        period_start = f"{period}-01"
+        next_month = month + 1 if month < 12 else 1
+        next_year = year if month < 12 else year + 1
+        period_end = f"{next_year}-{next_month:02d}-01"
+
+        agg = await db.hotel_bookings.aggregate([
+            {"$match": {
+                "hotel_id": hotel_id,
+                "status": {"$in": ["completed", "confirmed", "assigned"]},
+                "created_at": {"$gte": period_start, "$lt": period_end},
+            }},
+            {"$group": {"_id": None, "revenue": {"$sum": "$total_price"}, "count": {"$sum": 1}}},
+        ]).to_list(1)
+
+        stats = agg[0] if agg else {"revenue": 0, "count": 0}
+        if stats["count"] == 0:
+            continue
+
+        commission = round(stats["revenue"] * rate_h / 100, 2)
+        zont_comm = round(stats["revenue"] * rate_z / 100, 2)
+
+        invoice_num = f"INV-{period.replace('-', '')}-{hotel_id[:6].upper()}"
+        doc = {
+            "id": invoice_num,
+            "hotel_id": hotel_id,
+            "hotel_name": hotel.get("name", ""),
+            "period": period,
+            "total_revenue": round(stats["revenue"], 2),
+            "bookings_count": stats["count"],
+            "commission_rate": rate_h,
+            "commission_amount": commission,
+            "zont_commission_rate": rate_z,
+            "zont_commission_amount": zont_comm,
+            "driver_amount": round(stats["revenue"] - commission - zont_comm, 2),
+            "status": "pending",
+            "due_date": due_date,
+            "created_at": now_str,
+            "paid_at": None,
+            "payment_method": None,
+            "payment_reference": None,
+        }
+        await db.hotel_invoices.insert_one(doc)
+        doc.pop("_id", None)
+        created.append(doc)
+
+    return {"message": f"{len(created)} facture(s) generee(s) pour {period}", "invoices": created}
+
+
+@router.put("/invoices/{invoice_id}/pay")
+async def mark_invoice_paid(invoice_id: str, data: MarkPaidRequest, request: Request):
+    await require_admin(request)
+    db = request.app.state.db
+    result = await db.hotel_invoices.update_one(
+        {"id": invoice_id, "status": "pending"},
+        {"$set": {
+            "status": "paid",
+            "paid_at": datetime.now(timezone.utc).isoformat(),
+            "payment_method": data.payment_method,
+            "payment_reference": data.payment_reference,
+        }},
+    )
+    if result.modified_count == 0:
+        raise HTTPException(404, "Facture introuvable ou deja payee")
+    return {"message": "Facture marquee comme payee"}
+
+
 @router.get("/{hotel_id}")
 async def get_hotel(hotel_id: str, request: Request):
     await require_admin(request)
@@ -403,3 +540,4 @@ async def seed_demo_data(request: Request):
             })
 
     return {"message": "3 hotels + bornes + reservations de demo crees"}
+

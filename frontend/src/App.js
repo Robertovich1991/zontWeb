@@ -45,13 +45,19 @@ const HotelsManager = lazy(() => import("@/pages/admin/HotelsManager"));
 const HotelsDashboard = lazy(() => import("@/pages/admin/HotelsDashboard"));
 const KiosksManager = lazy(() => import("@/pages/admin/KiosksManager"));
 const HotelBookingsManager = lazy(() => import("@/pages/admin/HotelBookingsManager"));
+const HotelPayments = lazy(() => import("@/pages/admin/HotelPayments"));
 
 // Hotel Admin Portal
 const HotelLogin = lazy(() => import("@/pages/hotel/HotelLogin"));
+
+// VTC Service Pages
+const VTC8Places = lazy(() => import("@/pages/services/VTC8Places"));
+const VTC7Places = lazy(() => import("@/pages/services/VTC7Places"));
 const HotelLayout = lazy(() => import("@/pages/hotel/HotelLayout"));
 const HotelDashboard = lazy(() => import("@/pages/hotel/HotelDashboard"));
 const HotelBookings = lazy(() => import("@/pages/hotel/HotelBookings"));
 const HotelRevenue = lazy(() => import("@/pages/hotel/HotelRevenue"));
+const HotelInvoices = lazy(() => import("@/pages/hotel/HotelInvoices"));
 
 // Driver App
 const DriverApp = lazy(() => import("@/pages/driver/DriverApp"));
@@ -187,6 +193,13 @@ function App() {
                   <Route path="/countries" element={<Countries />} />
                   {/* B2B Pages */}
                   <Route path="/partners" element={<Partners />} />
+                  {/* VTC Service Pages */}
+                  <Route path="/vtc-8-places" element={<VTC8Places />} />
+                  <Route path="/vtc-8-seats" element={<VTC8Places />} />
+                  <Route path="/vtc-8-mest" element={<VTC8Places />} />
+                  <Route path="/vtc-7-places" element={<VTC7Places />} />
+                  <Route path="/vtc-7-seats" element={<VTC7Places />} />
+                  <Route path="/vtc-7-mest" element={<VTC7Places />} />
                   <Route path="/travel-agencies" element={<TravelAgencies />} />
                   <Route path="/tourism-agencies" element={<TourismAgencies />} />
                   <Route path="/hotels" element={<HotelsB2B />} />
@@ -211,6 +224,7 @@ function App() {
                     <Route path="hotels" element={<HotelsManager />} />
                     <Route path="hotel-kiosks" element={<KiosksManager />} />
                     <Route path="hotel-bookings" element={<HotelBookingsManager />} />
+                    <Route path="hotel-payments" element={<HotelPayments />} />
                   </Route>
                   {/* Driver PWA */}
                   <Route path="/driver/*" element={<DriverApp />} />
@@ -220,6 +234,7 @@ function App() {
                     <Route index element={<HotelDashboard />} />
                     <Route path="bookings" element={<HotelBookings />} />
                     <Route path="revenue" element={<HotelRevenue />} />
+                    <Route path="invoices" element={<HotelInvoices />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>

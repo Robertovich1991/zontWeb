@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useHotelAuth } from './HotelAuthContext';
-import { Building2, BarChart3, BookOpen, DollarSign, Monitor, LogOut, Menu, X, ChevronRight } from 'lucide-react';
+import { Building2, BarChart3, BookOpen, DollarSign, Monitor, LogOut, Menu, X, ChevronRight, FileText } from 'lucide-react';
 
 const navItems = [
   { path: '/hotel', icon: BarChart3, label: 'Dashboard', exact: true },
   { path: '/hotel/bookings', icon: BookOpen, label: 'Reservations' },
   { path: '/hotel/revenue', icon: DollarSign, label: 'Revenus' },
+  { path: '/hotel/invoices', icon: FileText, label: 'Facturation' },
 ];
 
 const HotelLayout = () => {

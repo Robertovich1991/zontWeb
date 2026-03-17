@@ -196,3 +196,73 @@ async def hotel_bookings_export(request: Request):
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename=reservations_{hotel_name}.csv"},
     )
+
+
+@router.get("/invoices")
+async def hotel_invoices(request: Request):
+    payload = await require_hotel_user(request)
+    db = request.app.state.db
+    hotel_id = payload["hotel_id"]
+    invoices = await db.hotel_invoices.find({"hotel_id": hotel_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return invoices
+
+
+@router.get("/invoices/{invoice_id}/download")
+async def download_invoice(invoice_id: str, request: Request):
+    token = request.query_params.get("token")
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            if payload.get("role") != "hotel_admin":
+                raise HTTPException(403, "Acces refuse")
+        except jwt.InvalidTokenError:
+            raise HTTPException(401, "Token invalide")
+    else:
+        payload = await require_hotel_user(request)
+
+    db = request.app.state.db
+    invoice = await db.hotel_invoices.find_one(
+        {"id": invoice_id, "hotel_id": payload["hotel_id"]}, {"_id": 0}
+    )
+    if not invoice:
+        raise HTTPException(404, "Facture introuvable")
+
+    hotel = await db.hotels.find_one({"id": payload["hotel_id"]}, {"_id": 0, "name": 1, "address": 1, "city": 1, "postal_code": 1, "contact_email": 1})
+
+    output = io.StringIO()
+    output.write("=" * 60 + "\n")
+    output.write(f"  FACTURE DE COMMISSION - {invoice['id']}\n")
+    output.write("=" * 60 + "\n\n")
+    output.write(f"  Emetteur: Zont.cab\n")
+    output.write(f"  Date: {invoice['created_at'][:10]}\n")
+    output.write(f"  Echeance: {invoice['due_date']}\n")
+    output.write(f"  Statut: {'PAYEE' if invoice['status'] == 'paid' else 'EN ATTENTE'}\n\n")
+    output.write("-" * 60 + "\n")
+    output.write(f"  Hotel: {invoice['hotel_name']}\n")
+    if hotel:
+        output.write(f"  Adresse: {hotel.get('address', '')}, {hotel.get('postal_code', '')} {hotel.get('city', '')}\n")
+        output.write(f"  Email: {hotel.get('contact_email', '')}\n")
+    output.write("-" * 60 + "\n\n")
+    output.write(f"  Periode: {invoice['period']}\n")
+    output.write(f"  Nombre de reservations: {invoice['bookings_count']}\n")
+    output.write(f"  Chiffre d'affaires genere: {invoice['total_revenue']:.2f} EUR\n\n")
+    output.write(f"  Taux de commission hotel: {invoice['commission_rate']}%\n")
+    output.write(f"  MONTANT COMMISSION HOTEL: {invoice['commission_amount']:.2f} EUR\n\n")
+    output.write(f"  Taux commission Zont: {invoice['zont_commission_rate']}%\n")
+    output.write(f"  Commission Zont: {invoice['zont_commission_amount']:.2f} EUR\n")
+    output.write(f"  Montant chauffeur: {invoice['driver_amount']:.2f} EUR\n\n")
+    if invoice.get("paid_at"):
+        output.write("-" * 60 + "\n")
+        output.write(f"  Paye le: {invoice['paid_at'][:10]}\n")
+        output.write(f"  Mode: {invoice.get('payment_method', '-')}\n")
+        output.write(f"  Reference: {invoice.get('payment_reference', '-')}\n")
+    output.write("\n" + "=" * 60 + "\n")
+    output.write("  Merci pour votre partenariat - Zont.cab\n")
+    output.write("=" * 60 + "\n")
+
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/plain",
+        headers={"Content-Disposition": f"attachment; filename=facture_{invoice['id']}.txt"},
+    )
