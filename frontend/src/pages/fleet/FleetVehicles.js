@@ -59,7 +59,12 @@ const FleetVehicles = () => {
         fetchData();
       } else {
         const err = await res.json().catch(() => ({}));
-        toast.error(err.detail || "Erreur lors de l'affectation");
+        const msg = err.detail || '';
+        if (msg.includes('deja affecte') || msg.includes('not available') || msg.includes('isn\'t available')) {
+          toast.error('Ce vehicule est deja utilise par un chauffeur. Le chauffeur actuel doit liberer le vehicule depuis son application.');
+        } else {
+          toast.error(msg || "Erreur lors de l'affectation");
+        }
       }
     } catch { toast.error('Erreur de connexion'); }
     finally { setAssigning(false); }
@@ -135,6 +140,11 @@ const FleetVehicles = () => {
                         <div className="flex items-center gap-2">
                           <User className="w-3.5 h-3.5 text-gray-400" />
                           <span className="text-gray-700 text-sm">{v.driver.firstName} {v.driver.lastName}</span>
+                          <button onClick={(e) => { e.stopPropagation(); setAssigningVehicleId(assigningVehicleId === v.id ? null : v.id); setSelectedDriverId(''); }}
+                            data-testid={`change-driver-btn-${v.id}`}
+                            className="ml-1 inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 rounded text-xs transition">
+                            Changer
+                          </button>
                         </div>
                       ) : (
                         <button onClick={(e) => { e.stopPropagation(); setAssigningVehicleId(assigningVehicleId === v.id ? null : v.id); setSelectedDriverId(''); }}
@@ -166,7 +176,9 @@ const FleetVehicles = () => {
             <div className="border-t border-gray-200 bg-amber-50/50 p-4" data-testid={`assign-form-${assigningVehicleId}`}>
               <div className="flex items-end gap-3 flex-wrap max-w-lg">
                 <div className="flex-1 min-w-[200px]">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Affecter un chauffeur au vehicule</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    {vehicles.find(v => v.id === assigningVehicleId)?.driver ? 'Changer le chauffeur du vehicule' : 'Affecter un chauffeur au vehicule'}
+                  </label>
                   <select value={selectedDriverId} onChange={e => setSelectedDriverId(e.target.value)}
                     data-testid={`assign-driver-select-${assigningVehicleId}`}
                     className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:border-emerald-500">
@@ -217,7 +229,14 @@ const FleetVehicles = () => {
               <div className="flex justify-between py-2 items-center">
                 <span className="text-gray-500">Chauffeur</span>
                 {selectedVehicle.driver ? (
-                  <span className="text-gray-900">{selectedVehicle.driver.firstName} {selectedVehicle.driver.lastName}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-900">{selectedVehicle.driver.firstName} {selectedVehicle.driver.lastName}</span>
+                    <button onClick={() => { setAssigningVehicleId(selectedVehicle.id); setSelectedDriverId(''); }}
+                      data-testid="change-driver-detail-btn"
+                      className="px-2 py-0.5 bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 rounded text-xs transition">
+                      Changer
+                    </button>
+                  </div>
                 ) : (
                   <button onClick={() => { setAssigningVehicleId(selectedVehicle.id); setSelectedDriverId(''); }}
                     data-testid="assign-driver-detail-btn"
