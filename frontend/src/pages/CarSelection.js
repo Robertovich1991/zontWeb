@@ -286,12 +286,12 @@ const CarSelection = () => {
 
                     <div className="flex flex-col sm:flex-row">
                       {/* Image */}
-                      <div className="sm:w-[220px] md:w-[280px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-3 sm:p-4">
+                      <div className="w-full sm:w-[280px] md:w-[340px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 sm:p-5">
                         {imageUrl ? (
                           <img
                             src={imageUrl}
                             alt={tripType}
-                            className="w-full h-auto max-h-[120px] sm:max-h-[110px] object-contain"
+                            className="w-full h-auto max-h-[180px] sm:max-h-[160px] object-contain"
                             loading="lazy"
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
