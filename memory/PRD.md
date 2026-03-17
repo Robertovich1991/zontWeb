@@ -169,6 +169,21 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - **Testing**: 100% pass rate — 12 backend + 9 frontend scenarios verified
 - **Credentials**: Each hotel admin uses `hotel{hotel_id}` as default password (e.g., `admin@bristol.fr` / `hotelc9baf685`)
 
+### Phase 7.4 - Hotel Payments & Invoicing (Complete - March 17, 2026)
+- **Super Admin - Paiements Hotels** (`/admin/hotel-payments`): Dashboard with 4 stat cards, invoice table with filters (status/hotel), generate invoices for any period, mark invoices as paid with method/reference
+- **Hotel Portal - Facturation** (`/hotel/invoices`): Invoice history with status, amounts, download button, payment details
+- **Invoice Generation**: Auto-calculates commission based on hotel's rate and completed bookings for the period
+- **Invoice Download**: Text-format invoice with full details (hotel info, bookings count, commissions, payment status)
+- **Backend**: `GET/POST /api/admin/hotels/invoices/*`, `PUT /api/admin/hotels/invoices/{id}/pay`, `GET /api/hotel/invoices`, `GET /api/hotel/invoices/{id}/download`
+- **DB Collection**: `hotel_invoices` with id, hotel_id, period, commission_amount, status, due_date, paid_at, payment_method, payment_reference
+- **Testing**: 100% pass — 11 backend + all frontend scenarios verified
+
+### Phase 7.5 - VTC SEO Service Pages (Complete - March 17, 2026)
+- **VTC 8 Places** (`/vtc-8-places`): SEO-optimized page targeting "VTC 8 places" keyword, with content about Renault Trafic/Mercedes Vito, airport transfers, group travel, pricing
+- **VTC 7 Places** (`/vtc-7-places`): SEO-optimized page targeting "VTC 7 places" keyword, with content about Mercedes V-Class, family travel, baby seats
+- Both pages use CityTransferPage component with FR/EN/RU translations, booking form, vehicle cards, popular routes, reviews, and structured data (JSON-LD)
+- SEO URLs: `/vtc-8-places` (FR), `/vtc-8-seats` (EN), `/vtc-8-mest` (RU) + same pattern for 7 places
+
 ## Backlog
 
 ### P1 - Partner Payment Debits (ON HOLD by user)
