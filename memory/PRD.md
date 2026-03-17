@@ -184,6 +184,17 @@ Migration of the Angular website zont.cab to a React frontend with a C# backend,
 - Both pages use CityTransferPage component with FR/EN/RU translations, booking form, vehicle cards, popular routes, reviews, and structured data (JSON-LD)
 - SEO URLs: `/vtc-8-places` (FR), `/vtc-8-seats` (EN), `/vtc-8-mest` (RU) + same pattern for 7 places
 
+### Phase 8 - Fleet Portal / Plateforme Societe (Complete - March 17, 2026)
+- **Login** (`/fleet/login`): Authentification via C# backend `POST /api/Login/company`
+- **Dashboard** (`/fleet`): Nom société, adresse, 4 stats cards (chauffeurs/véhicules total+actifs), liens rapides
+- **Chauffeurs** (`/fleet/drivers`): Tableau avec recherche, filtres actif/inactif, vue détail (nom, email, tel, statut, note)
+- **Véhicules** (`/fleet/vehicles`): Tableau avec recherche, filtres, vue détail (immatriculation, marque, modèle, couleur, catégorie, chauffeur affecté)
+- **Profil** (`/fleet/profile`): Informations société, contact, code parrainage, stats
+- **Sécurité**: Token C# stocké, guard sur toutes les routes, données filtrées par CompanyId côté C#
+- **Architecture**: Backend proxy (`/api/fleet/*`) transforme et normalise les données C# → Frontend React
+- **Testing**: 100% — 9 backend + 10 frontend scénarios
+- **Credentials test**: nandetiri1@gmail.com / 12345678 (société "comfort cars 1")
+
 ## Backlog
 
 ### P1 - Partner Payment Debits (ON HOLD by user)
