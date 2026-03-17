@@ -308,6 +308,41 @@ async def fleet_vehicle_detail(vehicle_id: int, request: Request):
     return await csharp_get(f"/api/Vehicle/{vehicle_id}", token)
 
 
+class AssignDriverToVehicleRequest(BaseModel):
+    driverId: str
+    vehicleId: int
+
+
+@router.post("/vehicles/assign-driver")
+async def fleet_assign_driver_to_vehicle(data: AssignDriverToVehicleRequest, request: Request):
+    token = get_token(request)
+    payload = {"driverId": data.driverId, "vehicleId": data.vehicleId}
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Vehicle/company/setVehicleToDriver",
+                json=payload,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            if resp.status_code in (200, 201):
+                logger.info(f"Assigned driver {data.driverId} to vehicle {data.vehicleId}")
+                return {"success": True, "message": "Chauffeur affecte au vehicule"}
+            else:
+                detail = resp.text[:300]
+                logger.warning(f"Assign driver to vehicle failed ({resp.status_code}): {detail}")
+                try:
+                    err_data = resp.json()
+                    msg = err_data.get("message") or err_data.get("title") or str(err_data) if isinstance(err_data, dict) else str(err_data)
+                except Exception:
+                    msg = detail
+                raise HTTPException(resp.status_code, f"Erreur: {msg}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Assign driver to vehicle error: {e}")
+        raise HTTPException(500, "Erreur lors de l'affectation du chauffeur")
+
+
 # ─── Bookings (Auctions) ───
 
 @router.get("/bookings")

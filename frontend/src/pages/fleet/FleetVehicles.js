@@ -1,24 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { Car, Search, Loader2, CheckCircle, XCircle, ChevronRight, User, Plus } from 'lucide-react';
+import { Car, Search, Loader2, CheckCircle, XCircle, ChevronRight, User, Plus, UserPlus, Send } from 'lucide-react';
 
 const FleetVehicles = () => {
   const { authFetch } = useFleetAuth();
   const navigate = useNavigate();
   const [vehicles, setVehicles] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [assigningVehicleId, setAssigningVehicleId] = useState(null);
+  const [selectedDriverId, setSelectedDriverId] = useState('');
+  const [assigning, setAssigning] = useState(false);
 
-  useEffect(() => {
-    authFetch('/api/fleet/vehicles').then(r => r.ok ? r.json() : [])
-      .then(setVehicles)
-      .catch(() => toast.error('Erreur'))
-      .finally(() => setLoading(false));
-  }, []);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [vRes, dRes] = await Promise.all([
+        authFetch('/api/fleet/vehicles'),
+        authFetch('/api/fleet/drivers'),
+      ]);
+      const vData = vRes.ok ? await vRes.json() : [];
+      const dData = dRes.ok ? await dRes.json() : [];
+      setVehicles(Array.isArray(vData) ? vData : []);
+      setDrivers(Array.isArray(dData) ? dData : []);
+    } catch { toast.error('Erreur de chargement'); }
+    finally { setLoading(false); }
+  }, [authFetch]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const filtered = vehicles.filter(v => {
     const q = search.toLowerCase();
@@ -26,6 +40,30 @@ const FleetVehicles = () => {
     const matchFilter = filter === 'all' || (filter === 'active' && v.isActivated) || (filter === 'inactive' && !v.isActivated);
     return matchSearch && matchFilter;
   });
+
+  const activeDrivers = drivers.filter(d => d.isActivated);
+
+  const handleAssignDriver = async (vehicleId) => {
+    if (!selectedDriverId) { toast.error('Selectionnez un chauffeur'); return; }
+    setAssigning(true);
+    try {
+      const res = await authFetch('/api/fleet/vehicles/assign-driver', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driverId: selectedDriverId, vehicleId }),
+      });
+      if (res.ok) {
+        toast.success('Chauffeur affecte au vehicule !');
+        setAssigningVehicleId(null);
+        setSelectedDriverId('');
+        fetchData();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.detail || "Erreur lors de l'affectation");
+      }
+    } catch { toast.error('Erreur de connexion'); }
+    finally { setAssigning(false); }
+  };
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-emerald-500 animate-spin" /></div>;
 
@@ -99,7 +137,11 @@ const FleetVehicles = () => {
                           <span className="text-gray-700 text-sm">{v.driver.firstName} {v.driver.lastName}</span>
                         </div>
                       ) : (
-                        <span className="text-gray-400 text-xs italic">Non affecte</span>
+                        <button onClick={(e) => { e.stopPropagation(); setAssigningVehicleId(assigningVehicleId === v.id ? null : v.id); setSelectedDriverId(''); }}
+                          data-testid={`assign-driver-btn-${v.id}`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg text-xs font-medium transition">
+                          <UserPlus className="w-3 h-3" /> Affecter
+                        </button>
                       )}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -119,6 +161,32 @@ const FleetVehicles = () => {
               </tbody>
             </table>
           </div>
+
+          {assigningVehicleId && (
+            <div className="border-t border-gray-200 bg-amber-50/50 p-4" data-testid={`assign-form-${assigningVehicleId}`}>
+              <div className="flex items-end gap-3 flex-wrap max-w-lg">
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Affecter un chauffeur au vehicule</label>
+                  <select value={selectedDriverId} onChange={e => setSelectedDriverId(e.target.value)}
+                    data-testid={`assign-driver-select-${assigningVehicleId}`}
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:border-emerald-500">
+                    <option value="">Selectionnez un chauffeur...</option>
+                    {activeDrivers.map(d => (
+                      <option key={d.id} value={d.id}>{d.firstName} {d.lastName}</option>
+                    ))}
+                  </select>
+                </div>
+                <button onClick={() => handleAssignDriver(assigningVehicleId)} disabled={assigning}
+                  data-testid={`confirm-assign-btn-${assigningVehicleId}`}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2 disabled:opacity-50">
+                  {assigning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  Confirmer
+                </button>
+                <button onClick={() => { setAssigningVehicleId(null); setSelectedDriverId(''); }}
+                  className="px-3 py-2 text-gray-500 hover:text-gray-700 text-sm">Annuler</button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -146,7 +214,18 @@ const FleetVehicles = () => {
               <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Categorie</span><span className="text-blue-600 font-medium">{selectedVehicle.type || '-'}</span></div>
               <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">VTC</span><span>{selectedVehicle.isVTC ? 'Oui' : 'Non'}</span></div>
               <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Statut</span><span className={selectedVehicle.isActivated ? 'text-emerald-600 font-medium' : 'text-red-500'}>{selectedVehicle.isActivated ? 'Actif' : 'Inactif'}</span></div>
-              <div className="flex justify-between py-2"><span className="text-gray-500">Chauffeur</span><span>{selectedVehicle.driver ? `${selectedVehicle.driver.firstName} ${selectedVehicle.driver.lastName}` : 'Non affecte'}</span></div>
+              <div className="flex justify-between py-2 items-center">
+                <span className="text-gray-500">Chauffeur</span>
+                {selectedVehicle.driver ? (
+                  <span className="text-gray-900">{selectedVehicle.driver.firstName} {selectedVehicle.driver.lastName}</span>
+                ) : (
+                  <button onClick={() => { setAssigningVehicleId(selectedVehicle.id); setSelectedDriverId(''); }}
+                    data-testid="assign-driver-detail-btn"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg text-xs font-medium transition">
+                    <UserPlus className="w-3 h-3" /> Affecter un chauffeur
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
