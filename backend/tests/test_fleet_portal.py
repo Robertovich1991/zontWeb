@@ -451,5 +451,232 @@ class TestFleetAddVehicleAPI:
         assert isinstance(data, dict)
 
 
+# ─── Bookings (Reservations) API Tests ───
+
+class TestFleetBookingsAPI:
+    """Fleet bookings/reservations endpoint tests"""
+    
+    @pytest.fixture
+    def auth_token(self):
+        """Get fleet auth token"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": FLEET_EMAIL,
+            "password": FLEET_PASSWORD
+        })
+        if response.status_code == 200:
+            return response.json().get("accessToken")
+        pytest.skip("Fleet authentication failed")
+    
+    def test_fleet_bookings_list(self, auth_token):
+        """GET /api/fleet/bookings - Returns array of bookings/reservations"""
+        response = requests.get(
+            f"{BASE_URL}/api/fleet/bookings",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        assert isinstance(data, list), "Response should be a list"
+        
+        # Verify booking structure if there are bookings
+        if len(data) > 0:
+            booking = data[0]
+            assert "id" in booking, "Booking should have 'id'"
+            assert "status" in booking, "Booking should have 'status'"
+            assert "startAddress" in booking, "Booking should have 'startAddress'"
+            assert "endAddress" in booking, "Booking should have 'endAddress'"
+            assert "startDate" in booking, "Booking should have 'startDate'"
+            assert "totalAmount" in booking, "Booking should have 'totalAmount'"
+            # Status should be one of known values
+            valid_statuses = ['New', 'Confirmed', 'Started', 'Completed', 'Cancelled', 'CancelledByDriver', 'CancelledByClient']
+            assert booking["status"] in valid_statuses, f"Unexpected status: {booking['status']}"
+    
+    def test_fleet_bookings_unauthorized(self):
+        """GET /api/fleet/bookings - No token returns 401"""
+        response = requests.get(f"{BASE_URL}/api/fleet/bookings")
+        
+        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+    
+    def test_fleet_bookings_with_pagination(self, auth_token):
+        """GET /api/fleet/bookings - Supports pagination parameters"""
+        response = requests.get(
+            f"{BASE_URL}/api/fleet/bookings?count=5&pageNumber=1",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        assert isinstance(data, list), "Response should be a list"
+        # Should return max 5 items
+        assert len(data) <= 5, f"Expected max 5 items, got {len(data)}"
+    
+    def test_fleet_bookings_count(self, auth_token):
+        """GET /api/fleet/bookings/count - Returns count of bookings"""
+        response = requests.get(
+            f"{BASE_URL}/api/fleet/bookings/count",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        # Response can be integer or object with count
+        data = response.json()
+        # Either integer or object
+        if isinstance(data, int):
+            assert data >= 0, "Count should be non-negative"
+        elif isinstance(data, dict):
+            # Some APIs return {count: X}
+            pass
+        # C# might return just the integer
+    
+    def test_fleet_bookings_count_unauthorized(self):
+        """GET /api/fleet/bookings/count - No token returns 401"""
+        response = requests.get(f"{BASE_URL}/api/fleet/bookings/count")
+        
+        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+
+
+class TestFleetDispatchAPI:
+    """Fleet dispatch endpoint tests - POST /api/fleet/bookings/dispatch"""
+    
+    @pytest.fixture
+    def auth_token(self):
+        """Get fleet auth token"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": FLEET_EMAIL,
+            "password": FLEET_PASSWORD
+        })
+        if response.status_code == 200:
+            return response.json().get("accessToken")
+        pytest.skip("Fleet authentication failed")
+    
+    def test_dispatch_unauthorized(self):
+        """POST /api/fleet/bookings/dispatch - No token returns 401"""
+        response = requests.post(f"{BASE_URL}/api/fleet/bookings/dispatch", json={
+            "driverId": "test-driver-id",
+            "auctionId": 12345
+        })
+        
+        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+    
+    def test_dispatch_missing_driverId(self, auth_token):
+        """POST /api/fleet/bookings/dispatch - Missing driverId returns 422"""
+        response = requests.post(
+            f"{BASE_URL}/api/fleet/bookings/dispatch",
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json={"auctionId": 12345}
+        )
+        
+        assert response.status_code == 422, f"Expected 422, got {response.status_code}"
+    
+    def test_dispatch_missing_auctionId(self, auth_token):
+        """POST /api/fleet/bookings/dispatch - Missing auctionId returns 422"""
+        response = requests.post(
+            f"{BASE_URL}/api/fleet/bookings/dispatch",
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json={"driverId": "some-driver-id"}
+        )
+        
+        assert response.status_code == 422, f"Expected 422, got {response.status_code}"
+    
+    def test_dispatch_validation_structure(self, auth_token):
+        """POST /api/fleet/bookings/dispatch - Validates payload passes to C# API"""
+        # NOTE: Using invalid IDs to avoid actually dispatching
+        test_payload = {
+            "driverId": "invalid-driver-id-that-does-not-exist",
+            "auctionId": 999999999  # Non-existent auction
+        }
+        
+        response = requests.post(
+            f"{BASE_URL}/api/fleet/bookings/dispatch",
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json=test_payload
+        )
+        
+        # C# API should reject with 4xx or 5xx for invalid IDs
+        # We're testing that proxy correctly forwards the request
+        assert response.status_code in [200, 201, 400, 404, 409, 422, 500], f"Unexpected status {response.status_code}: {response.text}"
+
+
+# ─── Trips (Courses) API Tests ───
+
+class TestFleetTripsAPI:
+    """Fleet trips/courses endpoint tests"""
+    
+    @pytest.fixture
+    def auth_token(self):
+        """Get fleet auth token"""
+        response = requests.post(f"{BASE_URL}/api/fleet/auth/login", json={
+            "username": FLEET_EMAIL,
+            "password": FLEET_PASSWORD
+        })
+        if response.status_code == 200:
+            return response.json().get("accessToken")
+        pytest.skip("Fleet authentication failed")
+    
+    def test_fleet_trips_list(self, auth_token):
+        """GET /api/fleet/trips - Returns array of trips/courses"""
+        response = requests.get(
+            f"{BASE_URL}/api/fleet/trips",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        assert isinstance(data, list), "Response should be a list"
+        
+        # Verify trip structure if there are trips
+        if len(data) > 0:
+            trip = data[0]
+            assert "id" in trip, "Trip should have 'id'"
+            assert "status" in trip, "Trip should have 'status'"
+            assert "startAddress" in trip, "Trip should have 'startAddress'"
+            assert "endAddress" in trip, "Trip should have 'endAddress'"
+            assert "startDate" in trip, "Trip should have 'startDate'"
+            assert "totalAmount" in trip, "Trip should have 'totalAmount'"
+    
+    def test_fleet_trips_unauthorized(self):
+        """GET /api/fleet/trips - No token returns 401"""
+        response = requests.get(f"{BASE_URL}/api/fleet/trips")
+        
+        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+    
+    def test_fleet_trips_with_pagination(self, auth_token):
+        """GET /api/fleet/trips - Supports pagination parameters"""
+        response = requests.get(
+            f"{BASE_URL}/api/fleet/trips?count=10&pageNumber=1",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        data = response.json()
+        assert isinstance(data, list), "Response should be a list"
+        assert len(data) <= 10, f"Expected max 10 items, got {len(data)}"
+    
+    def test_fleet_trips_count(self, auth_token):
+        """GET /api/fleet/trips/count - Returns count of trips"""
+        response = requests.get(
+            f"{BASE_URL}/api/fleet/trips/count",
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+        
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+        
+        # Response can be integer or object
+        data = response.json()
+        if isinstance(data, int):
+            assert data >= 0, "Count should be non-negative"
+    
+    def test_fleet_trips_count_unauthorized(self):
+        """GET /api/fleet/trips/count - No token returns 401"""
+        response = requests.get(f"{BASE_URL}/api/fleet/trips/count")
+        
+        assert response.status_code == 401, f"Expected 401, got {response.status_code}"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

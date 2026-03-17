@@ -306,3 +306,139 @@ async def fleet_add_vehicle(data: AddVehicleRequest, request: Request):
 async def fleet_vehicle_detail(vehicle_id: int, request: Request):
     token = get_token(request)
     return await csharp_get(f"/api/Vehicle/{vehicle_id}", token)
+
+
+# ─── Bookings (Auctions) ───
+
+@router.get("/bookings")
+async def fleet_bookings(request: Request, count: int = 20, pageNumber: int = 1, type: str = ""):
+    token = get_token(request)
+    params = f"count={count}&pageNumber={pageNumber}&isDescending=true"
+    if type:
+        params += f"&type={type}"
+    data = await csharp_get(f"/api/Auction/company/auctions?{params}", token)
+    return [
+        {
+            "id": a.get("id"),
+            "status": a.get("status", ""),
+            "startDate": a.get("startDate", ""),
+            "startAddress": a.get("startAddress", ""),
+            "endAddress": a.get("endAddress", ""),
+            "carType": (a.get("carType") or "").strip(),
+            "tripType": a.get("tripType", ""),
+            "totalAmount": a.get("totalAmount", 0),
+            "currentPrice": a.get("currentPrice", 0),
+            "client": {
+                "firstName": (a.get("client") or {}).get("firstName", ""),
+                "lastName": (a.get("client") or {}).get("lastName", ""),
+                "phone": (a.get("client") or {}).get("phoneNumber", ""),
+            } if a.get("client") else None,
+            "driver": {
+                "id": (a.get("driver") or {}).get("id", ""),
+                "firstName": (a.get("driver") or {}).get("firstName", ""),
+                "lastName": (a.get("driver") or {}).get("lastName", ""),
+            } if a.get("driver") else None,
+            "additionalComments": a.get("additionalComments", ""),
+        }
+        for a in (data if isinstance(data, list) else [])
+    ]
+
+
+@router.get("/bookings/count")
+async def fleet_bookings_count(request: Request, type: str = ""):
+    token = get_token(request)
+    params = "isDescending=true"
+    if type:
+        params += f"&type={type}"
+    return await csharp_get(f"/api/Auction/company/auctions/count?{params}", token)
+
+
+@router.get("/bookings/{booking_id}")
+async def fleet_booking_detail(booking_id: int, request: Request):
+    token = get_token(request)
+    return await csharp_get(f"/api/Auction/company/auctions/{booking_id}", token)
+
+
+class DispatchRequest(BaseModel):
+    driverId: str
+    auctionId: int
+
+
+@router.post("/bookings/dispatch")
+async def fleet_dispatch(data: DispatchRequest, request: Request):
+    token = get_token(request)
+    payload = {"driverId": data.driverId, "auctionId": data.auctionId}
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Auction/company/auction",
+                json=payload,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            if resp.status_code in (200, 201):
+                logger.info(f"Dispatched auction {data.auctionId} to driver {data.driverId}")
+                return {"success": True, "message": "Chauffeur affecte avec succes"}
+            else:
+                detail = resp.text[:300]
+                logger.warning(f"Dispatch failed ({resp.status_code}): {detail}")
+                try:
+                    err_data = resp.json()
+                    msg = err_data.get("message") or err_data.get("title") or str(err_data) if isinstance(err_data, dict) else str(err_data)
+                except Exception:
+                    msg = detail
+                raise HTTPException(resp.status_code, f"Erreur: {msg}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Dispatch error: {e}")
+        raise HTTPException(500, "Erreur lors de l'affectation")
+
+
+# ─── Trips (Courses) ───
+
+@router.get("/trips")
+async def fleet_trips(request: Request, count: int = 20, pageNumber: int = 1, startDate: str = "", endDate: str = ""):
+    token = get_token(request)
+    params = f"count={count}&pageNumber={pageNumber}"
+    if startDate:
+        params += f"&startDate={startDate}"
+    if endDate:
+        params += f"&endDate={endDate}"
+    data = await csharp_get(f"/api/Trip/company?{params}", token)
+    return [
+        {
+            "id": t.get("id"),
+            "startDate": t.get("startDate", ""),
+            "endDate": t.get("endDate", ""),
+            "status": t.get("status", ""),
+            "startAddress": t.get("startAddress", ""),
+            "endAddress": t.get("endAddress", ""),
+            "totalAmount": t.get("totalAmount", 0),
+            "totalKM": t.get("totalKM", 0),
+            "totalTime": t.get("totalTime", 0),
+            "carType": (t.get("carType") or "").strip(),
+            "orderType": t.get("orderType", ""),
+            "driver": {
+                "id": (t.get("driver") or {}).get("id", ""),
+                "firstName": (t.get("driver") or {}).get("firstName", ""),
+                "lastName": (t.get("driver") or {}).get("lastName", ""),
+            } if t.get("driver") else None,
+            "creator": {
+                "firstName": (t.get("creator") or {}).get("firstName", ""),
+                "lastName": (t.get("creator") or {}).get("lastName", ""),
+                "phone": (t.get("creator") or {}).get("phoneNumber", ""),
+            } if t.get("creator") else None,
+        }
+        for t in (data if isinstance(data, list) else [])
+    ]
+
+
+@router.get("/trips/count")
+async def fleet_trips_count(request: Request, startDate: str = "", endDate: str = ""):
+    token = get_token(request)
+    params = ""
+    if startDate:
+        params += f"startDate={startDate}&"
+    if endDate:
+        params += f"endDate={endDate}&"
+    return await csharp_get(f"/api/Trip/company/count?{params}".rstrip("?&"), token)
