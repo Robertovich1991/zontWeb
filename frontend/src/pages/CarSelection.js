@@ -291,7 +291,7 @@ const CarSelection = () => {
                           <img
                             src={imageUrl}
                             alt={tripType}
-                            className="w-full h-auto max-h-[180px] sm:max-h-[160px] object-contain"
+                            className="w-full h-auto max-h-[240px] sm:max-h-[160px] object-contain"
                             loading="lazy"
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
