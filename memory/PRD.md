@@ -40,16 +40,16 @@ Build a "Hotel Kiosk" management system that has evolved into a multi-portal pla
 - Responsive layouts across all portals
 
 ## Key Files
-- `/app/backend/routes/fleet_portal.py` - Fleet portal proxy routes
+- `/app/backend/routes/fleet_portal.py` - Fleet portal proxy routes (drivers, vehicles, ref data)
 - `/app/frontend/src/pages/fleet/` - Fleet portal frontend
 - `/app/frontend/src/pages/fleet/FleetAddDriver.js` - Add driver form
-- `/app/backend/routes/company.py` - Company registration
-- `/app/frontend/src/components/PhoneInput.js` - Reusable phone input
+- `/app/frontend/src/pages/fleet/FleetAddVehicle.js` - Add vehicle form with cascade dropdowns
+- `/app/frontend/src/pages/fleet/FleetDrivers.js` - Drivers list
+- `/app/frontend/src/pages/fleet/FleetVehicles.js` - Vehicles list
 
 ## Prioritized Backlog
 
 ### P1 - Next
-- Fleet Portal: Add Vehicle functionality
 - Fleet Portal: Company Profile edit page
 
 ### P2 - Upcoming
