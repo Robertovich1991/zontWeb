@@ -16,7 +16,7 @@ const FleetCreateBooking = () => {
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState('transfer');
   const [form, setForm] = useState({
-    date: '', time: '', passengers: 1, passengerName: '',
+    date: '', time: '', passengers: 1, passengerName: '', clientName: '',
     pickupAddress: '', dropoffAddress: '',
     hours: 1, vehicleModel: '',
     tourName: '', guideName: '',
@@ -42,17 +42,20 @@ const FleetCreateBooking = () => {
       if (tab === 'transfer') {
         payload.passengers = parseInt(form.passengers) || 1;
         payload.passengerName = form.passengerName;
+        payload.clientName = form.clientName;
         payload.pickupAddress = form.pickupAddress;
         payload.dropoffAddress = form.dropoffAddress;
       } else if (tab === 'dispo') {
         payload.hours = parseInt(form.hours) || 1;
         payload.vehicleModel = form.vehicleModel;
+        payload.clientName = form.clientName;
       } else {
         payload.hours = parseInt(form.hours) || 1;
         payload.vehicleModel = form.vehicleModel;
         payload.pickupAddress = form.pickupAddress;
         payload.tourName = form.tourName;
         payload.guideName = form.guideName;
+        payload.clientName = form.clientName;
       }
 
       const res = await authFetch('/api/fleet/my-bookings', {
@@ -105,6 +108,12 @@ const FleetCreateBooking = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Heure *</label>
             <input type="time" value={form.time} onChange={set('time')} data-testid="booking-time" className={inputCls} />
           </div>
+        </div>
+
+        {/* Common: Client name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom du client</label>
+          <input type="text" value={form.clientName} onChange={set('clientName')} data-testid="booking-client-name" className={inputCls} placeholder="Ex: M. Dupont" />
         </div>
 
         {/* TRANSFER fields */}

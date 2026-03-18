@@ -35,6 +35,7 @@ class CreateBookingRequest(BaseModel):
     # Transfer fields
     passengers: Optional[int] = None
     passengerName: Optional[str] = None
+    clientName: Optional[str] = None
     pickupAddress: Optional[str] = None
     dropoffAddress: Optional[str] = None
     # Dispo fields
@@ -79,6 +80,7 @@ async def create_booking(data: CreateBookingRequest, request: Request):
         booking.update({
             "passengers": data.passengers or 1,
             "passengerName": data.passengerName or "",
+            "clientName": data.clientName or "",
             "pickupAddress": data.pickupAddress,
             "dropoffAddress": data.dropoffAddress,
         })
@@ -88,6 +90,7 @@ async def create_booking(data: CreateBookingRequest, request: Request):
         booking.update({
             "hours": data.hours,
             "vehicleModel": data.vehicleModel or "",
+            "clientName": data.clientName or "",
         })
     elif data.type == "excursion":
         if not data.pickupAddress:
@@ -98,6 +101,7 @@ async def create_booking(data: CreateBookingRequest, request: Request):
             "pickupAddress": data.pickupAddress,
             "tourName": data.tourName or "",
             "guideName": data.guideName or "",
+            "clientName": data.clientName or "",
         })
 
     booking["price"] = data.price or 0

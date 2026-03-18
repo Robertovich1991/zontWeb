@@ -204,7 +204,8 @@ const FleetMyBookings = () => {
                       <Clock className="w-3 h-3" /> {b.date} {b.time}
                     </div>
                     {b.price > 0 && <p className="text-gray-900 font-semibold">{b.price.toFixed(2)} EUR</p>}
-                    {b.driver && <p className="text-xs text-blue-600 mt-1"><User className="w-3 h-3 inline" /> {b.driver.name}</p>}
+                    {b.clientName && <p className="text-xs text-gray-600 mt-0.5"><User className="w-3 h-3 inline" /> {b.clientName}</p>}
+                    {b.driver && <p className="text-xs text-blue-600 mt-0.5"><User className="w-3 h-3 inline" /> {b.driver.name}</p>}
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400 mt-1 ml-auto" /> : <ChevronDown className="w-4 h-4 text-gray-400 mt-1 ml-auto" />}
                   </div>
                 </div>
@@ -212,6 +213,9 @@ const FleetMyBookings = () => {
                 {isExpanded && (
                   <div className="border-t border-gray-100 p-4 bg-gray-50/50 space-y-3" data-testid={`my-booking-detail-${b.id}`}>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                      {b.clientName && (
+                        <div><span className="text-gray-400 text-xs block">Client</span><span className="text-gray-900 font-medium">{b.clientName}</span></div>
+                      )}
                       {b.type === 'transfer' && (
                         <div><span className="text-gray-400 text-xs block">Nb personnes</span><span className="text-gray-900">{b.passengers}</span></div>
                       )}
