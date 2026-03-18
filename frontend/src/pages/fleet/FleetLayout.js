@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useFleetAuth } from './FleetAuthContext';
-import { LayoutDashboard, Users, Car, User, LogOut, Menu, X, ChevronRight, Truck, CalendarClock, Route as RouteIcon } from 'lucide-react';
+import { LayoutDashboard, Users, Car, User, LogOut, Menu, X, ChevronRight, Truck, CalendarClock, Route as RouteIcon, BookOpen } from 'lucide-react';
 
 const navItems = [
   { path: '/fleet', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-  { path: '/fleet/bookings', icon: CalendarClock, label: 'Reservations' },
+  { path: '/fleet/bookings', icon: CalendarClock, label: 'Reservations Zont' },
+  { path: '/fleet/my-bookings', icon: BookOpen, label: 'Mes Reservations' },
   { path: '/fleet/trips', icon: RouteIcon, label: 'Courses' },
   { path: '/fleet/drivers', icon: Users, label: 'Chauffeurs' },
   { path: '/fleet/vehicles', icon: Car, label: 'Vehicules' },
