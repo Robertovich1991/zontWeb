@@ -213,7 +213,10 @@ const FleetMyBookings = () => {
                   <div className="border-t border-gray-100 p-4 bg-gray-50/50 space-y-3" data-testid={`my-booking-detail-${b.id}`}>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                       {b.type === 'transfer' && (
-                        <div><span className="text-gray-400 text-xs block">Passagers</span><span className="text-gray-900">{b.passengers}</span></div>
+                        <>
+                          <div><span className="text-gray-400 text-xs block">Passager</span><span className="text-gray-900">{b.passengerName || '-'}</span></div>
+                          <div><span className="text-gray-400 text-xs block">Nb personnes</span><span className="text-gray-900">{b.passengers}</span></div>
+                        </>
                       )}
                       {(b.type === 'dispo' || b.type === 'excursion') && (
                         <>

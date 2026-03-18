@@ -34,6 +34,7 @@ class CreateBookingRequest(BaseModel):
     time: str
     # Transfer fields
     passengers: Optional[int] = None
+    passengerName: Optional[str] = None
     pickupAddress: Optional[str] = None
     dropoffAddress: Optional[str] = None
     # Dispo fields
@@ -77,6 +78,7 @@ async def create_booking(data: CreateBookingRequest, request: Request):
             raise HTTPException(400, "Adresses requises pour un transfert")
         booking.update({
             "passengers": data.passengers or 1,
+            "passengerName": data.passengerName or "",
             "pickupAddress": data.pickupAddress,
             "dropoffAddress": data.dropoffAddress,
         })
