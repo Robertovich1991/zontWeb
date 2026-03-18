@@ -205,6 +205,7 @@ const FleetMyBookings = () => {
                     </div>
                     {b.price > 0 && <p className="text-gray-900 font-semibold">{b.price.toFixed(2)} EUR</p>}
                     {b.clientName && <p className="text-xs text-gray-600 mt-0.5"><User className="w-3 h-3 inline" /> {b.clientName}</p>}
+                    {b.flightNumber && <p className="text-xs text-gray-400 mt-0.5"><Plane className="w-3 h-3 inline" /> {b.flightNumber}</p>}
                     {b.driver && <p className="text-xs text-blue-600 mt-0.5"><User className="w-3 h-3 inline" /> {b.driver.name}</p>}
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400 mt-1 ml-auto" /> : <ChevronDown className="w-4 h-4 text-gray-400 mt-1 ml-auto" />}
                   </div>

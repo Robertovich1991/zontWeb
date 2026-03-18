@@ -16,7 +16,7 @@ const FleetCreateBooking = () => {
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState('transfer');
   const [form, setForm] = useState({
-    date: '', time: '', passengers: 1, passengerName: '', clientName: '',
+    date: '', time: '', passengers: 1, passengerName: '', clientName: '', flightNumber: '',
     pickupAddress: '', dropoffAddress: '',
     hours: 1, vehicleModel: '',
     tourName: '', guideName: '',
@@ -43,12 +43,14 @@ const FleetCreateBooking = () => {
         payload.passengers = parseInt(form.passengers) || 1;
         payload.passengerName = form.passengerName;
         payload.clientName = form.clientName;
+        payload.flightNumber = form.flightNumber;
         payload.pickupAddress = form.pickupAddress;
         payload.dropoffAddress = form.dropoffAddress;
       } else if (tab === 'dispo') {
         payload.hours = parseInt(form.hours) || 1;
         payload.vehicleModel = form.vehicleModel;
         payload.clientName = form.clientName;
+        payload.flightNumber = form.flightNumber;
       } else {
         payload.hours = parseInt(form.hours) || 1;
         payload.vehicleModel = form.vehicleModel;
@@ -115,6 +117,14 @@ const FleetCreateBooking = () => {
           <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom du client</label>
           <input type="text" value={form.clientName} onChange={set('clientName')} data-testid="booking-client-name" className={inputCls} placeholder="Ex: M. Dupont" />
         </div>
+
+        {/* Flight number for Transfer & Dispo */}
+        {(tab === 'transfer' || tab === 'dispo') && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Numero de vol</label>
+            <input type="text" value={form.flightNumber} onChange={set('flightNumber')} data-testid="booking-flight" className={inputCls} placeholder="Ex: AF123" />
+          </div>
+        )}
 
         {/* TRANSFER fields */}
         {tab === 'transfer' && (

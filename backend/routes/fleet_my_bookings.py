@@ -36,6 +36,7 @@ class CreateBookingRequest(BaseModel):
     passengers: Optional[int] = None
     passengerName: Optional[str] = None
     clientName: Optional[str] = None
+    flightNumber: Optional[str] = None
     pickupAddress: Optional[str] = None
     dropoffAddress: Optional[str] = None
     # Dispo fields
@@ -81,6 +82,7 @@ async def create_booking(data: CreateBookingRequest, request: Request):
             "passengers": data.passengers or 1,
             "passengerName": data.passengerName or "",
             "clientName": data.clientName or "",
+            "flightNumber": data.flightNumber or "",
             "pickupAddress": data.pickupAddress,
             "dropoffAddress": data.dropoffAddress,
         })
@@ -91,6 +93,7 @@ async def create_booking(data: CreateBookingRequest, request: Request):
             "hours": data.hours,
             "vehicleModel": data.vehicleModel or "",
             "clientName": data.clientName or "",
+            "flightNumber": data.flightNumber or "",
         })
     elif data.type == "excursion":
         if not data.pickupAddress:
