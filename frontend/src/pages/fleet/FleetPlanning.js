@@ -8,6 +8,7 @@ const HOUR_WIDTH = 120;
 const ROW_HEIGHT = 80;
 
 const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+const MONTHS_FR = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];
 
 const TYPE_CONFIG = {
   transfer: { label: 'Transfer', cls: 'bg-blue-50 text-blue-700 border-blue-200', icon: Plane },
@@ -79,12 +80,20 @@ const FleetPlanning = () => {
   const goToday = () => setCurrentDate(formatLocalDate(new Date()));
   const goPrev = () => {
     const d = new Date(currentDate + 'T12:00:00');
-    d.setDate(d.getDate() - (view === 'week' ? 7 : 1));
+    if (view === 'month') {
+      d.setMonth(d.getMonth() - 1);
+    } else {
+      d.setDate(d.getDate() - (view === 'week' ? 7 : 1));
+    }
     setCurrentDate(formatLocalDate(d));
   };
   const goNext = () => {
     const d = new Date(currentDate + 'T12:00:00');
-    d.setDate(d.getDate() + (view === 'week' ? 7 : 1));
+    if (view === 'month') {
+      d.setMonth(d.getMonth() + 1);
+    } else {
+      d.setDate(d.getDate() + (view === 'week' ? 7 : 1));
+    }
     setCurrentDate(formatLocalDate(d));
   };
 
@@ -111,12 +120,25 @@ const FleetPlanning = () => {
 
   const getWeekDays = () => {
     if (!planning) return [];
-    const start = new Date(planning.dateStart + 'T00:00:00');
+    const start = new Date(planning.dateStart + 'T12:00:00');
     const days = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(start);
       d.setDate(d.getDate() + i);
-      days.push(d.toISOString().split('T')[0]);
+      days.push(formatLocalDate(d));
+    }
+    return days;
+  };
+
+  const getMonthDays = () => {
+    if (!planning) return [];
+    const start = new Date(planning.dateStart + 'T12:00:00');
+    const end = new Date(planning.dateEnd + 'T12:00:00');
+    const days = [];
+    const d = new Date(start);
+    while (d <= end) {
+      days.push(formatLocalDate(d));
+      d.setDate(d.getDate() + 1);
     }
     return days;
   };
@@ -319,6 +341,10 @@ const FleetPlanning = () => {
               className={`px-4 py-2 text-sm font-medium transition ${view === 'week' ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}>
               Semaine
             </button>
+            <button onClick={() => setView('month')} data-testid="planning-month-btn"
+              className={`px-4 py-2 text-sm font-medium transition ${view === 'month' ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}>
+              Mois
+            </button>
           </div>
           <div className="flex items-center gap-1">
             <button onClick={goPrev} className="p-2 hover:bg-gray-100 rounded-lg transition" data-testid="planning-prev">
@@ -327,6 +353,8 @@ const FleetPlanning = () => {
             <span className="text-sm font-medium text-gray-700 min-w-[130px] text-center" data-testid="planning-date-label">
               {view === 'day'
                 ? formatDate(currentDate)
+                : view === 'month'
+                ? `${MONTHS_FR[new Date(currentDate + 'T12:00:00').getMonth()]} ${new Date(currentDate + 'T12:00:00').getFullYear()}`
                 : `${formatDate(planning?.dateStart || currentDate)} - ${formatDate(planning?.dateEnd || currentDate)}`
               }
             </span>
@@ -576,7 +604,7 @@ const FleetPlanning = () => {
             </div>
           </div>
         </div>
-      ) : (
+      ) : view === 'week' ? (
         /* WEEK VIEW */
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" data-testid="planning-week-view">
           <div className="flex">
@@ -604,7 +632,7 @@ const FleetPlanning = () => {
               <div className="min-w-[700px]">
                 <div className="h-[44px] border-b border-gray-200 bg-gray-50 flex">
                   {getWeekDays().map(day => {
-                    const isToday = day === new Date().toISOString().split('T')[0];
+                    const isToday = day === formatLocalDate(new Date());
                     return (
                       <div key={day} className={`flex-1 flex items-center justify-center border-r border-gray-100 ${isToday ? 'bg-emerald-50' : ''}`}>
                         <span className={`text-xs font-medium ${isToday ? 'text-emerald-700 font-bold' : 'text-gray-500'}`}>{formatDate(day)}</span>
@@ -644,6 +672,86 @@ const FleetPlanning = () => {
               </div>
             </div>
           </div>
+        </div>
+      ) : (
+        /* MONTH VIEW */
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" data-testid="planning-month-view">
+          {filteredDrivers.map(d => {
+            const monthDays = getMonthDays();
+            const weeks = [];
+            let week = [];
+            if (monthDays.length > 0) {
+              const firstDow = new Date(monthDays[0] + 'T12:00:00').getDay();
+              const startPad = firstDow === 0 ? 6 : firstDow - 1;
+              for (let i = 0; i < startPad; i++) week.push(null);
+            }
+            monthDays.forEach(day => {
+              week.push(day);
+              if (week.length === 7) { weeks.push(week); week = []; }
+            });
+            if (week.length > 0) {
+              while (week.length < 7) week.push(null);
+              weeks.push(week);
+            }
+
+            return (
+              <div key={d.id} className="border-b border-gray-200 last:border-b-0" data-testid={`month-driver-${d.id}`}>
+                <div className="bg-gray-50 px-4 py-2.5 flex items-center gap-3 border-b border-gray-100">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-[10px] font-bold">
+                    {d.firstName?.[0]}{d.lastName?.[0]}
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">{d.firstName} {d.lastName}</span>
+                  <span className={`w-2 h-2 rounded-full ${getStatusColor(d.status)}`} />
+                  <span className="text-xs text-gray-400 ml-auto">{d.events.length} course{d.events.length !== 1 ? 's' : ''}</span>
+                </div>
+                <div>
+                  {/* Day headers */}
+                  <div className="grid grid-cols-7 border-b border-gray-100">
+                    {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
+                      <div key={day} className="text-center py-1.5 text-[10px] font-semibold text-gray-400 uppercase">{day}</div>
+                    ))}
+                  </div>
+                  {/* Weeks */}
+                  {weeks.map((w, wi) => (
+                    <div key={wi} className="grid grid-cols-7 border-b border-gray-50">
+                      {w.map((day, di) => {
+                        if (!day) return <div key={di} className="min-h-[60px] bg-gray-50/50 border-r border-gray-50" />;
+                        const dayNum = parseInt(day.split('-')[2]);
+                        const isToday = day === formatLocalDate(new Date());
+                        const dayEvents = d.events.filter(e => e.startTime.startsWith(day));
+                        return (
+                          <div key={di} className={`min-h-[60px] border-r border-gray-50 p-1 ${isToday ? 'bg-emerald-50/50' : ''}`}>
+                            <div className={`text-[10px] font-medium mb-0.5 ${isToday ? 'text-emerald-700 font-bold' : 'text-gray-400'}`}>
+                              {dayNum}
+                            </div>
+                            {dayEvents.slice(0, 3).map(e => {
+                              const isZont = e.source === 'zont';
+                              return (
+                                <div key={e.id}
+                                  className={`mb-0.5 rounded px-1 py-0.5 cursor-pointer text-white text-[8px] truncate ${isZont ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                                  onClick={() => handleEventClick(e)}
+                                  onMouseEnter={() => !selectedEvent && setHoveredEvent(e)}
+                                  onMouseLeave={() => setHoveredEvent(null)}
+                                >
+                                  <span className="font-bold">
+                                    {new Date(e.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                  {' '}{e.pickupAddress?.split(',')[0]?.substring(0, 15) || e.type}
+                                </div>
+                              );
+                            })}
+                            {dayEvents.length > 3 && (
+                              <div className="text-[8px] text-gray-400 text-center">+{dayEvents.length - 3}</div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

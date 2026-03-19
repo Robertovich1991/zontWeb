@@ -82,7 +82,13 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
     except ValueError:
         target_date = datetime.now()
 
-    if view == "week":
+    if view == "month":
+        import calendar
+        year, month = target_date.year, target_date.month
+        _, last_day = calendar.monthrange(year, month)
+        date_start = f"{year}-{str(month).zfill(2)}-01"
+        date_end = f"{year}-{str(month).zfill(2)}-{str(last_day).zfill(2)}"
+    elif view == "week":
         start_of_week = target_date - timedelta(days=target_date.weekday())
         date_start = start_of_week.strftime("%Y-%m-%d")
         date_end = (start_of_week + timedelta(days=6)).strftime("%Y-%m-%d")
