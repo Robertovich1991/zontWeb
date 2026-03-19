@@ -186,6 +186,26 @@ async def stripe_webhook(request: Request):
         return {"status": "error"}
 
 
+@app.on_event("startup")
+async def startup_event():
+    """Create MongoDB indexes and initialize shared resources."""
+    logger.info("Creating MongoDB indexes...")
+    # Fleet reservations: most common queries
+    await db.fleet_reservations.create_index([("companyId", 1), ("date", 1)])
+    await db.fleet_reservations.create_index([("companyId", 1), ("driver.id", 1), ("date", 1)])
+    await db.fleet_reservations.create_index([("companyId", 1), ("status", 1)])
+    # Rest days
+    await db.driver_rest_days.create_index([("companyId", 1), ("date", 1)])
+    await db.driver_rest_days.create_index([("companyId", 1), ("driverId", 1), ("date", 1)], unique=True)
+    # Forfaits
+    await db.driver_forfaits.create_index([("driverId", 1), ("companyId", 1), ("month", 1)])
+    await db.driver_forfaits.create_index([("driverId", 1), ("rideId", 1), ("companyId", 1)], unique=True)
+    logger.info("MongoDB indexes created.")
+
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    # Close shared HTTP client
+    from routes.fleet_shared import close_shared_client
+    await close_shared_client()
     client.close()

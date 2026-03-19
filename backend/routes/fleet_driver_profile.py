@@ -3,63 +3,17 @@ from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import Optional
+import asyncio
 import logging
 import calendar
 
+from routes.fleet_shared import (
+    get_token, get_company_id, get_db, csharp_get,
+    parse_csharp_date,
+)
+
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/fleet/drivers", tags=["fleet-driver-profile"])
-
-CSHARP_API = "https://api.zont.cab"
-TIMEOUT = 15.0
-
-
-def get_token(request: Request) -> str:
-    auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
-        raise HTTPException(401, "Token requis")
-    return auth.split(" ", 1)[1]
-
-
-def get_company_id(request: Request) -> str:
-    token = request.headers.get("Authorization", "").replace("Bearer ", "")
-    if not token:
-        raise HTTPException(401, "Non authentifie")
-    import base64
-    import json
-    try:
-        payload = token.split(".")[1]
-        payload += "=" * (4 - len(payload) % 4)
-        data = json.loads(base64.b64decode(payload))
-        return data.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "")
-    except Exception:
-        raise HTTPException(401, "Token invalide")
-
-
-def get_db(request: Request):
-    return request.app.state.db
-
-
-async def csharp_get(path: str, token: str):
-    import httpx
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-        resp = await client.get(
-            f"{CSHARP_API}{path}",
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        if resp.status_code != 200:
-            return []
-        return resp.json()
-
-
-def parse_csharp_date(date_str):
-    if not date_str:
-        return None
-    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d", "%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M", "%d/%m/%Y"):
-        try:
-            return datetime.strptime(date_str.split("+")[0].split("Z")[0], fmt)
-        except (ValueError, AttributeError):
-            continue
-    return None
 
 
 @router.get("/{driver_id}/rides")
@@ -85,8 +39,26 @@ async def get_driver_rides(driver_id: str, request: Request, month: str = ""):
 
     rides = []
 
-    # 1. Get Zont trips completed by this driver (from /api/Trip/driver)
-    zont_trips = await csharp_get("/api/Trip/driver?count=200&pageNumber=1", token)
+    # Parallel fetch: Zont trips + Zont auctions + Company bookings + Forfaits
+    (
+        zont_trips,
+        zont_bookings,
+        company_raw,
+        forfaits_raw,
+    ) = await asyncio.gather(
+        csharp_get("/api/Trip/driver?count=200&pageNumber=1", token),
+        csharp_get("/api/Auction/company/auctions?count=200&pageNumber=1&isDescending=true", token),
+        db.fleet_reservations.find(
+            {"companyId": company_id, "driver.id": driver_id, "date": {"$gte": date_start, "$lte": date_end}},
+            {"_id": 0},
+        ).to_list(200),
+        db.driver_forfaits.find(
+            {"driverId": driver_id, "companyId": company_id, "month": f"{year}-{str(mon).zfill(2)}"},
+            {"_id": 0},
+        ).to_list(500),
+    )
+
+    # 1. Zont trips
     for t in (zont_trips if isinstance(zont_trips, list) else []):
         trip_driver = t.get("driver") or {}
         if trip_driver.get("id") != driver_id:
@@ -116,10 +88,7 @@ async def get_driver_rides(driver_id: str, request: Request, month: str = ""):
             "forfait": 0,
         })
 
-    # 2. Get Zont auctions dispatched to this driver
-    zont_bookings = await csharp_get(
-        "/api/Auction/company/auctions?count=200&pageNumber=1&isDescending=true", token
-    )
+    # 2. Zont auctions dispatched to this driver
     zont_trip_ids = {r["id"] for r in rides}
     for a in (zont_bookings if isinstance(zont_bookings, list) else []):
         if not a.get("driver") or a["driver"].get("id") != driver_id:
@@ -150,13 +119,7 @@ async def get_driver_rides(driver_id: str, request: Request, month: str = ""):
             "forfait": 0,
         })
 
-    # 3. Get Company bookings assigned to this driver (MongoDB)
-    mongo_query = {
-        "companyId": company_id,
-        "driver.id": driver_id,
-        "date": {"$gte": date_start, "$lte": date_end},
-    }
-    company_raw = await db.fleet_reservations.find(mongo_query, {"_id": 0}).to_list(200)
+    # 3. Company bookings (already fetched in parallel above)
     for b in company_raw:
         time_str = b.get("time", "00:00")
         start_dt = parse_csharp_date(f"{b['date']}T{time_str}")
@@ -182,11 +145,7 @@ async def get_driver_rides(driver_id: str, request: Request, month: str = ""):
             "forfait": 0,
         })
 
-    # 4. Load saved forfaits from MongoDB
-    forfaits_raw = await db.driver_forfaits.find(
-        {"driverId": driver_id, "companyId": company_id, "month": f"{year}-{str(mon).zfill(2)}"},
-        {"_id": 0},
-    ).to_list(500)
+    # 4. Apply saved forfaits (already fetched in parallel above)
     forfait_map = {f["rideId"]: f["amount"] for f in forfaits_raw}
 
     for ride in rides:

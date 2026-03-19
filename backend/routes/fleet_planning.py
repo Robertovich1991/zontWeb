@@ -1,73 +1,18 @@
-"""Fleet Planning - Aggregates Zont + Company bookings for driver timeline."""
+"""Fleet Planning - Aggregates Zont + Company bookings for driver timeline.
+Optimized: parallel C# calls, shared client, caching, reduced scan range."""
 from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 from datetime import datetime, timedelta
+import asyncio
 import logging
+
+from routes.fleet_shared import (
+    get_token, get_company_id, get_db, csharp_get,
+    parse_csharp_date, estimate_end_time, scan_auctions,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/fleet/planning", tags=["fleet-planning"])
-
-CSHARP_API = "https://api.zont.cab"
-TIMEOUT = 15.0
-
-
-def get_token(request: Request) -> str:
-    auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
-        raise HTTPException(401, "Token requis")
-    return auth.split(" ", 1)[1]
-
-
-def get_company_id(request: Request) -> str:
-    token = request.headers.get("Authorization", "").replace("Bearer ", "")
-    if not token:
-        raise HTTPException(401, "Non authentifie")
-    import base64
-    import json
-    try:
-        payload = token.split(".")[1]
-        payload += "=" * (4 - len(payload) % 4)
-        data = json.loads(base64.b64decode(payload))
-        return data.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "")
-    except Exception:
-        raise HTTPException(401, "Token invalide")
-
-
-def get_db(request: Request):
-    return request.app.state.db
-
-
-async def csharp_get(path: str, token: str):
-    import httpx
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-        resp = await client.get(
-            f"{CSHARP_API}{path}",
-            headers={"Authorization": f"Bearer {token}"},
-        )
-        if resp.status_code != 200:
-            return []
-        return resp.json()
-
-
-def parse_csharp_date(date_str):
-    """Parse C# date string to datetime."""
-    if not date_str:
-        return None
-    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d", "%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M", "%d/%m/%Y"):
-        try:
-            return datetime.strptime(date_str.split("+")[0].split("Z")[0], fmt)
-        except (ValueError, AttributeError):
-            continue
-    return None
-
-
-def estimate_end_time(start_dt, booking_type="transfer"):
-    """Estimate end time if not available."""
-    if not start_dt:
-        return None
-    if booking_type in ("dispo", "excursion"):
-        return start_dt + timedelta(hours=2)
-    return start_dt + timedelta(hours=1, minutes=30)
 
 
 @router.get("")
@@ -96,8 +41,41 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
         date_start = target_date.strftime("%Y-%m-%d")
         date_end = date_start
 
-    # 1. Get drivers
-    drivers_raw = await csharp_get("/api/Driver/company/getdriver", token)
+    # ── PHASE 1: Parallel fetch (drivers + auctions + trips + MongoDB) ──
+    mongo_assigned_query = {
+        "companyId": company_id,
+        "driver": {"$ne": None},
+        "date": {"$gte": date_start, "$lte": date_end},
+    }
+    mongo_unassigned_query = {
+        "companyId": company_id,
+        "$or": [{"driver": None}, {"driver": {"$exists": False}}],
+        "date": {"$gte": date_start, "$lte": date_end},
+        "status": {"$nin": ["cancelled", "completed"]},
+    }
+    rest_days_query = {
+        "companyId": company_id,
+        "date": {"$gte": date_start, "$lte": date_end},
+    }
+
+    # Launch ALL data fetches in parallel
+    (
+        drivers_raw,
+        zont_bookings,
+        zont_trips,
+        company_assigned_raw,
+        company_unassigned_raw,
+        rest_days_raw,
+    ) = await asyncio.gather(
+        csharp_get("/api/Driver/company/getdriver", token),
+        csharp_get("/api/Auction/company/auctions?count=100&pageNumber=1&isDescending=true", token),
+        csharp_get("/api/Trip/driver?count=200&pageNumber=1", token),
+        db.fleet_reservations.find(mongo_assigned_query, {"_id": 0}).to_list(200),
+        db.fleet_reservations.find(mongo_unassigned_query, {"_id": 0}).to_list(200),
+        db.driver_rest_days.find(rest_days_query, {"_id": 0}).to_list(500),
+    )
+
+    # ── Parse drivers ──
     drivers = []
     for d in (drivers_raw if isinstance(drivers_raw, list) else []):
         drivers.append({
@@ -109,12 +87,13 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "phone": d.get("phoneNumber", ""),
         })
 
-    # 2. Get Zont bookings (auctions assigned to drivers)
-    zont_bookings = await csharp_get(
-        "/api/Auction/company/auctions?count=100&pageNumber=1&isDescending=true", token
-    )
+    # ── Parse Zont auctions (assigned to drivers) ──
     zont_events = []
+    known_auction_ids = set()
     for a in (zont_bookings if isinstance(zont_bookings, list) else []):
+        aid = a.get("id")
+        if aid:
+            known_auction_ids.add(aid)
         if not a.get("driver"):
             continue
         start_dt = parse_csharp_date(a.get("startDate"))
@@ -125,7 +104,7 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             continue
         end_dt = parse_csharp_date(a.get("endDate")) or estimate_end_time(start_dt)
         zont_events.append({
-            "id": f"zont-{a.get('id')}",
+            "id": f"zont-{aid}",
             "driverId": a["driver"].get("id", ""),
             "source": "zont",
             "type": (a.get("tripType") or "Transfer"),
@@ -138,38 +117,15 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "price": a.get("totalAmount", 0),
         })
 
-    # 2a. Scan recent auction IDs (C# list endpoint may hide expired/pending auctions)
-    import asyncio
-    seen_auction_ids = {e["id"] for e in zont_events}
-    max_id = 0
-    for e in zont_events:
-        try:
-            aid = int(e["id"].replace("zont-", ""))
-            max_id = max(max_id, aid)
-        except (ValueError, TypeError):
-            pass
-    scan_start = max(1, max_id - 5)
-    scan_end = max_id + 30 if max_id > 0 else 30
-
-    async def check_auction_for_planning(aid):
-        try:
-            detail = await csharp_get(f"/api/Auction/company/auctions/{aid}", token)
-            if isinstance(detail, dict) and detail.get("id"):
-                auction_company = detail.get("company") or {}
-                if auction_company.get("id") == company_id and detail.get("driver"):
-                    return detail
-        except Exception:
-            pass
-        return None
-
-    tasks = [check_auction_for_planning(i) for i in range(scan_start, scan_end + 1)]
-    extra_auctions = await asyncio.gather(*tasks)
+    # ── PHASE 2: Scan for hidden auctions (reduced range) ──
+    extra_auctions = await scan_auctions(token, company_id, known_auction_ids)
+    seen_event_ids = {e["id"] for e in zont_events}
     for a in extra_auctions:
-        if not a:
-            continue
         eid = f"zont-{a.get('id')}"
-        if eid in seen_auction_ids:
+        if eid in seen_event_ids:
             continue
+        if not a.get("driver"):
+            continue  # Unassigned handled below
         start_dt = parse_csharp_date(a.get("startDate"))
         if not start_dt:
             continue
@@ -191,11 +147,9 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "clientName": "",
             "price": a.get("totalAmount", 0),
         })
-        seen_auction_ids.add(eid)
+        seen_event_ids.add(eid)
 
-    # 2b. Get Zont completed trips (driver-accepted rides)
-    zont_trips = await csharp_get("/api/Trip/driver?count=200&pageNumber=1", token)
-    zont_event_ids = {e["id"] for e in zont_events}
+    # ── Parse Zont completed trips ──
     for t in (zont_trips if isinstance(zont_trips, list) else []):
         trip_driver = t.get("driver") or {}
         if not trip_driver.get("id"):
@@ -207,12 +161,10 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
         if trip_date < date_start or trip_date > date_end:
             continue
         end_dt = parse_csharp_date(t.get("endDate"))
-        if end_dt and end_dt.year <= 1:
-            end_dt = estimate_end_time(start_dt)
-        elif not end_dt:
+        if not end_dt or (end_dt and end_dt.year <= 1):
             end_dt = estimate_end_time(start_dt)
         trip_id = f"zont-trip-{t.get('id')}"
-        if trip_id in zont_event_ids:
+        if trip_id in seen_event_ids:
             continue
         creator = t.get("creator") or {}
         client_name = f"{creator.get('firstName', '')} {creator.get('lastName', '')}".strip()
@@ -230,27 +182,15 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "price": t.get("totalAmount", 0),
         })
 
-    # 3. Get Company bookings assigned to drivers (from MongoDB)
-    mongo_query = {
-        "companyId": company_id,
-        "driver": {"$ne": None},
-        "date": {"$gte": date_start, "$lte": date_end},
-    }
-    logger.info(f"Planning query: {mongo_query}")
-    company_raw = await db.fleet_reservations.find(mongo_query, {"_id": 0}).to_list(200)
-    logger.info(f"Planning found {len(company_raw)} company bookings")
+    # ── Parse company bookings (MongoDB - already fetched) ──
     company_events = []
-    for b in company_raw:
+    for b in company_assigned_raw:
         time_str = b.get("time", "00:00")
-        start_str = f"{b['date']}T{time_str}"
-        start_dt = parse_csharp_date(start_str)
+        start_dt = parse_csharp_date(f"{b['date']}T{time_str}")
         if not start_dt:
             continue
         hours = b.get("hours", 0)
-        if hours and hours > 0:
-            end_dt = start_dt + timedelta(hours=hours)
-        else:
-            end_dt = estimate_end_time(start_dt, b.get("type", "transfer"))
+        end_dt = start_dt + timedelta(hours=hours) if hours and hours > 0 else estimate_end_time(start_dt, b.get("type", "transfer"))
         company_events.append({
             "id": f"company-{b.get('id', '')}",
             "driverId": b.get("driver", {}).get("id", ""),
@@ -265,27 +205,15 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "price": b.get("price", 0),
         })
 
-    # 3b. Get UNASSIGNED company bookings for the date range
-    unassigned_query = {
-        "companyId": company_id,
-        "$or": [{"driver": None}, {"driver": {"$exists": False}}],
-        "date": {"$gte": date_start, "$lte": date_end},
-        "status": {"$nin": ["cancelled", "completed"]},
-    }
-    unassigned_raw = await db.fleet_reservations.find(unassigned_query, {"_id": 0}).to_list(200)
-    logger.info(f"Planning found {len(unassigned_raw)} unassigned bookings")
+    # ── Unassigned bookings ──
     unassigned_bookings = []
-    for b in unassigned_raw:
+    for b in company_unassigned_raw:
         time_str = b.get("time", "00:00")
-        start_str = f"{b['date']}T{time_str}"
-        start_dt = parse_csharp_date(start_str)
+        start_dt = parse_csharp_date(f"{b['date']}T{time_str}")
         hours = b.get("hours", 0)
         end_dt = None
         if start_dt:
-            if hours and hours > 0:
-                end_dt = start_dt + timedelta(hours=hours)
-            else:
-                end_dt = estimate_end_time(start_dt, b.get("type", "transfer"))
+            end_dt = start_dt + timedelta(hours=hours) if hours and hours > 0 else estimate_end_time(start_dt, b.get("type", "transfer"))
         unassigned_bookings.append({
             "id": b.get("id", ""),
             "source": "company",
@@ -306,16 +234,10 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "comment": b.get("comment", ""),
         })
 
-    # 3c. Add UNASSIGNED Zont auctions (no driver yet)
-    for e in zont_events:
-        pass  # zont_events only have events WITH a driver
-
-    # Scan for Zont auctions without driver
+    # Add unassigned Zont auctions
     for a in extra_auctions:
-        if not a:
-            continue
         if a.get("driver"):
-            continue  # Already has a driver, skip
+            continue
         start_dt = parse_csharp_date(a.get("startDate"))
         if not start_dt:
             continue
@@ -348,14 +270,13 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
 
     unassigned_bookings.sort(key=lambda x: x.get("time", ""))
 
-    # 4. Build planning per driver
+    # ── Build planning per driver ──
     all_events = zont_events + company_events
+    now_str = datetime.now().strftime("%Y-%m-%dT%H:%M")
     planning = []
     for driver in drivers:
         driver_events = [e for e in all_events if e["driverId"] == driver["id"]]
         driver_events.sort(key=lambda e: e["startTime"])
-        # Determine status
-        now_str = datetime.now().strftime("%Y-%m-%dT%H:%M")
         is_busy = any(e["startTime"] <= now_str <= e["endTime"] for e in driver_events if e["endTime"])
 
         if not driver["isActivated"]:
@@ -365,25 +286,15 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
         else:
             status = "available"
 
-        planning.append({
-            **driver,
-            "status": status,
-            "events": driver_events,
-        })
+        planning.append({**driver, "status": status, "events": driver_events})
 
-    # 5. Load rest days from MongoDB
-    rest_days_raw = await db.driver_rest_days.find(
-        {"companyId": company_id, "date": {"$gte": date_start, "$lte": date_end}},
-        {"_id": 0},
-    ).to_list(500)
+    # ── Rest days (already fetched) ──
     rest_days = {}
     for rd in rest_days_raw:
         did = rd.get("driverId", "")
         if did not in rest_days:
             rest_days[did] = []
         rest_days[did].append(rd.get("date", ""))
-
-    # Add rest days to each driver
     for p in planning:
         p["restDays"] = rest_days.get(p["id"], [])
 
@@ -417,10 +328,17 @@ async def check_conflict(data: ConflictCheckRequest, request: Request):
 
     date_str = new_start.strftime("%Y-%m-%d")
 
-    # Check Zont bookings
-    zont_bookings = await csharp_get(
+    # Parallel: check Zont + company bookings
+    zont_task = csharp_get(
         "/api/Auction/company/auctions?count=100&pageNumber=1&isDescending=true", token
     )
+    company_task = db.fleet_reservations.find(
+        {"companyId": company_id, "driver.id": data.driverId, "date": date_str, "status": {"$nin": ["cancelled"]}},
+        {"_id": 0},
+    ).to_list(100)
+
+    zont_bookings, company_bookings = await asyncio.gather(zont_task, company_task)
+
     for a in (zont_bookings if isinstance(zont_bookings, list) else []):
         if not a.get("driver") or a["driver"].get("id") != data.driverId:
             continue
@@ -441,11 +359,6 @@ async def check_conflict(data: ConflictCheckRequest, request: Request):
                 },
             }
 
-    # Check Company bookings
-    company_bookings = await db.fleet_reservations.find(
-        {"companyId": company_id, "driver.id": data.driverId, "date": date_str, "status": {"$nin": ["cancelled"]}},
-        {"_id": 0},
-    ).to_list(100)
     for b in company_bookings:
         if data.excludeBookingId and f"company-{b.get('id')}" == data.excludeBookingId:
             continue
