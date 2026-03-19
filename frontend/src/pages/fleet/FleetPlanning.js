@@ -3,7 +3,7 @@ import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble } from 'lucide-react';
 
-const HOURS = Array.from({ length: 17 }, (_, i) => i + 6);
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_WIDTH = 120;
 const ROW_HEIGHT = 80;
 
@@ -65,7 +65,7 @@ const FleetPlanning = () => {
   useEffect(() => {
     if (view === 'day' && timelineRef.current && !loading) {
       const now = new Date();
-      const scrollX = Math.max(0, (now.getHours() - 6) * HOUR_WIDTH - 200);
+      const scrollX = Math.max(0, now.getHours() * HOUR_WIDTH - 200);
       timelineRef.current.scrollLeft = scrollX;
     }
   }, [view, loading]);
@@ -113,7 +113,7 @@ const FleetPlanning = () => {
     const end = event.endTime ? new Date(event.endTime) : new Date(start.getTime() + 90 * 60000);
     const startH = start.getHours() + start.getMinutes() / 60;
     const endH = end.getHours() + end.getMinutes() / 60;
-    const left = Math.max(0, (startH - 6) * HOUR_WIDTH);
+    const left = Math.max(0, startH * HOUR_WIDTH);
     const width = Math.max(HOUR_WIDTH * 0.5, (endH - startH) * HOUR_WIDTH);
     return { left: `${left}px`, width: `${width}px` };
   };
@@ -624,7 +624,7 @@ const FleetPlanning = () => {
                       <div key={h} className="border-r border-gray-50 shrink-0" style={{ width: HOUR_WIDTH, height: '100%' }}>
                         {h === new Date().getHours() && currentDate === new Date().toISOString().split('T')[0] && (
                           <div className="absolute top-0 bottom-0 w-px bg-red-400 z-20"
-                            style={{ left: `${(new Date().getHours() - 6 + new Date().getMinutes() / 60) * HOUR_WIDTH}px` }} />
+                            style={{ left: `${(new Date().getHours() + new Date().getMinutes() / 60) * HOUR_WIDTH}px` }} />
                         )}
                       </div>
                     ))}
