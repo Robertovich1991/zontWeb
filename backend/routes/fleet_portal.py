@@ -38,6 +38,21 @@ async def csharp_get(path: str, token: str):
         return resp.json()
 
 
+def get_company_id(request: Request) -> str:
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if not token:
+        raise HTTPException(401, "Non authentifie")
+    import base64
+    import json as _json
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (4 - len(payload) % 4)
+        data = _json.loads(base64.b64decode(payload))
+        return data.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "")
+    except Exception:
+        raise HTTPException(401, "Token invalide")
+
+
 @router.post("/auth/login")
 async def fleet_login(data: FleetLoginRequest):
     try:
@@ -47,7 +62,6 @@ async def fleet_login(data: FleetLoginRequest):
                 json={"username": data.username, "password": data.password},
             )
             if resp.status_code == 400:
-                detail = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
                 raise HTTPException(400, "Email ou mot de passe incorrect")
             if resp.status_code != 200:
                 raise HTTPException(resp.status_code, "Erreur de connexion")
@@ -373,38 +387,75 @@ async def fleet_assign_driver_to_vehicle(data: AssignDriverToVehicleRequest, req
 
 # ─── Bookings (Auctions) ───
 
+def format_auction(a):
+    """Format a raw auction into a clean dict."""
+    return {
+        "id": a.get("id"),
+        "status": a.get("status", ""),
+        "startDate": a.get("startDate", ""),
+        "startAddress": a.get("startAddress", ""),
+        "endAddress": a.get("endAddress", ""),
+        "carType": (a.get("carType") or "").strip(),
+        "tripType": a.get("tripType", ""),
+        "totalAmount": a.get("totalAmount", 0),
+        "currentPrice": a.get("currentPrice", 0),
+        "client": {
+            "firstName": (a.get("client") or {}).get("firstName", ""),
+            "lastName": (a.get("client") or {}).get("lastName", ""),
+            "phone": (a.get("client") or {}).get("phoneNumber", ""),
+        } if a.get("client") else None,
+        "driver": {
+            "id": (a.get("driver") or {}).get("id", ""),
+            "firstName": (a.get("driver") or {}).get("firstName", ""),
+            "lastName": (a.get("driver") or {}).get("lastName", ""),
+        } if a.get("driver") else None,
+        "additionalComments": a.get("additionalComments", ""),
+    }
+
+
 @router.get("/bookings")
 async def fleet_bookings(request: Request, count: int = 20, pageNumber: int = 1, type: str = ""):
     token = get_token(request)
+    company_id = get_company_id(request)
     params = f"count={count}&pageNumber={pageNumber}&isDescending=true"
     if type:
         params += f"&type={type}"
     data = await csharp_get(f"/api/Auction/company/auctions?{params}", token)
-    return [
-        {
-            "id": a.get("id"),
-            "status": a.get("status", ""),
-            "startDate": a.get("startDate", ""),
-            "startAddress": a.get("startAddress", ""),
-            "endAddress": a.get("endAddress", ""),
-            "carType": (a.get("carType") or "").strip(),
-            "tripType": a.get("tripType", ""),
-            "totalAmount": a.get("totalAmount", 0),
-            "currentPrice": a.get("currentPrice", 0),
-            "client": {
-                "firstName": (a.get("client") or {}).get("firstName", ""),
-                "lastName": (a.get("client") or {}).get("lastName", ""),
-                "phone": (a.get("client") or {}).get("phoneNumber", ""),
-            } if a.get("client") else None,
-            "driver": {
-                "id": (a.get("driver") or {}).get("id", ""),
-                "firstName": (a.get("driver") or {}).get("firstName", ""),
-                "lastName": (a.get("driver") or {}).get("lastName", ""),
-            } if a.get("driver") else None,
-            "additionalComments": a.get("additionalComments", ""),
-        }
-        for a in (data if isinstance(data, list) else [])
-    ]
+    results = [format_auction(a) for a in (data if isinstance(data, list) else [])]
+    seen_ids = {r["id"] for r in results}
+
+    # Workaround: C# list endpoint filters out expired/pending auctions
+    # Scan recent IDs via detail endpoint to catch missing ones
+    if pageNumber == 1:
+        import asyncio
+        # Get the max known auction ID
+        max_id = max((r["id"] for r in results), default=0)
+        # Also check from a higher range
+        scan_start = max(1, max_id - 5)
+        scan_end = max_id + 30 if max_id > 0 else 30
+
+        async def check_auction(aid):
+            try:
+                detail = await csharp_get(f"/api/Auction/company/auctions/{aid}", token)
+                if isinstance(detail, dict) and detail.get("id") and detail["id"] not in seen_ids:
+                    # Verify this auction belongs to our company
+                    auction_company = detail.get("company") or {}
+                    if auction_company.get("id") == company_id:
+                        return format_auction(detail)
+            except Exception:
+                pass
+            return None
+
+        tasks = [check_auction(i) for i in range(scan_start, scan_end + 1)]
+        extra = await asyncio.gather(*tasks)
+        for item in extra:
+            if item and item["id"] not in seen_ids:
+                results.append(item)
+                seen_ids.add(item["id"])
+
+        results.sort(key=lambda x: x.get("id", 0), reverse=True)
+
+    return results
 
 
 @router.get("/bookings/count")
