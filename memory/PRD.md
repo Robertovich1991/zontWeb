@@ -33,14 +33,17 @@ Build a "Hotel Kiosk" management system that has evolved into a multi-portal pla
   - Fields: clientName, passengerName, flightNumber, passengers, etc.
   - Assign/unassign drivers, send to Zont, cancel
   - Date range and text search filters
-- **Planning Module** - Timeline view (Day/Week) of driver schedules
+- **Planning Module** - Timeline view (Day/Week/Month) of driver schedules
   - Shows bookings from both Zont (C#) and company (MongoDB)
   - Conflict detection for double-booking
-  - **Unassigned missions panel** - Shows bookings without driver
+  - **Unassigned missions panel** - Shows bookings without driver from both Zont and company sources
+  - **Source filter (Tout/Société/Zont)** - Segmented control in header to filter events and unassigned missions by source. Unassigned panel shows count per source. Source badges on each unassigned mission.
   - **Direct assignment from Planning** - Assign drivers to missions directly from timeline view
   - **Force assignment** - Override conflict check when driver is available earlier than planned
   - **Unassign/Reassign from timeline** - Click on assigned event to unassign or reassign to another driver
   - Conflict check before assignment/reassignment with force option
+  - **Rest Day management** - Toggle rest days in month view
+  - **Month calendar view** - Full month view with event counts per day per driver
 
 ### Hotel Kiosk System
 - Commission/invoicing modules
