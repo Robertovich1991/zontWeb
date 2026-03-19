@@ -30,6 +30,8 @@ const FleetMyBookings = () => {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [assigningId, setAssigningId] = useState(null);
   const [selectedDriverId, setSelectedDriverId] = useState('');
@@ -56,8 +58,11 @@ const FleetMyBookings = () => {
       (b.pickupAddress || '').toLowerCase().includes(q) ||
       (b.dropoffAddress || '').toLowerCase().includes(q) ||
       (b.tourName || '').toLowerCase().includes(q) ||
+      (b.clientName || '').toLowerCase().includes(q) ||
+      (b.flightNumber || '').toLowerCase().includes(q) ||
       (b.driver?.name || '').toLowerCase().includes(q);
-    return matchSearch &&
+    const matchDate = (!dateFrom || b.date >= dateFrom) && (!dateTo || b.date <= dateTo);
+    return matchSearch && matchDate &&
       (typeFilter === 'all' || b.type === typeFilter) &&
       (statusFilter === 'all' || b.status === statusFilter);
   });
@@ -132,6 +137,14 @@ const FleetMyBookings = () => {
           <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..."
             className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:border-blue-500" data-testid="my-booking-search" />
         </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-gray-400">Du</span>
+          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} data-testid="my-booking-date-from"
+            className="px-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:border-blue-500" />
+          <span className="text-xs text-gray-400">au</span>
+          <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} data-testid="my-booking-date-to"
+            className="px-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:border-blue-500" />
+        </div>
         <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} data-testid="my-booking-type-filter"
           className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm">
           <option value="all">Tous types</option>
@@ -144,6 +157,12 @@ const FleetMyBookings = () => {
           <option value="all">Tous statuts</option>
           {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
         </select>
+        {(dateFrom || dateTo || typeFilter !== 'all' || statusFilter !== 'all' || search) && (
+          <button onClick={() => { setSearch(''); setDateFrom(''); setDateTo(''); setTypeFilter('all'); setStatusFilter('all'); }}
+            className="px-3 py-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
+            Effacer filtres
+          </button>
+        )}
       </div>
 
       {/* List */}
