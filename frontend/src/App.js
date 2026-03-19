@@ -65,6 +65,7 @@ const FleetCreateBooking = lazy(() => import("@/pages/fleet/FleetCreateBooking")
 const FleetPlanning = lazy(() => import("@/pages/fleet/FleetPlanning"));
 const FleetTrips = lazy(() => import("@/pages/fleet/FleetTrips"));
 const FleetProfile = lazy(() => import("@/pages/fleet/FleetProfile"));
+const FleetDriverProfile = lazy(() => import("@/pages/fleet/FleetDriverProfile"));
 
 // VTC Service Pages
 const VTC8Places = lazy(() => import("@/pages/services/VTC8Places"));
@@ -258,6 +259,7 @@ function App() {
                     <Route index element={<FleetDashboard />} />
                     <Route path="drivers" element={<FleetDrivers />} />
                     <Route path="drivers/add" element={<FleetAddDriver />} />
+                    <Route path="drivers/:driverId" element={<FleetDriverProfile />} />
                     <Route path="vehicles" element={<FleetVehicles />} />
                     <Route path="vehicles/add" element={<FleetAddVehicle />} />
                     <Route path="bookings" element={<FleetBookings />} />

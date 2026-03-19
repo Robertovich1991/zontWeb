@@ -140,6 +140,8 @@ from routes.fleet_my_bookings import router as fleet_my_bookings_router
 app.include_router(fleet_my_bookings_router)
 from routes.fleet_planning import router as fleet_planning_router
 app.include_router(fleet_planning_router)
+from routes.fleet_driver_profile import router as fleet_driver_profile_router
+app.include_router(fleet_driver_profile_router)
 
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"

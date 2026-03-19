@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { Users, Search, Loader2, CheckCircle, XCircle, ChevronRight, Phone, Mail, UserPlus } from 'lucide-react';
+import { Users, Search, Loader2, CheckCircle, XCircle, ChevronRight, UserPlus } from 'lucide-react';
 
 const FleetDrivers = () => {
   const { authFetch } = useFleetAuth();
@@ -11,7 +11,6 @@ const FleetDrivers = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
-  const [selectedDriver, setSelectedDriver] = useState(null);
 
   useEffect(() => {
     authFetch('/api/fleet/drivers').then(r => r.ok ? r.json() : [])
@@ -102,7 +101,7 @@ const FleetDrivers = () => {
                     </td>
                     <td className="px-4 py-3 text-center text-gray-700 font-medium">{d.rank || '-'}</td>
                     <td className="px-4 py-3 text-center">
-                      <button onClick={() => setSelectedDriver(selectedDriver?.id === d.id ? null : d)}
+                      <button onClick={() => navigate(`/fleet/drivers/${d.id}`)}
                         className="px-3 py-1 bg-gray-50 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-100 transition" data-testid={`view-driver-${d.id}`}>
                         <ChevronRight className="w-3 h-3 inline" /> Voir
                       </button>
@@ -115,37 +114,6 @@ const FleetDrivers = () => {
         </div>
       )}
 
-      {/* Driver Detail Panel */}
-      {selectedDriver && (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm" data-testid="driver-detail">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Detail du chauffeur</h3>
-            <button onClick={() => setSelectedDriver(null)} className="text-gray-400 hover:text-gray-600 text-sm">Fermer</button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 bg-emerald-50 text-emerald-700 rounded-full flex items-center justify-center text-lg font-semibold">
-                  {selectedDriver.firstName?.[0]}{selectedDriver.lastName?.[0]}
-                </div>
-                <div>
-                  <p className="text-gray-900 font-semibold text-lg">{selectedDriver.firstName} {selectedDriver.lastName}</p>
-                  <p className="text-gray-500 text-sm">ID: {selectedDriver.id.slice(0, 8)}...</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600"><Phone className="w-4 h-4 text-gray-400" />{selectedDriver.phone || 'Non renseigne'}</div>
-              <div className="flex items-center gap-2 text-sm text-gray-600"><Mail className="w-4 h-4 text-gray-400" />{selectedDriver.email || 'Non renseigne'}</div>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Statut</span><span className={selectedDriver.isActivated ? 'text-emerald-600 font-medium' : 'text-red-500'}>{selectedDriver.isActivated ? 'Actif' : 'Inactif'}</span></div>
-              <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Admin active</span><span>{selectedDriver.isAdminActivated ? 'Oui' : 'Non'}</span></div>
-              <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Societe active</span><span>{selectedDriver.isCompanyActivated ? 'Oui' : 'Non'}</span></div>
-              <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Verifie</span><span>{selectedDriver.isVerified ? 'Oui' : 'Non'}</span></div>
-              <div className="flex justify-between py-2"><span className="text-gray-500">Note</span><span className="font-medium">{selectedDriver.rank}/5</span></div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
