@@ -462,11 +462,11 @@ const FleetPlanning = () => {
                             value={selectedDriverId}
                             onChange={e => { setSelectedDriverId(e.target.value); setConflictInfo(null); }}
                             data-testid={`assign-planning-select-${b.id}`}
-                            className="px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs min-w-[160px]"
+                            className="px-3 py-2 bg-white border-2 border-gray-300 rounded-lg text-sm text-gray-900 font-medium min-w-[180px]"
                           >
-                            <option value="">Chauffeur...</option>
+                            <option value="" className="text-gray-400">Chauffeur...</option>
                             {drivers.filter(d => d.isActivated).map(d => (
-                              <option key={d.id} value={d.id}>{d.firstName} {d.lastName}</option>
+                              <option key={d.id} value={d.id} className="text-gray-900">{d.firstName} {d.lastName}</option>
                             ))}
                           </select>
                           {conflictInfo && (
@@ -872,11 +872,11 @@ const FleetPlanning = () => {
                     value={reassignDriverId}
                     onChange={e => { setReassignDriverId(e.target.value); setReassignConflict(null); }}
                     data-testid="event-reassign-select"
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                    className="w-full px-3 py-2.5 bg-white border-2 border-gray-300 rounded-lg text-sm text-gray-900 font-medium"
                   >
-                    <option value="">Selectionner un chauffeur...</option>
+                    <option value="" className="text-gray-400">Selectionner un chauffeur...</option>
                     {drivers.filter(d => d.isActivated).map(d => (
-                      <option key={d.id} value={d.id}>{d.firstName} {d.lastName}</option>
+                      <option key={d.id} value={d.id} className="text-gray-900">{d.firstName} {d.lastName}</option>
                     ))}
                   </select>
                   {reassignConflict && (
