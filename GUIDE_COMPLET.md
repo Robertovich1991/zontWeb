@@ -286,7 +286,7 @@ sudo supervisorctl restart frontend
 ```
 
 ### Étape 4 : Tester
-1. Ouvrir https://intelligent-bookings.preview.emergentagent.com
+1. Ouvrir https://fleet-dispatch-41.preview.emergentagent.com
 2. Faire une recherche
 3. Vérifier les requêtes dans la console du navigateur
 
@@ -294,7 +294,7 @@ sudo supervisorctl restart frontend
 
 ```env
 # Frontend
-REACT_APP_BACKEND_URL=https://intelligent-bookings.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://fleet-dispatch-41.preview.emergentagent.com
 REACT_APP_CSHARP_API_URL=https://api.zont.cab  # À MODIFIER
 WDS_SOCKET_PORT=443
 ENABLE_HEALTH_CHECK=false
@@ -376,4 +376,4 @@ Pour toute question ou problème :
 
 Le site Zont en React est **100% fonctionnel** avec le design identique au site Angular original. Il est prêt à être connecté au backend C# pour devenir pleinement opérationnel !
 
-**URL du site** : https://intelligent-bookings.preview.emergentagent.com
+**URL du site** : https://fleet-dispatch-41.preview.emergentagent.com

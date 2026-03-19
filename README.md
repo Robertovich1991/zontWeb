@@ -81,7 +81,7 @@ tail -f /var/log/supervisor/frontend.out.log
 ## 🌐 Accès
 
 Une fois lancé, le site est accessible à :
-- **Frontend** : https://intelligent-bookings.preview.emergentagent.com
+- **Frontend** : https://fleet-dispatch-41.preview.emergentagent.com
 
 ## 📁 Structure du projet
 

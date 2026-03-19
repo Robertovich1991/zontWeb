@@ -337,16 +337,21 @@ const FleetPlanning = () => {
   };
 
   const drivers = planning?.drivers || [];
-  const unassigned = planning?.unassigned || [];
-  const filteredDrivers = drivers.filter(d => {
-    if (driverFilter !== 'all' && d.id !== driverFilter) return false;
-    if (sourceFilter !== 'all') {
-      const hasSource = d.events.some(e => e.source === sourceFilter);
-      const isIdle = d.events.length === 0;
-      if (!hasSource && !isIdle) return false;
-    }
-    return true;
-  });
+  const unassignedRaw = planning?.unassigned || [];
+
+  // Filter unassigned bookings by source
+  const unassigned = sourceFilter === 'all'
+    ? unassignedRaw
+    : unassignedRaw.filter(b => b.source === (sourceFilter === 'societe' ? 'company' : sourceFilter));
+
+  // Filter drivers and their events by source
+  const filteredDrivers = drivers
+    .filter(d => driverFilter === 'all' || d.id === driverFilter)
+    .map(d => {
+      if (sourceFilter === 'all') return d;
+      const sourceKey = sourceFilter === 'societe' ? 'company' : sourceFilter;
+      return { ...d, events: d.events.filter(e => e.source === sourceKey) };
+    });
 
   if (loading && !planning) {
     return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-emerald-500 animate-spin" /></div>;
@@ -392,6 +397,21 @@ const FleetPlanning = () => {
               <ChevronRight className="w-4 h-4 text-gray-600" />
             </button>
           </div>
+          {/* Source filter - segmented control */}
+          <div className="flex bg-white border border-gray-200 rounded-lg overflow-hidden" data-testid="planning-source-switcher">
+            {[
+              { key: 'all', label: 'Tout' },
+              { key: 'societe', label: 'Societe' },
+              { key: 'zont', label: 'Zont' },
+            ].map(s => (
+              <button key={s.key} onClick={() => setSourceFilter(s.key)} data-testid={`source-filter-${s.key}`}
+                className={`px-3 py-2 text-sm font-medium transition ${sourceFilter === s.key
+                  ? s.key === 'zont' ? 'bg-emerald-600 text-white' : s.key === 'societe' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-white'
+                  : 'text-gray-600 hover:bg-gray-50'}`}>
+                {s.label}
+              </button>
+            ))}
+          </div>
           <button onClick={() => setShowFilters(!showFilters)} data-testid="planning-filter-toggle"
             className={`p-2 rounded-lg transition ${showFilters ? 'bg-emerald-50 text-emerald-600' : 'hover:bg-gray-100 text-gray-500'}`}>
             <Filter className="w-4 h-4" />
@@ -407,14 +427,8 @@ const FleetPlanning = () => {
             <option value="all">Tous les chauffeurs</option>
             {drivers.map(d => <option key={d.id} value={d.id}>{d.firstName} {d.lastName}</option>)}
           </select>
-          <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)} data-testid="planning-source-filter"
-            className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm">
-            <option value="all">Toutes sources</option>
-            <option value="zont">Zont</option>
-            <option value="company">Societe</option>
-          </select>
-          {(driverFilter !== 'all' || sourceFilter !== 'all') && (
-            <button onClick={() => { setDriverFilter('all'); setSourceFilter('all'); }}
+          {driverFilter !== 'all' && (
+            <button onClick={() => setDriverFilter('all')}
               className="px-3 py-2 text-xs text-red-500 hover:bg-red-50 rounded-lg">Effacer</button>
           )}
           <div className="flex items-center gap-4 ml-auto text-xs text-gray-500">
@@ -436,6 +450,20 @@ const FleetPlanning = () => {
               <span className="text-sm font-semibold text-amber-800">
                 Missions non affectees ({unassigned.length})
               </span>
+              {unassigned.length > 0 && (
+                <span className="flex items-center gap-2 ml-2 text-[10px]">
+                  {unassigned.filter(b => b.source === 'company').length > 0 && (
+                    <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-medium">
+                      {unassigned.filter(b => b.source === 'company').length} Societe
+                    </span>
+                  )}
+                  {unassigned.filter(b => b.source === 'zont').length > 0 && (
+                    <span className="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">
+                      {unassigned.filter(b => b.source === 'zont').length} Zont
+                    </span>
+                  )}
+                </span>
+              )}
             </div>
             <span className="text-xs text-amber-600">Affectez un chauffeur pour planifier</span>
           </div>
@@ -453,6 +481,9 @@ const FleetPlanning = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${tp.cls}`}>{tp.label}</span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold text-white ${b.source === 'zont' ? 'bg-emerald-500' : 'bg-blue-500'}`}>
+                          {b.source === 'zont' ? 'ZONT' : 'SOCIETE'}
+                        </span>
                         <span className="flex items-center gap-1 text-xs text-gray-500">
                           <Clock className="w-3 h-3" /> {b.date} {b.time}
                         </span>

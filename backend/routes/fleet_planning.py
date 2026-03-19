@@ -288,6 +288,7 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
                 end_dt = estimate_end_time(start_dt, b.get("type", "transfer"))
         unassigned_bookings.append({
             "id": b.get("id", ""),
+            "source": "company",
             "type": b.get("type", "transfer"),
             "status": b.get("status", "new"),
             "date": b.get("date", ""),
@@ -304,6 +305,47 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "price": b.get("price", 0),
             "comment": b.get("comment", ""),
         })
+
+    # 3c. Add UNASSIGNED Zont auctions (no driver yet)
+    for e in zont_events:
+        pass  # zont_events only have events WITH a driver
+
+    # Scan for Zont auctions without driver
+    for a in extra_auctions:
+        if not a:
+            continue
+        if a.get("driver"):
+            continue  # Already has a driver, skip
+        start_dt = parse_csharp_date(a.get("startDate"))
+        if not start_dt:
+            continue
+        booking_date = start_dt.strftime("%Y-%m-%d")
+        if booking_date < date_start or booking_date > date_end:
+            continue
+        end_dt = parse_csharp_date(a.get("endDate")) or estimate_end_time(start_dt)
+        client = a.get("client") or {}
+        client_name = f"{client.get('firstName', '')} {client.get('lastName', '')}".strip()
+        unassigned_bookings.append({
+            "id": f"zont-{a.get('id')}",
+            "source": "zont",
+            "type": a.get("tripType") or a.get("carType") or "Transfer",
+            "status": a.get("status", ""),
+            "date": booking_date,
+            "time": start_dt.strftime("%H:%M"),
+            "startTime": start_dt.strftime("%Y-%m-%dT%H:%M"),
+            "endTime": end_dt.strftime("%Y-%m-%dT%H:%M") if end_dt else "",
+            "pickupAddress": a.get("startAddress", ""),
+            "dropoffAddress": a.get("endAddress", ""),
+            "clientName": client_name,
+            "passengerName": "",
+            "flightNumber": "",
+            "passengers": a.get("passengerCount", 0),
+            "hours": 0,
+            "price": a.get("totalAmount", 0),
+            "comment": a.get("additionalComments", ""),
+            "auctionId": a.get("id"),
+        })
+
     unassigned_bookings.sort(key=lambda x: x.get("time", ""))
 
     # 4. Build planning per driver
