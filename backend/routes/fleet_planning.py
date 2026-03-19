@@ -117,7 +117,12 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "price": a.get("totalAmount", 0),
         })
 
-    # ── PHASE 2: Scan for hidden auctions (reduced range) ──
+    # ── PHASE 2: Scan for hidden auctions ──
+    # Also collect IDs from trips to help determine scan range
+    for t in (zont_trips if isinstance(zont_trips, list) else []):
+        tid = t.get("auctionId") or t.get("id")
+        if tid and isinstance(tid, int):
+            known_auction_ids.add(tid)
     extra_auctions = await scan_auctions(token, company_id, known_auction_ids)
     seen_event_ids = {e["id"] for e in zont_events}
     for a in extra_auctions:

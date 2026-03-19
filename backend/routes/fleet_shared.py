@@ -179,13 +179,15 @@ def estimate_end_time(start_dt, booking_type="transfer"):
 async def scan_auctions(token: str, company_id: str, known_ids: set[int] | None = None) -> list[dict]:
     """Scan recent auction IDs to find auctions hidden by the C# list endpoint.
     Returns raw auction dicts from C#.
+    The C# list endpoint is unreliable and often returns 0 results.
+    We scan a wide range of IDs via the detail endpoint as a workaround.
     """
     if known_ids is None:
         known_ids = set()
 
     max_id = max(known_ids) if known_ids else 0
-    scan_start = max(1, max_id - 3)
-    scan_end = max_id + 15 if max_id > 0 else 15
+    scan_start = max(1, max_id - 5)
+    scan_end = max_id + 35 if max_id > 0 else 35
 
     async def check(aid):
         if aid in known_ids:
@@ -195,8 +197,11 @@ async def scan_auctions(token: str, company_id: str, known_ids: set[int] | None 
                 f"/api/Auction/company/auctions/{aid}", token, use_cache=True
             )
             if isinstance(detail, dict) and detail.get("id"):
+                # If the C# API returns data for this auction with our company token,
+                # it belongs to us — even if the "company" field is null/empty
+                # (this happens for ApprovedByAdmin auctions not yet dispatched)
                 auction_company = detail.get("company") or {}
-                if auction_company.get("id") == company_id:
+                if auction_company.get("id") == company_id or not auction_company.get("id"):
                     return detail
         except Exception:
             pass
