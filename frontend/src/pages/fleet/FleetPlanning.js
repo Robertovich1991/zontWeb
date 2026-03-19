@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble } from 'lucide-react';
 
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 6);
 const HOUR_WIDTH = 120;
@@ -304,6 +304,36 @@ const FleetPlanning = () => {
     } finally {
       setAssignLoading(false);
     }
+  };
+
+  // Rest day handlers
+  const [restDayLoading, setRestDayLoading] = useState(null);
+
+  const handleToggleRestDay = async (driverId, date) => {
+    const driver = planning?.drivers?.find(d => d.id === driverId);
+    if (!driver) return;
+    const isRest = (driver.restDays || []).includes(date);
+    setRestDayLoading(`${driverId}-${date}`);
+    try {
+      if (isRest) {
+        const res = await authFetch(`/api/fleet/planning/rest-day?driverId=${driverId}&date=${date}`, { method: 'DELETE' });
+        if (res.ok) {
+          toast.success('Jour de repos retire');
+          fetchPlanning();
+        } else toast.error('Erreur');
+      } else {
+        const res = await authFetch('/api/fleet/planning/rest-day', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ driverId, date }),
+        });
+        if (res.ok) {
+          toast.success('Jour de repos ajoute');
+          fetchPlanning();
+        } else toast.error('Erreur');
+      }
+    } catch { toast.error('Erreur de connexion'); }
+    finally { setRestDayLoading(null); }
   };
 
   const drivers = planning?.drivers || [];
@@ -719,15 +749,31 @@ const FleetPlanning = () => {
                         const dayNum = parseInt(day.split('-')[2]);
                         const isToday = day === formatLocalDate(new Date());
                         const dayEvents = d.events.filter(e => e.startTime.startsWith(day));
+                        const isRestDay = (d.restDays || []).includes(day);
+                        const isLoadingRest = restDayLoading === `${d.id}-${day}`;
                         return (
-                          <div key={di} className={`min-h-[60px] border-r border-gray-50 p-1 ${isToday ? 'bg-emerald-50/50' : ''}`}>
-                            <div className={`text-[10px] font-medium mb-0.5 ${isToday ? 'text-emerald-700 font-bold' : 'text-gray-400'}`}>
-                              {dayNum}
+                          <div key={di}
+                            className={`min-h-[60px] border-r border-gray-50 p-1 relative group cursor-pointer ${isRestDay ? 'bg-red-50' : isToday ? 'bg-emerald-50/50' : 'hover:bg-gray-50/80'}`}
+                            onClick={(e) => {
+                              if (e.target.closest('[data-event-block]')) return;
+                              handleToggleRestDay(d.id, day);
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className={`text-[10px] font-medium ${isRestDay ? 'text-red-500 font-bold' : isToday ? 'text-emerald-700 font-bold' : 'text-gray-400'}`}>
+                                {dayNum}
+                              </span>
+                              {isLoadingRest && <Loader2 className="w-2.5 h-2.5 text-gray-400 animate-spin" />}
                             </div>
-                            {dayEvents.slice(0, 3).map(e => {
+                            {isRestDay && (
+                              <div className="flex items-center gap-0.5 bg-red-100 text-red-600 rounded px-1 py-0.5 text-[8px] font-semibold mb-0.5" data-testid={`rest-day-${d.id}-${day}`}>
+                                <BedDouble className="w-2.5 h-2.5" /> Repos
+                              </div>
+                            )}
+                            {dayEvents.slice(0, isRestDay ? 2 : 3).map(e => {
                               const isZont = e.source === 'zont';
                               return (
-                                <div key={e.id}
+                                <div key={e.id} data-event-block="true"
                                   className={`mb-0.5 rounded px-1 py-0.5 cursor-pointer text-white text-[8px] truncate ${isZont ? 'bg-emerald-500' : 'bg-blue-500'}`}
                                   onClick={() => handleEventClick(e)}
                                   onMouseEnter={() => !selectedEvent && setHoveredEvent(e)}
@@ -740,8 +786,13 @@ const FleetPlanning = () => {
                                 </div>
                               );
                             })}
-                            {dayEvents.length > 3 && (
-                              <div className="text-[8px] text-gray-400 text-center">+{dayEvents.length - 3}</div>
+                            {dayEvents.length > (isRestDay ? 2 : 3) && (
+                              <div className="text-[8px] text-gray-400 text-center">+{dayEvents.length - (isRestDay ? 2 : 3)}</div>
+                            )}
+                            {!isRestDay && dayEvents.length === 0 && (
+                              <div className="hidden group-hover:flex items-center justify-center absolute inset-0 top-4">
+                                <span className="text-[8px] text-gray-300">cliquez = repos</span>
+                              </div>
                             )}
                           </div>
                         );

@@ -275,6 +275,22 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "events": driver_events,
         })
 
+    # 5. Load rest days from MongoDB
+    rest_days_raw = await db.driver_rest_days.find(
+        {"companyId": company_id, "date": {"$gte": date_start, "$lte": date_end}},
+        {"_id": 0},
+    ).to_list(500)
+    rest_days = {}
+    for rd in rest_days_raw:
+        did = rd.get("driverId", "")
+        if did not in rest_days:
+            rest_days[did] = []
+        rest_days[did].append(rd.get("date", ""))
+
+    # Add rest days to each driver
+    for p in planning:
+        p["restDays"] = rest_days.get(p["id"], [])
+
     return {
         "dateStart": date_start,
         "dateEnd": date_end,
@@ -355,3 +371,36 @@ async def check_conflict(data: ConflictCheckRequest, request: Request):
             }
 
     return {"conflict": False, "message": "Chauffeur disponible"}
+
+
+# ─── Rest Days ───
+
+class RestDayRequest(BaseModel):
+    driverId: str
+    date: str  # YYYY-MM-DD
+
+
+@router.post("/rest-day")
+async def add_rest_day(data: RestDayRequest, request: Request):
+    get_token(request)
+    company_id = get_company_id(request)
+    db = get_db(request)
+
+    await db.driver_rest_days.update_one(
+        {"companyId": company_id, "driverId": data.driverId, "date": data.date},
+        {"$set": {"companyId": company_id, "driverId": data.driverId, "date": data.date}},
+        upsert=True,
+    )
+    return {"success": True, "date": data.date}
+
+
+@router.delete("/rest-day")
+async def remove_rest_day(request: Request, driverId: str = "", date: str = ""):
+    get_token(request)
+    company_id = get_company_id(request)
+    db = get_db(request)
+
+    await db.driver_rest_days.delete_one(
+        {"companyId": company_id, "driverId": driverId, "date": date}
+    )
+    return {"success": True}
