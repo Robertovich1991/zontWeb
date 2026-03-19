@@ -261,16 +261,19 @@ const FleetDriverProfile = () => {
                         <span className="text-gray-900 font-medium">{ride.price > 0 ? `${ride.price.toFixed(2)}` : '-'}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={currentForfait || ''}
-                          onChange={e => handleForfaitChange(ride.id, e.target.value)}
-                          placeholder="0.00"
-                          data-testid={`forfait-input-${ride.id}`}
-                          className={`w-24 text-right px-2 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 ${hasChanged ? 'border-amber-400 bg-amber-50' : 'border-gray-200 bg-gray-50'}`}
-                        />
+                        <div className="flex items-center justify-end">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={currentForfait || ''}
+                            onChange={e => handleForfaitChange(ride.id, e.target.value)}
+                            placeholder="0.00"
+                            data-testid={`forfait-input-${ride.id}`}
+                            className={`w-28 text-right px-3 py-2 border-2 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${hasChanged ? 'border-amber-400 bg-amber-50 text-amber-800' : 'border-gray-200 bg-white text-gray-900'}`}
+                          />
+                          <span className="ml-1.5 text-xs text-gray-400">EUR</span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <button
