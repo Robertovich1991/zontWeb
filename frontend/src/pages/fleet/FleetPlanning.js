@@ -1,13 +1,21 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle } from 'lucide-react';
 
-const HOURS = Array.from({ length: 17 }, (_, i) => i + 6); // 06h → 22h
-const HOUR_WIDTH = 120; // pixels per hour
+const HOURS = Array.from({ length: 17 }, (_, i) => i + 6);
+const HOUR_WIDTH = 120;
 const ROW_HEIGHT = 80;
 
 const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+const TYPE_CONFIG = {
+  transfer: { label: 'Transfer', cls: 'bg-blue-50 text-blue-700 border-blue-200', icon: Plane },
+  dispo: { label: 'Dispo', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: Timer },
+  excursion: { label: 'Excursion', cls: 'bg-amber-50 text-amber-700 border-amber-200', icon: Mountain },
+};
+
+const getType = (t) => TYPE_CONFIG[t] || { label: t, cls: 'bg-gray-100 text-gray-600 border-gray-200', icon: Plane };
 
 const formatDate = (d) => {
   const dt = new Date(d + 'T00:00:00');
@@ -26,6 +34,12 @@ const FleetPlanning = () => {
   const [showFilters, setShowFilters] = useState(false);
   const timelineRef = useRef(null);
 
+  // Assignment state
+  const [assigningBookingId, setAssigningBookingId] = useState(null);
+  const [selectedDriverId, setSelectedDriverId] = useState('');
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [conflictInfo, setConflictInfo] = useState(null);
+
   const fetchPlanning = useCallback(async () => {
     setLoading(true);
     try {
@@ -38,7 +52,6 @@ const FleetPlanning = () => {
 
   useEffect(() => { fetchPlanning(); }, [fetchPlanning]);
 
-  // Scroll to current time on day view
   useEffect(() => {
     if (view === 'day' && timelineRef.current && !loading) {
       const now = new Date();
@@ -70,8 +83,7 @@ const FleetPlanning = () => {
     return 'Hors ligne';
   };
 
-  // Calculate event position on timeline (day view)
-  const getEventStyle = (event, dayDate) => {
+  const getEventStyle = (event) => {
     const start = new Date(event.startTime);
     const end = event.endTime ? new Date(event.endTime) : new Date(start.getTime() + 90 * 60000);
     const startH = start.getHours() + start.getMinutes() / 60;
@@ -81,7 +93,6 @@ const FleetPlanning = () => {
     return { left: `${left}px`, width: `${width}px` };
   };
 
-  // Week view: get day columns
   const getWeekDays = () => {
     if (!planning) return [];
     const start = new Date(planning.dateStart + 'T00:00:00');
@@ -103,7 +114,74 @@ const FleetPlanning = () => {
     return h > 0 ? `${h}h${m > 0 ? m.toString().padStart(2, '0') : ''}` : `${m}min`;
   };
 
+  // Assignment handlers
+  const handleStartAssign = (bookingId) => {
+    setAssigningBookingId(bookingId);
+    setSelectedDriverId('');
+    setConflictInfo(null);
+  };
+
+  const handleCancelAssign = () => {
+    setAssigningBookingId(null);
+    setSelectedDriverId('');
+    setConflictInfo(null);
+  };
+
+  const handleCheckAndAssign = async (booking) => {
+    if (!selectedDriverId) {
+      toast.error('Selectionnez un chauffeur');
+      return;
+    }
+    setAssignLoading(true);
+    setConflictInfo(null);
+
+    try {
+      // Check conflict first
+      if (booking.startTime && booking.endTime) {
+        const conflictRes = await authFetch('/api/fleet/planning/check-conflict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            driverId: selectedDriverId,
+            startTime: booking.startTime,
+            endTime: booking.endTime,
+          }),
+        });
+        if (conflictRes.ok) {
+          const conflictData = await conflictRes.json();
+          if (conflictData.conflict) {
+            setConflictInfo(conflictData.message);
+            setAssignLoading(false);
+            return;
+          }
+        }
+      }
+
+      // Assign driver
+      const driver = drivers.find(d => d.id === selectedDriverId);
+      const driverName = `${driver?.firstName || ''} ${driver?.lastName || ''}`.trim();
+      const res = await authFetch(`/api/fleet/my-bookings/${booking.id}/assign`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driverId: selectedDriverId, driverName }),
+      });
+      if (res.ok) {
+        toast.success(`Mission affectee a ${driverName}`);
+        handleCancelAssign();
+        fetchPlanning();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.detail || 'Erreur d\'affectation');
+      }
+    } catch {
+      toast.error('Erreur de connexion');
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
   const drivers = planning?.drivers || [];
+  const unassigned = planning?.unassigned || [];
   const filteredDrivers = drivers.filter(d => {
     if (driverFilter !== 'all' && d.id !== driverFilter) return false;
     if (sourceFilter !== 'all') {
@@ -177,13 +255,118 @@ const FleetPlanning = () => {
             <button onClick={() => { setDriverFilter('all'); setSourceFilter('all'); }}
               className="px-3 py-2 text-xs text-red-500 hover:bg-red-50 rounded-lg">Effacer</button>
           )}
-          {/* Legend */}
           <div className="flex items-center gap-4 ml-auto text-xs text-gray-500">
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-emerald-500 inline-block" /> Zont</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-500 inline-block" /> Societe</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-400 inline-block" /> Disponible</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-400 inline-block" /> Occupe</span>
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-gray-300 inline-block" /> Hors ligne</span>
+          </div>
+        </div>
+      )}
+
+      {/* Unassigned Bookings Panel */}
+      {unassigned.length > 0 && (
+        <div className="bg-white border-2 border-dashed border-amber-300 rounded-xl shadow-sm overflow-hidden" data-testid="unassigned-panel">
+          <div className="bg-amber-50 px-4 py-3 flex items-center justify-between border-b border-amber-200">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <span className="text-sm font-semibold text-amber-800">
+                Missions non affectees ({unassigned.length})
+              </span>
+            </div>
+            <span className="text-xs text-amber-600">Affectez un chauffeur pour planifier</span>
+          </div>
+          <div className="divide-y divide-gray-100 max-h-[320px] overflow-y-auto">
+            {unassigned.map(b => {
+              const tp = getType(b.type);
+              const TypeIcon = tp.icon;
+              const isAssigning = assigningBookingId === b.id;
+              return (
+                <div key={b.id} className="p-3 hover:bg-gray-50/50 transition" data-testid={`unassigned-booking-${b.id}`}>
+                  <div className="flex items-start gap-3">
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${tp.cls}`}>
+                      <TypeIcon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${tp.cls}`}>{tp.label}</span>
+                        <span className="flex items-center gap-1 text-xs text-gray-500">
+                          <Clock className="w-3 h-3" /> {b.date} {b.time}
+                        </span>
+                        {b.price > 0 && <span className="text-xs font-semibold text-gray-700">{b.price.toFixed(2)} EUR</span>}
+                      </div>
+                      {b.pickupAddress && (
+                        <div className="flex items-start gap-1 text-xs text-gray-600 mb-0.5">
+                          <MapPin className="w-3 h-3 text-blue-500 shrink-0 mt-0.5" />
+                          <span className="truncate">{b.pickupAddress}</span>
+                        </div>
+                      )}
+                      {b.dropoffAddress && (
+                        <div className="flex items-start gap-1 text-xs text-gray-500 mb-0.5">
+                          <MapPin className="w-3 h-3 text-red-400 shrink-0 mt-0.5" />
+                          <span className="truncate">{b.dropoffAddress}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3 text-xs text-gray-500">
+                        {b.clientName && <span className="flex items-center gap-1"><User className="w-3 h-3" />{b.clientName}</span>}
+                        {b.flightNumber && <span className="flex items-center gap-1"><Plane className="w-3 h-3" />{b.flightNumber}</span>}
+                        {b.passengers > 0 && <span>{b.passengers} pax</span>}
+                        {b.hours > 0 && <span>{b.hours}h</span>}
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      {!isAssigning ? (
+                        <button
+                          onClick={() => handleStartAssign(b.id)}
+                          data-testid={`assign-planning-btn-${b.id}`}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition flex items-center gap-1.5"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" /> Affecter
+                        </button>
+                      ) : (
+                        <div className="flex flex-col gap-1.5 items-end" data-testid={`assign-planning-form-${b.id}`}>
+                          <select
+                            value={selectedDriverId}
+                            onChange={e => { setSelectedDriverId(e.target.value); setConflictInfo(null); }}
+                            data-testid={`assign-planning-select-${b.id}`}
+                            className="px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs min-w-[160px]"
+                          >
+                            <option value="">Chauffeur...</option>
+                            {drivers.filter(d => d.isActivated).map(d => (
+                              <option key={d.id} value={d.id}>{d.firstName} {d.lastName}</option>
+                            ))}
+                          </select>
+                          {conflictInfo && (
+                            <div className="flex items-center gap-1 text-xs text-red-600 max-w-[200px]">
+                              <AlertTriangle className="w-3 h-3 shrink-0" />
+                              <span className="truncate">{conflictInfo}</span>
+                            </div>
+                          )}
+                          <div className="flex gap-1.5">
+                            <button
+                              onClick={() => handleCheckAndAssign(b)}
+                              disabled={assignLoading || !selectedDriverId}
+                              data-testid={`assign-planning-confirm-${b.id}`}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium disabled:opacity-50 flex items-center gap-1"
+                            >
+                              {assignLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                              OK
+                            </button>
+                            <button
+                              onClick={handleCancelAssign}
+                              className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -233,17 +416,14 @@ const FleetPlanning = () => {
                 {/* Driver rows */}
                 {filteredDrivers.map(d => (
                   <div key={d.id} className="relative border-b border-gray-100 flex" style={{ height: ROW_HEIGHT }} data-testid={`planning-row-${d.id}`}>
-                    {/* Grid lines */}
                     {HOURS.map(h => (
                       <div key={h} className="border-r border-gray-50 shrink-0" style={{ width: HOUR_WIDTH, height: '100%' }}>
-                        {/* Current time indicator */}
                         {h === new Date().getHours() && currentDate === new Date().toISOString().split('T')[0] && (
                           <div className="absolute top-0 bottom-0 w-px bg-red-400 z-20"
                             style={{ left: `${(new Date().getHours() - 6 + new Date().getMinutes() / 60) * HOUR_WIDTH}px` }} />
                         )}
                       </div>
                     ))}
-                    {/* Events */}
                     {d.events.map(e => {
                       const style = getEventStyle(e);
                       const isZont = e.source === 'zont';
@@ -283,7 +463,6 @@ const FleetPlanning = () => {
         /* WEEK VIEW */
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" data-testid="planning-week-view">
           <div className="flex">
-            {/* Driver column */}
             <div className="shrink-0 w-[180px] border-r border-gray-200 z-10 bg-white">
               <div className="h-[44px] border-b border-gray-200 bg-gray-50 px-3 flex items-center">
                 <span className="text-xs font-semibold text-gray-500 uppercase">Chauffeur</span>
@@ -304,10 +483,8 @@ const FleetPlanning = () => {
               ))}
             </div>
 
-            {/* Week grid */}
             <div className="flex-1 overflow-x-auto">
               <div className="min-w-[700px]">
-                {/* Day headers */}
                 <div className="h-[44px] border-b border-gray-200 bg-gray-50 flex">
                   {getWeekDays().map(day => {
                     const isToday = day === new Date().toISOString().split('T')[0];
@@ -318,7 +495,6 @@ const FleetPlanning = () => {
                     );
                   })}
                 </div>
-                {/* Driver rows */}
                 {filteredDrivers.map(d => (
                   <div key={d.id} className="flex border-b border-gray-100" style={{ height: ROW_HEIGHT }}>
                     {getWeekDays().map(day => {

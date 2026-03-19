@@ -1,0 +1,109 @@
+{
+  "summary": "Fleet Planning - Unassigned Bookings & Assignment Feature Testing Complete. Backend: 10/10 API tests passed (GET /api/fleet/planning returns unassigned array, PUT /api/fleet/my-bookings/{id}/assign, POST /api/fleet/planning/check-conflict). Frontend: All UI flows working - Unassigned panel displays missions with type/date/time/price/addresses/pax, Affecter button shows driver dropdown, assignment moves booking from unassigned panel to driver timeline, success toast shown.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "FleetPlanning unassigned panel select",
+        "issues": ["React hydration warnings in console from Emergent preview wrapper injecting <span> into <select>/<option> - cosmetic only, does NOT affect functionality"]
+      }
+    ]
+  },
+  "test_results": {
+    "backend_tests": {
+      "test_planning_returns_unassigned_array": "PASS - Response includes 'unassigned' array with 3 bookings",
+      "test_unassigned_booking_structure": "PASS - Has id, type, date, time, price, pickupAddress, dropoffAddress, passengers",
+      "test_unassigned_has_start_end_time": "PASS - Has startTime and endTime for conflict checks",
+      "test_assign_driver_requires_auth": "PASS - Returns 401 without token",
+      "test_assign_driver_invalid_booking": "PASS - Returns 404 for invalid booking ID",
+      "test_assign_driver_to_booking": "PASS - Returns success=true, message='Chauffeur affecte'",
+      "test_assigned_booking_moves_from_unassigned_to_driver_events": "PASS - Booking removed from unassigned, appears in driver events",
+      "test_conflict_check_for_unassigned_booking": "PASS - Returns conflict=boolean with message",
+      "test_unassign_driver_requires_auth": "PASS - Returns 401 without token",
+      "test_unassign_driver_invalid_booking": "PASS - Returns 404 for invalid booking ID"
+    },
+    "frontend_tests": {
+      "fleet_login": "PASS - Login with Nandetiri1@gmail.com/12345678",
+      "planning_page_load": "PASS - data-testid='fleet-planning' found",
+      "unassigned_panel_visible": "PASS - data-testid='unassigned-panel' with amber border",
+      "unassigned_panel_header": "PASS - Shows 'Missions non affectees (3)' with warning icon",
+      "unassigned_booking_details": "PASS - Each shows type (Transfer), date/time, pickup/dropoff, price, pax",
+      "affecter_button": "PASS - data-testid='assign-planning-btn-{id}' on each booking",
+      "affecter_click_shows_form": "PASS - data-testid='assign-planning-form-{id}' appears",
+      "driver_dropdown": "PASS - data-testid='assign-planning-select-{id}' with driver options",
+      "driver_options": "PASS - Shows 'Vova YERITSYAN' and 'Mariam saroyan'",
+      "confirm_button": "PASS - data-testid='assign-planning-confirm-{id}'",
+      "assignment_success": "PASS - Toast 'Mission affectee a [driver name]'",
+      "booking_moves_to_timeline": "PASS - Booking appears as blue SOCIETE block on driver row",
+      "booking_removed_from_unassigned": "PASS - Count decreases from 3 to 2 to 1",
+      "driver_status_indicators": "PASS - Green dot with 'Disponible'"
+    }
+  },
+  "verified_features": [
+    "Backend GET /api/fleet/planning returns 'unassigned' array with bookings without driver",
+    "Backend PUT /api/fleet/my-bookings/{id}/assign assigns driver to booking",
+    "Backend POST /api/fleet/planning/check-conflict detects overlapping bookings",
+    "Frontend: Unassigned panel at top of Planning page with amber dashed border",
+    "Frontend: Panel header shows 'Missions non affectees (N)' with warning icon",
+    "Frontend: Each unassigned booking shows type icon, Transfer label, date/time",
+    "Frontend: Each booking shows pickup address (blue pin), dropoff address (red pin)",
+    "Frontend: Each booking shows price in EUR and passenger count (pax)",
+    "Frontend: Each booking has green 'Affecter' button with UserPlus icon",
+    "Frontend: Clicking 'Affecter' shows inline form with driver dropdown",
+    "Frontend: Dropdown shows activated drivers only (Vova YERITSYAN, Mariam saroyan)",
+    "Frontend: Form has OK (confirm) and X (cancel) buttons",
+    "Frontend: After assignment, toast shows 'Mission affectee a [driver name]'",
+    "Frontend: Booking disappears from unassigned panel after assignment",
+    "Frontend: Booking appears as blue SOCIETE block on driver's timeline row"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_fleet_planning_unassigned.py",
+    "/app/test_reports/pytest/fleet_planning_unassigned_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "FleetPlanning.js correctly implements unassigned panel with proper data-testid attributes",
+    "Assignment flow correctly calls PUT /api/fleet/my-bookings/{id}/assign with driverId and driverName",
+    "Backend fleet_planning.py correctly filters unassigned bookings (driver=null, status not cancelled/completed)",
+    "Conflict check is called before assignment to validate driver availability",
+    "After successful assignment, fetchPlanning() is called to refresh the view",
+    "All interactive elements have proper data-testid for testing"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_fleet_planning_unassigned.py"
+  ],
+  "success_rate": {
+    "backend": "100% (10/10 tests passed)",
+    "frontend": "100% (all flows working)"
+  },
+  "test_credentials": {
+    "fleet_company": {
+      "email": "Nandetiri1@gmail.com",
+      "password": "12345678"
+    }
+  },
+  "seed_data": {
+    "unassigned_bookings": [
+      {"id": "9e0e60fe-d656-436d-8864-cfedc01fc565", "type": "transfer", "date": "2026-03-19", "time": "15:20", "price": 50, "pax": 8},
+      {"id": "608b2e26-20f5-47c7-a936-...", "type": "transfer", "date": "2026-03-19", "time": "16:20", "price": 10, "pax": 6},
+      {"id": "e95f7c4f-1e2d-408d-9c6e-...", "type": "transfer", "date": "2026-03-19", "time": "17:24", "price": 5, "pax": 1}
+    ],
+    "assigned_booking": {"time": "14:00", "driver": "Mariam saroyan", "driverId": "858e3dc3-5bb4-431d-b108-4c620375551c"},
+    "drivers": [
+      {"name": "Vova YERITSYAN", "id": "2055d816-8d81-4152-8dac-272f4e569e39", "isActivated": true},
+      {"name": "Mariam saroyan", "id": "858e3dc3-5bb4-431d-b108-4c620375551c", "isActivated": true}
+    ]
+  },
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Unassigned bookings feature fully tested. Test data reset to 3 unassigned bookings. Use date 2026-03-19 for testing. Mariam saroyan has existing booking at 14:00-15:30 for conflict testing. Assignment flow: click Affecter -> select driver -> click OK -> booking moves from unassigned panel to driver timeline.",
+  "mocked_api": {
+    "has_mocked_apis": false,
+    "note": "Uses live C# backend (Zont API) + MongoDB. No mocking."
+  }
+}
