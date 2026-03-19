@@ -54,7 +54,7 @@ async def csharp_get(path: str, token: str):
 def parse_csharp_date(date_str):
     if not date_str:
         return None
-    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
+    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d", "%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M", "%d/%m/%Y"):
         try:
             return datetime.strptime(date_str.split("+")[0].split("Z")[0], fmt)
         except (ValueError, AttributeError):
@@ -85,10 +85,42 @@ async def get_driver_rides(driver_id: str, request: Request, month: str = ""):
 
     rides = []
 
-    # 1. Get Zont bookings assigned to this driver
+    # 1. Get Zont trips completed by this driver (from /api/Trip/driver)
+    zont_trips = await csharp_get("/api/Trip/driver?count=200&pageNumber=1", token)
+    for t in (zont_trips if isinstance(zont_trips, list) else []):
+        trip_driver = t.get("driver") or {}
+        if trip_driver.get("id") != driver_id:
+            continue
+        start_dt = parse_csharp_date(t.get("startDate"))
+        if not start_dt:
+            continue
+        booking_date = start_dt.strftime("%Y-%m-%d")
+        if booking_date < date_start or booking_date > date_end:
+            continue
+        end_dt = parse_csharp_date(t.get("endDate"))
+        creator = t.get("creator") or {}
+        client_name = f"{creator.get('firstName', '')} {creator.get('lastName', '')}".strip()
+        rides.append({
+            "id": f"zont-trip-{t.get('id')}",
+            "source": "zont",
+            "type": t.get("carType") or "Transfer",
+            "status": t.get("status", ""),
+            "date": booking_date,
+            "time": start_dt.strftime("%H:%M"),
+            "endTime": end_dt.strftime("%H:%M") if end_dt and end_dt.year > 1 else "",
+            "pickupAddress": t.get("startAddress", ""),
+            "dropoffAddress": t.get("endAddress", ""),
+            "clientName": client_name,
+            "passengers": len(t.get("tripClients", [])) or 1,
+            "price": t.get("totalAmount", 0),
+            "forfait": 0,
+        })
+
+    # 2. Get Zont auctions dispatched to this driver
     zont_bookings = await csharp_get(
         "/api/Auction/company/auctions?count=200&pageNumber=1&isDescending=true", token
     )
+    zont_trip_ids = {r["id"] for r in rides}
     for a in (zont_bookings if isinstance(zont_bookings, list) else []):
         if not a.get("driver") or a["driver"].get("id") != driver_id:
             continue
@@ -98,9 +130,12 @@ async def get_driver_rides(driver_id: str, request: Request, month: str = ""):
         booking_date = start_dt.strftime("%Y-%m-%d")
         if booking_date < date_start or booking_date > date_end:
             continue
+        auction_id = f"zont-auction-{a.get('id')}"
+        if auction_id in zont_trip_ids:
+            continue
         end_dt = parse_csharp_date(a.get("endDate"))
         rides.append({
-            "id": f"zont-{a.get('id')}",
+            "id": auction_id,
             "source": "zont",
             "type": a.get("tripType") or "Transfer",
             "status": a.get("status", ""),
@@ -115,7 +150,7 @@ async def get_driver_rides(driver_id: str, request: Request, month: str = ""):
             "forfait": 0,
         })
 
-    # 2. Get company bookings assigned to this driver (MongoDB)
+    # 3. Get Company bookings assigned to this driver (MongoDB)
     mongo_query = {
         "companyId": company_id,
         "driver.id": driver_id,
@@ -147,7 +182,7 @@ async def get_driver_rides(driver_id: str, request: Request, month: str = ""):
             "forfait": 0,
         })
 
-    # 3. Load saved forfaits from MongoDB
+    # 4. Load saved forfaits from MongoDB
     forfaits_raw = await db.driver_forfaits.find(
         {"driverId": driver_id, "companyId": company_id, "month": f"{year}-{str(mon).zfill(2)}"},
         {"_id": 0},
