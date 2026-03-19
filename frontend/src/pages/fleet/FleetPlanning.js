@@ -127,17 +127,17 @@ const FleetPlanning = () => {
     setConflictInfo(null);
   };
 
-  const handleCheckAndAssign = async (booking) => {
+  const handleCheckAndAssign = async (booking, force = false) => {
     if (!selectedDriverId) {
       toast.error('Selectionnez un chauffeur');
       return;
     }
     setAssignLoading(true);
-    setConflictInfo(null);
+    if (!force) setConflictInfo(null);
 
     try {
-      // Check conflict first
-      if (booking.startTime && booking.endTime) {
+      // Check conflict first (skip if forcing)
+      if (!force && booking.startTime && booking.endTime) {
         const conflictRes = await authFetch('/api/fleet/planning/check-conflict', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -338,9 +338,20 @@ const FleetPlanning = () => {
                             ))}
                           </select>
                           {conflictInfo && (
-                            <div className="flex items-center gap-1 text-xs text-red-600 max-w-[200px]">
-                              <AlertTriangle className="w-3 h-3 shrink-0" />
-                              <span className="truncate">{conflictInfo}</span>
+                            <div className="flex flex-col gap-1 items-end" data-testid={`assign-conflict-${b.id}`}>
+                              <div className="flex items-center gap-1 text-xs text-amber-600 max-w-[220px]">
+                                <AlertTriangle className="w-3 h-3 shrink-0" />
+                                <span>{conflictInfo}</span>
+                              </div>
+                              <button
+                                onClick={() => handleCheckAndAssign(b, true)}
+                                disabled={assignLoading}
+                                data-testid={`assign-force-btn-${b.id}`}
+                                className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-medium disabled:opacity-50 flex items-center gap-1"
+                              >
+                                {assignLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <AlertTriangle className="w-3 h-3" />}
+                                Forcer l'affectation
+                              </button>
                             </div>
                           )}
                           <div className="flex gap-1.5">
