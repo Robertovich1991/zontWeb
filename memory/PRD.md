@@ -14,6 +14,15 @@ Build a "Hotel Kiosk" management system that has evolved into a multi-portal pla
 - **Database**: MongoDB (for hotel/admin data), C# external backend (api.zont.cab) for fleet/driver data
 - **Integrations**: Stripe (payments), Google Maps (Places, Directions), C# backend (api.zont.cab)
 
+## Performance Optimizations (March 2026)
+- **Shared HTTP Client** (`fleet_shared.py`): Connection pooling with `httpx.AsyncClient` (max 20 connections, 10 keepalive)
+- **In-Memory Cache**: 30-second TTL cache for C# API responses, avoids redundant calls on navigation
+- **Parallel Data Fetching**: All C# API calls + MongoDB queries run via `asyncio.gather` instead of sequential
+- **Reduced Auction Scan**: Range reduced from 35 to ~18 IDs, cached individually
+- **MongoDB Indexes**: Compound indexes on `fleet_reservations`, `driver_rest_days`, `driver_forfaits`
+- **Centralized Logic** (`fleet_shared.py`): Auth helpers, date parsing, scan logic, format functions shared across all fleet routes
+- **Results**: Planning day 4.3s→1.7s (-60%), Planning week 16.7s→1.1s (-93%), Bookings 16s→1s (-93%)
+
 ## What's Been Implemented
 
 ### Fleet Management Portal
