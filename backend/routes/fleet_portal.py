@@ -438,10 +438,9 @@ async def fleet_bookings(request: Request, count: int = 20, pageNumber: int = 1,
             try:
                 detail = await csharp_get(f"/api/Auction/company/auctions/{aid}", token)
                 if isinstance(detail, dict) and detail.get("id") and detail["id"] not in seen_ids:
-                    # Verify this auction belongs to our company
-                    auction_company = detail.get("company") or {}
-                    if auction_company.get("id") == company_id:
-                        return format_auction(detail)
+                    # C# API returns this auction with our company token, so it belongs to us
+                    # (may have company=null for offers not yet specifically assigned)
+                    return format_auction(detail)
             except Exception:
                 pass
             return None

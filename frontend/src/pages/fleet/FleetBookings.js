@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 import { CalendarClock, Search, Loader2, MapPin, User, Clock, ChevronDown, ChevronUp, Send, RefreshCw } from 'lucide-react';
 
 const STATUS_MAP = {
+  ApprovedByAdmin: { label: 'En attente', cls: 'bg-purple-50 text-purple-700' },
+  Took: { label: 'Acceptee', cls: 'bg-emerald-50 text-emerald-700' },
   New: { label: 'Nouvelle', cls: 'bg-blue-50 text-blue-700' },
   Confirmed: { label: 'Confirmee', cls: 'bg-emerald-50 text-emerald-700' },
   Started: { label: 'En cours', cls: 'bg-amber-50 text-amber-700' },
@@ -174,7 +176,7 @@ const FleetBookings = () => {
                       <div className="text-sm"><span className="text-gray-400 text-xs">Commentaires :</span> <span className="text-gray-700">{b.additionalComments}</span></div>
                     )}
 
-                    {b.status === 'New' && !b.driver && (
+                    {!b.driver && (
                       <div className="border-t border-gray-200 pt-3 mt-2">
                         {!isDispatching ? (
                           <button onClick={(e) => { e.stopPropagation(); setDispatchingId(b.id); }} data-testid={`dispatch-btn-${b.id}`}
