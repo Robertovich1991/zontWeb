@@ -1,0 +1,399 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useFleetAuth } from './FleetAuthContext';
+import { toast } from 'sonner';
+import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X } from 'lucide-react';
+
+const HOURS = Array.from({ length: 17 }, (_, i) => i + 6); // 06h → 22h
+const HOUR_WIDTH = 120; // pixels per hour
+const ROW_HEIGHT = 80;
+
+const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+const formatDate = (d) => {
+  const dt = new Date(d + 'T00:00:00');
+  return `${DAYS_FR[dt.getDay()]} ${dt.getDate()}/${dt.getMonth() + 1}`;
+};
+
+const FleetPlanning = () => {
+  const { authFetch } = useFleetAuth();
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState('day');
+  const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [planning, setPlanning] = useState(null);
+  const [hoveredEvent, setHoveredEvent] = useState(null);
+  const [driverFilter, setDriverFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const timelineRef = useRef(null);
+
+  const fetchPlanning = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await authFetch(`/api/fleet/planning?date=${currentDate}&view=${view}`);
+      if (res.ok) setPlanning(await res.json());
+      else toast.error('Erreur de chargement');
+    } catch { toast.error('Erreur de connexion'); }
+    finally { setLoading(false); }
+  }, [authFetch, currentDate, view]);
+
+  useEffect(() => { fetchPlanning(); }, [fetchPlanning]);
+
+  // Scroll to current time on day view
+  useEffect(() => {
+    if (view === 'day' && timelineRef.current && !loading) {
+      const now = new Date();
+      const scrollX = Math.max(0, (now.getHours() - 6) * HOUR_WIDTH - 200);
+      timelineRef.current.scrollLeft = scrollX;
+    }
+  }, [view, loading]);
+
+  const goToday = () => setCurrentDate(new Date().toISOString().split('T')[0]);
+  const goPrev = () => {
+    const d = new Date(currentDate + 'T00:00:00');
+    d.setDate(d.getDate() - (view === 'week' ? 7 : 1));
+    setCurrentDate(d.toISOString().split('T')[0]);
+  };
+  const goNext = () => {
+    const d = new Date(currentDate + 'T00:00:00');
+    d.setDate(d.getDate() + (view === 'week' ? 7 : 1));
+    setCurrentDate(d.toISOString().split('T')[0]);
+  };
+
+  const getStatusColor = (s) => {
+    if (s === 'available') return 'bg-emerald-400';
+    if (s === 'busy') return 'bg-amber-400';
+    return 'bg-gray-300';
+  };
+  const getStatusLabel = (s) => {
+    if (s === 'available') return 'Disponible';
+    if (s === 'busy') return 'Occupe';
+    return 'Hors ligne';
+  };
+
+  // Calculate event position on timeline (day view)
+  const getEventStyle = (event, dayDate) => {
+    const start = new Date(event.startTime);
+    const end = event.endTime ? new Date(event.endTime) : new Date(start.getTime() + 90 * 60000);
+    const startH = start.getHours() + start.getMinutes() / 60;
+    const endH = end.getHours() + end.getMinutes() / 60;
+    const left = Math.max(0, (startH - 6) * HOUR_WIDTH);
+    const width = Math.max(HOUR_WIDTH * 0.5, (endH - startH) * HOUR_WIDTH);
+    return { left: `${left}px`, width: `${width}px` };
+  };
+
+  // Week view: get day columns
+  const getWeekDays = () => {
+    if (!planning) return [];
+    const start = new Date(planning.dateStart + 'T00:00:00');
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      days.push(d.toISOString().split('T')[0]);
+    }
+    return days;
+  };
+
+  const getEventDuration = (event) => {
+    const start = new Date(event.startTime);
+    const end = event.endTime ? new Date(event.endTime) : new Date(start.getTime() + 90 * 60000);
+    const mins = Math.round((end - start) / 60000);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h}h${m > 0 ? m.toString().padStart(2, '0') : ''}` : `${m}min`;
+  };
+
+  const drivers = planning?.drivers || [];
+  const filteredDrivers = drivers.filter(d => {
+    if (driverFilter !== 'all' && d.id !== driverFilter) return false;
+    if (sourceFilter !== 'all') {
+      const hasSource = d.events.some(e => e.source === sourceFilter);
+      const isIdle = d.events.length === 0;
+      if (!hasSource && !isIdle) return false;
+    }
+    return true;
+  });
+
+  if (loading && !planning) {
+    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-emerald-500 animate-spin" /></div>;
+  }
+
+  return (
+    <div className="space-y-4" data-testid="fleet-planning">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h1 className="text-2xl font-bold text-gray-900">Planning Chauffeurs</h1>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button onClick={goToday} data-testid="planning-today-btn"
+            className="px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+            Aujourd'hui
+          </button>
+          <div className="flex bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <button onClick={() => setView('day')} data-testid="planning-day-btn"
+              className={`px-4 py-2 text-sm font-medium transition ${view === 'day' ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}>
+              Jour
+            </button>
+            <button onClick={() => setView('week')} data-testid="planning-week-btn"
+              className={`px-4 py-2 text-sm font-medium transition ${view === 'week' ? 'bg-emerald-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}>
+              Semaine
+            </button>
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={goPrev} className="p-2 hover:bg-gray-100 rounded-lg transition" data-testid="planning-prev">
+              <ChevronLeft className="w-4 h-4 text-gray-600" />
+            </button>
+            <span className="text-sm font-medium text-gray-700 min-w-[130px] text-center" data-testid="planning-date-label">
+              {view === 'day'
+                ? formatDate(currentDate)
+                : `${formatDate(planning?.dateStart || currentDate)} - ${formatDate(planning?.dateEnd || currentDate)}`
+              }
+            </span>
+            <button onClick={goNext} className="p-2 hover:bg-gray-100 rounded-lg transition" data-testid="planning-next">
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+          <button onClick={() => setShowFilters(!showFilters)} data-testid="planning-filter-toggle"
+            className={`p-2 rounded-lg transition ${showFilters ? 'bg-emerald-50 text-emerald-600' : 'hover:bg-gray-100 text-gray-500'}`}>
+            <Filter className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Filters */}
+      {showFilters && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-wrap gap-3" data-testid="planning-filters">
+          <select value={driverFilter} onChange={e => setDriverFilter(e.target.value)} data-testid="planning-driver-filter"
+            className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm">
+            <option value="all">Tous les chauffeurs</option>
+            {drivers.map(d => <option key={d.id} value={d.id}>{d.firstName} {d.lastName}</option>)}
+          </select>
+          <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)} data-testid="planning-source-filter"
+            className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm">
+            <option value="all">Toutes sources</option>
+            <option value="zont">Zont</option>
+            <option value="company">Societe</option>
+          </select>
+          {(driverFilter !== 'all' || sourceFilter !== 'all') && (
+            <button onClick={() => { setDriverFilter('all'); setSourceFilter('all'); }}
+              className="px-3 py-2 text-xs text-red-500 hover:bg-red-50 rounded-lg">Effacer</button>
+          )}
+          {/* Legend */}
+          <div className="flex items-center gap-4 ml-auto text-xs text-gray-500">
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-emerald-500 inline-block" /> Zont</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-500 inline-block" /> Societe</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-400 inline-block" /> Disponible</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-amber-400 inline-block" /> Occupe</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-gray-300 inline-block" /> Hors ligne</span>
+          </div>
+        </div>
+      )}
+
+      {/* Planning Grid */}
+      {filteredDrivers.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
+          <CalendarDays className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500">Aucun chauffeur a afficher</p>
+        </div>
+      ) : view === 'day' ? (
+        /* DAY VIEW */
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" data-testid="planning-day-view">
+          <div className="flex">
+            {/* Driver column (fixed) */}
+            <div className="shrink-0 w-[200px] border-r border-gray-200 z-10 bg-white">
+              <div className="h-[44px] border-b border-gray-200 bg-gray-50 px-3 flex items-center">
+                <span className="text-xs font-semibold text-gray-500 uppercase">Chauffeur</span>
+              </div>
+              {filteredDrivers.map(d => (
+                <div key={d.id} className="flex items-center gap-3 px-3 border-b border-gray-100" style={{ height: ROW_HEIGHT }}>
+                  <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xs font-bold shrink-0">
+                    {d.firstName?.[0]}{d.lastName?.[0]}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{d.firstName} {d.lastName}</p>
+                    <div className="flex items-center gap-1">
+                      <span className={`w-2 h-2 rounded-full ${getStatusColor(d.status)}`} />
+                      <span className="text-xs text-gray-500">{getStatusLabel(d.status)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Timeline (scrollable) */}
+            <div className="flex-1 overflow-x-auto" ref={timelineRef}>
+              <div style={{ minWidth: HOURS.length * HOUR_WIDTH }}>
+                {/* Hours header */}
+                <div className="h-[44px] border-b border-gray-200 bg-gray-50 flex">
+                  {HOURS.map(h => (
+                    <div key={h} className="border-r border-gray-100 flex items-center justify-center" style={{ width: HOUR_WIDTH }}>
+                      <span className="text-xs font-medium text-gray-500">{String(h).padStart(2, '0')}:00</span>
+                    </div>
+                  ))}
+                </div>
+                {/* Driver rows */}
+                {filteredDrivers.map(d => (
+                  <div key={d.id} className="relative border-b border-gray-100 flex" style={{ height: ROW_HEIGHT }} data-testid={`planning-row-${d.id}`}>
+                    {/* Grid lines */}
+                    {HOURS.map(h => (
+                      <div key={h} className="border-r border-gray-50 shrink-0" style={{ width: HOUR_WIDTH, height: '100%' }}>
+                        {/* Current time indicator */}
+                        {h === new Date().getHours() && currentDate === new Date().toISOString().split('T')[0] && (
+                          <div className="absolute top-0 bottom-0 w-px bg-red-400 z-20"
+                            style={{ left: `${(new Date().getHours() - 6 + new Date().getMinutes() / 60) * HOUR_WIDTH}px` }} />
+                        )}
+                      </div>
+                    ))}
+                    {/* Events */}
+                    {d.events.map(e => {
+                      const style = getEventStyle(e);
+                      const isZont = e.source === 'zont';
+                      return (
+                        <div key={e.id}
+                          className={`absolute top-2 bottom-2 rounded-lg px-2.5 py-1 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg hover:z-30 ${isZont ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white'}`}
+                          style={style}
+                          onMouseEnter={() => setHoveredEvent(e)}
+                          onMouseLeave={() => setHoveredEvent(null)}
+                          data-testid={`event-${e.id}`}
+                        >
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-[10px] font-bold whitespace-nowrap">
+                              {new Date(e.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                              {' - '}
+                              {e.endTime ? new Date(e.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''}
+                            </span>
+                            <span className="text-[9px] font-bold opacity-80 uppercase shrink-0">{isZont ? 'ZONT' : 'SOCIETE'}</span>
+                          </div>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-2.5 h-2.5 opacity-70 shrink-0" />
+                            <span className="text-[10px] truncate opacity-90">
+                              {e.pickupAddress ? (e.dropoffAddress ? `${e.pickupAddress.split(',')[0]} → ${e.dropoffAddress.split(',')[0]}` : e.pickupAddress.split(',')[0]) : e.type}
+                            </span>
+                          </div>
+                          <span className="text-[9px] opacity-70">{getEventDuration(e)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* WEEK VIEW */
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" data-testid="planning-week-view">
+          <div className="flex">
+            {/* Driver column */}
+            <div className="shrink-0 w-[180px] border-r border-gray-200 z-10 bg-white">
+              <div className="h-[44px] border-b border-gray-200 bg-gray-50 px-3 flex items-center">
+                <span className="text-xs font-semibold text-gray-500 uppercase">Chauffeur</span>
+              </div>
+              {filteredDrivers.map(d => (
+                <div key={d.id} className="flex items-center gap-2 px-3 border-b border-gray-100" style={{ height: ROW_HEIGHT }}>
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-[10px] font-bold shrink-0">
+                    {d.firstName?.[0]}{d.lastName?.[0]}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-900 truncate">{d.firstName} {d.lastName}</p>
+                    <div className="flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${getStatusColor(d.status)}`} />
+                      <span className="text-[10px] text-gray-500">{getStatusLabel(d.status)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Week grid */}
+            <div className="flex-1 overflow-x-auto">
+              <div className="min-w-[700px]">
+                {/* Day headers */}
+                <div className="h-[44px] border-b border-gray-200 bg-gray-50 flex">
+                  {getWeekDays().map(day => {
+                    const isToday = day === new Date().toISOString().split('T')[0];
+                    return (
+                      <div key={day} className={`flex-1 flex items-center justify-center border-r border-gray-100 ${isToday ? 'bg-emerald-50' : ''}`}>
+                        <span className={`text-xs font-medium ${isToday ? 'text-emerald-700 font-bold' : 'text-gray-500'}`}>{formatDate(day)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Driver rows */}
+                {filteredDrivers.map(d => (
+                  <div key={d.id} className="flex border-b border-gray-100" style={{ height: ROW_HEIGHT }}>
+                    {getWeekDays().map(day => {
+                      const dayEvents = d.events.filter(e => e.startTime.startsWith(day));
+                      return (
+                        <div key={day} className="flex-1 border-r border-gray-50 p-1 overflow-hidden relative">
+                          {dayEvents.map(e => {
+                            const isZont = e.source === 'zont';
+                            return (
+                              <div key={e.id}
+                                className={`mb-0.5 rounded px-1.5 py-0.5 cursor-pointer text-white text-[9px] truncate ${isZont ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                                onMouseEnter={() => setHoveredEvent(e)}
+                                onMouseLeave={() => setHoveredEvent(null)}
+                                data-testid={`week-event-${e.id}`}
+                              >
+                                <span className="font-bold">
+                                  {new Date(e.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                {' '}{e.pickupAddress?.split(',')[0] || e.type}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hover tooltip */}
+      {hoveredEvent && (
+        <div className="fixed bottom-4 right-4 bg-white border border-gray-200 rounded-xl shadow-xl p-4 z-50 w-[300px]" data-testid="event-tooltip">
+          <div className="flex items-center gap-2 mb-2">
+            <span className={`px-2 py-0.5 rounded text-[10px] font-bold text-white ${hoveredEvent.source === 'zont' ? 'bg-emerald-500' : 'bg-blue-500'}`}>
+              {hoveredEvent.source === 'zont' ? 'ZONT' : 'SOCIETE'}
+            </span>
+            <span className="text-xs text-gray-500">{hoveredEvent.type}</span>
+            <span className="text-xs text-gray-400 ml-auto">{getEventDuration(hoveredEvent)}</span>
+          </div>
+          <div className="space-y-1.5 text-sm">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-gray-400" />
+              <span className="text-gray-700">
+                {new Date(hoveredEvent.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                {hoveredEvent.endTime && ` → ${new Date(hoveredEvent.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`}
+              </span>
+            </div>
+            {hoveredEvent.pickupAddress && (
+              <div className="flex items-start gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-emerald-500 mt-0.5" />
+                <span className="text-gray-700">{hoveredEvent.pickupAddress}</span>
+              </div>
+            )}
+            {hoveredEvent.dropoffAddress && (
+              <div className="flex items-start gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-red-400 mt-0.5" />
+                <span className="text-gray-700">{hoveredEvent.dropoffAddress}</span>
+              </div>
+            )}
+            {hoveredEvent.clientName && (
+              <div className="flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-gray-400" />
+                <span className="text-gray-700">{hoveredEvent.clientName}</span>
+              </div>
+            )}
+            {hoveredEvent.price > 0 && <p className="text-gray-900 font-semibold text-right">{hoveredEvent.price.toFixed(2)} EUR</p>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default FleetPlanning;

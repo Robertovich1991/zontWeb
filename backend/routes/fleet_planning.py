@@ -1,0 +1,273 @@
+"""Fleet Planning - Aggregates Zont + Company bookings for driver timeline."""
+from fastapi import APIRouter, Request, HTTPException
+from pydantic import BaseModel
+from datetime import datetime, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/api/fleet/planning", tags=["fleet-planning"])
+
+CSHARP_API = "https://api.zont.cab"
+TIMEOUT = 15.0
+
+
+def get_token(request: Request) -> str:
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise HTTPException(401, "Token requis")
+    return auth.split(" ", 1)[1]
+
+
+def get_company_id(request: Request) -> str:
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if not token:
+        raise HTTPException(401, "Non authentifie")
+    import base64, json
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (4 - len(payload) % 4)
+        data = json.loads(base64.b64decode(payload))
+        return data.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "")
+    except Exception:
+        raise HTTPException(401, "Token invalide")
+
+
+def get_db(request: Request):
+    return request.app.state.db
+
+
+async def csharp_get(path: str, token: str):
+    import httpx
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+        resp = await client.get(
+            f"{CSHARP_API}{path}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        if resp.status_code != 200:
+            return []
+        return resp.json()
+
+
+def parse_csharp_date(date_str):
+    """Parse C# date string to datetime."""
+    if not date_str:
+        return None
+    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(date_str.split("+")[0].split("Z")[0], fmt)
+        except (ValueError, AttributeError):
+            continue
+    return None
+
+
+def estimate_end_time(start_dt, booking_type="transfer"):
+    """Estimate end time if not available."""
+    if not start_dt:
+        return None
+    if booking_type in ("dispo", "excursion"):
+        return start_dt + timedelta(hours=2)
+    return start_dt + timedelta(hours=1, minutes=30)
+
+
+@router.get("")
+async def get_planning(request: Request, date: str = "", view: str = "day"):
+    token = get_token(request)
+    company_id = get_company_id(request)
+    db = get_db(request)
+
+    # Parse target date
+    try:
+        target_date = datetime.strptime(date, "%Y-%m-%d") if date else datetime.now()
+    except ValueError:
+        target_date = datetime.now()
+
+    if view == "week":
+        start_of_week = target_date - timedelta(days=target_date.weekday())
+        date_start = start_of_week.strftime("%Y-%m-%d")
+        date_end = (start_of_week + timedelta(days=6)).strftime("%Y-%m-%d")
+    else:
+        date_start = target_date.strftime("%Y-%m-%d")
+        date_end = date_start
+
+    # 1. Get drivers
+    drivers_raw = await csharp_get("/api/Driver/company/getdriver", token)
+    drivers = []
+    for d in (drivers_raw if isinstance(drivers_raw, list) else []):
+        drivers.append({
+            "id": d.get("id", ""),
+            "firstName": d.get("firstName", ""),
+            "lastName": d.get("lastName", ""),
+            "isActivated": d.get("isActivated", False),
+            "isOnline": d.get("isOnline", False),
+            "phone": d.get("phoneNumber", ""),
+        })
+
+    # 2. Get Zont bookings (auctions assigned to drivers)
+    zont_bookings = await csharp_get(
+        f"/api/Auction/company/auctions?count=100&pageNumber=1&isDescending=true", token
+    )
+    zont_events = []
+    for a in (zont_bookings if isinstance(zont_bookings, list) else []):
+        if not a.get("driver"):
+            continue
+        start_dt = parse_csharp_date(a.get("startDate"))
+        if not start_dt:
+            continue
+        # Filter by date range
+        booking_date = start_dt.strftime("%Y-%m-%d")
+        if booking_date < date_start or booking_date > date_end:
+            continue
+        end_dt = parse_csharp_date(a.get("endDate")) or estimate_end_time(start_dt)
+        zont_events.append({
+            "id": f"zont-{a.get('id')}",
+            "driverId": a["driver"].get("id", ""),
+            "source": "zont",
+            "type": (a.get("tripType") or "Transfer"),
+            "status": a.get("status", ""),
+            "startTime": start_dt.strftime("%Y-%m-%dT%H:%M"),
+            "endTime": end_dt.strftime("%Y-%m-%dT%H:%M") if end_dt else "",
+            "pickupAddress": a.get("startAddress", ""),
+            "dropoffAddress": a.get("endAddress", ""),
+            "clientName": "",
+            "price": a.get("totalAmount", 0),
+        })
+
+    # 3. Get Company bookings (from MongoDB)
+    mongo_query = {
+        "companyId": company_id,
+        "driver": {"$ne": None},
+        "date": {"$gte": date_start, "$lte": date_end},
+    }
+    logger.info(f"Planning query: {mongo_query}")
+    company_raw = await db.fleet_reservations.find(mongo_query, {"_id": 0}).to_list(200)
+    logger.info(f"Planning found {len(company_raw)} company bookings")
+    company_events = []
+    for b in company_raw:
+        time_str = b.get("time", "00:00")
+        start_str = f"{b['date']}T{time_str}"
+        start_dt = parse_csharp_date(start_str)
+        if not start_dt:
+            continue
+        hours = b.get("hours", 0)
+        if hours and hours > 0:
+            end_dt = start_dt + timedelta(hours=hours)
+        else:
+            end_dt = estimate_end_time(start_dt, b.get("type", "transfer"))
+        company_events.append({
+            "id": f"company-{b.get('id', '')}",
+            "driverId": b.get("driver", {}).get("id", ""),
+            "source": "company",
+            "type": b.get("type", "transfer"),
+            "status": b.get("status", ""),
+            "startTime": start_dt.strftime("%Y-%m-%dT%H:%M"),
+            "endTime": end_dt.strftime("%Y-%m-%dT%H:%M") if end_dt else "",
+            "pickupAddress": b.get("pickupAddress", ""),
+            "dropoffAddress": b.get("dropoffAddress", ""),
+            "clientName": b.get("clientName", ""),
+            "price": b.get("price", 0),
+        })
+
+    # 4. Build planning per driver
+    all_events = zont_events + company_events
+    planning = []
+    for driver in drivers:
+        driver_events = [e for e in all_events if e["driverId"] == driver["id"]]
+        driver_events.sort(key=lambda e: e["startTime"])
+        has_events = len(driver_events) > 0
+
+        # Determine status
+        now_str = datetime.now().strftime("%Y-%m-%dT%H:%M")
+        is_busy = any(e["startTime"] <= now_str <= e["endTime"] for e in driver_events if e["endTime"])
+
+        if not driver["isActivated"]:
+            status = "offline"
+        elif is_busy:
+            status = "busy"
+        else:
+            status = "available"
+
+        planning.append({
+            **driver,
+            "status": status,
+            "events": driver_events,
+        })
+
+    return {
+        "dateStart": date_start,
+        "dateEnd": date_end,
+        "view": view,
+        "drivers": planning,
+    }
+
+
+class ConflictCheckRequest(BaseModel):
+    driverId: str
+    startTime: str
+    endTime: str
+    excludeBookingId: str = ""
+
+
+@router.post("/check-conflict")
+async def check_conflict(data: ConflictCheckRequest, request: Request):
+    token = get_token(request)
+    company_id = get_company_id(request)
+    db = get_db(request)
+
+    try:
+        new_start = datetime.strptime(data.startTime, "%Y-%m-%dT%H:%M")
+        new_end = datetime.strptime(data.endTime, "%Y-%m-%dT%H:%M")
+    except ValueError:
+        raise HTTPException(400, "Format date invalide (YYYY-MM-DDTHH:MM)")
+
+    date_str = new_start.strftime("%Y-%m-%d")
+
+    # Check Zont bookings
+    zont_bookings = await csharp_get(
+        f"/api/Auction/company/auctions?count=100&pageNumber=1&isDescending=true", token
+    )
+    for a in (zont_bookings if isinstance(zont_bookings, list) else []):
+        if not a.get("driver") or a["driver"].get("id") != data.driverId:
+            continue
+        if data.excludeBookingId and f"zont-{a.get('id')}" == data.excludeBookingId:
+            continue
+        start_dt = parse_csharp_date(a.get("startDate"))
+        if not start_dt:
+            continue
+        end_dt = parse_csharp_date(a.get("endDate")) or estimate_end_time(start_dt)
+        if start_dt < new_end and end_dt > new_start:
+            return {
+                "conflict": True,
+                "message": "Ce chauffeur est deja occupe sur ce creneau (reservation Zont)",
+                "conflictWith": {
+                    "id": f"zont-{a.get('id')}",
+                    "startTime": start_dt.strftime("%Y-%m-%dT%H:%M"),
+                    "endTime": end_dt.strftime("%Y-%m-%dT%H:%M") if end_dt else "",
+                },
+            }
+
+    # Check Company bookings
+    company_bookings = await db.fleet_reservations.find(
+        {"companyId": company_id, "driver.id": data.driverId, "date": date_str, "status": {"$nin": ["cancelled"]}},
+        {"_id": 0},
+    ).to_list(100)
+    for b in company_bookings:
+        if data.excludeBookingId and f"company-{b.get('id')}" == data.excludeBookingId:
+            continue
+        time_str = b.get("time", "00:00")
+        start_dt = parse_csharp_date(f"{b['date']}T{time_str}")
+        if not start_dt:
+            continue
+        hours = b.get("hours", 0)
+        end_dt = start_dt + timedelta(hours=hours) if hours > 0 else estimate_end_time(start_dt, b.get("type"))
+        if start_dt < new_end and end_dt > new_start:
+            return {
+                "conflict": True,
+                "message": "Ce chauffeur est deja occupe sur ce creneau (reservation societe)",
+                "conflictWith": {
+                    "id": f"company-{b.get('id')}",
+                    "startTime": start_dt.strftime("%Y-%m-%dT%H:%M"),
+                    "endTime": end_dt.strftime("%Y-%m-%dT%H:%M") if end_dt else "",
+                },
+            }
+
+    return {"conflict": False, "message": "Chauffeur disponible"}

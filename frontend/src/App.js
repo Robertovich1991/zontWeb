@@ -62,6 +62,7 @@ const FleetVehicles = lazy(() => import("@/pages/fleet/FleetVehicles"));
 const FleetBookings = lazy(() => import("@/pages/fleet/FleetBookings"));
 const FleetMyBookings = lazy(() => import("@/pages/fleet/FleetMyBookings"));
 const FleetCreateBooking = lazy(() => import("@/pages/fleet/FleetCreateBooking"));
+const FleetPlanning = lazy(() => import("@/pages/fleet/FleetPlanning"));
 const FleetTrips = lazy(() => import("@/pages/fleet/FleetTrips"));
 const FleetProfile = lazy(() => import("@/pages/fleet/FleetProfile"));
 
@@ -262,6 +263,7 @@ function App() {
                     <Route path="bookings" element={<FleetBookings />} />
                     <Route path="my-bookings" element={<FleetMyBookings />} />
                     <Route path="my-bookings/new" element={<FleetCreateBooking />} />
+                    <Route path="planning" element={<FleetPlanning />} />
                     <Route path="trips" element={<FleetTrips />} />
                     <Route path="profile" element={<FleetProfile />} />
                   </Route>
