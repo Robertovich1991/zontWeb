@@ -120,7 +120,6 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
         start_dt = parse_csharp_date(a.get("startDate"))
         if not start_dt:
             continue
-        # Filter by date range
         booking_date = start_dt.strftime("%Y-%m-%d")
         if booking_date < date_start or booking_date > date_end:
             continue
@@ -138,6 +137,61 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "clientName": "",
             "price": a.get("totalAmount", 0),
         })
+
+    # 2a. Scan recent auction IDs (C# list endpoint may hide expired/pending auctions)
+    import asyncio
+    seen_auction_ids = {e["id"] for e in zont_events}
+    max_id = 0
+    for e in zont_events:
+        try:
+            aid = int(e["id"].replace("zont-", ""))
+            max_id = max(max_id, aid)
+        except (ValueError, TypeError):
+            pass
+    scan_start = max(1, max_id - 5)
+    scan_end = max_id + 30 if max_id > 0 else 30
+
+    async def check_auction_for_planning(aid):
+        try:
+            detail = await csharp_get(f"/api/Auction/company/auctions/{aid}", token)
+            if isinstance(detail, dict) and detail.get("id"):
+                auction_company = detail.get("company") or {}
+                if auction_company.get("id") == company_id and detail.get("driver"):
+                    return detail
+        except Exception:
+            pass
+        return None
+
+    tasks = [check_auction_for_planning(i) for i in range(scan_start, scan_end + 1)]
+    extra_auctions = await asyncio.gather(*tasks)
+    for a in extra_auctions:
+        if not a:
+            continue
+        eid = f"zont-{a.get('id')}"
+        if eid in seen_auction_ids:
+            continue
+        start_dt = parse_csharp_date(a.get("startDate"))
+        if not start_dt:
+            continue
+        booking_date = start_dt.strftime("%Y-%m-%d")
+        if booking_date < date_start or booking_date > date_end:
+            continue
+        end_dt = parse_csharp_date(a.get("endDate")) or estimate_end_time(start_dt)
+        driver = a.get("driver") or {}
+        zont_events.append({
+            "id": eid,
+            "driverId": driver.get("id", ""),
+            "source": "zont",
+            "type": (a.get("tripType") or "Transfer"),
+            "status": a.get("status", ""),
+            "startTime": start_dt.strftime("%Y-%m-%dT%H:%M"),
+            "endTime": end_dt.strftime("%Y-%m-%dT%H:%M") if end_dt else "",
+            "pickupAddress": a.get("startAddress", ""),
+            "dropoffAddress": a.get("endAddress", ""),
+            "clientName": "",
+            "price": a.get("totalAmount", 0),
+        })
+        seen_auction_ids.add(eid)
 
     # 2b. Get Zont completed trips (driver-accepted rides)
     zont_trips = await csharp_get("/api/Trip/driver?count=200&pageNumber=1", token)
