@@ -53,7 +53,7 @@ def parse_csharp_date(date_str):
     """Parse C# date string to datetime."""
     if not date_str:
         return None
-    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
+    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d", "%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M", "%d/%m/%Y"):
         try:
             return datetime.strptime(date_str.split("+")[0].split("Z")[0], fmt)
         except (ValueError, AttributeError):
@@ -131,6 +131,43 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
             "dropoffAddress": a.get("endAddress", ""),
             "clientName": "",
             "price": a.get("totalAmount", 0),
+        })
+
+    # 2b. Get Zont completed trips (driver-accepted rides)
+    zont_trips = await csharp_get("/api/Trip/driver?count=200&pageNumber=1", token)
+    zont_event_ids = {e["id"] for e in zont_events}
+    for t in (zont_trips if isinstance(zont_trips, list) else []):
+        trip_driver = t.get("driver") or {}
+        if not trip_driver.get("id"):
+            continue
+        start_dt = parse_csharp_date(t.get("startDate"))
+        if not start_dt:
+            continue
+        trip_date = start_dt.strftime("%Y-%m-%d")
+        if trip_date < date_start or trip_date > date_end:
+            continue
+        end_dt = parse_csharp_date(t.get("endDate"))
+        if end_dt and end_dt.year <= 1:
+            end_dt = estimate_end_time(start_dt)
+        elif not end_dt:
+            end_dt = estimate_end_time(start_dt)
+        trip_id = f"zont-trip-{t.get('id')}"
+        if trip_id in zont_event_ids:
+            continue
+        creator = t.get("creator") or {}
+        client_name = f"{creator.get('firstName', '')} {creator.get('lastName', '')}".strip()
+        zont_events.append({
+            "id": trip_id,
+            "driverId": trip_driver.get("id", ""),
+            "source": "zont",
+            "type": t.get("carType") or "Transfer",
+            "status": t.get("status", ""),
+            "startTime": start_dt.strftime("%Y-%m-%dT%H:%M"),
+            "endTime": end_dt.strftime("%Y-%m-%dT%H:%M") if end_dt else "",
+            "pickupAddress": t.get("startAddress", ""),
+            "dropoffAddress": t.get("endAddress", ""),
+            "clientName": client_name,
+            "price": t.get("totalAmount", 0),
         })
 
     # 3. Get Company bookings assigned to drivers (from MongoDB)
