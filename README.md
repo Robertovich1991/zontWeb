@@ -81,7 +81,7 @@ tail -f /var/log/supervisor/frontend.out.log
 ## 🌐 Accès
 
 Une fois lancé, le site est accessible à :
-- **Frontend** : https://fleet-personnel.preview.emergentagent.com
+- **Frontend** : https://intelligent-bookings.preview.emergentagent.com
 
 ## 📁 Structure du projet
 

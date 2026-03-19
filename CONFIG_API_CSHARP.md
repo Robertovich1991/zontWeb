@@ -146,7 +146,7 @@ Voici la liste des endpoints utilisés par l'application :
 ## CORS Configuration
 
 Assurez-vous que votre backend C# autorise les requêtes depuis :
-- `https://fleet-personnel.preview.emergentagent.com` (pendant le développement)
+- `https://intelligent-bookings.preview.emergentagent.com` (pendant le développement)
 - Votre domaine de production
 
 ## Dépannage
