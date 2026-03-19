@@ -26,7 +26,10 @@ const FleetPlanning = () => {
   const { authFetch } = useFleetAuth();
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('day');
-  const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [currentDate, setCurrentDate] = useState(() => {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+  });
   const [planning, setPlanning] = useState(null);
   const [hoveredEvent, setHoveredEvent] = useState(null);
   const [driverFilter, setDriverFilter] = useState('all');
@@ -66,16 +69,23 @@ const FleetPlanning = () => {
     }
   }, [view, loading]);
 
-  const goToday = () => setCurrentDate(new Date().toISOString().split('T')[0]);
+  const formatLocalDate = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  const goToday = () => setCurrentDate(formatLocalDate(new Date()));
   const goPrev = () => {
-    const d = new Date(currentDate + 'T00:00:00');
+    const d = new Date(currentDate + 'T12:00:00');
     d.setDate(d.getDate() - (view === 'week' ? 7 : 1));
-    setCurrentDate(d.toISOString().split('T')[0]);
+    setCurrentDate(formatLocalDate(d));
   };
   const goNext = () => {
-    const d = new Date(currentDate + 'T00:00:00');
+    const d = new Date(currentDate + 'T12:00:00');
     d.setDate(d.getDate() + (view === 'week' ? 7 : 1));
-    setCurrentDate(d.toISOString().split('T')[0]);
+    setCurrentDate(formatLocalDate(d));
   };
 
   const getStatusColor = (s) => {
