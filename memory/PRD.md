@@ -19,7 +19,12 @@ Build a "Hotel Kiosk" management system that has evolved into a multi-portal pla
 ### Fleet Management Portal
 - Login via C# backend (`/api/Login/company`)
 - Dashboard with company stats
-- Drivers list with search/filter + Add Driver form
+- **Driver Profile** - Click on a driver to see their profile with:
+  - Driver info (name, phone, email, status, rating)
+  - Monthly ride history with month selector (prev/next navigation)
+  - Per-ride forfait input field with save button
+  - Summary cards: total rides, total price, total forfait for the month
+  - Rides table with date, time, type, source, addresses, client, price, forfait
 - Vehicles list + Add Vehicle form (cascade Year/Make/Model)
 - Vehicle-Driver assignment/un-assignment
 - "Reservations Zont" - view bookings from C# backend
