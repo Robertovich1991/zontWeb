@@ -1,0 +1,101 @@
+{
+  "summary": "Fleet Planning - Unassign & Reassign Feature Testing Complete. All features working: Backend APIs (unassign/assign), Frontend UI (event action panel with Desaffecter/Reaffecter buttons), conflict detection, and force reassignment.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "FleetPlanning - Select dropdowns",
+        "issues": ["React hydration warnings in console from Emergent preview wrapper injecting <span> into <select>/<option> - cosmetic only, does NOT affect functionality"]
+      }
+    ]
+  },
+  "test_results": {
+    "backend_tests": {
+      "test_unassign_requires_auth": "PASS - Returns 401 without token",
+      "test_unassign_invalid_booking": "PASS - Returns 404 for non-existent booking",
+      "test_unassign_workflow": "PASS - Assign->Unassign sets driver=null, status='new'",
+      "test_reassign_to_different_driver": "PASS - Can reassign from one driver to another",
+      "test_conflict_check_no_conflict": "PASS - Returns conflict=false when no overlap",
+      "test_conflict_check_returns_conflict_info": "PASS - Returns conflict=true with message when overlap",
+      "test_conflict_check_excludes_own_booking": "PASS - ExcludeBookingId works correctly",
+      "test_unassigned_appears_in_planning": "PASS - Unassigned booking in planning.unassigned",
+      "test_assigned_not_in_unassigned": "PASS - Assigned booking in driver events, not unassigned"
+    },
+    "frontend_tests": {
+      "fleet_login": "PASS - Login with Nandetiri1@gmail.com/12345678",
+      "planning_page_load": "PASS - data-testid='fleet-planning' found",
+      "click_on_company_event": "PASS - Event action panel opens",
+      "action_panel_desaffecter_button": "PASS - data-testid='event-unassign-btn' found",
+      "action_panel_reaffecter_button": "PASS - data-testid='event-reassign-btn' found",
+      "action_panel_close_button": "PASS - data-testid='close-event-panel' works",
+      "desaffecter_flow": "PASS - Click Desaffecter -> booking moves to unassigned panel",
+      "desaffecter_toast": "PASS - 'Chauffeur retire - mission remise en attente'",
+      "reaffecter_form": "PASS - data-testid='event-reassign-form' appears",
+      "reaffecter_select": "PASS - data-testid='event-reassign-select' shows drivers",
+      "reaffecter_confirm": "PASS - data-testid='event-reassign-confirm' works",
+      "reaffecter_success": "PASS - Toast 'Mission reassignee a [driver name]'",
+      "conflict_detection": "PASS - Conflict warning appears when reassigning to busy driver",
+      "force_reassign_button": "PASS - data-testid='event-reassign-force-btn' found",
+      "zont_event_handling": "VERIFIED IN CODE - Shows 'Les reservations Zont se gerent depuis le reseau Zont', no action buttons"
+    }
+  },
+  "verified_features": [
+    "Backend PUT /api/fleet/my-bookings/{id}/unassign - removes driver, sets status='new'",
+    "Backend PUT /api/fleet/my-bookings/{id}/assign - reassigns driver to existing booking",
+    "Backend POST /api/fleet/planning/check-conflict - detects overlapping bookings",
+    "Frontend: Click on SOCIETE (company) event opens action panel",
+    "Frontend: Action panel shows 'Desaffecter' (red) button - unassigns driver",
+    "Frontend: Action panel shows 'Reaffecter' (blue) button - opens driver dropdown",
+    "Frontend: After Desaffecter, mission moves back to unassigned panel",
+    "Frontend: After Reaffecter, mission moves to new driver's timeline",
+    "Frontend: Conflict check shows warning message with 'Forcer la reaffectation' button",
+    "Frontend: Close button (X) on action panel works correctly",
+    "Frontend: Zont events show info message 'Les reservations Zont se gerent depuis le reseau Zont' (code verified, no Zont events to test live)"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_fleet_unassign_reassign.py",
+    "/app/test_reports/pytest/fleet_unassign_reassign_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "FleetPlanning.js correctly implements event action panel with proper data-testid attributes",
+    "Unassign handler calls PUT /api/fleet/my-bookings/{id}/unassign correctly",
+    "Reassign handler calls PUT /api/fleet/my-bookings/{id}/assign with driverId and driverName",
+    "Conflict check is performed before reassignment, shows warning if overlap detected",
+    "Force reassignment bypasses conflict check when user confirms",
+    "Zont events conditionally show info message instead of action buttons (source === 'zont')",
+    "All test IDs properly implemented: event-action-panel, event-unassign-btn, event-reassign-btn, event-reassign-form, event-reassign-select, event-reassign-confirm, event-reassign-force-btn, close-event-panel"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_fleet_unassign_reassign.py"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 tests passed)",
+    "frontend": "100% (all flows working)"
+  },
+  "test_credentials": {
+    "fleet_company": {
+      "email": "Nandetiri1@gmail.com",
+      "password": "12345678"
+    }
+  },
+  "seed_data": {
+    "drivers": [
+      {"name": "Vova YERITSYAN", "id": "2055d816-8d81-4152-8dac-272f4e569e39", "isActivated": true},
+      {"name": "Mariam saroyan", "id": "858e3dc3-5bb4-431d-b108-4c620375551c", "isActivated": true}
+    ],
+    "test_date": "2026-03-19"
+  },
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Unassign/Reassign features fully tested and working. Test data: Bookings can be assigned/unassigned/reassigned. Conflict detection works when reassigning to driver with overlapping booking. Zont events show info message (code verified, requires live Zont bookings to test UI). Use date 2026-03-19 for testing.",
+  "mocked_api": {
+    "has_mocked_apis": false,
+    "note": "Uses live C# backend (Zont API) + MongoDB. No mocking."
+  }
+}

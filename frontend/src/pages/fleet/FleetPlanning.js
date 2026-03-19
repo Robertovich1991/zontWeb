@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw } from 'lucide-react';
 
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 6);
 const HOUR_WIDTH = 120;
@@ -34,11 +34,17 @@ const FleetPlanning = () => {
   const [showFilters, setShowFilters] = useState(false);
   const timelineRef = useRef(null);
 
-  // Assignment state
+  // Assignment state (unassigned panel)
   const [assigningBookingId, setAssigningBookingId] = useState(null);
   const [selectedDriverId, setSelectedDriverId] = useState('');
   const [assignLoading, setAssignLoading] = useState(false);
   const [conflictInfo, setConflictInfo] = useState(null);
+
+  // Event action state (click on assigned event)
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [reassignMode, setReassignMode] = useState(false);
+  const [reassignDriverId, setReassignDriverId] = useState('');
+  const [reassignConflict, setReassignConflict] = useState(null);
 
   const fetchPlanning = useCallback(async () => {
     setLoading(true);
@@ -125,6 +131,94 @@ const FleetPlanning = () => {
     setAssigningBookingId(null);
     setSelectedDriverId('');
     setConflictInfo(null);
+  };
+
+  // Extract booking ID from event ID (e.g., "company-uuid" → "uuid")
+  const getBookingIdFromEvent = (event) => {
+    if (!event || event.source !== 'company') return null;
+    return event.id.replace('company-', '');
+  };
+
+  const handleEventClick = (event) => {
+    if (event.source !== 'company') return; // Only company bookings can be managed
+    setSelectedEvent(event);
+    setReassignMode(false);
+    setReassignDriverId('');
+    setReassignConflict(null);
+    setHoveredEvent(null);
+  };
+
+  const handleCloseEventActions = () => {
+    setSelectedEvent(null);
+    setReassignMode(false);
+    setReassignDriverId('');
+    setReassignConflict(null);
+  };
+
+  const handleUnassign = async () => {
+    const bookingId = getBookingIdFromEvent(selectedEvent);
+    if (!bookingId) return;
+    setAssignLoading(true);
+    try {
+      const res = await authFetch(`/api/fleet/my-bookings/${bookingId}/unassign`, { method: 'PUT' });
+      if (res.ok) {
+        toast.success('Chauffeur retire - mission remise en attente');
+        handleCloseEventActions();
+        fetchPlanning();
+      } else {
+        toast.error('Erreur lors du retrait');
+      }
+    } catch { toast.error('Erreur de connexion'); }
+    finally { setAssignLoading(false); }
+  };
+
+  const handleReassign = async (force = false) => {
+    if (!reassignDriverId) { toast.error('Selectionnez un chauffeur'); return; }
+    const bookingId = getBookingIdFromEvent(selectedEvent);
+    if (!bookingId) return;
+    setAssignLoading(true);
+    if (!force) setReassignConflict(null);
+
+    try {
+      // Check conflict (skip if forcing)
+      if (!force && selectedEvent.startTime && selectedEvent.endTime) {
+        const conflictRes = await authFetch('/api/fleet/planning/check-conflict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            driverId: reassignDriverId,
+            startTime: selectedEvent.startTime,
+            endTime: selectedEvent.endTime,
+            excludeBookingId: selectedEvent.id,
+          }),
+        });
+        if (conflictRes.ok) {
+          const conflictData = await conflictRes.json();
+          if (conflictData.conflict) {
+            setReassignConflict(conflictData.message);
+            setAssignLoading(false);
+            return;
+          }
+        }
+      }
+
+      const driver = drivers.find(d => d.id === reassignDriverId);
+      const driverName = `${driver?.firstName || ''} ${driver?.lastName || ''}`.trim();
+      const res = await authFetch(`/api/fleet/my-bookings/${bookingId}/assign`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ driverId: reassignDriverId, driverName }),
+      });
+      if (res.ok) {
+        toast.success(`Mission reassignee a ${driverName}`);
+        handleCloseEventActions();
+        fetchPlanning();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.detail || 'Erreur');
+      }
+    } catch { toast.error('Erreur de connexion'); }
+    finally { setAssignLoading(false); }
   };
 
   const handleCheckAndAssign = async (booking, force = false) => {
@@ -438,11 +532,13 @@ const FleetPlanning = () => {
                     {d.events.map(e => {
                       const style = getEventStyle(e);
                       const isZont = e.source === 'zont';
+                      const isSelected = selectedEvent?.id === e.id;
                       return (
                         <div key={e.id}
-                          className={`absolute top-2 bottom-2 rounded-lg px-2.5 py-1 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg hover:z-30 ${isZont ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white'}`}
+                          className={`absolute top-2 bottom-2 rounded-lg px-2.5 py-1 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg hover:z-30 ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-blue-300 z-40' : ''} ${isZont ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white'}`}
                           style={style}
-                          onMouseEnter={() => setHoveredEvent(e)}
+                          onClick={() => handleEventClick(e)}
+                          onMouseEnter={() => !selectedEvent && setHoveredEvent(e)}
                           onMouseLeave={() => setHoveredEvent(null)}
                           data-testid={`event-${e.id}`}
                         >
@@ -514,10 +610,12 @@ const FleetPlanning = () => {
                         <div key={day} className="flex-1 border-r border-gray-50 p-1 overflow-hidden relative">
                           {dayEvents.map(e => {
                             const isZont = e.source === 'zont';
+                            const isSelected = selectedEvent?.id === e.id;
                             return (
                               <div key={e.id}
-                                className={`mb-0.5 rounded px-1.5 py-0.5 cursor-pointer text-white text-[9px] truncate ${isZont ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                                onMouseEnter={() => setHoveredEvent(e)}
+                                className={`mb-0.5 rounded px-1.5 py-0.5 cursor-pointer text-white text-[9px] truncate ${isSelected ? 'ring-2 ring-offset-1 ring-blue-300' : ''} ${isZont ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                                onClick={() => handleEventClick(e)}
+                                onMouseEnter={() => !selectedEvent && setHoveredEvent(e)}
                                 onMouseLeave={() => setHoveredEvent(null)}
                                 data-testid={`week-event-${e.id}`}
                               >
@@ -539,9 +637,9 @@ const FleetPlanning = () => {
         </div>
       )}
 
-      {/* Hover tooltip */}
-      {hoveredEvent && (
-        <div className="fixed bottom-4 right-4 bg-white border border-gray-200 rounded-xl shadow-xl p-4 z-50 w-[300px]" data-testid="event-tooltip">
+      {/* Hover tooltip (only when no event selected) */}
+      {hoveredEvent && !selectedEvent && (
+        <div className="fixed bottom-20 right-4 bg-white border border-gray-200 rounded-xl shadow-xl p-4 z-50 w-[300px]" data-testid="event-tooltip">
           <div className="flex items-center gap-2 mb-2">
             <span className={`px-2 py-0.5 rounded text-[10px] font-bold text-white ${hoveredEvent.source === 'zont' ? 'bg-emerald-500' : 'bg-blue-500'}`}>
               {hoveredEvent.source === 'zont' ? 'ZONT' : 'SOCIETE'}
@@ -577,6 +675,137 @@ const FleetPlanning = () => {
             )}
             {hoveredEvent.price > 0 && <p className="text-gray-900 font-semibold text-right">{hoveredEvent.price.toFixed(2)} EUR</p>}
           </div>
+          {hoveredEvent.source === 'company' && (
+            <p className="text-[10px] text-gray-400 mt-2 text-center">Cliquez pour gerer cette mission</p>
+          )}
+        </div>
+      )}
+
+      {/* Event Action Panel (click on assigned company event) */}
+      {selectedEvent && (
+        <div className="fixed bottom-20 right-4 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 w-[340px] overflow-hidden" data-testid="event-action-panel">
+          {/* Header */}
+          <div className={`px-4 py-3 flex items-center justify-between ${selectedEvent.source === 'zont' ? 'bg-emerald-500' : 'bg-blue-500'}`}>
+            <div className="flex items-center gap-2 text-white">
+              <span className="text-xs font-bold uppercase">{selectedEvent.source === 'zont' ? 'ZONT' : 'SOCIETE'}</span>
+              <span className="text-xs opacity-80">{selectedEvent.type}</span>
+            </div>
+            <button onClick={handleCloseEventActions} className="text-white/70 hover:text-white transition" data-testid="close-event-panel">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          {/* Details */}
+          <div className="p-4 space-y-2 text-sm">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-gray-400" />
+              <span className="text-gray-700">
+                {new Date(selectedEvent.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                {selectedEvent.endTime && ` → ${new Date(selectedEvent.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`}
+              </span>
+              <span className="text-xs text-gray-400 ml-auto">{getEventDuration(selectedEvent)}</span>
+            </div>
+            {selectedEvent.pickupAddress && (
+              <div className="flex items-start gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-emerald-500 mt-0.5" />
+                <span className="text-gray-700 text-xs">{selectedEvent.pickupAddress}</span>
+              </div>
+            )}
+            {selectedEvent.dropoffAddress && (
+              <div className="flex items-start gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-red-400 mt-0.5" />
+                <span className="text-gray-700 text-xs">{selectedEvent.dropoffAddress}</span>
+              </div>
+            )}
+            {selectedEvent.clientName && (
+              <div className="flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-gray-400" />
+                <span className="text-gray-700 text-xs">{selectedEvent.clientName}</span>
+              </div>
+            )}
+            {selectedEvent.price > 0 && <p className="text-gray-900 font-semibold">{selectedEvent.price.toFixed(2)} EUR</p>}
+          </div>
+
+          {/* Actions - only for company bookings */}
+          {selectedEvent.source === 'company' && (
+            <div className="border-t border-gray-100 p-4 space-y-3">
+              {!reassignMode ? (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleUnassign}
+                    disabled={assignLoading}
+                    data-testid="event-unassign-btn"
+                    className="flex-1 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    {assignLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserMinus className="w-3.5 h-3.5" />}
+                    Desaffecter
+                  </button>
+                  <button
+                    onClick={() => setReassignMode(true)}
+                    data-testid="event-reassign-btn"
+                    className="flex-1 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Reaffecter
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2" data-testid="event-reassign-form">
+                  <p className="text-xs text-gray-500 font-medium">Choisir un nouveau chauffeur :</p>
+                  <select
+                    value={reassignDriverId}
+                    onChange={e => { setReassignDriverId(e.target.value); setReassignConflict(null); }}
+                    data-testid="event-reassign-select"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                  >
+                    <option value="">Selectionner un chauffeur...</option>
+                    {drivers.filter(d => d.isActivated).map(d => (
+                      <option key={d.id} value={d.id}>{d.firstName} {d.lastName}</option>
+                    ))}
+                  </select>
+                  {reassignConflict && (
+                    <div data-testid="event-reassign-conflict">
+                      <div className="flex items-center gap-1 text-xs text-amber-600 mb-1">
+                        <AlertTriangle className="w-3 h-3 shrink-0" />
+                        <span>{reassignConflict}</span>
+                      </div>
+                      <button
+                        onClick={() => handleReassign(true)}
+                        disabled={assignLoading}
+                        data-testid="event-reassign-force-btn"
+                        className="w-full px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-medium disabled:opacity-50 flex items-center justify-center gap-1"
+                      >
+                        {assignLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <AlertTriangle className="w-3 h-3" />}
+                        Forcer la reaffectation
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleReassign(false)}
+                      disabled={assignLoading || !reassignDriverId}
+                      data-testid="event-reassign-confirm"
+                      className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    >
+                      {assignLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                      Confirmer
+                    </button>
+                    <button
+                      onClick={() => { setReassignMode(false); setReassignDriverId(''); setReassignConflict(null); }}
+                      className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-medium"
+                    >
+                      Retour
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Info for Zont events */}
+          {selectedEvent.source === 'zont' && (
+            <div className="border-t border-gray-100 px-4 py-3">
+              <p className="text-xs text-gray-400 text-center">Les reservations Zont se gerent depuis le reseau Zont</p>
+            </div>
+          )}
         </div>
       )}
     </div>
