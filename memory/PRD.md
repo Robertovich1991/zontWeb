@@ -33,7 +33,9 @@ Build a "Hotel Kiosk" management system that has evolved into a multi-portal pla
   - Conflict detection for double-booking
   - **Unassigned missions panel** - Shows bookings without driver
   - **Direct assignment from Planning** - Assign drivers to missions directly from timeline view
-  - Conflict check before assignment
+  - **Force assignment** - Override conflict check when driver is available earlier than planned
+  - **Unassign/Reassign from timeline** - Click on assigned event to unassign or reassign to another driver
+  - Conflict check before assignment/reassignment with force option
 
 ### Hotel Kiosk System
 - Commission/invoicing modules
