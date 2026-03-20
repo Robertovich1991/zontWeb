@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
-import { MapPin, Settings, RefreshCw, Wifi, WifiOff, Clock, Gauge, ChevronRight, X, Check, Trash2, Loader2 } from 'lucide-react';
+import { MapPin, Settings, RefreshCw, Wifi, WifiOff, Clock, Gauge, ChevronRight, X, Check, Trash2, Loader2, Eye, EyeOff, LogIn, LogOut, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
-// ── Map component (loaded dynamically to avoid SSR issues) ──
+// ── Map Component ──
 const VehicleMap = ({ vehicles, selectedId, onSelect }) => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
 
   useEffect(() => {
-    // Load Leaflet CSS
     if (!document.getElementById('leaflet-css')) {
       const link = document.createElement('link');
       link.id = 'leaflet-css';
@@ -20,31 +19,17 @@ const VehicleMap = ({ vehicles, selectedId, onSelect }) => {
       link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
       document.head.appendChild(link);
     }
-
-    // Initialize map
     const initMap = async () => {
       const L = await import('leaflet');
       if (mapInstanceRef.current) return;
-
-      const map = L.map(mapRef.current, {
-        center: [48.8566, 2.3522], // Paris default
-        zoom: 11,
-        zoomControl: true,
-      });
+      const map = L.map(mapRef.current, { center: [48.8566, 2.3522], zoom: 11, zoomControl: true });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap',
-        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap', maxZoom: 19,
       }).addTo(map);
       mapInstanceRef.current = map;
     };
     initMap();
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
+    return () => { if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; } };
   }, []);
 
   useEffect(() => {
@@ -52,43 +37,30 @@ const VehicleMap = ({ vehicles, selectedId, onSelect }) => {
       const L = await import('leaflet');
       const map = mapInstanceRef.current;
       if (!map) return;
-
-      // Clear old markers
       markersRef.current.forEach(m => map.removeLayer(m));
       markersRef.current = [];
-
-      const validVehicles = vehicles.filter(v => v.lat && v.lon && (v.lat !== 0 || v.lon !== 0));
-      if (validVehicles.length === 0) return;
-
-      validVehicles.forEach(v => {
-        const isSelected = v.id === selectedId;
+      const valid = vehicles.filter(v => v.lat && v.lon && (v.lat !== 0 || v.lon !== 0));
+      if (valid.length === 0) return;
+      valid.forEach(v => {
+        const sel = v.id === selectedId;
         const color = v.status === 'online' ? '#10b981' : v.status === 'idle' ? '#f59e0b' : '#6b7280';
-        const size = isSelected ? 16 : 10;
-
+        const sz = sel ? 16 : 10;
         const icon = L.divIcon({
           className: '',
-          html: `<div style="width:${size}px;height:${size}px;background:${color};border:2px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);${isSelected ? 'transform:scale(1.5);z-index:999;' : ''}"></div>`,
-          iconSize: [size, size],
-          iconAnchor: [size / 2, size / 2],
+          html: `<div style="width:${sz}px;height:${sz}px;background:${color};border:2px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);${sel ? 'transform:scale(1.5);z-index:999;' : ''}"></div>`,
+          iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2],
         });
-
-        const marker = L.marker([v.lat, v.lon], { icon })
-          .addTo(map)
+        const marker = L.marker([v.lat, v.lon], { icon }).addTo(map)
           .bindPopup(`<b>${v.name}</b><br/>Vitesse: ${v.speed} km/h<br/>Statut: ${v.status}`);
         marker.on('click', () => onSelect(v.id));
         markersRef.current.push(marker);
       });
-
-      // Fit bounds if not selected
-      if (!selectedId && validVehicles.length > 0) {
-        const bounds = L.latLngBounds(validVehicles.map(v => [v.lat, v.lon]));
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      if (!selectedId && valid.length > 0) {
+        map.fitBounds(L.latLngBounds(valid.map(v => [v.lat, v.lon])), { padding: [40, 40], maxZoom: 14 });
       }
-
-      // Zoom to selected
       if (selectedId) {
-        const sel = validVehicles.find(v => v.id === selectedId);
-        if (sel) map.setView([sel.lat, sel.lon], 15, { animate: true });
+        const s = valid.find(v => v.id === selectedId);
+        if (s) map.setView([s.lat, s.lon], 15, { animate: true });
       }
     };
     updateMarkers();
@@ -97,53 +69,70 @@ const VehicleMap = ({ vehicles, selectedId, onSelect }) => {
   return <div ref={mapRef} className="w-full h-full rounded-xl" style={{ minHeight: 400 }} />;
 };
 
-// ── Settings Modal ──
-const WialonSettings = ({ open, onClose, authFetch, onSaved }) => {
-  const [token, setToken] = useState('');
+// ── Login Modal ──
+const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
   const [host, setHost] = useState('hst-api.wialon.com');
-  const [saving, setSaving] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [remember, setRemember] = useState(true);
+  const [status, setStatus] = useState('idle'); // idle | connecting | success | error
+  const [errorMsg, setErrorMsg] = useState('');
   const [config, setConfig] = useState(null);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (open) {
-      authFetch(`${API}/api/fleet/wialon/config`).then(r => r.json()).then(setConfig).catch(() => {});
+      authFetch(`${API}/api/fleet/wialon/config`).then(r => r.json()).then(data => {
+        setConfig(data);
+        if (data.configured) setHost(data.host || 'hst-api.wialon.com');
+      }).catch(() => {});
+      setStatus('idle');
+      setErrorMsg('');
     }
   }, [open, authFetch]);
 
-  const handleSave = async () => {
-    if (!token.trim()) return toast.error('Entrez votre token Wialon');
-    setSaving(true);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!username.trim() || !password.trim()) return toast.error('Remplissez tous les champs');
+    setStatus('connecting');
+    setErrorMsg('');
     try {
-      const resp = await authFetch(`${API}/api/fleet/wialon/config`, {
+      const resp = await authFetch(`${API}/api/fleet/wialon/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token.trim(), host: host.trim() }),
+        body: JSON.stringify({
+          host: host.trim().replace('https://', '').replace('http://', '').replace(/\/$/, ''),
+          username: username.trim(),
+          password: password,
+          remember,
+        }),
       });
       const data = await resp.json();
-      if (!resp.ok) throw new Error(data.detail || 'Erreur');
-      toast.success('Configuration sauvegardee');
-      setToken('');
-      onSaved();
-      onClose();
+      if (!resp.ok) throw new Error(data.detail || 'Connexion echouee');
+      setStatus('success');
+      toast.success(data.message || 'Connexion Wialon reussie');
+      setTimeout(() => {
+        onConnected(data.vehicles || []);
+        onClose();
+      }, 1200);
     } catch (err) {
+      setStatus('error');
+      setErrorMsg(err.message);
       toast.error(err.message);
-    } finally {
-      setSaving(false);
     }
   };
 
-  const handleDelete = async () => {
-    setDeleting(true);
+  const handleDisconnect = async () => {
     try {
       await authFetch(`${API}/api/fleet/wialon/config`, { method: 'DELETE' });
-      toast.success('Configuration supprimee');
-      onSaved();
-      onClose();
+      toast.success('Deconnexion effectuee');
+      setConfig(null);
+      setUsername('');
+      setPassword('');
+      setStatus('idle');
+      onConnected([]);
     } catch (err) {
-      toast.error('Erreur lors de la suppression');
-    } finally {
-      setDeleting(false);
+      toast.error('Erreur de deconnexion');
     }
   };
 
@@ -151,49 +140,100 @@ const WialonSettings = ({ open, onClose, authFetch, onSaved }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()} data-testid="wialon-settings-modal">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-gray-900">Configuration Wialon</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5" /></button>
-        </div>
-
-        {config?.configured && (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-sm">
-            <div className="flex items-center gap-2 text-emerald-700 font-medium">
-              <Check className="w-4 h-4" /> Connecte
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl" onClick={e => e.stopPropagation()} data-testid="wialon-login-modal">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center">
+              <MapPin className="w-5 h-5 text-emerald-600" />
             </div>
-            <p className="text-emerald-600 mt-1">Host: {config.host}</p>
-            <p className="text-emerald-600">Token: {config.tokenMasked}</p>
+            <div>
+              <h3 className="text-base font-bold text-gray-900">Connexion Wialon</h3>
+              <p className="text-xs text-gray-400">Suivi GPS en temps reel</p>
+            </div>
           </div>
-        )}
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Token Wialon (72 caracteres)</label>
-          <input type="text" value={token} onChange={e => setToken(e.target.value)}
-            placeholder="Collez votre token ici..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-            data-testid="wialon-token-input" />
-          <p className="text-xs text-gray-400 mt-1">Obtenez-le depuis votre compte Wialon (Parametres &gt; Tokens)</p>
+          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg transition"><X className="w-4 h-4 text-gray-400" /></button>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Serveur Wialon</label>
-          <input type="text" value={host} onChange={e => setHost(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-            data-testid="wialon-host-input" />
-        </div>
+        <div className="p-6 space-y-4">
+          {/* Connected status */}
+          {config?.configured && status !== 'success' && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium text-emerald-700">Connecte</span>
+                </div>
+                <button onClick={handleDisconnect} className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1">
+                  <LogOut className="w-3 h-3" /> Deconnecter
+                </button>
+              </div>
+              <p className="text-xs text-emerald-600 mt-1">Utilisateur: {config.wialonUser || config.username}</p>
+              <p className="text-xs text-emerald-600">Serveur: {config.host}</p>
+            </div>
+          )}
 
-        <div className="flex gap-2">
-          <button onClick={handleSave} disabled={saving} data-testid="wialon-save-btn"
-            className="flex-1 py-2.5 bg-emerald-500 text-white rounded-lg font-medium text-sm hover:bg-emerald-600 disabled:opacity-50 flex items-center justify-center gap-2">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            {config?.configured ? 'Mettre a jour' : 'Connecter'}
-          </button>
-          {config?.configured && (
-            <button onClick={handleDelete} disabled={deleting}
-              className="px-4 py-2.5 border border-red-200 text-red-600 rounded-lg text-sm hover:bg-red-50 disabled:opacity-50 flex items-center gap-1">
-              {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-            </button>
+          {/* Success state */}
+          {status === 'success' && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+              <Check className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+              <p className="text-sm font-medium text-emerald-700">Connexion Wialon reussie</p>
+              <p className="text-xs text-emerald-500 mt-1">Chargement des vehicules...</p>
+            </div>
+          )}
+
+          {/* Error state */}
+          {status === 'error' && errorMsg && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+              <p className="text-sm text-red-700">{errorMsg}</p>
+            </div>
+          )}
+
+          {/* Login form */}
+          {status !== 'success' && (
+            <form onSubmit={handleLogin} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Serveur Wialon</label>
+                <input type="text" value={host} onChange={e => setHost(e.target.value)}
+                  placeholder="hst-api.wialon.com"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                  data-testid="wialon-host-input" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Nom d'utilisateur</label>
+                <input type="text" value={username} onChange={e => setUsername(e.target.value)}
+                  placeholder="Votre identifiant Wialon" autoComplete="username"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                  data-testid="wialon-username-input" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Mot de passe</label>
+                <div className="relative">
+                  <input type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                    placeholder="Votre mot de passe Wialon" autoComplete="current-password"
+                    className="w-full px-3 py-2 pr-10 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                    data-testid="wialon-password-input" />
+                  <button type="button" onClick={() => setShowPwd(!showPwd)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500" />
+                <span className="text-xs text-gray-500">Memoriser la connexion</span>
+              </label>
+              <button type="submit" disabled={status === 'connecting'} data-testid="wialon-connect-btn"
+                className="w-full py-2.5 bg-emerald-500 text-white rounded-xl font-medium text-sm hover:bg-emerald-600 transition disabled:opacity-50 flex items-center justify-center gap-2">
+                {status === 'connecting' ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Connexion en cours...</>
+                ) : (
+                  <><LogIn className="w-4 h-4" /> Se connecter</>
+                )}
+              </button>
+            </form>
           )}
         </div>
       </div>
@@ -206,8 +246,9 @@ const FleetGeolocation = () => {
   const { authFetch } = useFleetAuth();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [configured, setConfigured] = useState(null);
-  const [showSettings, setShowSettings] = useState(false);
+  const [configured, setConfigured] = useState(null); // null=loading, false, true
+  const [config, setConfig] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const intervalRef = useRef(null);
@@ -218,34 +259,26 @@ const FleetGeolocation = () => {
       const resp = await authFetch(`${API}/api/fleet/wialon/vehicles`);
       const data = await resp.json();
       if (!resp.ok) {
-        if (resp.status === 400) {
-          setConfigured(false);
-          return;
-        }
+        if (resp.status === 400) { setConfigured(false); return; }
         throw new Error(data.detail || 'Erreur');
       }
       setVehicles(data.vehicles || []);
       setConfigured(true);
     } catch (err) {
-      if (err.message?.includes('non configure')) {
+      if (err.message?.includes('non configure') || err.message?.includes('Reconnectez')) {
         setConfigured(false);
       } else {
         toast.error(err.message);
       }
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }, [authFetch]);
 
   useEffect(() => {
-    // Check config first
-    authFetch(`${API}/api/fleet/wialon/config`)
-      .then(r => r.json())
-      .then(data => {
-        setConfigured(data.configured);
-        if (data.configured) fetchVehicles();
-      })
-      .catch(() => setConfigured(false));
+    authFetch(`${API}/api/fleet/wialon/config`).then(r => r.json()).then(data => {
+      setConfig(data);
+      setConfigured(data.configured);
+      if (data.configured) fetchVehicles();
+    }).catch(() => setConfigured(false));
   }, [authFetch, fetchVehicles]);
 
   useEffect(() => {
@@ -255,8 +288,21 @@ const FleetGeolocation = () => {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [autoRefresh, configured, fetchVehicles]);
 
+  const handleConnected = (newVehicles) => {
+    if (newVehicles.length > 0) {
+      setVehicles(newVehicles);
+      setConfigured(true);
+    }
+    // Refresh config
+    authFetch(`${API}/api/fleet/wialon/config`).then(r => r.json()).then(data => {
+      setConfig(data);
+      setConfigured(data.configured);
+      if (data.configured && newVehicles.length === 0) fetchVehicles();
+    });
+  };
+
   const formatAge = (seconds) => {
-    if (seconds < 60) return 'A l\'instant';
+    if (seconds < 60) return "A l'instant";
     if (seconds < 3600) return `il y a ${Math.round(seconds / 60)} min`;
     if (seconds < 86400) return `il y a ${Math.round(seconds / 3600)}h`;
     return `il y a ${Math.round(seconds / 86400)}j`;
@@ -275,7 +321,7 @@ const FleetGeolocation = () => {
   const idleCount = vehicles.filter(v => v.status === 'idle').length;
   const offlineCount = vehicles.filter(v => v.status === 'offline').length;
 
-  // Not configured state
+  // Not configured
   if (configured === false) {
     return (
       <div className="p-6 max-w-lg mx-auto mt-20 text-center" data-testid="wialon-not-configured">
@@ -283,13 +329,12 @@ const FleetGeolocation = () => {
           <MapPin className="w-10 h-10 text-gray-400" />
         </div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">Geolocalisation des vehicules</h2>
-        <p className="text-gray-500 mb-6">Connectez votre compte Wialon pour suivre vos vehicules en temps reel sur la carte.</p>
-        <button onClick={() => setShowSettings(true)} data-testid="wialon-setup-btn"
+        <p className="text-gray-500 mb-6 text-sm">Connectez votre compte Wialon pour suivre vos vehicules en temps reel.</p>
+        <button onClick={() => setShowLogin(true)} data-testid="wialon-setup-btn"
           className="px-6 py-3 bg-emerald-500 text-white rounded-xl font-medium hover:bg-emerald-600 transition flex items-center gap-2 mx-auto">
-          <Settings className="w-5 h-5" /> Configurer Wialon
+          <LogIn className="w-5 h-5" /> Se connecter a Wialon
         </button>
-        <WialonSettings open={showSettings} onClose={() => setShowSettings(false)} authFetch={authFetch}
-          onSaved={() => { setConfigured(true); fetchVehicles(); }} />
+        <WialonLogin open={showLogin} onClose={() => setShowLogin(false)} authFetch={authFetch} onConnected={handleConnected} />
       </div>
     );
   }
@@ -300,10 +345,14 @@ const FleetGeolocation = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Geolocalisation</h1>
-          <p className="text-sm text-gray-500">{vehicles.length} vehicules trouves</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+            <span className="text-xs text-gray-500">
+              Wialon: {config?.wialonUser || config?.username || 'Connecte'}
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Stats pills */}
           <div className="flex items-center gap-1.5 text-xs">
             <span className="flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 rounded-full">
               <Wifi className="w-3 h-3" /> {onlineCount}
@@ -323,30 +372,34 @@ const FleetGeolocation = () => {
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-50">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          <button onClick={() => setShowSettings(true)} data-testid="wialon-settings-btn"
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500">
+          <button onClick={() => setShowLogin(true)} data-testid="wialon-settings-btn"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500" title="Reconfigurer Wialon">
             <Settings className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Main layout */}
+      {/* Map + List */}
       <div className="flex flex-col lg:flex-row gap-4" style={{ height: 'calc(100vh - 180px)' }}>
-        {/* Map */}
         <div className="flex-1 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm min-h-[400px]">
           {vehicles.length > 0 ? (
             <VehicleMap vehicles={vehicles} selectedId={selectedId} onSelect={setSelectedId} />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
-              {loading ? <Loader2 className="w-8 h-8 animate-spin" /> : <p>Aucun vehicule avec position GPS</p>}
+              {loading ? <Loader2 className="w-8 h-8 animate-spin" /> : (
+                <div className="text-center">
+                  <MapPin className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                  <p className="text-sm">Aucun vehicule avec position GPS</p>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Vehicle list */}
         <div className="w-full lg:w-80 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
-          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
             <span className="text-sm font-semibold text-gray-700">Vehicules ({vehicles.length})</span>
+            {loading && <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />}
           </div>
           <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
             {vehicles.map(v => (
@@ -358,25 +411,23 @@ const FleetGeolocation = () => {
                   {statusBadge(v.status)}
                 </div>
                 <div className="flex items-center gap-3 text-xs text-gray-400">
-                  <span className="flex items-center gap-1">
-                    <Gauge className="w-3 h-3" /> {v.speed} km/h
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {formatAge(v.ageSeconds)}
-                  </span>
+                  <span className="flex items-center gap-1"><Gauge className="w-3 h-3" /> {v.speed} km/h</span>
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {formatAge(v.ageSeconds)}</span>
                   {v.id === selectedId && <ChevronRight className="w-3 h-3 ml-auto text-emerald-500" />}
                 </div>
               </button>
             ))}
             {vehicles.length === 0 && !loading && (
-              <div className="p-6 text-center text-sm text-gray-400">Aucun vehicule</div>
+              <div className="p-6 text-center text-sm text-gray-400">
+                <p>Aucun vehicule trouve</p>
+                <p className="text-xs mt-1">Verifiez votre compte Wialon</p>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      <WialonSettings open={showSettings} onClose={() => setShowSettings(false)} authFetch={authFetch}
-        onSaved={() => fetchVehicles()} />
+      <WialonLogin open={showLogin} onClose={() => setShowLogin(false)} authFetch={authFetch} onConnected={handleConnected} />
     </div>
   );
 };
