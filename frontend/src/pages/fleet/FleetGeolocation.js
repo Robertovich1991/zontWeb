@@ -3,8 +3,6 @@ import { useFleetAuth } from './FleetAuthContext';
 import { MapPin, Settings, RefreshCw, Wifi, WifiOff, Clock, Gauge, ChevronRight, X, Check, Trash2, Loader2, Eye, EyeOff, LogIn, LogOut, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-const API = process.env.REACT_APP_BACKEND_URL;
-
 // ── Map Component ──
 const VehicleMap = ({ vehicles, selectedId, onSelect }) => {
   const mapRef = useRef(null);
@@ -82,7 +80,7 @@ const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
 
   useEffect(() => {
     if (open) {
-      authFetch(`${API}/api/fleet/wialon/config`).then(r => r.json()).then(data => {
+      authFetch('/api/fleet/wialon/config').then(r => r.json()).then(data => {
         setConfig(data);
         if (data.configured) setHost(data.host || 'hst-api.wialon.com');
       }).catch(() => {});
@@ -97,7 +95,7 @@ const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
     setStatus('connecting');
     setErrorMsg('');
     try {
-      const resp = await authFetch(`${API}/api/fleet/wialon/login`, {
+      const resp = await authFetch('/api/fleet/wialon/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -124,7 +122,7 @@ const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
 
   const handleDisconnect = async () => {
     try {
-      await authFetch(`${API}/api/fleet/wialon/config`, { method: 'DELETE' });
+      await authFetch('/api/fleet/wialon/config', { method: 'DELETE' });
       toast.success('Deconnexion effectuee');
       setConfig(null);
       setUsername('');
@@ -256,7 +254,7 @@ const FleetGeolocation = () => {
   const fetchVehicles = useCallback(async () => {
     setLoading(true);
     try {
-      const resp = await authFetch(`${API}/api/fleet/wialon/vehicles`);
+      const resp = await authFetch('/api/fleet/wialon/vehicles');
       const data = await resp.json();
       if (!resp.ok) {
         if (resp.status === 400) { setConfigured(false); return; }
@@ -274,7 +272,7 @@ const FleetGeolocation = () => {
   }, [authFetch]);
 
   useEffect(() => {
-    authFetch(`${API}/api/fleet/wialon/config`).then(r => r.json()).then(data => {
+    authFetch('/api/fleet/wialon/config').then(r => r.json()).then(data => {
       setConfig(data);
       setConfigured(data.configured);
       if (data.configured) fetchVehicles();
@@ -294,7 +292,7 @@ const FleetGeolocation = () => {
       setConfigured(true);
     }
     // Refresh config
-    authFetch(`${API}/api/fleet/wialon/config`).then(r => r.json()).then(data => {
+    authFetch('/api/fleet/wialon/config').then(r => r.json()).then(data => {
       setConfig(data);
       setConfigured(data.configured);
       if (data.configured && newVehicles.length === 0) fetchVehicles();
