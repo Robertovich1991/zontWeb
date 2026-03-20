@@ -25,19 +25,19 @@ const HotelLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex" data-testid="hotel-login-page">
-      {/* Left side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 items-end justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-gray-900 flex flex-col lg:flex-row" data-testid="hotel-login-page">
+      {/* Image - banner on mobile, left panel on desktop */}
+      <div className="h-48 sm:h-56 lg:h-auto lg:w-1/2 relative overflow-hidden">
         <img src="https://customer-assets.emergentagent.com/job_ef3426f2-dc72-4376-a61e-52efe878088e/artifacts/l4cdj4wc_1000136154.jpg"
-          alt="Hotel Transfer" className="w-full h-full object-cover object-center" />
+          alt="Hotel Transfer" className="w-full h-full object-cover object-bottom lg:object-center" />
       </div>
 
-      {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-6">
+      {/* Form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-8 lg:py-0">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Building2 className="w-8 h-8 text-emerald-400" />
+            <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Building2 className="w-7 h-7 text-emerald-400" />
             </div>
             <h1 className="text-2xl font-bold text-white">Espace Hotel</h1>
             <p className="text-gray-400 text-sm mt-1">Connectez-vous pour acceder a votre tableau de bord</p>
