@@ -80,7 +80,8 @@ const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
 
   useEffect(() => {
     if (open) {
-      authFetch('/api/fleet/wialon/config').then(r => r.json()).then(data => {
+      authFetch('/api/fleet/wialon/config').then(async r => {
+        const data = await r.json();
         setConfig(data);
         if (data.configured) setHost(data.host || 'hst-api.wialon.com');
       }).catch(() => {});
@@ -105,7 +106,9 @@ const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
           remember,
         }),
       });
-      const data = await resp.json();
+      const text = await resp.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { detail: text || 'Erreur inconnue' }; }
       if (!resp.ok) throw new Error(data.detail || 'Connexion echouee');
       setStatus('success');
       toast.success(data.message || 'Connexion Wialon reussie');
@@ -255,7 +258,9 @@ const FleetGeolocation = () => {
     setLoading(true);
     try {
       const resp = await authFetch('/api/fleet/wialon/vehicles');
-      const data = await resp.json();
+      const text = await resp.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = {}; }
       if (!resp.ok) {
         if (resp.status === 400) { setConfigured(false); return; }
         throw new Error(data.detail || 'Erreur');
@@ -272,7 +277,8 @@ const FleetGeolocation = () => {
   }, [authFetch]);
 
   useEffect(() => {
-    authFetch('/api/fleet/wialon/config').then(r => r.json()).then(data => {
+    authFetch('/api/fleet/wialon/config').then(async r => {
+      const data = await r.json();
       setConfig(data);
       setConfigured(data.configured);
       if (data.configured) fetchVehicles();
@@ -292,11 +298,12 @@ const FleetGeolocation = () => {
       setConfigured(true);
     }
     // Refresh config
-    authFetch('/api/fleet/wialon/config').then(r => r.json()).then(data => {
+    authFetch('/api/fleet/wialon/config').then(async r => {
+      const data = await r.json();
       setConfig(data);
       setConfigured(data.configured);
       if (data.configured && newVehicles.length === 0) fetchVehicles();
-    });
+    }).catch(() => {});
   };
 
   const formatAge = (seconds) => {
