@@ -69,12 +69,14 @@ const VehicleMap = ({ vehicles, selectedId, onSelect }) => {
 
 // ── Login Modal ──
 const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
+  const [tab, setTab] = useState('token'); // 'token' | 'password'
   const [host, setHost] = useState('hst-api.wialon.com');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [wialonToken, setWialonToken] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState(true);
-  const [status, setStatus] = useState('idle'); // idle | connecting | success | error
+  const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [config, setConfig] = useState(null);
 
@@ -83,39 +85,55 @@ const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
       authFetch('/api/fleet/wialon/config').then(async r => {
         const data = await r.json();
         setConfig(data);
-        if (data.configured) setHost(data.host || 'hst-api.wialon.com');
+        if (data.configured) {
+          setHost(data.host || 'hst-api.wialon.com');
+          setTab(data.authMode || 'token');
+        }
       }).catch(() => {});
       setStatus('idle');
       setErrorMsg('');
     }
   }, [open, authFetch]);
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username.trim() || !password.trim()) return toast.error('Remplissez tous les champs');
     setStatus('connecting');
     setErrorMsg('');
+
     try {
-      const resp = await authFetch('/api/fleet/wialon/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          host: host.trim().replace('https://', '').replace('http://', '').replace(/\/$/, ''),
-          username: username.trim(),
-          password: password,
-          remember,
-        }),
-      });
+      let resp;
+      if (tab === 'token') {
+        if (!wialonToken.trim()) return (setStatus('idle'), toast.error('Collez votre token Wialon'));
+        resp = await authFetch('/api/fleet/wialon/login-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            host: host.trim().replace('https://', '').replace('http://', '').replace(/\/$/, ''),
+            token: wialonToken.trim(),
+          }),
+        });
+      } else {
+        if (!username.trim() || !password.trim()) return (setStatus('idle'), toast.error('Remplissez tous les champs'));
+        resp = await authFetch('/api/fleet/wialon/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            host: host.trim().replace('https://', '').replace('http://', '').replace(/\/$/, ''),
+            username: username.trim(),
+            password: password,
+            remember,
+          }),
+        });
+      }
+
       const text = await resp.text();
       let data;
       try { data = JSON.parse(text); } catch { data = { detail: text || 'Erreur inconnue' }; }
       if (!resp.ok) throw new Error(data.detail || 'Connexion echouee');
+
       setStatus('success');
       toast.success(data.message || 'Connexion Wialon reussie');
-      setTimeout(() => {
-        onConnected(data.vehicles || []);
-        onClose();
-      }, 1200);
+      setTimeout(() => { onConnected(data.vehicles || []); onClose(); }, 1200);
     } catch (err) {
       setStatus('error');
       setErrorMsg(err.message);
@@ -128,8 +146,7 @@ const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
       await authFetch('/api/fleet/wialon/config', { method: 'DELETE' });
       toast.success('Deconnexion effectuee');
       setConfig(null);
-      setUsername('');
-      setPassword('');
+      setUsername(''); setPassword(''); setWialonToken('');
       setStatus('idle');
       onConnected([]);
     } catch (err) {
@@ -163,7 +180,7 @@ const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                  <span className="text-sm font-medium text-emerald-700">Connecte</span>
+                  <span className="text-sm font-medium text-emerald-700">Connecte ({config.authMode === 'token' ? 'Token' : 'Login'})</span>
                 </div>
                 <button onClick={handleDisconnect} className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1">
                   <LogOut className="w-3 h-3" /> Deconnecter
@@ -191,50 +208,81 @@ const WialonLogin = ({ open, onClose, authFetch, onConnected }) => {
             </div>
           )}
 
-          {/* Login form */}
+          {/* Auth mode tabs */}
           {status !== 'success' && (
-            <form onSubmit={handleLogin} className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Serveur Wialon</label>
-                <input type="text" value={host} onChange={e => setHost(e.target.value)}
-                  placeholder="hst-api.wialon.com"
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-                  data-testid="wialon-host-input" />
+            <>
+              <div className="flex bg-gray-100 rounded-lg p-0.5" data-testid="wialon-auth-tabs">
+                <button onClick={() => setTab('token')} data-testid="wialon-tab-token"
+                  className={`flex-1 py-2 text-xs font-medium rounded-md transition ${tab === 'token' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+                  Token (recommande)
+                </button>
+                <button onClick={() => setTab('password')} data-testid="wialon-tab-password"
+                  className={`flex-1 py-2 text-xs font-medium rounded-md transition ${tab === 'password' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+                  Login / Mot de passe
+                </button>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Nom d'utilisateur</label>
-                <input type="text" value={username} onChange={e => setUsername(e.target.value)}
-                  placeholder="Votre identifiant Wialon" autoComplete="username"
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-                  data-testid="wialon-username-input" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Mot de passe</label>
-                <div className="relative">
-                  <input type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="Votre mot de passe Wialon" autoComplete="current-password"
-                    className="w-full px-3 py-2 pr-10 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-                    data-testid="wialon-password-input" />
-                  <button type="button" onClick={() => setShowPwd(!showPwd)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Serveur Wialon</label>
+                  <input type="text" value={host} onChange={e => setHost(e.target.value)}
+                    placeholder="hst-api.wialon.com"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                    data-testid="wialon-host-input" />
                 </div>
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500" />
-                <span className="text-xs text-gray-500">Memoriser la connexion</span>
-              </label>
-              <button type="submit" disabled={status === 'connecting'} data-testid="wialon-connect-btn"
-                className="w-full py-2.5 bg-emerald-500 text-white rounded-xl font-medium text-sm hover:bg-emerald-600 transition disabled:opacity-50 flex items-center justify-center gap-2">
-                {status === 'connecting' ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Connexion en cours...</>
+
+                {tab === 'token' ? (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Token d'acces Wialon</label>
+                    <textarea value={wialonToken} onChange={e => setWialonToken(e.target.value)}
+                      placeholder="Collez votre token ici (72 caracteres)..."
+                      rows={3}
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none font-mono resize-none"
+                      data-testid="wialon-token-input" />
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      Wialon Hosting &gt; Nom d'utilisateur &gt; Parametres &gt; Tokens &gt; Creer un token
+                    </p>
+                  </div>
                 ) : (
-                  <><LogIn className="w-4 h-4" /> Se connecter</>
+                  <>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Nom d'utilisateur</label>
+                      <input type="text" value={username} onChange={e => setUsername(e.target.value)}
+                        placeholder="Votre identifiant Wialon" autoComplete="username"
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                        data-testid="wialon-username-input" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Mot de passe</label>
+                      <div className="relative">
+                        <input type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                          placeholder="Votre mot de passe Wialon" autoComplete="current-password"
+                          className="w-full px-3 py-2 pr-10 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                          data-testid="wialon-password-input" />
+                        <button type="button" onClick={() => setShowPwd(!showPwd)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                          {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500" />
+                      <span className="text-xs text-gray-500">Memoriser la connexion</span>
+                    </label>
+                  </>
                 )}
-              </button>
-            </form>
+
+                <button type="submit" disabled={status === 'connecting'} data-testid="wialon-connect-btn"
+                  className="w-full py-2.5 bg-emerald-500 text-white rounded-xl font-medium text-sm hover:bg-emerald-600 transition disabled:opacity-50 flex items-center justify-center gap-2">
+                  {status === 'connecting' ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Connexion en cours...</>
+                  ) : (
+                    <><LogIn className="w-4 h-4" /> Se connecter</>
+                  )}
+                </button>
+              </form>
+            </>
           )}
         </div>
       </div>

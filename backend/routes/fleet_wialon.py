@@ -134,7 +134,7 @@ class WialonTokenRequest(BaseModel):
 
 @router.post("/login")
 async def wialon_connect(data: WialonLoginRequest, request: Request):
-    """Connect to Wialon with username/password."""
+    """Connect to Wialon with username/password (legacy method)."""
     get_token(request)
     company_id = get_company_id(request)
     db = get_db(request)
@@ -157,7 +157,7 @@ async def wialon_connect(data: WialonLoginRequest, request: Request):
     units = await wialon_get_units(host, eid)
     logger.info(f"Wialon units found: {len(units)}")
 
-    # Store config (encrypted password if remember=True)
+    # Store config
     config_doc = {
         "companyId": company_id,
         "authMode": "password",
@@ -167,6 +167,7 @@ async def wialon_connect(data: WialonLoginRequest, request: Request):
         "wialonUserName": user_name,
         "connectedAt": time.time(),
         "updatedAt": time.time(),
+        "tokenEnc": "",
     }
     if data.remember:
         config_doc["passwordEnc"] = encrypt_value(data.password)
@@ -181,10 +182,62 @@ async def wialon_connect(data: WialonLoginRequest, request: Request):
         upsert=True,
     )
 
-    # Logout the test session (we'll create a new one when needed)
     await wialon_logout(host, eid)
+    vehicles = _format_units(units)
 
-    # Format vehicles for response
+    return {
+        "success": True,
+        "message": f"Connexion Wialon reussie ({user_name})",
+        "wialonUser": user_name,
+        "vehicleCount": len(vehicles),
+        "vehicles": vehicles,
+    }
+
+
+@router.post("/login-token")
+async def wialon_connect_token(data: WialonTokenRequest, request: Request):
+    """Connect to Wialon with access token (recommended method)."""
+    get_token(request)
+    company_id = get_company_id(request)
+    db = get_db(request)
+
+    host = data.host.strip().replace("https://", "").replace("http://", "").rstrip("/") if data.host else WIALON_DEFAULT_HOST
+
+    session = await wialon_login_token(host, data.token)
+
+    eid = session.get("eid", "")
+    if not eid:
+        raise HTTPException(400, "Connexion echouee - token invalide ou expire")
+
+    wialon_user = session.get("user", {})
+    user_name = wialon_user.get("nm", "")
+    user_id = wialon_user.get("id", "")
+    logger.info(f"Wialon token login success: user={user_name} id={user_id} host={host}")
+
+    units = await wialon_get_units(host, eid)
+    logger.info(f"Wialon units found: {len(units)}")
+
+    config_doc = {
+        "companyId": company_id,
+        "authMode": "token",
+        "host": host,
+        "username": user_name,
+        "wialonUserId": user_id,
+        "wialonUserName": user_name,
+        "tokenEnc": encrypt_value(data.token),
+        "passwordEnc": "",
+        "remembered": True,
+        "connectedAt": time.time(),
+        "updatedAt": time.time(),
+    }
+
+    await db.fleet_wialon_config.update_one(
+        {"companyId": company_id},
+        {"$set": config_doc},
+        upsert=True,
+    )
+
+    await wialon_logout(host, eid)
     vehicles = _format_units(units)
 
     return {
@@ -206,7 +259,7 @@ async def get_wialon_config(request: Request):
     config = await db.fleet_wialon_config.find_one(
         {"companyId": company_id}, {"_id": 0}
     )
-    if not config or not config.get("username"):
+    if not config or (not config.get("username") and not config.get("tokenEnc")):
         return {"configured": False, "authMode": None}
 
     return {
@@ -244,23 +297,31 @@ async def get_wialon_vehicles(request: Request):
     config = await db.fleet_wialon_config.find_one(
         {"companyId": company_id}, {"_id": 0}
     )
-    if not config or not config.get("username"):
+    if not config:
         raise HTTPException(400, "Wialon non configure. Connectez-vous dans les parametres.")
 
     host = config.get("host", WIALON_DEFAULT_HOST)
-    username = config.get("username", "")
-    password_enc = config.get("passwordEnc", "")
+    auth_mode = config.get("authMode", "password")
 
-    if not password_enc:
-        raise HTTPException(400, "Identifiants Wialon non memorises. Reconnectez-vous.")
-
+    # Login based on auth mode
     try:
-        password = decrypt_value(password_enc)
+        if auth_mode == "token":
+            token_enc = config.get("tokenEnc", "")
+            if not token_enc:
+                raise HTTPException(400, "Token Wialon non memorise. Reconnectez-vous.")
+            wialon_token = decrypt_value(token_enc)
+            session = await wialon_login_token(host, wialon_token)
+        else:
+            password_enc = config.get("passwordEnc", "")
+            if not password_enc:
+                raise HTTPException(400, "Identifiants Wialon non memorises. Reconnectez-vous.")
+            password = decrypt_value(password_enc)
+            session = await wialon_login_password(host, config.get("username", ""), password)
+    except HTTPException:
+        raise
     except Exception:
         raise HTTPException(400, "Erreur de dechiffrement. Reconnectez-vous.")
 
-    # Login to Wialon
-    session = await wialon_login_password(host, username, password)
     eid = session.get("eid", "")
     if not eid:
         raise HTTPException(502, "Session Wialon non obtenue")
