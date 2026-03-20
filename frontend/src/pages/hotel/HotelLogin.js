@@ -29,7 +29,7 @@ const HotelLogin = () => {
       {/* Image - banner on mobile, left panel on desktop */}
       <div className="h-48 sm:h-56 lg:h-auto lg:w-1/2 relative overflow-hidden">
         <img src="https://customer-assets.emergentagent.com/job_ef3426f2-dc72-4376-a61e-52efe878088e/artifacts/l4cdj4wc_1000136154.jpg"
-          alt="Hotel Transfer" className="w-full h-full object-cover object-bottom lg:object-center" />
+          alt="Hotel Transfer" loading="lazy" className="w-full h-full object-cover object-bottom lg:object-center" />
       </div>
 
       {/* Form */}
