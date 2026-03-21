@@ -1,9 +1,7 @@
 from fastapi import FastAPI, APIRouter, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
@@ -25,23 +23,6 @@ db = client[os.environ['DB_NAME']]
 # Create the main app without a prefix
 app = FastAPI()
 app.state.db = db
-
-
-# ── Cache-Control middleware for static assets ──
-class CacheControlMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        path = request.url.path
-        if any(path.endswith(ext) for ext in ('.js', '.css', '.woff2', '.woff', '.ttf')):
-            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
-        elif any(path.endswith(ext) for ext in ('.png', '.jpg', '.jpeg', '.webp', '.svg', '.ico', '.gif')):
-            response.headers['Cache-Control'] = 'public, max-age=2592000'
-        elif path.endswith('.html') or path == '/':
-            response.headers['Cache-Control'] = 'no-cache, must-revalidate'
-        return response
-
-
-app.add_middleware(CacheControlMiddleware)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
