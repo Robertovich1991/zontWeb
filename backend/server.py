@@ -143,6 +143,8 @@ from routes.fleet_driver_profile import router as fleet_driver_profile_router
 app.include_router(fleet_driver_profile_router)
 from routes.fleet_wialon import router as fleet_wialon_router
 app.include_router(fleet_wialon_router)
+from routes.fleet_gps import router as fleet_gps_router
+app.include_router(fleet_gps_router)
 
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"
@@ -201,6 +203,12 @@ async def startup_event():
     # Forfaits
     await db.driver_forfaits.create_index([("driverId", 1), ("companyId", 1), ("month", 1)])
     await db.driver_forfaits.create_index([("driverId", 1), ("rideId", 1), ("companyId", 1)], unique=True)
+    # GPS indexes
+    await db.gps_devices.create_index([("companyId", 1)])
+    await db.gps_devices.create_index([("imei", 1), ("companyId", 1)], unique=True)
+    await db.gps_positions.create_index([("imei", 1)], unique=True)
+    await db.gps_history.create_index([("imei", 1), ("timestamp", 1)])
+    await db.gps_history.create_index([("receivedAt", 1)], expireAfterSeconds=2592000)  # 30 days TTL
     logger.info("MongoDB indexes created.")
 
 
