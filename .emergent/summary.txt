@@ -1,153 +1,156 @@
 <analysis>**original_problem_statement:**
-The user's initial goal was to build a Hotel Kiosk management system. This has been completed. The project has since evolved significantly based on user requests.
+The user's application has evolved into a comprehensive multi-portal platform (Client website, Super Admin, Hotel Admin, Fleet Management, and Driver portals). The system aggregates ride data from an external C# backend () and an internal MongoDB. 
+Recent requirements include deep performance optimizations, integrating Wialon GPS for real-time fleet tracking, UI/UX refinements, and handling new business flows (like importing planning from Google Sheets and planning a new Android Kiosk application for hotels).
 
-The most recent major initiative was to create a brand new, standalone portal for partner transportation companies (referred to as Fleet Management or Société). This portal must be entirely separate from the existing admin panels and connect to the user's pre-existing C# backend () for all data operations (authentication, reading driver/vehicle data). The first phase of this portal (login, dashboard, read-only lists of drivers and vehicles) is complete.
+**User's preferred language**: French (INSTRUCT next agent to respond in French only).
 
-The current request is to begin Phase 2 of the Fleet Management portal by adding the ability for a logged-in company to create new drivers.
-
-**User's preferred language**: French
-
-**what currently exists?**
-- A full-stack application with a client-facing booking site, a driver PWA, a Super Admin panel, a Hotel Admin panel, and the new Fleet Management portal.
-- The Hotel Kiosk system, including commission/invoicing modules, is fully functional and tested.
-- SEO-optimized pages for VTC 7 Places and VTC 8 Places have been created, and the Google Places Autocomplete bug on them has been fixed.
-- The Super Admin UI has been converted from a dark theme to a light theme, with all related visibility bugs fixed.
-- A reusable  component with a searchable country code selector has been built and integrated into the client and driver registration forms.
-- The driver registration flow (Devenir Chauffeur) has been fixed to correctly synchronize new company registrations with the external C# backend.
-- The new Fleet Management portal () is live. It authenticates against the C# backend and displays company-specific dashboards, driver lists, and vehicle lists by proxying API calls.
+**what currently exists?** 
+- Multi-portal platform (Client, Admin, Hotel, Fleet, Driver).
+- **Fleet Portal:** Full CRUD for drivers/vehicles, Wialon GPS live tracking integration, and highly optimized Planning module (aggregating Zont C# and Company MongoDB bookings) with 24h timeline view, assignment logic, and source filtering.
+- **Hotel Portal:** Dashboard for hotel admins to view bookings and commissions, recently updated with a refined login UI.
+- **Backend Architecture:** FastAPI backend heavily utilizing asynchronous requests, connection pooling, and caching () to bypass the external C# API's slow response times and pagination bugs.
+- **SEO & Performance:** Optimized React frontend (lazy loading, unused packages removed), working  and .
 
 **Last working item**:
-- **Last item agent was working:** The user requested the ability for a logged-in fleet company to add a new driver. The data must be sent to the C# backend for approval.
-- **Status:** NOT STARTED
-- **Agent Testing Done:** N
-- **Which testing method agent to use?** both. The agent must first create a backend proxy endpoint and then a frontend form. The entire flow (form submission -> proxy -> C# API call -> response handling) needs end-to-end testing.
-- **User Testing Done:** N
+- **Last item agent was working:** The agent was discussing infrastructure requirements with the user. The user asked about importing booking data from a Google Sheet, building a new Android Kiosk app for quick hotel bookings (with SMS payment links), and integrating raw Teltonika GPS trackers via TCP. The agent clarified that raw TCP requires an external VPS, which should then webhook into our FastAPI backend.
+- **Status:** USER VERIFICATION PENDING / CLARIFICATION PENDING
+- **Agent Testing Done:** N/A (Consultation phase)
+- **Which testing method agent to use?** N/A
+- **User Testing Done:** N/A
 
 **All Pending/In progress Issue list**:
-- **Issue 1: Implement Add Driver Feature in Fleet Portal (P0)**
-    - **Description:** A logged-in fleet company administrator needs a form to add a new driver. The submitted information must be sent to the C# backend via the existing proxy system for approval.
-    - **Next debug checklist:**
-        1.  Investigate the C# Swagger documentation () to find the correct endpoint for creating a new driver (e.g., ).
-        2.  Identify the required payload fields for the C# endpoint (e.g., FirstName, LastName, Email, Phone, CompanyId).
-        3.  Create a new backend proxy endpoint in . This endpoint will receive the form data, add the  from the logged-in user's session, and forward the request to the C# backend.
-        4.  Create a new frontend page or modal for the Add Driver form (e.g., ).
-        5.  Add a button on the drivers list page () that navigates to the new form.
-        6.  Implement the form submission logic to call the new backend proxy endpoint and handle success/error responses.
-    - **Why fix this issue and what will be achieved with the fix?** This is a critical feature for the Fleet Management portal, allowing partner companies to become self-sufficient in managing their personnel.
-    - **Status:** NOT STARTED
-    - **Is recurring issue?** N
-    - **Should Test frontend/backend/both after fix?** Both
-    - **Blocked on other issue:** No.
+- **Issue 1: Partner Ride Cancellation is Local Only (P2)**
+    - **Attempted fixes:** None. Blocked by external C# team.
+    - **Next debug checklist:** Wait for user's C# team to provide an API endpoint for cancellation.
+    - **Why fix this issue and what will be achieved with the fix?** Data consistency between local DB and legacy C# system.
+    - **Status:** BLOCKED
+    - **Is recurring issue?** Y
+    - **Should Test frontend/backend/both after fix?** Backend
+    - **Blocked on other issue:** Blocked by the external C# team.
 
 **In progress Task List**:
-- None.
+- **Task 1: Google Sheets Planning Import (P1)**
+    - **Where to resume:** The user provided an image of a Google Sheet containing bookings. Need to design an import feature (CSV upload or Google Sheets API) to map columns (Date, Time, Client, Source, Price, Driver) into .
+    - **What will be achieved with this?** Allows the company to easily migrate manual planning into the platform.
+    - **Status:** NOT STARTED (Pending user validation of the mapping plan)
+    - **Should Test frontend/backend/both after fix?** Both
+    - **Blocked on something:** Waiting for user confirmation on the exact workflow.
+
+- **Task 2: Android Hotel Kiosk App / Web-view (P1)**
+    - **Where to resume:** The user wants a simplified interface for a tablet/Android screen in hotels. Clients book in a few clicks and receive a payment link on their phone. Design the UI/UX flow for this specific route (e.g., ).
+    - **What will be achieved with this?** Increased autonomy for hotel guests to book rides.
+    - **Status:** NOT STARTED (Pending user clarification)
+    - **Should Test frontend/backend/both after fix?** Both
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks:**
-  - **P1: Fleet Portal - Vehicle Management:** Implement functionality for companies to add new vehicles, similar to the Add Driver task.
-  - **P1: Fleet Portal - Company Profile:** Create a page where the company can view and manage their own profile details.
-- **Future Tasks:**
-  - **P2: Fleet Portal - Booking & Dispatch:** Implement modules for booking management and driver dispatching.
-  - **P3: Hotel Admin - Automated Invoicing:** Automate the generation and sending of monthly commission invoices to hotels.
-  - **P3: Super Admin - Hotel Leaderboard:** Create a dashboard widget or page to rank hotels by performance.
+- **P0: Implement AI-assisted Booking Creation:** Create a feature where users can paste text (like an email), and an LLM extracts booking details to pre-fill the Mes Réservations form. (Requires  for LLM).
+- **P1: Create Editable Company Profile Page:** Build a page for the fleet company to edit their profile details.
+- **P2: Teltonika GPS Webhook Integration:** Create an endpoint to receive JSON/HTTP data from the user's future VPS (which will decode raw Teltonika TCP data).
+- **P3: Hotel Admin - Automated Invoicing:** Automate the generation of monthly commission invoices.
+- **P3: Super Admin - Hotel Leaderboard:** Create a dashboard to rank hotels by performance.
+- **P3: Wialon History:** Track playback for Wialon GPS history.
 
 **Completed work in this session**
-- **Fleet Management Portal (Phase 1):** Successfully launched a new, separate portal for partner companies, connecting to an external C# backend for all data. Implemented login, dashboard, and read-only lists for drivers and vehicles.
-- **Driver Registration C# Sync:** Fixed a critical bug preventing new driver companies from being registered in the C# backend. The agent diagnosed the issue, found the correct C# API endpoint, and implemented the backend proxy call.
-- **Country Code Phone Input:** Built and integrated a reusable  component with a searchable country dropdown into the client and driver registration forms.
-- **VTC SEO Pages:** Created and integrated two new SEO pages (, ) and fixed a bug with the Google Places search functionality on them.
-- **Hotel Invoicing Module:** Implemented the full lifecycle for hotel commission invoicing, including generation in the Super Admin panel and viewing/downloading in the Hotel Admin portal.
-- **UI/UX Improvements:**
-    - Converted the entire Super Admin section to a light theme.
-    - Fixed all resulting text visibility issues.
-    - Fixed the main admin sidebar link to redirect correctly.
-    - Iteratively enlarged vehicle images on the booking page based on user feedback.
+- Source Filter (All/Societe/Zont) on Fleet Planning (DONE)
+- Massive Backend Performance Audit & Refactor (, connection pooling, parallel requests, MongoDB indexing) (DONE)
+- Bug fix: Hidden Zont auctions now visible in Unassigned list (DONE)
+- Planning timeline extended to full 24h (0h-23h) (DONE)
+- Hotel Login UI updated with new image and responsive mobile layout (DONE)
+- Wialon GPS Integration for Fleet (Token & Password Auth modes) (DONE)
+- Frontend Performance Optimizations (Removed unused JS packages, lazy loading images) (DONE)
+- Removed Emergent Deployment Badge (DONE)
+- Fixed critical Starlette cache middleware bug causing body stream already read (DONE)
 
 **Earlier issues found/mentioned but not fixed**
-- **Issue 1: Partner Ride Cancellation is Local Only**
-  - **Debug checklist:** This refers to rides created by partners in the PWA. The cancellation only updates the application's MongoDB and does not call the C# backend.
-  - **Why to solve this issue and what will be achieved with this?** To ensure data consistency between the new application and the legacy C# system.
-  - **Should Test frontend/backend/both after fix:** Backend
-  - **Is recurring issue?** Y (from previous forks)
-  - **Status:** BLOCKED, pending an API endpoint from the user's C# team.
+- None (All mentioned bugs were resolved).
 
 **Known issue recurrence from previous fork**
-- None.
+- **Issue recurrence:**  in FastAPI/Starlette corrupting JSON streaming/POST responses.
+- **Recurrence count:** 1
+- **Status:** RESOLVED
+- **Note:** Do NOT use  for adding global headers like Cache-Control if the app relies on POST requests or JSON body reading. Use custom route-specific handlers or let the reverse proxy (Cloudflare/Nginx) handle caching.
+- **Issue recurrence:** Wialon  (User/Password).
+- **Note:** The  API is deprecated by Wialon Hosting and returns Error 8 for modern accounts. ALWAYS recommend the Token authentication method to the user.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **API Proxying:** The application now has a robust pattern for securely proxying requests to an external C# API (), handling authentication and data scoping. This is the foundation of the Fleet portal.
-- **Multi-Portal Architecture:** The app successfully isolates three distinct admin experiences (Super Admin, Hotel Admin, Fleet Admin) with separate authentication, layouts, and data sources.
-- **Reusable Components:** The creation of the  component demonstrates the ability to build and integrate generic, high-quality UI elements across different parts of the application.
+- **C# Proxy with Connection Pooling:**  uses a single  to dramatically reduce TCP handshake overhead when communicating with the legacy C# API. 
+- **Wialon API:** Integrated via  using both  (recommended) and  (fallback).
+- **React Lazy Loading:** The frontend extensively uses React.lazy for route code-splitting to maintain a low bundle size.
 
 **key DB schema**
-- ** (NEW):** 
-- ** (MODIFIED):** A field  was added to track synchronization with the C# backend during registration.
+- : 
+
+**changes in tech stack**
+- Removed several unused frontend packages (, , , etc.) to optimize build size. Use native  via contexts (like ) instead of Axios.
 
 **All files of reference**
--  (Backend for Fleet portal, to be modified)
--  (Frontend for Fleet portal, to be modified)
--  (Reference for C# API calls)
--  (Reference for form inputs)
+-  (Crucial for C# interactions)
+- 
+- 
+- 
+- 
+- 
 
 **Areas that need refactoring**:
-- The  workaround for a Stripe.js bug, inherited from a previous session, should be centralized into a reusable helper function.
+-  is still very large, though functional.
+- The Google Maps integration might need consolidation if the new Android Kiosk app requires heavy map usage.
 
 **key api endpoints**
-- **Fleet Portal (Proxy to C#):**
-  - 
-  - 
-  - 
-  - 
-  -  (To be created)
-- **Hotel Invoicing (New):**
-  - 
-  - 
-  - 
+-  (Highly optimized)
+-  (Save GPS config)
+-  (Fetch live GPS data)
 
 **Critical Info for New Agent**
-- **You must respond in French.**
-- Your immediate task is to implement the **Add Driver** functionality within the new Fleet Management portal.
-- This requires finding the correct driver creation endpoint in the C# Swagger docs (), then creating the backend proxy endpoint in  and the corresponding frontend form.
-- All data for the Fleet portal comes exclusively from the external C# backend. Do not use MongoDB for this portal's data.
-- Use the provided test credentials for a fleet company to test the new feature:  / .
+- **LANGUAGE:** Always respond in French.
+- **AUTH PREFIX BUG:** Frontend  automatically prepends the backend URL. Never pass the full URL or  into , only pass  to avoid double-prefixing.
+- **EXTERNAL C#:**  can be slow and hides certain auctions from its list endpoint. Rely on the scanning logic in .
+- **INFRASTRUCTURE:** The user was just informed that Emergent cannot host raw TCP sockets (port 5055) for Teltonika GPS. They will likely build an external VPS and ask you to create a webhook endpoint in the FastAPI backend to receive the parsed data. Be ready for this.
 
 **documents and test reports created in this job**
--  (Updated with Fleet Management project details)
-- Multiple test reports were generated; the latest successful test runs validated the Fleet Portal (Phase 1) and the Driver Registration C# sync.
+- 
+- 
+-  (Used temporarily and deleted)
+- 
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **PENDING:** Ok, très bien. Dans... Le section... Dans un société existant, il aura... Droit de rajouter des nouveaux chauffeurs et on reçoit... Ces informations dans le C-Chart pour euh, accepter ou pas. (User asks to add the ability for a fleet company to add a new driver, sending the info to the C# backend for approval).
-2.  Url Fleet.zont.cab... Nandetiri1@gmail.com 12345678 Voici un compte societer driver ok on commence (User provides URL goal and test credentials for the new Fleet portal).
-3.  User provides a detailed PRD for the new Fleet Management portal.
-4.  Sur notre site on peux mettre les code pays pour les telefone ? Avec un système de recherche semple (User asks to add a country code selector to phone inputs).
-5.  Les foto de voiture tu peux faire grande on a fait deja mais toujour petite (User complains car images are still too small).
-6.  QUAND JE VAIS SUR LA PAGE DEVENIRE CHEUFFEUR ET JE MENSCRIT DANS LADMIN C SHARP JE VOIS PAS LA CREATION DE LA SOCSIETER TU PEUX VERIFIER LE SWAGER api.zont.cab/swagger (User reports that driver company registration is not syncing to the C# admin).
-7.  310 (User requests a specific image size).
-8.  Mobil fait 240 (User requests a specific image size for mobile).
-9.  Tu oeux affiche plus grand les image des voitures pour que sa soir bien avec lecran (User asks for car images to be made larger).
-10. Recherche destination ne marche pas sur la page vtc 7 places et 8 places (User reports that destination search is broken on VTC pages).
+1. *(Done)* User asked for all portal links.
+2. *(Done)* User requested updating the Hotel login background image.
+3. *(Done)* User requested mobile UI fix for the Hotel login.
+4. *(Done)* User asked to add a Geolocation page for Wialon GPS.
+5. *(Done)* User requested changing Wialon auth to Username/Password instead of just Token.
+6. *(Done)* User reported connection error (AuthFetch bug + Wialon Error 8). Fixed, explained Token is better.
+7. *(Support)* User asked about saving to GitHub.
+8. *(Support)* User asked about data persistence on redeployment.
+9. *(Clarification pending)* User asked how to import a planning Google Sheet.
+10. *(Clarification pending)* User described a new requirement: an Android Kiosk App for hotels to book and pay via SMS link.
+11. *(Done)* User asked to remove the Emergent badge and optimize performance (Lighthouse screenshots).
+12. *(Done)* User asked for Hotel demo accounts and reported a login error ( bug fixed).
+13. *(Done)* User asked about Sitemap and Google Search Console.
+14. *(Support)* User asked if Emergent supports direct TCP socket connections for Teltonika GPS.
 
 **Project Health Check:**
-- **Broken:** None
-- **Mocked:** None. The Fleet portal uses live data from the C# backend.
+- All features working, highly optimized backend.
+- No mocked APIs (Live C# and Wialon APIs used).
 
 **3rd Party Integrations**
-- **Stripe:** Payments.
-- **Google Maps Platform:** Places Autocomplete, Directions.
-- **Custom C# Backend ():** A critical integration used for the Devenir Chauffeur registration flow and the entire new Fleet Management portal.
+- Custom C# Backend () - Requires User credentials.
+- Wialon GPS API - Requires User Token.
+- Google Maps Platform.
+- Stripe (Payments).
+- OpenAI / Emergent LLM Key (Upcoming for AI booking feature).
 
 **Testing status**
-- **Testing agent used after significant changes:** YES. The agent successfully used the testing agent to validate the Hotel Admin portal, the Hotel Invoicing module, the Driver Registration C# sync, and the initial phase of the Fleet Management portal.
-- **Test files created:** None
-- **Known regressions:** None
+- Testing agent used after significant changes: YES (Iterations 36, 37).
+- Test files created: None.
+- Known regressions: None currently.
 
 **Credentials to test flow:**
-- **Super Admin:**  / 
-- **Hotel Admin:** Fetch from  (e.g.,  / )
-- **Fleet Admin:**  / 
+- Super Admin:  / 
+- Fleet Admin:  / 
+- Hotel Admin:  / 
 
 **What agent forgot to execute**
-- The refactoring of the  helper function for Stripe, identified in a previous session, remains an outstanding item of technical debt.</analysis>
+- The agent did not start the AI-assisted Booking Creation (P0) task because the user kept introducing high-priority operational requests (Performance, Wialon, Optimizations). The next agent needs to bring this up or handle the new Kiosk/Google Sheets requirements first depending on user priority.</analysis>
