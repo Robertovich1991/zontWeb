@@ -7,7 +7,7 @@ External C# backend (api.zont.cab) + internal MongoDB. Custom Teltonika GPS inte
 ## Core Architecture
 - **Frontend**: React + Tailwind CSS + Shadcn/UI + Leaflet (light CartoDB tiles)
 - **Backend**: FastAPI (Python) + MongoDB
-- **GPS**: Teltonika FMB/FMC via external VPS TCP decoder -> Webhook -> MongoDB
+- **GPS**: Teltonika FMB/FMC via external VPS TCP decoder -> Webhook -> MongoDB -> WebSocket broadcast
 - **External**: C# backend (api.zont.cab) via proxy
 
 ## Portals
@@ -20,32 +20,41 @@ External C# backend (api.zont.cab) + internal MongoDB. Custom Teltonika GPS inte
 
 ## What's Been Implemented
 
+### GPS Real-Time WebSocket System (March 2026)
+- **WebSocket Backend**: GPSConnectionManager class in fleet_gps.py, broadcasts position_update on webhook receipt
+- **Fleet WS Endpoint**: /api/fleet/gps/ws?token=xxx (C# JWT token, company-specific filtering)
+- **Admin WS Endpoint**: /api/gps-admin/ws?token=xxx (PyJWT, global view)
+- **Frontend**: Both maps use WebSocket primary with polling fallback (3s interval)
+- **Car SVG Icons**: Top-down car shape with heading rotation, 4 status colors
+- **Statuses**: Moving (green, speed>2), Stopped (amber), Offline (red, >10min), GPS Lost (gray)
+- **Smooth Animation**: requestAnimationFrame interpolation between positions
+- **Vehicle Detail**: Full telemetry panel (speed, heading, satellites, ignition, timestamp, coordinates)
+- **Company Filter**: GPS Admin map has dropdown to filter by company/unassigned
+- **Testing**: 100% backend (10/10) + 100% frontend E2E (iteration_42)
+
 ### GPS Admin Portal (March 2026)
 - **Backend**: 14 API endpoints (auth, companies CRUD, devices CRUD, assign/unassign, positions, stats)
-- **Frontend**: Login, Dashboard (6 stat cards), Devices (table + CRUD modals), Companies (cards + CRUD), Global Map (Leaflet + sidebar)
-- **Auth**: Separate JWT auth context (gps_admin_users collection)
-- **Routes**: /gps-admin/login, /gps-admin/dashboard, /gps-admin/devices, /gps-admin/companies, /gps-admin/map
-- **Testing**: 100% pass rate (20/20 backend, all frontend E2E)
+- **Frontend**: Login, Dashboard, Devices, Companies, Global Map
+- **Testing**: 100% pass (iteration_41)
 
 ### Fleet GPS Tracking (March 2026)
-- **Backend**: 12 API endpoints (webhook, devices CRUD, positions, history, SSE, stats)
-- **VPS Decoder**: Node.js Teltonika Codec8/Codec8E TCP decoder with simulator
-- **Frontend Map**: Light theme dispatch UI with Bento grid telemetry
-- **Wialon**: Completely removed (backend + frontend)
+- Teltonika Codec8/8E TCP decoder (Node.js VPS kit)
+- Webhook + SSE + WebSocket endpoints
+- Wialon completely removed
 
 ### Fleet Management Portal
-- Planning Module (24h timeline, source filters, conflict detection)
-- Driver Profiles, Vehicles CRUD, Company Bookings CRUD
+- Planning Module, Driver Profiles, Vehicles CRUD, Company Bookings
 - Optimized C# proxy with caching/pooling
 
 ### Hotel & Admin
 - Hotel Admin portal, Super Admin panel, SEO pages
 
 ## Key Files
+- `/app/frontend/src/pages/fleet/FleetGeolocation.js` - Fleet GPS map (WebSocket + car icons)
+- `/app/frontend/src/pages/gps-admin/GpsAdminMap.js` - GPS Admin global map
 - `/app/frontend/src/pages/gps-admin/*` - GPS Admin Portal (7 files)
-- `/app/frontend/src/pages/fleet/FleetGeolocation.js` - Fleet GPS map
-- `/app/backend/routes/gps_admin.py` - GPS Admin backend
-- `/app/backend/routes/fleet_gps.py` - Fleet GPS backend
+- `/app/backend/routes/fleet_gps.py` - GPS backend (WebSocket + webhook + SSE)
+- `/app/backend/routes/gps_admin.py` - GPS Admin backend (WebSocket + CRUD)
 - `/app/backend/vps-teltonika/` - VPS TCP decoder kit
 
 ## DB Collections (GPS)
@@ -57,7 +66,7 @@ External C# backend (api.zont.cab) + internal MongoDB. Custom Teltonika GPS inte
 ## Prioritized Backlog
 - **P0**: AI-assisted booking creation (LLM integration needed)
 - **P1**: Google Sheets Planning Import, Hotel Kiosk, Trip History/Route Replay
-- **P2**: Geofences & GPS Alerts, Editable Company Profile, Partner cancellation (blocked by C# team)
+- **P2**: Geofences & GPS Alerts, Editable Company Profile, Partner cancellation (blocked C# team)
 - **P3**: Hotel automated invoicing, Hotel leaderboard
 
 ## Test Credentials
