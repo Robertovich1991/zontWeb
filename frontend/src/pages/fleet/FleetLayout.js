@@ -19,6 +19,7 @@ const FleetLayout = () => {
   const { company, logout, isAuthenticated } = useFleetAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isFullScreen = location.pathname === '/fleet/geolocation';
 
   if (!isAuthenticated) return <Navigate to="/fleet/login" replace />;
 
@@ -65,14 +66,26 @@ const FleetLayout = () => {
           </button>
         </div>
       </aside>
-      <main className="flex-1 min-w-0">
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-gray-200 px-4 lg:px-6 py-3 flex items-center gap-4">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-500 hover:text-gray-900">
-            <Menu className="w-5 h-5" />
-          </button>
-          <h2 className="text-gray-900 font-medium text-sm">{navItems.find(n => isActive(n))?.label || 'Fleet'}</h2>
-        </header>
-        <div className="p-4 lg:p-6"><Outlet /></div>
+      <main className="flex-1 min-w-0 flex flex-col">
+        {!isFullScreen && (
+          <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-gray-200 px-4 lg:px-6 py-3 flex items-center gap-4">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-500 hover:text-gray-900">
+              <Menu className="w-5 h-5" />
+            </button>
+            <h2 className="text-gray-900 font-medium text-sm">{navItems.find(n => isActive(n))?.label || 'Fleet'}</h2>
+          </header>
+        )}
+        {isFullScreen ? (
+          <div className="flex-1 relative">
+            {/* Mobile menu button for fullscreen pages */}
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden fixed top-3 left-3 z-40 p-2 bg-[#1a2332] rounded-lg text-gray-400 hover:text-white shadow-lg">
+              <Menu className="w-5 h-5" />
+            </button>
+            <Outlet />
+          </div>
+        ) : (
+          <div className="p-4 lg:p-6 flex-1"><Outlet /></div>
+        )}
       </main>
     </div>
   );

@@ -141,8 +141,6 @@ from routes.fleet_planning import router as fleet_planning_router
 app.include_router(fleet_planning_router)
 from routes.fleet_driver_profile import router as fleet_driver_profile_router
 app.include_router(fleet_driver_profile_router)
-from routes.fleet_wialon import router as fleet_wialon_router
-app.include_router(fleet_wialon_router)
 from routes.fleet_gps import router as fleet_gps_router
 app.include_router(fleet_gps_router)
 
@@ -214,7 +212,6 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    # Close shared HTTP client
     from routes.fleet_shared import close_shared_client
     await close_shared_client()
     client.close()
