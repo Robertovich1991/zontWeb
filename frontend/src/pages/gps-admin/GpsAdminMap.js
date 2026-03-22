@@ -205,7 +205,16 @@ const GpsAdminMap = () => {
           stopPolling();
           pingRef.current = setInterval(() => { if (ws.readyState === WebSocket.OPEN) ws.send('ping'); }, 25000);
         };
-        ws.onmessage = (e) => { try { handleWsMessage(JSON.parse(e.data)); } catch {} };
+        ws.onmessage = (e) => {
+          try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === 'ping') {
+              ws.send('pong');
+              return;
+            }
+            handleWsMessage(msg);
+          } catch {}
+        };
         ws.onclose = () => {
           if (closed) return;
           setWsConnected(false);

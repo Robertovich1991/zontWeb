@@ -396,7 +396,14 @@ const FleetGeolocation = () => {
         };
 
         ws.onmessage = (e) => {
-          try { handleWsMessage(JSON.parse(e.data)); } catch {}
+          try {
+            const msg = JSON.parse(e.data);
+            if (msg.type === 'ping') {
+              ws.send('pong');
+              return;
+            }
+            handleWsMessage(msg);
+          } catch {}
         };
 
         ws.onclose = () => {
