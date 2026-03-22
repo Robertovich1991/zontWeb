@@ -64,7 +64,7 @@ const FleetMap = ({ vehicles, selectedImei, onSelect }) => {
         zoomControl: false, attributionControl: false,
       });
       L.control.zoom({ position: 'bottomright' }).addTo(map);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19, subdomains: 'abcd',
       }).addTo(map);
       mapInstance.current = map;
@@ -94,7 +94,7 @@ const FleetMap = ({ vehicles, selectedImei, onSelect }) => {
         const iconHtml = `
           <div style="position:relative;width:${sz * 2.5}px;height:${sz * 2.5}px;display:flex;align-items:center;justify-content:center;">
             ${st === 'moving' ? `<div style="position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:${cfg.color};animation:gps-ping 2s cubic-bezier(0,0,0.2,1) infinite;"></div>` : ''}
-            <div style="position:relative;width:${sz}px;height:${sz}px;border-radius:50%;background:${cfg.color};border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)${sel ? ',0 0 0 3px '+cfg.color+'40' : ''};transition:all 0.3s ease;"></div>
+            <div style="position:relative;width:${sz}px;height:${sz}px;border-radius:50%;background:${cfg.color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.25)${sel ? ',0 0 0 3px '+cfg.color+'40' : ''};transition:all 0.3s ease;"></div>
           </div>`;
 
         const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [sz * 2.5, sz * 2.5], iconAnchor: [sz * 1.25, sz * 1.25] });
