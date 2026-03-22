@@ -52,11 +52,15 @@ class GPSConnectionManager:
 
     async def broadcast_position(self, position_data: dict, company_id: str = None):
         msg = json_lib.dumps({"type": "position_update", "data": position_data})
+        imei = position_data.get("imei", "?")
+        fleet_sent = 0
+        admin_sent = 0
         if company_id and company_id in self.fleet_connections:
             dead = []
             for ws in self.fleet_connections[company_id]:
                 try:
                     await ws.send_text(msg)
+                    fleet_sent += 1
                 except Exception:
                     dead.append(ws)
             for ws in dead:
@@ -65,10 +69,12 @@ class GPSConnectionManager:
         for ws in self.admin_connections:
             try:
                 await ws.send_text(msg)
+                admin_sent += 1
             except Exception:
                 dead.append(ws)
         for ws in dead:
             self.admin_connections.remove(ws)
+        logger.info(f"WS broadcast IMEI={imei}: fleet={fleet_sent}, admin={admin_sent}")
 
 
 gps_ws_manager = GPSConnectionManager()
@@ -618,9 +624,16 @@ async def fleet_gps_websocket(websocket: WebSocket):
             await websocket.send_text(json_lib.dumps({"type": "initial", "data": []}))
 
         while True:
-            data = await websocket.receive_text()
-            if data == "ping":
-                await websocket.send_text(json_lib.dumps({"type": "pong"}))
+            try:
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=20)
+                if data == "ping":
+                    await websocket.send_text(json_lib.dumps({"type": "pong"}))
+            except asyncio.TimeoutError:
+                # Server-side ping to keep K8s proxy alive
+                try:
+                    await websocket.send_text(json_lib.dumps({"type": "ping"}))
+                except Exception:
+                    break
     except WebSocketDisconnect:
         pass
     except Exception as e:

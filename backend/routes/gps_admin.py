@@ -17,6 +17,7 @@ import os
 import uuid
 import logging
 import json as json_lib
+import asyncio
 
 from routes.fleet_gps import gps_ws_manager
 
@@ -445,9 +446,15 @@ async def gps_admin_websocket(websocket: WebSocket):
             await websocket.send_text(json_lib.dumps({"type": "initial", "data": []}))
 
         while True:
-            data = await websocket.receive_text()
-            if data == "ping":
-                await websocket.send_text(json_lib.dumps({"type": "pong"}))
+            try:
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=20)
+                if data == "ping":
+                    await websocket.send_text(json_lib.dumps({"type": "pong"}))
+            except asyncio.TimeoutError:
+                try:
+                    await websocket.send_text(json_lib.dumps({"type": "ping"}))
+                except Exception:
+                    break
     except WebSocketDisconnect:
         pass
     except Exception as e:
