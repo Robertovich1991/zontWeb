@@ -7,7 +7,7 @@ The GPS Admin:
   - Views ALL vehicles across all companies on a global map
   - Fleet companies see only their assigned devices
 """
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Optional
 from passlib.context import CryptContext
@@ -16,6 +16,9 @@ import jwt
 import os
 import uuid
 import logging
+import json as json_lib
+
+from routes.fleet_gps import gps_ws_manager
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/gps-admin", tags=["gps-admin"])
@@ -401,3 +404,53 @@ async def global_stats(request: Request):
         "totalCompanies": total_companies,
         "activeCompanies": active_companies,
     }
+
+
+# ── WebSocket (Real-Time Global) ─────────────────────────────────────
+
+@router.websocket("/ws")
+async def gps_admin_websocket(websocket: WebSocket):
+    """WebSocket for real-time GPS positions (admin global view)."""
+    token = websocket.query_params.get("token", "")
+    try:
+        jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+    except Exception:
+        await websocket.close(code=4001, reason="Token invalide")
+        return
+
+    await gps_ws_manager.connect_admin(websocket)
+    try:
+        db = websocket.app.state.db
+        devices = await db.gps_devices.find({}, {"_id": 0}).to_list(5000)
+        if devices:
+            imeis = [d["imei"] for d in devices]
+            positions = await db.gps_positions.find({"imei": {"$in": imeis}}, {"_id": 0}).to_list(5000)
+            pos_map = {p["imei"]: p for p in positions}
+            initial = []
+            for d in devices:
+                pos = pos_map.get(d["imei"])
+                entry = {"imei": d["imei"], "vehicleName": d.get("vehicleName", ""),
+                         "licensePlate": d.get("licensePlate", ""), "driverName": d.get("driverName", ""),
+                         "companyId": d.get("companyId"), "companyName": d.get("companyName", "")}
+                if pos:
+                    entry.update({"lat": pos["lat"], "lng": pos["lng"], "speed": pos["speed"],
+                                  "heading": pos["heading"], "altitude": pos.get("altitude", 0),
+                                  "satellites": pos.get("satellites", 0), "ignition": pos.get("ignition"),
+                                  "timestamp": pos["timestamp"], "updatedAt": pos.get("updatedAt", "")})
+                else:
+                    entry.update({"lat": None, "lng": None, "timestamp": None})
+                initial.append(entry)
+            await websocket.send_text(json_lib.dumps({"type": "initial", "data": initial}))
+        else:
+            await websocket.send_text(json_lib.dumps({"type": "initial", "data": []}))
+
+        while True:
+            data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_text(json_lib.dumps({"type": "pong"}))
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"Admin WS error: {e}")
+    finally:
+        gps_ws_manager.disconnect_admin(websocket)

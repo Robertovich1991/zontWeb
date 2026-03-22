@@ -4,7 +4,7 @@ Architecture:
   Teltonika FMB/FMC -> VPS (Node.js TCP decoder) -> POST /api/fleet/gps/webhook -> MongoDB
   Frontend -> GET /api/fleet/gps/positions (polling) or GET /api/fleet/gps/stream (SSE)
 """
-from fastapi import APIRouter, Request, HTTPException, Query
+from fastapi import APIRouter, Request, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import Optional
@@ -13,6 +13,8 @@ import asyncio
 import logging
 import os
 import uuid
+import json as json_lib
+import base64
 
 from routes.fleet_shared import get_token, get_company_id, get_db
 
@@ -20,6 +22,67 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/fleet/gps", tags=["fleet-gps"])
 
 GPS_WEBHOOK_KEY = os.environ.get("GPS_WEBHOOK_API_KEY", "")
+
+
+# ── WebSocket Connection Manager ──────────────────────────────────────
+
+class GPSConnectionManager:
+    """Manages WebSocket connections for real-time GPS broadcasting."""
+
+    def __init__(self):
+        self.fleet_connections: dict = {}
+        self.admin_connections: list = []
+
+    async def connect_fleet(self, ws: WebSocket, company_id: str):
+        await ws.accept()
+        self.fleet_connections.setdefault(company_id, []).append(ws)
+        logger.info(f"Fleet WS connected: company={company_id}")
+
+    async def connect_admin(self, ws: WebSocket):
+        await ws.accept()
+        self.admin_connections.append(ws)
+        logger.info(f"Admin WS connected, total={len(self.admin_connections)}")
+
+    def disconnect_fleet(self, ws: WebSocket, company_id: str):
+        if company_id in self.fleet_connections:
+            self.fleet_connections[company_id] = [c for c in self.fleet_connections[company_id] if c is not ws]
+
+    def disconnect_admin(self, ws: WebSocket):
+        self.admin_connections = [c for c in self.admin_connections if c is not ws]
+
+    async def broadcast_position(self, position_data: dict, company_id: str = None):
+        msg = json_lib.dumps({"type": "position_update", "data": position_data})
+        if company_id and company_id in self.fleet_connections:
+            dead = []
+            for ws in self.fleet_connections[company_id]:
+                try:
+                    await ws.send_text(msg)
+                except Exception:
+                    dead.append(ws)
+            for ws in dead:
+                self.fleet_connections[company_id].remove(ws)
+        dead = []
+        for ws in self.admin_connections:
+            try:
+                await ws.send_text(msg)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.admin_connections.remove(ws)
+
+
+gps_ws_manager = GPSConnectionManager()
+
+
+def _extract_company_id(token: str) -> str:
+    """Extract companyId from C# JWT token (base64 decode)."""
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (4 - len(payload) % 4)
+        data = json_lib.loads(base64.b64decode(payload))
+        return data.get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", "")
+    except Exception:
+        return ""
 
 
 # ── Pydantic Models ───────────────────────────────────────────────────
@@ -122,6 +185,24 @@ async def gps_webhook(payload: WebhookPayload, request: Request):
             upsert=True,
         )
 
+    # Broadcast via WebSocket
+    if latest_pos:
+        device = await db.gps_devices.find_one({"imei": imei}, {"_id": 0})
+        if device:
+            bdata = {
+                "imei": imei, "lat": latest_pos["lat"], "lng": latest_pos["lng"],
+                "speed": latest_pos["speed"], "heading": latest_pos["heading"],
+                "altitude": latest_pos.get("altitude", 0), "satellites": latest_pos.get("satellites", 0),
+                "ignition": latest_pos.get("ignition"), "timestamp": latest_pos["timestamp"],
+                "vehicleName": device.get("vehicleName", ""), "licensePlate": device.get("licensePlate", ""),
+                "driverName": device.get("driverName", ""), "companyId": device.get("companyId"),
+                "companyName": device.get("companyName", ""),
+            }
+            try:
+                await gps_ws_manager.broadcast_position(bdata, device.get("companyId"))
+            except Exception as e:
+                logger.error(f"WS broadcast error: {e}")
+
     logger.info(f"GPS webhook: IMEI={imei}, {len(history_docs)} positions stored")
     return {"received": len(history_docs), "imei": imei}
 
@@ -191,6 +272,22 @@ async def gps_webhook_batch(payload: BatchWebhookPayload, request: Request):
                 }},
                 upsert=True,
             )
+            # Broadcast via WebSocket
+            device = await db.gps_devices.find_one({"imei": imei}, {"_id": 0})
+            if device:
+                bdata = {
+                    "imei": imei, "lat": latest_pos["lat"], "lng": latest_pos["lng"],
+                    "speed": latest_pos["speed"], "heading": latest_pos["heading"],
+                    "altitude": latest_pos.get("altitude", 0), "satellites": latest_pos.get("satellites", 0),
+                    "ignition": latest_pos.get("ignition"), "timestamp": latest_pos["timestamp"],
+                    "vehicleName": device.get("vehicleName", ""), "licensePlate": device.get("licensePlate", ""),
+                    "driverName": device.get("driverName", ""), "companyId": device.get("companyId"),
+                    "companyName": device.get("companyName", ""),
+                }
+                try:
+                    await gps_ws_manager.broadcast_position(bdata, device.get("companyId"))
+                except Exception as e:
+                    logger.error(f"WS batch broadcast error: {e}")
 
     logger.info(f"GPS batch webhook: {len(payload.devices)} devices, {total_received} positions")
     return {"received": total_received, "devices": len(payload.devices)}
@@ -481,6 +578,55 @@ async def gps_stream(request: Request):
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ── WebSocket (Real-Time) ────────────────────────────────────────────
+
+@router.websocket("/ws")
+async def fleet_gps_websocket(websocket: WebSocket):
+    """WebSocket for real-time GPS positions (fleet company)."""
+    token = websocket.query_params.get("token", "")
+    company_id = _extract_company_id(token)
+    if not company_id:
+        await websocket.close(code=4001, reason="Token invalide")
+        return
+
+    await gps_ws_manager.connect_fleet(websocket, company_id)
+    try:
+        db = websocket.app.state.db
+        devices = await db.gps_devices.find({"companyId": company_id}, {"_id": 0}).to_list(500)
+        if devices:
+            imeis = [d["imei"] for d in devices]
+            positions = await db.gps_positions.find({"imei": {"$in": imeis}}, {"_id": 0}).to_list(500)
+            pos_map = {p["imei"]: p for p in positions}
+            initial = []
+            for d in devices:
+                pos = pos_map.get(d["imei"])
+                entry = {"imei": d["imei"], "vehicleName": d.get("vehicleName", ""),
+                         "licensePlate": d.get("licensePlate", ""), "driverName": d.get("driverName", ""),
+                         "companyId": company_id}
+                if pos:
+                    entry.update({"lat": pos["lat"], "lng": pos["lng"], "speed": pos["speed"],
+                                  "heading": pos["heading"], "altitude": pos.get("altitude", 0),
+                                  "satellites": pos.get("satellites", 0), "ignition": pos.get("ignition"),
+                                  "timestamp": pos["timestamp"], "updatedAt": pos.get("updatedAt", "")})
+                else:
+                    entry.update({"lat": None, "lng": None, "timestamp": None})
+                initial.append(entry)
+            await websocket.send_text(json_lib.dumps({"type": "initial", "data": initial}))
+        else:
+            await websocket.send_text(json_lib.dumps({"type": "initial", "data": []}))
+
+        while True:
+            data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_text(json_lib.dumps({"type": "pong"}))
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        logger.error(f"Fleet WS error: {e}")
+    finally:
+        gps_ws_manager.disconnect_fleet(websocket, company_id)
 
 
 # ── Stats Endpoint ────────────────────────────────────────────────────
