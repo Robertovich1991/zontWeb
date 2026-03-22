@@ -146,7 +146,7 @@ Voici la liste des endpoints utilisés par l'application :
 ## CORS Configuration
 
 Assurez-vous que votre backend C# autorise les requêtes depuis :
-- `https://ride-dispatch-33.preview.emergentagent.com` (pendant le développement)
+- `https://gps-super-admin.preview.emergentagent.com` (pendant le développement)
 - Votre domaine de production
 
 ## Dépannage

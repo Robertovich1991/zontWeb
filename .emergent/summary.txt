@@ -1,156 +1,152 @@
 <analysis>**original_problem_statement:**
-The user's application has evolved into a comprehensive multi-portal platform (Client website, Super Admin, Hotel Admin, Fleet Management, and Driver portals). The system aggregates ride data from an external C# backend () and an internal MongoDB. 
-Recent requirements include deep performance optimizations, integrating Wialon GPS for real-time fleet tracking, UI/UX refinements, and handling new business flows (like importing planning from Google Sheets and planning a new Android Kiosk application for hotels).
+The user's application is a comprehensive multi-portal platform (Client, Admin, Hotel, Fleet, Driver) that integrates an external C# backend () and an internal MongoDB. Recently, the user decided to replace their dependency on Wialon GPS with a fully custom Teltonika GPS integration. The architecture consists of an external VPS (running a Node.js TCP gateway to decode Teltonika devices) sending data to the Emergent backend via Webhook. 
+The user requested the complete removal of Wialon, the creation of a light-themed Fleet Geolocation map, and a new GPS Super Admin portal to manage thousands of fleet companies and their assigned GPS hardware (IMEIs).
 
 **User's preferred language**: French (INSTRUCT next agent to respond in French only).
 
 **what currently exists?** 
 - Multi-portal platform (Client, Admin, Hotel, Fleet, Driver).
-- **Fleet Portal:** Full CRUD for drivers/vehicles, Wialon GPS live tracking integration, and highly optimized Planning module (aggregating Zont C# and Company MongoDB bookings) with 24h timeline view, assignment logic, and source filtering.
-- **Hotel Portal:** Dashboard for hotel admins to view bookings and commissions, recently updated with a refined login UI.
-- **Backend Architecture:** FastAPI backend heavily utilizing asynchronous requests, connection pooling, and caching () to bypass the external C# API's slow response times and pagination bugs.
-- **SEO & Performance:** Optimized React frontend (lazy loading, unused packages removed), working  and .
+- **Custom GPS System:** Wialon logic has been completely removed. A custom GPS webhook () processes JSON payloads. The  page now uses a light theme (matching the rest of the app) with real-time SSE updates, Leaflet mapping, and Bento-grid telemetry panels. 
+- **VPS TCP Decoder:** A standalone Node.js Teltonika decoder was created and zipped for the user to deploy on their external VPS.
+- **GPS Admin Portal (WIP):** Backend routes and frontend component files have been created to allow global administrators to manage IMEIs across all companies.
 
 **Last working item**:
-- **Last item agent was working:** The agent was discussing infrastructure requirements with the user. The user asked about importing booking data from a Google Sheet, building a new Android Kiosk app for quick hotel bookings (with SMS payment links), and integrating raw Teltonika GPS trackers via TCP. The agent clarified that raw TCP requires an external VPS, which should then webhook into our FastAPI backend.
-- **Status:** USER VERIFICATION PENDING / CLARIFICATION PENDING
-- **Agent Testing Done:** N/A (Consultation phase)
-- **Which testing method agent to use?** N/A
-- **User Testing Done:** N/A
+- **Last item agent was working:** Building the standalone GPS Super Admin portal so Zont administrators can view all vehicles across all companies and manage IMEI assignments. The agent created the backend routes () and frontend pages (, , etc.).
+- **Status:** IN PROGRESS
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** Both (Testing agent should be used once the new portal is fully wired and functional).
+- **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
 - **Issue 1: Partner Ride Cancellation is Local Only (P2)**
-    - **Attempted fixes:** None. Blocked by external C# team.
-    - **Next debug checklist:** Wait for user's C# team to provide an API endpoint for cancellation.
-    - **Why fix this issue and what will be achieved with the fix?** Data consistency between local DB and legacy C# system.
-    - **Status:** BLOCKED
-    - **Is recurring issue?** Y
-    - **Should Test frontend/backend/both after fix?** Backend
-    - **Blocked on other issue:** Blocked by the external C# team.
+   - **Attempted fixes:** None. Blocked by external C# team.
+   - **Next debug checklist:** Wait for user's C# team to provide an API endpoint for cancellation.
+   - **Why fix this issue and what will be achieved with the fix?** Ensures data consistency between local DB and legacy C# system.
+   - **Status:** BLOCKED
+   - **Is recurring issue?** Y
+   - **Should Test frontend/backend/both after fix?** Backend
+   - **Blocked on other issue:** Blocked by the external C# team.
 
 **In progress Task List**:
-- **Task 1: Google Sheets Planning Import (P1)**
-    - **Where to resume:** The user provided an image of a Google Sheet containing bookings. Need to design an import feature (CSV upload or Google Sheets API) to map columns (Date, Time, Client, Source, Price, Driver) into .
-    - **What will be achieved with this?** Allows the company to easily migrate manual planning into the platform.
-    - **Status:** NOT STARTED (Pending user validation of the mapping plan)
-    - **Should Test frontend/backend/both after fix?** Both
-    - **Blocked on something:** Waiting for user confirmation on the exact workflow.
+- **Task 1: Complete GPS Super Admin Portal Wiring & Testing (P0)**
+   - **Where to resume:** The agent just created the frontend files in . These pages need to be imported into , with the correct routing established (e.g., ). Afterward, test the complete flow.
+   - **What will be achieved with this?** Allows Zont staff to manage thousands of fleet companies, oversee all vehicles globally, and assign hardware IMEIs to fleets.
+   - **Status:** IN PROGRESS
+   - **Should Test frontend/backend/both after fix?** Both
+   - **Blocked on something:** None.
 
-- **Task 2: Android Hotel Kiosk App / Web-view (P1)**
-    - **Where to resume:** The user wants a simplified interface for a tablet/Android screen in hotels. Clients book in a few clicks and receive a payment link on their phone. Design the UI/UX flow for this specific route (e.g., ).
-    - **What will be achieved with this?** Increased autonomy for hotel guests to book rides.
-    - **Status:** NOT STARTED (Pending user clarification)
-    - **Should Test frontend/backend/both after fix?** Both
+- **Task 2: Google Sheets Planning Import (P1)**
+   - **Where to resume:** Design an import feature (CSV upload or Google Sheets API) mapping columns (Date, Time, Client, Source, Price, Driver) into .
+   - **What will be achieved with this?** Allows the company to easily migrate manual planning into the platform.
+   - **Status:** NOT STARTED (Pending user validation of workflow)
+   - **Should Test frontend/backend/both after fix?** Both
+   - **Blocked on something:** Waiting for user confirmation.
+
+- **Task 3: Android Hotel Kiosk App / Web-view (P1)**
+   - **Where to resume:** Simplified interface for tablets in hotels. Guests book in a few clicks and receive an SMS payment link. Design UI/UX for .
+   - **What will be achieved with this?** Increased autonomy for hotel guests to book rides.
+   - **Status:** NOT STARTED (Pending user clarification)
+   - **Should Test frontend/backend/both after fix?** Both
 
 **Upcoming and Future Tasks**
-- **P0: Implement AI-assisted Booking Creation:** Create a feature where users can paste text (like an email), and an LLM extracts booking details to pre-fill the Mes Réservations form. (Requires  for LLM).
-- **P1: Create Editable Company Profile Page:** Build a page for the fleet company to edit their profile details.
-- **P2: Teltonika GPS Webhook Integration:** Create an endpoint to receive JSON/HTTP data from the user's future VPS (which will decode raw Teltonika TCP data).
-- **P3: Hotel Admin - Automated Invoicing:** Automate the generation of monthly commission invoices.
-- **P3: Super Admin - Hotel Leaderboard:** Create a dashboard to rank hotels by performance.
-- **P3: Wialon History:** Track playback for Wialon GPS history.
+- **P0: Implement AI-assisted Booking Creation:** Feature where users paste text (like an email), and an LLM extracts booking details to pre-fill the Mes Réservations form (Requires ).
+- **P1: Trip History and Route Replay:** Adding playback features to the new custom GPS map.
+- **P2: Geofences & GPS Alerts:** Add zone definitions and speeding/geofence alerts.
+- **P2: Create Editable Company Profile Page:** Build a page for the fleet company to edit their details.
+- **P3: Hotel Admin - Automated Invoicing:** Automate monthly commission invoices generation.
+- **P3: Super Admin - Hotel Leaderboard:** Rank hotels by performance.
 
 **Completed work in this session**
-- Source Filter (All/Societe/Zont) on Fleet Planning (DONE)
-- Massive Backend Performance Audit & Refactor (, connection pooling, parallel requests, MongoDB indexing) (DONE)
-- Bug fix: Hidden Zont auctions now visible in Unassigned list (DONE)
-- Planning timeline extended to full 24h (0h-23h) (DONE)
-- Hotel Login UI updated with new image and responsive mobile layout (DONE)
-- Wialon GPS Integration for Fleet (Token & Password Auth modes) (DONE)
-- Frontend Performance Optimizations (Removed unused JS packages, lazy loading images) (DONE)
-- Removed Emergent Deployment Badge (DONE)
-- Fixed critical Starlette cache middleware bug causing body stream already read (DONE)
+- Complete removal of Wialon API logic and UI pages (DONE)
+- Implementation of Custom GPS Webhook & API endpoints (DONE)
+- Creation of Node.js Teltonika TCP decoder () for user's VPS (DONE)
+- Refactored  with light theme, real-time map, and Bento-grid telemetry (DONE)
+- Initial creation of  backend and  frontend components (DONE)
 
 **Earlier issues found/mentioned but not fixed**
-- None (All mentioned bugs were resolved).
+- None.
 
 **Known issue recurrence from previous fork**
-- **Issue recurrence:**  in FastAPI/Starlette corrupting JSON streaming/POST responses.
+- **Issue recurrence:**  in FastAPI corrupting JSON streaming/POST responses.
 - **Recurrence count:** 1
 - **Status:** RESOLVED
-- **Note:** Do NOT use  for adding global headers like Cache-Control if the app relies on POST requests or JSON body reading. Use custom route-specific handlers or let the reverse proxy (Cloudflare/Nginx) handle caching.
-- **Issue recurrence:** Wialon  (User/Password).
-- **Note:** The  API is deprecated by Wialon Hosting and returns Error 8 for modern accounts. ALWAYS recommend the Token authentication method to the user.
+- **Note:** Do NOT use  for adding global headers. Route-specific middlewares or standard proxy setups are required.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **C# Proxy with Connection Pooling:**  uses a single  to dramatically reduce TCP handshake overhead when communicating with the legacy C# API. 
-- **Wialon API:** Integrated via  using both  (recommended) and  (fallback).
-- **React Lazy Loading:** The frontend extensively uses React.lazy for route code-splitting to maintain a low bundle size.
+- **Hybrid GPS Architecture:** Emergent only supports HTTP. Raw Teltonika TCP connections go to an external VPS (Node.js decoder). The VPS translates Codec8 data to JSON and posts it to the Emergent  endpoint.
+- **C# Proxy Integration:** Uses  with caching and connection pooling to stabilize external  endpoints.
 
 **key DB schema**
 - : 
+- : 
+- :  (Handles  as well).
 
 **changes in tech stack**
-- Removed several unused frontend packages (, , , etc.) to optimize build size. Use native  via contexts (like ) instead of Axios.
+- Deprecated Wialon Integration entirely. Transitioned completely to self-hosted Teltonika parser forwarding payloads to the webhook.
 
 **All files of reference**
--  (Crucial for C# interactions)
 - 
 - 
 - 
-- 
+-  (All newly created files needing routing)
+-  (Requires updates to route the GPS admin)
 - 
 
 **Areas that need refactoring**:
--  is still very large, though functional.
-- The Google Maps integration might need consolidation if the new Android Kiosk app requires heavy map usage.
+- The newly created files in  need to be imported and wired up correctly inside  before they can be used.
 
 **key api endpoints**
--  (Highly optimized)
--  (Save GPS config)
--  (Fetch live GPS data)
+- 
+- 
+- 
 
 **Critical Info for New Agent**
 - **LANGUAGE:** Always respond in French.
-- **AUTH PREFIX BUG:** Frontend  automatically prepends the backend URL. Never pass the full URL or  into , only pass  to avoid double-prefixing.
-- **EXTERNAL C#:**  can be slow and hides certain auctions from its list endpoint. Rely on the scanning logic in .
-- **INFRASTRUCTURE:** The user was just informed that Emergent cannot host raw TCP sockets (port 5055) for Teltonika GPS. They will likely build an external VPS and ask you to create a webhook endpoint in the FastAPI backend to receive the parsed data. Be ready for this.
+- **THEME:** The user specifically rejected a dark premium design for the Fleet GPS Map, stating it must match the light theme (white backgrounds, emerald green accents, gray borders) of the rest of the portal. Do not revert to dark mode.
+- **INFRASTRUCTURE:** Do not try to host the TCP Gateway on Emergent. The agent correctly provided the Node.js script as a zip to the user for their external VPS. You only need to maintain the Webhook receiving the data.
+- **GPS ADMIN:** The current task is connecting the new GPS Admin Portal. This portal allows  to oversee 1000+ companies, view all vehicles, and map IMEI devices to specific fleet companies.
 
 **documents and test reports created in this job**
-- 
-- 
--  (Used temporarily and deleted)
+-  (GPS Backend)
+-  (GPS Redesign)
+-  (GPS Redesign V2)
 - 
 
 **Last 10 User Messages and any pending HUMAN messages**
-1. *(Done)* User asked for all portal links.
-2. *(Done)* User requested updating the Hotel login background image.
-3. *(Done)* User requested mobile UI fix for the Hotel login.
-4. *(Done)* User asked to add a Geolocation page for Wialon GPS.
-5. *(Done)* User requested changing Wialon auth to Username/Password instead of just Token.
-6. *(Done)* User reported connection error (AuthFetch bug + Wialon Error 8). Fixed, explained Token is better.
-7. *(Support)* User asked about saving to GitHub.
-8. *(Support)* User asked about data persistence on redeployment.
-9. *(Clarification pending)* User asked how to import a planning Google Sheet.
-10. *(Clarification pending)* User described a new requirement: an Android Kiosk App for hotels to book and pay via SMS link.
-11. *(Done)* User asked to remove the Emergent badge and optimize performance (Lighthouse screenshots).
-12. *(Done)* User asked for Hotel demo accounts and reported a login error ( bug fixed).
-13. *(Done)* User asked about Sitemap and Google Search Console.
-14. *(Support)* User asked if Emergent supports direct TCP socket connections for Teltonika GPS.
+1. *(Done)* User asked for Node.js TCP decoder script for their VPS.
+2. *(Done)* User provided VPS details (port 5055, Ubuntu).
+3. *(Done)* User asked if the gateway is already running on their VPS. Agent clarified no, and provided a zip link.
+4. *(Done)* User asked to build the fleet map in a Wialon/Uber style.
+5. *(Done)* User explicitly ordered to delete ALL old Wialon code and APIs.
+6. *(Done)* User asked for the password of a demo account to test.
+7. *(Done)* User requested the map design to be more premium, dark, and professional (dispatch style).
+8. *(Done)* User retracted the dark theme request, stating it was too dark and should match the existing light-colored fleet pages.
+9. *(Done)* User requested the map itself to also use light tiles instead of dark tiles.
+10. *(Action Required)* User requested a Super Admin GPS portal that can manage tracking and IMEIs for 1000+ companies.
 
 **Project Health Check:**
-- All features working, highly optimized backend.
-- No mocked APIs (Live C# and Wialon APIs used).
+- Excellent. No mocked APIs. The backend is optimized. Wialon technical debt is removed.
 
 **3rd Party Integrations**
-- Custom C# Backend () - Requires User credentials.
-- Wialon GPS API - Requires User Token.
-- Google Maps Platform.
+- Custom C# Backend () — Requires User credentials.
+- Google Maps Platform — Uses user Key.
 - Stripe (Payments).
+- Custom TCP Gateway (Hosted externally, talks to Emergent webhook).
 - OpenAI / Emergent LLM Key (Upcoming for AI booking feature).
 
 **Testing status**
-- Testing agent used after significant changes: YES (Iterations 36, 37).
+- Testing agent used after significant changes: YES (Iterations 38, 39, 40).
 - Test files created: None.
-- Known regressions: None currently.
+- Known regressions: None.
 
 **Credentials to test flow:**
-- Super Admin:  / 
+- GPS Admin:  /  (Created this session)
 - Fleet Admin:  / 
 - Hotel Admin:  / 
+- Super Admin:  / 
 
 **What agent forgot to execute**
-- The agent did not start the AI-assisted Booking Creation (P0) task because the user kept introducing high-priority operational requests (Performance, Wialon, Optimizations). The next agent needs to bring this up or handle the new Kiosk/Google Sheets requirements first depending on user priority.</analysis>
+The agent created all the necessary React files for the new GPS Super Admin portal (in ) but ran out of context before adding the required routes to . This is the immediate next step.</analysis>

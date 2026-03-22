@@ -143,6 +143,8 @@ from routes.fleet_driver_profile import router as fleet_driver_profile_router
 app.include_router(fleet_driver_profile_router)
 from routes.fleet_gps import router as fleet_gps_router
 app.include_router(fleet_gps_router)
+from routes.gps_admin import router as gps_admin_router
+app.include_router(gps_admin_router)
 
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"
@@ -207,6 +209,9 @@ async def startup_event():
     await db.gps_positions.create_index([("imei", 1)], unique=True)
     await db.gps_history.create_index([("imei", 1), ("timestamp", 1)])
     await db.gps_history.create_index([("receivedAt", 1)], expireAfterSeconds=2592000)  # 30 days TTL
+    # GPS Admin indexes
+    await db.gps_admin_users.create_index([("email", 1)], unique=True)
+    await db.gps_companies.create_index([("companyId", 1)], unique=True)
     logger.info("MongoDB indexes created.")
 
 

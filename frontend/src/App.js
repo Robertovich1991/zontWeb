@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AdminAuthProvider, useAdminAuth } from "@/pages/admin/AdminAuthContext";
 import { FleetAuthProvider } from "@/pages/fleet/FleetAuthContext";
 import { HotelAuthProvider, useHotelAuth } from "@/pages/hotel/HotelAuthContext";
+import { GpsAdminProvider } from "@/pages/gps-admin/GpsAdminAuthContext";
 
 // Core pages (eager load)
 import Home from "@/pages/Home";
@@ -79,6 +80,14 @@ const HotelInvoices = lazy(() => import("@/pages/hotel/HotelInvoices"));
 
 // Driver App
 const DriverApp = lazy(() => import("@/pages/driver/DriverApp"));
+
+// GPS Admin Portal
+const GpsAdminLogin = lazy(() => import("@/pages/gps-admin/GpsAdminLogin"));
+const GpsAdminLayout = lazy(() => import("@/pages/gps-admin/GpsAdminLayout"));
+const GpsAdminDashboard = lazy(() => import("@/pages/gps-admin/GpsAdminDashboard"));
+const GpsAdminDevices = lazy(() => import("@/pages/gps-admin/GpsAdminDevices"));
+const GpsAdminCompanies = lazy(() => import("@/pages/gps-admin/GpsAdminCompanies"));
+const GpsAdminMap = lazy(() => import("@/pages/gps-admin/GpsAdminMap"));
 
 const AdminGuard = ({ children }) => {
   const { user, loading } = useAdminAuth();
@@ -270,6 +279,15 @@ function App() {
                     <Route path="geolocation" element={<FleetGeolocation />} />
                     <Route path="trips" element={<FleetTrips />} />
                     <Route path="profile" element={<FleetProfile />} />
+                  </Route>
+                  {/* GPS Admin Portal */}
+                  <Route path="/gps-admin/login" element={<GpsAdminProvider><GpsAdminLogin /></GpsAdminProvider>} />
+                  <Route path="/gps-admin" element={<GpsAdminProvider><GpsAdminLayout /></GpsAdminProvider>}>
+                    <Route index element={<Navigate to="/gps-admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<GpsAdminDashboard />} />
+                    <Route path="devices" element={<GpsAdminDevices />} />
+                    <Route path="companies" element={<GpsAdminCompanies />} />
+                    <Route path="map" element={<GpsAdminMap />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>

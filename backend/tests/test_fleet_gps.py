@@ -23,7 +23,7 @@ import os
 import time
 from datetime import datetime, timezone, timedelta
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://ride-dispatch-33.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://gps-super-admin.preview.emergentagent.com').rstrip('/')
 GPS_WEBHOOK_KEY = "3iIYkCw2PAWGzDtmv6RAsfRpejFUu0n_4shfkQb-XSg"
 GPS_WEBHOOK_HEADER = "X-GPS-API-Key"
 
