@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_WIDTH = 120;
@@ -17,6 +17,83 @@ const TYPE_CONFIG = {
 };
 
 const getType = (t) => TYPE_CONFIG[t] || { label: t, cls: 'bg-gray-100 text-gray-600 border-gray-200', icon: Plane };
+
+// ── Risk Badge Config ────────────────────────────────────────────────
+const RISK_CONFIG = {
+  on_time:  { color: '#10B981', bg: 'bg-emerald-500', border: 'border-emerald-400', text: 'text-emerald-700', light: 'bg-emerald-50', Icon: ShieldCheck },
+  tight:    { color: '#F59E0B', bg: 'bg-amber-500',   border: 'border-amber-400',   text: 'text-amber-700',   light: 'bg-amber-50',   Icon: Shield },
+  at_risk:  { color: '#EF4444', bg: 'bg-red-500',     border: 'border-red-400',     text: 'text-red-700',     light: 'bg-red-50',     Icon: ShieldAlert },
+};
+
+const RiskBadge = ({ risk, compact }) => {
+  if (!risk) return null;
+  const cfg = RISK_CONFIG[risk.status] || RISK_CONFIG.on_time;
+  if (compact) {
+    return (
+      <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[8px] font-bold text-white ${cfg.bg}`}
+        data-testid={`risk-badge-${risk.status}`}>
+        {risk.score}%
+      </span>
+    );
+  }
+  return (
+    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white ${cfg.bg} shadow-sm`}
+      data-testid={`risk-badge-${risk.status}`}>
+      <cfg.Icon className="w-3 h-3" />
+      {risk.score}%
+    </span>
+  );
+};
+
+const RiskTooltip = ({ risk, event }) => {
+  if (!risk) return null;
+  const cfg = RISK_CONFIG[risk.status] || RISK_CONFIG.on_time;
+  return (
+    <div className="w-[300px]" data-testid="risk-tooltip">
+      <div className={`px-3 py-2 rounded-t-xl flex items-center justify-between ${cfg.light} border-b ${cfg.border}`}>
+        <div className="flex items-center gap-2">
+          <cfg.Icon className={`w-4 h-4 ${cfg.text}`} />
+          <span className={`text-sm font-bold ${cfg.text}`}>{risk.label}</span>
+        </div>
+        <span className={`text-lg font-black ${cfg.text}`}>{risk.score}%</span>
+      </div>
+      <div className="p-3 space-y-2">
+        {risk.reasons.map((r, i) => (
+          <div key={i} className="flex items-start gap-2 text-xs text-gray-700">
+            <AlertTriangle className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${cfg.text}`} />
+            <span>{r}</span>
+          </div>
+        ))}
+        <div className="flex gap-3 pt-1 border-t border-gray-100 mt-2">
+          {risk.etaText && (
+            <div className="flex items-center gap-1 text-xs">
+              <Navigation className="w-3 h-3 text-blue-500" />
+              <span className="text-gray-600">ETA: <b className="text-gray-900">{risk.etaText}</b></span>
+            </div>
+          )}
+          {risk.distanceText && (
+            <div className="flex items-center gap-1 text-xs">
+              <MapPin className="w-3 h-3 text-gray-400" />
+              <span className="text-gray-600">{risk.distanceText}</span>
+            </div>
+          )}
+          {risk.marginMinutes != null && (
+            <div className="flex items-center gap-1 text-xs">
+              <Clock className="w-3 h-3 text-gray-400" />
+              <span className="text-gray-600">Marge: <b>{risk.marginMinutes} min</b></span>
+            </div>
+          )}
+        </div>
+        {risk.gpsActive === false && (
+          <div className="flex items-center gap-1 text-[10px] text-red-500 mt-1">
+            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+            GPS inactif
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const formatDate = (d) => {
   const dt = new Date(d + 'T00:00:00');
@@ -50,6 +127,11 @@ const FleetPlanning = () => {
   const [reassignDriverId, setReassignDriverId] = useState('');
   const [reassignConflict, setReassignConflict] = useState(null);
 
+  // ── Delay Risk AI ──
+  const [delayRisks, setDelayRisks] = useState({});
+  const [riskHoveredEvent, setRiskHoveredEvent] = useState(null);
+  const riskTimerRef = useRef(null);
+
   const fetchPlanning = useCallback(async () => {
     setLoading(true);
     try {
@@ -61,6 +143,34 @@ const FleetPlanning = () => {
   }, [authFetch, currentDate, view]);
 
   useEffect(() => { fetchPlanning(); }, [fetchPlanning]);
+
+  // ── Delay Risk AI: fetch + auto-refresh ──
+  const fetchDelayRisk = useCallback(async () => {
+    try {
+      const res = await authFetch(`/api/fleet/planning/delay-risk?date=${currentDate}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDelayRisks(data.risks || {});
+      }
+    } catch {}
+  }, [authFetch, currentDate]);
+
+  useEffect(() => {
+    if (view === 'day') {
+      fetchDelayRisk();
+      riskTimerRef.current = setInterval(fetchDelayRisk, 30000);
+      return () => clearInterval(riskTimerRef.current);
+    } else {
+      setDelayRisks({});
+    }
+  }, [fetchDelayRisk, view]);
+
+  // Risk summary counts
+  const riskSummary = useMemo(() => {
+    const counts = { on_time: 0, tight: 0, at_risk: 0 };
+    Object.values(delayRisks).forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+    return counts;
+  }, [delayRisks]);
 
   useEffect(() => {
     if (view === 'day' && timelineRef.current && !loading) {
@@ -416,6 +526,27 @@ const FleetPlanning = () => {
             className={`p-2 rounded-lg transition ${showFilters ? 'bg-emerald-50 text-emerald-600' : 'hover:bg-gray-100 text-gray-500'}`}>
             <Filter className="w-4 h-4" />
           </button>
+          {/* Risk AI Summary */}
+          {view === 'day' && Object.keys(delayRisks).length > 0 && (
+            <div className="flex items-center gap-1.5 ml-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg" data-testid="risk-summary">
+              <ShieldAlert className="w-3.5 h-3.5 text-gray-400" />
+              {riskSummary.at_risk > 0 && (
+                <span className="flex items-center gap-1 text-xs font-bold text-red-600">
+                  <span className="w-2 h-2 rounded-full bg-red-500" />{riskSummary.at_risk}
+                </span>
+              )}
+              {riskSummary.tight > 0 && (
+                <span className="flex items-center gap-1 text-xs font-bold text-amber-600">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />{riskSummary.tight}
+                </span>
+              )}
+              {riskSummary.on_time > 0 && (
+                <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />{riskSummary.on_time}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -632,13 +763,15 @@ const FleetPlanning = () => {
                       const style = getEventStyle(e);
                       const isZont = e.source === 'zont';
                       const isSelected = selectedEvent?.id === e.id;
+                      const risk = delayRisks[e.id];
+                      const riskBorder = risk?.status === 'at_risk' ? 'ring-2 ring-red-400' : risk?.status === 'tight' ? 'ring-2 ring-amber-400' : '';
                       return (
                         <div key={e.id}
-                          className={`absolute top-2 bottom-2 rounded-lg px-2.5 py-1 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg hover:z-30 ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-blue-300 z-40' : ''} ${isZont ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white'}`}
+                          className={`absolute top-2 bottom-2 rounded-lg px-2.5 py-1 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg hover:z-30 ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-blue-300 z-40' : riskBorder} ${isZont ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white'}`}
                           style={style}
                           onClick={() => handleEventClick(e)}
-                          onMouseEnter={() => !selectedEvent && setHoveredEvent(e)}
-                          onMouseLeave={() => setHoveredEvent(null)}
+                          onMouseEnter={() => { !selectedEvent && setHoveredEvent(e); risk && setRiskHoveredEvent(e.id); }}
+                          onMouseLeave={() => { setHoveredEvent(null); setRiskHoveredEvent(null); }}
                           data-testid={`event-${e.id}`}
                         >
                           <div className="flex items-center justify-between gap-1">
@@ -647,7 +780,10 @@ const FleetPlanning = () => {
                               {' - '}
                               {e.endTime ? new Date(e.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''}
                             </span>
-                            <span className="text-[9px] font-bold opacity-80 uppercase shrink-0">{isZont ? 'ZONT' : 'SOCIETE'}</span>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {risk && <RiskBadge risk={risk} compact />}
+                              <span className="text-[9px] font-bold opacity-80 uppercase">{isZont ? 'ZONT' : 'SOC'}</span>
+                            </div>
                           </div>
                           <div className="flex items-center gap-1 mt-0.5">
                             <MapPin className="w-2.5 h-2.5 opacity-70 shrink-0" />
@@ -710,14 +846,16 @@ const FleetPlanning = () => {
                           {dayEvents.map(e => {
                             const isZont = e.source === 'zont';
                             const isSelected = selectedEvent?.id === e.id;
+                            const risk = delayRisks[e.id];
                             return (
                               <div key={e.id}
-                                className={`mb-0.5 rounded px-1.5 py-0.5 cursor-pointer text-white text-[9px] truncate ${isSelected ? 'ring-2 ring-offset-1 ring-blue-300' : ''} ${isZont ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                                className={`mb-0.5 rounded px-1.5 py-0.5 cursor-pointer text-white text-[9px] truncate flex items-center gap-1 ${isSelected ? 'ring-2 ring-offset-1 ring-blue-300' : ''} ${isZont ? 'bg-emerald-500' : 'bg-blue-500'}`}
                                 onClick={() => handleEventClick(e)}
                                 onMouseEnter={() => !selectedEvent && setHoveredEvent(e)}
                                 onMouseLeave={() => setHoveredEvent(null)}
                                 data-testid={`week-event-${e.id}`}
                               >
+                                {risk && <RiskBadge risk={risk} compact />}
                                 <span className="font-bold">
                                   {new Date(e.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
@@ -839,45 +977,52 @@ const FleetPlanning = () => {
 
       {/* Hover tooltip (only when no event selected) */}
       {hoveredEvent && !selectedEvent && (
-        <div className="fixed bottom-20 right-4 bg-white border border-gray-200 rounded-xl shadow-xl p-4 z-50 w-[300px]" data-testid="event-tooltip">
-          <div className="flex items-center gap-2 mb-2">
-            <span className={`px-2 py-0.5 rounded text-[10px] font-bold text-white ${hoveredEvent.source === 'zont' ? 'bg-emerald-500' : 'bg-blue-500'}`}>
-              {hoveredEvent.source === 'zont' ? 'ZONT' : 'SOCIETE'}
-            </span>
-            <span className="text-xs text-gray-500">{hoveredEvent.type}</span>
-            <span className="text-xs text-gray-400 ml-auto">{getEventDuration(hoveredEvent)}</span>
-          </div>
-          <div className="space-y-1.5 text-sm">
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-gray-400" />
-              <span className="text-gray-700">
-                {new Date(hoveredEvent.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                {hoveredEvent.endTime && ` → ${new Date(hoveredEvent.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`}
-              </span>
-            </div>
-            {hoveredEvent.pickupAddress && (
-              <div className="flex items-start gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-emerald-500 mt-0.5" />
-                <span className="text-gray-700">{hoveredEvent.pickupAddress}</span>
-              </div>
-            )}
-            {hoveredEvent.dropoffAddress && (
-              <div className="flex items-start gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-red-400 mt-0.5" />
-                <span className="text-gray-700">{hoveredEvent.dropoffAddress}</span>
-              </div>
-            )}
-            {hoveredEvent.clientName && (
-              <div className="flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-gray-700">{hoveredEvent.clientName}</span>
-              </div>
-            )}
-            {hoveredEvent.price > 0 && <p className="text-gray-900 font-semibold text-right">{hoveredEvent.price.toFixed(2)} EUR</p>}
-          </div>
-          {hoveredEvent.source === 'company' && (
-            <p className="text-[10px] text-gray-400 mt-2 text-center">Cliquez pour gerer cette mission</p>
+        <div className="fixed bottom-20 right-4 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden" data-testid="event-tooltip">
+          {/* Risk section */}
+          {delayRisks[hoveredEvent.id] && (
+            <RiskTooltip risk={delayRisks[hoveredEvent.id]} event={hoveredEvent} />
           )}
+          {/* Event details */}
+          <div className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold text-white ${hoveredEvent.source === 'zont' ? 'bg-emerald-500' : 'bg-blue-500'}`}>
+                {hoveredEvent.source === 'zont' ? 'ZONT' : 'SOCIETE'}
+              </span>
+              <span className="text-xs text-gray-500">{hoveredEvent.type}</span>
+              <span className="text-xs text-gray-400 ml-auto">{getEventDuration(hoveredEvent)}</span>
+            </div>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-gray-400" />
+                <span className="text-gray-700">
+                  {new Date(hoveredEvent.startTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                  {hoveredEvent.endTime && ` → ${new Date(hoveredEvent.endTime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`}
+                </span>
+              </div>
+              {hoveredEvent.pickupAddress && (
+                <div className="flex items-start gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-500 mt-0.5" />
+                  <span className="text-gray-700">{hoveredEvent.pickupAddress}</span>
+                </div>
+              )}
+              {hoveredEvent.dropoffAddress && (
+                <div className="flex items-start gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-red-400 mt-0.5" />
+                  <span className="text-gray-700">{hoveredEvent.dropoffAddress}</span>
+                </div>
+              )}
+              {hoveredEvent.clientName && (
+                <div className="flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-gray-400" />
+                  <span className="text-gray-700">{hoveredEvent.clientName}</span>
+                </div>
+              )}
+              {hoveredEvent.price > 0 && <p className="text-gray-900 font-semibold text-right">{hoveredEvent.price.toFixed(2)} EUR</p>}
+            </div>
+            {hoveredEvent.source === 'company' && (
+              <p className="text-[10px] text-gray-400 mt-2 text-center">Cliquez pour gerer cette mission</p>
+            )}
+          </div>
         </div>
       )}
 

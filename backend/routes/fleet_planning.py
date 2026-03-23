@@ -1,10 +1,15 @@
 """Fleet Planning - Aggregates Zont + Company bookings for driver timeline.
-Optimized: parallel C# calls, shared client, caching, reduced scan range."""
+Optimized: parallel C# calls, shared client, caching, reduced scan range.
+Includes AI delay-risk scoring with Google Distance Matrix (real-time traffic)."""
 from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import asyncio
 import logging
+import os
+import time as _time
+import httpx
+import math
 
 from routes.fleet_shared import (
     get_token, get_company_id, get_db, csharp_get,
@@ -14,12 +19,89 @@ from routes.fleet_shared import (
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/fleet/planning", tags=["fleet-planning"])
 
+GOOGLE_MAPS_KEY = os.environ.get("GOOGLE_MAPS_KEY", "")
+
+# ── ETA Cache (avoid repeated Distance Matrix calls) ─────────────────
+# Key: "origin_lat,origin_lng|dest_address" -> {eta_seconds, fetched_at}
+_eta_cache: dict[str, dict] = {}
+ETA_CACHE_TTL = 300  # 5 min default
+
+
+def _get_cached_eta(origin: str, dest: str, ttl: int = ETA_CACHE_TTL):
+    key = f"{origin}|{dest}"
+    entry = _eta_cache.get(key)
+    if entry and (_time.time() - entry["fetched_at"]) < ttl:
+        return entry
+    return None
+
+
+def _set_eta_cache(origin: str, dest: str, data: dict):
+    key = f"{origin}|{dest}"
+    _eta_cache[key] = {**data, "fetched_at": _time.time()}
+    if len(_eta_cache) > 500:
+        cutoff = _time.time() - ETA_CACHE_TTL * 2
+        expired = [k for k, v in _eta_cache.items() if v["fetched_at"] < cutoff]
+        for k in expired:
+            del _eta_cache[k]
+
+
+async def get_eta_from_google(origin_lat: float, origin_lng: float, dest_address: str) -> dict | None:
+    """Call Google Distance Matrix API with real-time traffic."""
+    if not GOOGLE_MAPS_KEY:
+        return None
+    origin_str = f"{origin_lat},{origin_lng}"
+    cached = _get_cached_eta(origin_str, dest_address)
+    if cached:
+        return cached
+
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                "https://maps.googleapis.com/maps/api/distancematrix/json",
+                params={
+                    "origins": origin_str,
+                    "destinations": dest_address,
+                    "departure_time": "now",
+                    "key": GOOGLE_MAPS_KEY,
+                },
+            )
+            data = resp.json()
+            if data.get("status") != "OK":
+                return None
+            el = data["rows"][0]["elements"][0]
+            if el.get("status") != "OK":
+                return None
+            result = {
+                "eta_seconds": el.get("duration_in_traffic", el.get("duration", {})).get("value", 0),
+                "eta_text": el.get("duration_in_traffic", el.get("duration", {})).get("text", ""),
+                "distance_m": el.get("distance", {}).get("value", 0),
+                "distance_text": el.get("distance", {}).get("text", ""),
+            }
+            _set_eta_cache(origin_str, dest_address, result)
+            return result
+    except Exception as e:
+        logger.warning(f"Google Distance Matrix error: {e}")
+        return None
+
+
+def _haversine_km(lat1, lng1, lat2, lng2):
+    R = 6371
+    dLat = math.radians(lat2 - lat1)
+    dLng = math.radians(lng2 - lng1)
+    a = math.sin(dLat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dLng / 2) ** 2
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
 
 @router.get("")
 async def get_planning(request: Request, date: str = "", view: str = "day"):
     token = get_token(request)
     company_id = get_company_id(request)
     db = get_db(request)
+    return await _build_planning(token, company_id, db, date, view)
+
+
+async def _build_planning(token: str, company_id: str, db, date: str, view: str = "day"):
+    """Internal: build planning data (reusable by delay-risk endpoint)."""
 
     # Parse target date
     try:
@@ -310,6 +392,278 @@ async def get_planning(request: Request, date: str = "", view: str = "day"):
         "drivers": planning,
         "unassigned": unassigned_bookings,
     }
+
+
+# ── Delay Risk AI Scoring ─────────────────────────────────────────────
+
+RISK_BUFFER_MINUTES = 15  # configurable margin
+
+
+def _adaptive_cache_ttl(minutes_until: float) -> int:
+    """Cache TTL based on time until mission: farther = longer cache."""
+    if minutes_until >= 60:
+        return 1800   # 30 min
+    elif minutes_until >= 20:
+        return 600    # 10 min
+    else:
+        return 300    # 5 min
+
+
+@router.get("/delay-risk")
+async def get_delay_risk(request: Request, date: str = ""):
+    """Calculate delay risk scores for all future events on a given date.
+    Uses Google Distance Matrix for real-time ETA with traffic."""
+    token = get_token(request)
+    company_id = get_company_id(request)
+    db = get_db(request)
+
+    # Fetch planning data for the day
+    planning = await _build_planning(token, company_id, db, date, "day")
+
+    # Fetch GPS devices and positions for this company
+    gps_devices_list, gps_positions_list = await asyncio.gather(
+        db.gps_devices.find({"companyId": company_id}, {"_id": 0}).to_list(100),
+        db.gps_positions.find(
+            {"imei": {"$exists": True}}, {"_id": 0}
+        ).to_list(200),
+    )
+
+    # Build position lookup by IMEI
+    gps_positions = {p["imei"]: p for p in gps_positions_list}
+
+    # Map drivers to GPS positions by driverName match
+    driver_gps = {}
+    for device in gps_devices_list:
+        dn = (device.get("driverName") or "").strip().lower()
+        pos = gps_positions.get(device["imei"])
+        if pos:
+            entry = {
+                **pos,
+                "imei": device["imei"],
+                "vehicleName": device.get("vehicleName", ""),
+                "licensePlate": device.get("licensePlate", ""),
+            }
+            if dn:
+                driver_gps[dn] = entry
+            # Also store by IMEI for fallback
+            driver_gps[f"imei:{device['imei']}"] = entry
+
+    # If only one GPS device, use it as fallback for all drivers
+    single_gps = None
+    if len(gps_devices_list) == 1 and gps_positions:
+        imei = gps_devices_list[0]["imei"]
+        if imei in gps_positions:
+            single_gps = {
+                **gps_positions[imei],
+                "imei": imei,
+                "vehicleName": gps_devices_list[0].get("vehicleName", ""),
+                "licensePlate": gps_devices_list[0].get("licensePlate", ""),
+            }
+
+    now = datetime.now()
+    now_utc = datetime.now(timezone.utc)
+    risks = {}
+    eta_tasks = []  # Collect async ETA calls
+
+    for driver in planning.get("drivers", []):
+        events = driver.get("events", [])
+        driver_name_key = f"{driver.get('firstName', '')} {driver.get('lastName', '')}".strip().lower()
+        gps = driver_gps.get(driver_name_key) or single_gps
+
+        for i, event in enumerate(events):
+            try:
+                start_time = datetime.strptime(event["startTime"], "%Y-%m-%dT%H:%M")
+            except (ValueError, KeyError):
+                continue
+
+            # Only calculate for future events
+            if start_time <= now:
+                continue
+
+            minutes_until = (start_time - now).total_seconds() / 60
+
+            # Only analyze events within next 2 hours
+            if minutes_until > 120:
+                continue
+
+            score = 0
+            reasons = []
+            margin_minutes = None
+            eta_data = None
+            gps_active = False
+
+            # ── Previous mission overlap (+40) ──
+            prev_end_time = None
+            if i > 0:
+                prev = events[i - 1]
+                try:
+                    prev_end_time = datetime.strptime(prev["endTime"], "%Y-%m-%dT%H:%M") if prev.get("endTime") else None
+                except ValueError:
+                    prev_end_time = None
+
+            if prev_end_time and prev_end_time > start_time:
+                overlap_min = int((prev_end_time - start_time).total_seconds() / 60)
+                score += 40
+                reasons.append(f"Le chauffeur termine une course {overlap_min} min apres le debut de la suivante")
+
+            # ── Margin between events ──
+            if prev_end_time and prev_end_time <= start_time:
+                margin_minutes = (start_time - prev_end_time).total_seconds() / 60
+
+                # +10 if margin < 10 min
+                if margin_minutes < 10:
+                    score += 10
+                    reasons.append(f"Marge de seulement {int(margin_minutes)} min entre les missions")
+
+            # ── GPS inactive > 10 min (+20) ──
+            if gps:
+                gps_ts = gps.get("timestamp")
+                if gps_ts:
+                    try:
+                        gps_time = datetime.fromisoformat(gps_ts.replace("Z", "+00:00"))
+                        gps_age_min = (now_utc - gps_time).total_seconds() / 60
+                        if gps_age_min > 10:
+                            score += 20
+                            reasons.append(f"Le GPS est inactif depuis {int(gps_age_min)} minutes")
+                        else:
+                            gps_active = True
+                    except Exception:
+                        score += 20
+                        reasons.append("Impossible de lire le timestamp GPS")
+                else:
+                    score += 20
+                    reasons.append("Pas de timestamp GPS disponible")
+            else:
+                score += 20
+                reasons.append("Aucun traceur GPS associe a ce chauffeur")
+
+            # ── No driver assigned (+15) ──
+            if not event.get("driverId"):
+                score += 15
+                reasons.append("Chauffeur non assigne a cette mission")
+
+            # ── ETA vs margin: Google Distance Matrix (+25) ──
+            pickup_address = event.get("pickupAddress", "")
+            has_gps_position = gps and gps.get("lat") and gps.get("lng")
+            if has_gps_position and pickup_address:
+                cache_ttl = _adaptive_cache_ttl(minutes_until)
+                cached_eta = _get_cached_eta(
+                    f"{gps['lat']},{gps['lng']}", pickup_address, ttl=cache_ttl
+                )
+                if cached_eta:
+                    eta_data = cached_eta
+                else:
+                    # Schedule async call
+                    eta_tasks.append({
+                        "event_id": event["id"],
+                        "lat": gps["lat"],
+                        "lng": gps["lng"],
+                        "address": pickup_address,
+                    })
+
+            # Store preliminary risk (ETA will be added after batch calls)
+            risks[event["id"]] = {
+                "score": score,
+                "reasons": reasons,
+                "marginMinutes": int(margin_minutes) if margin_minutes is not None else None,
+                "etaMinutes": None,
+                "etaText": None,
+                "distanceText": None,
+                "gpsActive": gps_active,
+                "minutesUntil": int(minutes_until),
+                "_pending_eta": eta_data,
+            }
+
+    # ── Batch ETA calls (max 5 concurrent) ──
+    async def fetch_eta(task):
+        return task["event_id"], await get_eta_from_google(
+            task["lat"], task["lng"], task["address"]
+        )
+
+    if eta_tasks:
+        sem = asyncio.Semaphore(5)
+
+        async def limited_fetch(t):
+            async with sem:
+                return await fetch_eta(t)
+
+        results = await asyncio.gather(*[limited_fetch(t) for t in eta_tasks])
+        for event_id, eta_result in results:
+            if event_id in risks and eta_result:
+                risks[event_id]["_pending_eta"] = eta_result
+
+    # ── Apply ETA scoring ──
+    for event_id, risk in risks.items():
+        eta = risk.pop("_pending_eta", None)
+        if eta and eta.get("eta_seconds"):
+            eta_min = eta["eta_seconds"] / 60
+            risk["etaMinutes"] = int(eta_min)
+            risk["etaText"] = eta.get("eta_text", "")
+            risk["distanceText"] = eta.get("distance_text", "")
+
+            remaining = risk["minutesUntil"]
+            margin = risk["marginMinutes"]
+            effective_margin = margin if margin is not None else remaining
+
+            if eta_min > effective_margin:
+                risk["score"] += 25
+                is_airport = any(
+                    kw in (risk.get("_addr", "") or "").lower()
+                    for kw in ["aeroport", "cdg", "orly", "beauvais", "airport"]
+                )
+                if is_airport:
+                    risk["reasons"].append(
+                        f"Marge insuffisante pour un transfert aeroport (ETA {int(eta_min)} min, marge {int(effective_margin)} min)"
+                    )
+                else:
+                    risk["reasons"].append(
+                        f"Le vehicule est a {risk['etaText']} du point de depart (marge {int(effective_margin)} min)"
+                    )
+            elif eta_min > effective_margin - RISK_BUFFER_MINUTES:
+                risk["reasons"].append(
+                    f"ETA {risk['etaText']} - marge correcte mais limitee ({int(effective_margin)} min)"
+                )
+        elif not risk["gpsActive"] and risk["marginMinutes"] is not None:
+            # No GPS but tight margin → penalize
+            if risk["marginMinutes"] < RISK_BUFFER_MINUTES:
+                risk["score"] += 25
+                risk["reasons"].append(
+                    f"Marge de {int(risk['marginMinutes'])} min sans suivi GPS actif"
+                )
+
+        # Clamp score
+        risk["score"] = min(risk["score"], 100)
+
+        # Status
+        s = risk["score"]
+        if s <= 39:
+            risk["status"] = "on_time"
+            risk["label"] = "A l'heure"
+        elif s <= 69:
+            risk["status"] = "tight"
+            risk["label"] = "Timing serre"
+        else:
+            risk["status"] = "at_risk"
+            risk["label"] = "Risque de retard"
+
+    # Also mark unassigned events
+    for b in planning.get("unassigned", []):
+        bid = b.get("id", "")
+        if bid:
+            risks[bid] = {
+                "score": 15,
+                "status": "on_time",
+                "label": "A l'heure",
+                "reasons": ["Chauffeur non assigne a cette mission"],
+                "marginMinutes": None,
+                "etaMinutes": None,
+                "etaText": None,
+                "distanceText": None,
+                "gpsActive": False,
+                "minutesUntil": None,
+            }
+
+    return {"risks": risks, "date": date, "bufferMinutes": RISK_BUFFER_MINUTES}
 
 
 class ConflictCheckRequest(BaseModel):
