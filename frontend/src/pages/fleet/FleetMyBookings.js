@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { Plus, Search, Loader2, MapPin, Clock, User, Send, ChevronDown, ChevronUp, RefreshCw, Plane, Timer, Mountain, XCircle, UserPlus } from 'lucide-react';
+import { Plus, Search, Loader2, MapPin, Clock, User, Send, ChevronDown, ChevronUp, RefreshCw, Plane, Timer, Mountain, XCircle, UserPlus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const TYPE_CONFIG = {
   transfer: { label: 'Transfer', cls: 'bg-blue-50 text-blue-700', icon: Plane },
@@ -36,36 +36,53 @@ const FleetMyBookings = () => {
   const [assigningId, setAssigningId] = useState(null);
   const [selectedDriverId, setSelectedDriverId] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const LIMIT = 50;
+  const searchTimerRef = useRef(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
+      const params = new URLSearchParams({ page: String(page), limit: String(LIMIT) });
+      if (typeFilter !== 'all') params.set('type', typeFilter);
+      if (statusFilter !== 'all') params.set('status', statusFilter);
+      if (dateFrom) params.set('dateFrom', dateFrom);
+      if (dateTo) params.set('dateTo', dateTo);
+      if (search) params.set('search', search);
+
       const [bRes, dRes] = await Promise.all([
-        authFetch('/api/fleet/my-bookings'),
+        authFetch(`/api/fleet/my-bookings?${params}`),
         authFetch('/api/fleet/drivers'),
       ]);
-      setBookings(bRes.ok ? await bRes.json() : []);
+      if (bRes.ok) {
+        const data = await bRes.json();
+        setBookings(data.bookings || []);
+        setTotal(data.total || 0);
+        setTotalPages(data.totalPages || 1);
+      } else {
+        setBookings([]);
+      }
       setDrivers((dRes.ok ? await dRes.json() : []).filter(d => d.isActivated));
     } catch { toast.error('Erreur de chargement'); }
     finally { setLoading(false); }
-  }, [authFetch]);
+  }, [authFetch, page, typeFilter, statusFilter, dateFrom, dateTo, search]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const filtered = bookings.filter(b => {
-    const q = search.toLowerCase();
-    const matchSearch = !q ||
-      (b.pickupAddress || '').toLowerCase().includes(q) ||
-      (b.dropoffAddress || '').toLowerCase().includes(q) ||
-      (b.tourName || '').toLowerCase().includes(q) ||
-      (b.clientName || '').toLowerCase().includes(q) ||
-      (b.flightNumber || '').toLowerCase().includes(q) ||
-      (b.driver?.name || '').toLowerCase().includes(q);
-    const matchDate = (!dateFrom || b.date >= dateFrom) && (!dateTo || b.date <= dateTo);
-    return matchSearch && matchDate &&
-      (typeFilter === 'all' || b.type === typeFilter) &&
-      (statusFilter === 'all' || b.status === statusFilter);
-  });
+  // Reset page when filters change
+  const applyFilter = useCallback((setter, val) => {
+    setter(val);
+    setPage(1);
+  }, []);
+
+  const handleSearch = useCallback((val) => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => { setSearch(val); setPage(1); }, 400);
+  }, []);
+
+  const [searchInput, setSearchInput] = useState('');
 
   const handleAssign = async (id) => {
     if (!selectedDriverId) { toast.error('Selectionnez un chauffeur'); return; }
@@ -116,7 +133,7 @@ const FleetMyBookings = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Mes Reservations</h1>
-          <p className="text-gray-500 text-sm mt-1">{bookings.length} reservation{bookings.length > 1 ? 's' : ''} dans votre planning</p>
+          <p className="text-gray-500 text-sm mt-1">{total} reservation{total > 1 ? 's' : ''} dans votre planning</p>
         </div>
         <div className="flex gap-2">
           <button onClick={fetchData} data-testid="refresh-my-bookings-btn"
@@ -134,31 +151,31 @@ const FleetMyBookings = () => {
       <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[180px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..."
+          <input type="text" value={searchInput} onChange={e => { setSearchInput(e.target.value); handleSearch(e.target.value); }} placeholder="Rechercher..."
             className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:outline-none focus:border-blue-500" data-testid="my-booking-search" />
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-gray-400">Du</span>
-          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} data-testid="my-booking-date-from"
+          <input type="date" value={dateFrom} onChange={e => applyFilter(setDateFrom, e.target.value)} data-testid="my-booking-date-from"
             className="px-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:border-blue-500" />
           <span className="text-xs text-gray-400">au</span>
-          <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} data-testid="my-booking-date-to"
+          <input type="date" value={dateTo} onChange={e => applyFilter(setDateTo, e.target.value)} data-testid="my-booking-date-to"
             className="px-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:border-blue-500" />
         </div>
-        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} data-testid="my-booking-type-filter"
+        <select value={typeFilter} onChange={e => applyFilter(setTypeFilter, e.target.value)} data-testid="my-booking-type-filter"
           className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm">
           <option value="all">Tous types</option>
           <option value="transfer">Transfer</option>
           <option value="dispo">Dispo</option>
           <option value="excursion">Excursion</option>
         </select>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} data-testid="my-booking-status-filter"
+        <select value={statusFilter} onChange={e => applyFilter(setStatusFilter, e.target.value)} data-testid="my-booking-status-filter"
           className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm">
           <option value="all">Tous statuts</option>
           {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
         </select>
         {(dateFrom || dateTo || typeFilter !== 'all' || statusFilter !== 'all' || search) && (
-          <button onClick={() => { setSearch(''); setDateFrom(''); setDateTo(''); setTypeFilter('all'); setStatusFilter('all'); }}
+          <button onClick={() => { setSearchInput(''); setSearch(''); setDateFrom(''); setDateTo(''); setTypeFilter('all'); setStatusFilter('all'); setPage(1); }}
             className="px-3 py-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition">
             Effacer filtres
           </button>
@@ -166,7 +183,7 @@ const FleetMyBookings = () => {
       </div>
 
       {/* List */}
-      {filtered.length === 0 ? (
+      {bookings.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
           <Plane className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500 mb-4">{search || typeFilter !== 'all' || statusFilter !== 'all' ? 'Aucun resultat' : 'Aucune reservation'}</p>
@@ -177,7 +194,7 @@ const FleetMyBookings = () => {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map(b => {
+          {bookings.map(b => {
             const tp = getType(b.type);
             const st = getStatus(b.status);
             const TypeIcon = tp.icon;
@@ -310,6 +327,40 @@ const FleetMyBookings = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-3 shadow-sm" data-testid="pagination">
+          <p className="text-sm text-gray-500">
+            Page {page} / {totalPages} ({total} resultats)
+          </p>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}
+              data-testid="pagination-prev"
+              className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1">
+              <ChevronLeft className="w-4 h-4" /> Precedent
+            </button>
+            {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+              let p;
+              if (totalPages <= 7) p = i + 1;
+              else if (page <= 4) p = i + 1;
+              else if (page >= totalPages - 3) p = totalPages - 6 + i;
+              else p = page - 3 + i;
+              return (
+                <button key={p} onClick={() => setPage(p)}
+                  className={`w-8 h-8 rounded-lg text-sm font-medium transition ${p === page ? 'bg-blue-600 text-white' : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200'}`}>
+                  {p}
+                </button>
+              );
+            })}
+            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}
+              data-testid="pagination-next"
+              className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1">
+              Suivant <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
     </div>

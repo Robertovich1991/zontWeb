@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck, Bell, BellOff, Volume2, FileSpreadsheet, Upload, Download, Check } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck, Bell, BellOff, Volume2, FileSpreadsheet, Upload, Download, Check } from 'lucide-react';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_WIDTH = 120;
@@ -120,6 +120,7 @@ const FleetPlanning = () => {
   const [selectedDriverId, setSelectedDriverId] = useState('');
   const [assignLoading, setAssignLoading] = useState(false);
   const [conflictInfo, setConflictInfo] = useState(null);
+  const [unassignedExpanded, setUnassignedExpanded] = useState(false);
 
   // Event action state (click on assigned event)
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -729,10 +730,14 @@ const FleetPlanning = () => {
         </div>
       )}
 
-      {/* Unassigned Bookings Panel */}
+      {/* Unassigned Bookings Panel - Collapsible */}
       {unassigned.length > 0 && (
         <div className="bg-white border-2 border-dashed border-amber-300 rounded-xl shadow-sm overflow-hidden" data-testid="unassigned-panel">
-          <div className="bg-amber-50 px-4 py-3 flex items-center justify-between border-b border-amber-200">
+          <div
+            className="bg-amber-50 px-4 py-3 flex items-center justify-between border-b border-amber-200 cursor-pointer select-none"
+            onClick={() => setUnassignedExpanded(v => !v)}
+            data-testid="unassigned-panel-toggle"
+          >
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
               <span className="text-sm font-semibold text-amber-800">
@@ -753,10 +758,16 @@ const FleetPlanning = () => {
                 </span>
               )}
             </div>
-            <span className="text-xs text-amber-600">Affectez un chauffeur pour planifier</span>
+            <div className="flex items-center gap-2">
+              {!unassignedExpanded && (
+                <span className="text-xs text-amber-600 hidden sm:inline">Cliquez pour voir les missions</span>
+              )}
+              {unassignedExpanded ? <ChevronUp className="w-4 h-4 text-amber-600" /> : <ChevronDown className="w-4 h-4 text-amber-600" />}
+            </div>
           </div>
-          <div className="divide-y divide-gray-100 max-h-[320px] overflow-y-auto">
-            {unassigned.map(b => {
+          {unassignedExpanded && (
+            <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+              {unassigned.map(b => {
               const tp = getType(b.type);
               const TypeIcon = tp.icon;
               const isAssigning = assigningBookingId === b.id;
@@ -860,6 +871,7 @@ const FleetPlanning = () => {
               );
             })}
           </div>
+          )}
         </div>
       )}
 

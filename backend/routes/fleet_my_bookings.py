@@ -116,7 +116,16 @@ async def create_booking(data: CreateBookingRequest, request: Request):
 
 
 @router.get("")
-async def list_bookings(request: Request, type: str = "", status: str = ""):
+async def list_bookings(
+    request: Request,
+    type: str = "",
+    status: str = "",
+    dateFrom: str = "",
+    dateTo: str = "",
+    search: str = "",
+    page: int = 1,
+    limit: int = 50,
+):
     db = get_db(request)
     company_id = get_company_id(request)
 
@@ -125,9 +134,39 @@ async def list_bookings(request: Request, type: str = "", status: str = ""):
         query["type"] = type
     if status:
         query["status"] = status
+    if dateFrom or dateTo:
+        date_q = {}
+        if dateFrom:
+            date_q["$gte"] = dateFrom
+        if dateTo:
+            date_q["$lte"] = dateTo
+        query["date"] = date_q
+    if search:
+        regex = {"$regex": search, "$options": "i"}
+        query["$or"] = [
+            {"pickupAddress": regex},
+            {"dropoffAddress": regex},
+            {"clientName": regex},
+            {"flightNumber": regex},
+            {"driver.name": regex},
+            {"comment": regex},
+        ]
 
-    cursor = db.fleet_reservations.find(query, {"_id": 0}).sort("createdAt", -1)
-    return await cursor.to_list(200)
+    # Clamp limit
+    limit = min(max(limit, 10), 200)
+    skip = (max(page, 1) - 1) * limit
+
+    total = await db.fleet_reservations.count_documents(query)
+    cursor = db.fleet_reservations.find(query, {"_id": 0}).sort("date", -1).sort("time", -1).skip(skip).limit(limit)
+    bookings = await cursor.to_list(limit)
+
+    return {
+        "bookings": bookings,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "totalPages": (total + limit - 1) // limit,
+    }
 
 
 @router.get("/{booking_id}")
