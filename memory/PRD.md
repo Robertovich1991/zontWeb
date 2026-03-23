@@ -27,6 +27,9 @@ External C# backend (api.zont.cab) + internal MongoDB. Custom Teltonika GPS inte
 - **Adaptive Caching**: >=60min→30min TTL, 20-60min→10min TTL, <20min→5min TTL
 - **Frontend**: Risk badges (green/amber/red) on events, colored ring borders, risk summary counter
 - **Tooltip**: Reasons, ETA with traffic, distance, margin, GPS status
+- **Sound + Push Alerts**: Two-tone alert sound + browser notification when score escalates to red (at_risk)
+- **Alert Toggle**: Persistent on/off button in header (localStorage), speaker icon
+- **Visual Flash**: Risk summary bar pulses red + ping animation on escalation
 - **Auto-refresh**: Every 30 seconds in day and week views
 - **Status**: on_time (0-39), tight (40-69), at_risk (70-100)
 - **Testing**: 100% backend (16/16) + 100% frontend E2E (iteration_44)

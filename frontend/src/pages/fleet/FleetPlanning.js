@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck, Bell, BellOff, Volume2 } from 'lucide-react';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_WIDTH = 120;
@@ -144,26 +144,122 @@ const FleetPlanning = () => {
 
   useEffect(() => { fetchPlanning(); }, [fetchPlanning]);
 
-  // ── Delay Risk AI: fetch + auto-refresh ──
+  // ── Delay Risk AI: fetch + auto-refresh + alerts ──
+  const [alertsEnabled, setAlertsEnabled] = useState(() => {
+    try { return localStorage.getItem('fleet_risk_alerts') !== 'false'; } catch { return true; }
+  });
+  const [alertFlash, setAlertFlash] = useState(false);
+  const prevRisksRef = useRef({});
+  const audioCtxRef = useRef(null);
+
+  const toggleAlerts = useCallback(() => {
+    setAlertsEnabled(prev => {
+      const next = !prev;
+      try { localStorage.setItem('fleet_risk_alerts', String(next)); } catch {}
+      if (next) {
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+          Notification.requestPermission();
+        }
+        toast.success('Alertes de retard activees');
+      } else {
+        toast('Alertes de retard desactivees', { icon: '🔕' });
+      }
+      return next;
+    });
+  }, []);
+
+  const playAlertSound = useCallback(() => {
+    try {
+      if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = audioCtxRef.current;
+      // Two-tone urgent alert
+      [880, 1100].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.2 + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + i * 0.2);
+        osc.stop(ctx.currentTime + i * 0.2 + 0.2);
+      });
+    } catch {}
+  }, []);
+
+  const checkRiskEscalations = useCallback((newRisks) => {
+    if (!alertsEnabled) return;
+    const prev = prevRisksRef.current;
+    const escalated = [];
+
+    Object.entries(newRisks).forEach(([eventId, risk]) => {
+      const prevRisk = prev[eventId];
+      if (risk.status === 'at_risk' && prevRisk && prevRisk.status !== 'at_risk') {
+        escalated.push({ eventId, risk, from: prevRisk.status });
+      }
+    });
+
+    if (escalated.length > 0) {
+      // Sound
+      playAlertSound();
+      // Flash
+      setAlertFlash(true);
+      setTimeout(() => setAlertFlash(false), 3000);
+
+      // Toast
+      escalated.forEach(({ risk }) => {
+        const mainReason = risk.reasons?.[0] || 'Score critique';
+        toast.error(`Risque de retard ${risk.score}%`, {
+          description: mainReason,
+          duration: 8000,
+          icon: <ShieldAlert className="w-4 h-4 text-red-500" />,
+        });
+      });
+
+      // Browser notification
+      if ('Notification' in window && Notification.permission === 'granted') {
+        escalated.forEach(({ risk }) => {
+          try {
+            new Notification('Risque de retard detecte', {
+              body: `Score: ${risk.score}% - ${risk.reasons?.[0] || 'Alerte critique'}`,
+              icon: '/favicon.ico',
+              tag: 'risk-alert',
+              requireInteraction: true,
+            });
+          } catch {}
+        });
+      }
+    }
+  }, [alertsEnabled, playAlertSound]);
+
   const fetchDelayRisk = useCallback(async () => {
     try {
       const res = await authFetch(`/api/fleet/planning/delay-risk?date=${currentDate}`);
       if (res.ok) {
         const data = await res.json();
-        setDelayRisks(data.risks || {});
+        const newRisks = data.risks || {};
+        checkRiskEscalations(newRisks);
+        prevRisksRef.current = newRisks;
+        setDelayRisks(newRisks);
       }
     } catch {}
-  }, [authFetch, currentDate]);
+  }, [authFetch, currentDate, checkRiskEscalations]);
 
   useEffect(() => {
     if (view === 'day' || view === 'week') {
       fetchDelayRisk();
       riskTimerRef.current = setInterval(fetchDelayRisk, 30000);
+      // Request notification permission on first load
+      if (alertsEnabled && 'Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
       return () => clearInterval(riskTimerRef.current);
     } else {
       setDelayRisks({});
     }
-  }, [fetchDelayRisk, view]);
+  }, [fetchDelayRisk, view, alertsEnabled]);
 
   // Risk summary counts
   const riskSummary = useMemo(() => {
@@ -528,11 +624,11 @@ const FleetPlanning = () => {
           </button>
           {/* Risk AI Summary */}
           {(view === 'day' || view === 'week') && Object.keys(delayRisks).length > 0 && (
-            <div className="flex items-center gap-1.5 ml-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg" data-testid="risk-summary">
-              <ShieldAlert className="w-3.5 h-3.5 text-gray-400" />
+            <div className={`flex items-center gap-1.5 ml-2 px-3 py-1.5 border rounded-lg transition-all duration-500 ${alertFlash ? 'bg-red-50 border-red-300 animate-pulse shadow-lg shadow-red-100' : 'bg-gray-50 border-gray-200'}`} data-testid="risk-summary">
+              <ShieldAlert className={`w-3.5 h-3.5 ${alertFlash ? 'text-red-500' : 'text-gray-400'}`} />
               {riskSummary.at_risk > 0 && (
                 <span className="flex items-center gap-1 text-xs font-bold text-red-600">
-                  <span className="w-2 h-2 rounded-full bg-red-500" />{riskSummary.at_risk}
+                  <span className={`w-2 h-2 rounded-full bg-red-500 ${alertFlash ? 'animate-ping' : ''}`} />{riskSummary.at_risk}
                 </span>
               )}
               {riskSummary.tight > 0 && (
@@ -545,6 +641,14 @@ const FleetPlanning = () => {
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />{riskSummary.on_time}
                 </span>
               )}
+              <button
+                onClick={toggleAlerts}
+                data-testid="risk-alert-toggle"
+                className={`ml-1 p-1 rounded-md transition-colors ${alertsEnabled ? 'text-red-500 hover:bg-red-50' : 'text-gray-300 hover:bg-gray-100'}`}
+                title={alertsEnabled ? 'Alertes sonores activees' : 'Alertes sonores desactivees'}
+              >
+                {alertsEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
+              </button>
             </div>
           )}
         </div>
