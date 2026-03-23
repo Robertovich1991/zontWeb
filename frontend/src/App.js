@@ -65,6 +65,7 @@ const FleetMyBookings = lazy(() => import("@/pages/fleet/FleetMyBookings"));
 const FleetCreateBooking = lazy(() => import("@/pages/fleet/FleetCreateBooking"));
 const FleetPlanning = lazy(() => import("@/pages/fleet/FleetPlanning"));
 const FleetGeolocation = lazy(() => import("@/pages/fleet/FleetGeolocation"));
+const FleetGPSHistory = lazy(() => import("@/pages/fleet/FleetGPSHistory"));
 const FleetTrips = lazy(() => import("@/pages/fleet/FleetTrips"));
 const FleetProfile = lazy(() => import("@/pages/fleet/FleetProfile"));
 const FleetDriverProfile = lazy(() => import("@/pages/fleet/FleetDriverProfile"));
@@ -277,6 +278,7 @@ function App() {
                     <Route path="my-bookings/new" element={<FleetCreateBooking />} />
                     <Route path="planning" element={<FleetPlanning />} />
                     <Route path="geolocation" element={<FleetGeolocation />} />
+                    <Route path="gps-history" element={<FleetGPSHistory />} />
                     <Route path="trips" element={<FleetTrips />} />
                     <Route path="profile" element={<FleetProfile />} />
                   </Route>

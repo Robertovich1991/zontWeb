@@ -520,6 +520,36 @@ async def get_device_history(
     }
 
 
+@router.get("/history-days/{imei}")
+async def get_device_history_days(imei: str, request: Request):
+    """Get list of days that have GPS history data for a device."""
+    get_token(request)
+    company_id = get_company_id(request)
+    db = get_db(request)
+
+    device = await db.gps_devices.find_one(
+        {"imei": imei, "companyId": company_id}, {"_id": 0}
+    )
+    if not device:
+        raise HTTPException(404, "Appareil non trouve")
+
+    pipeline = [
+        {"$match": {"imei": imei, "lat": {"$ne": 0.0}}},
+        {"$group": {
+            "_id": {"$substr": ["$timestamp", 0, 10]},
+            "count": {"$sum": 1},
+            "maxSpeed": {"$max": "$speed"},
+        }},
+        {"$sort": {"_id": -1}},
+        {"$limit": 90},
+    ]
+    days = await db.gps_history.aggregate(pipeline).to_list(90)
+    return {
+        "device": device,
+        "days": [{"date": d["_id"], "positions": d["count"], "maxSpeed": d.get("maxSpeed", 0)} for d in days],
+    }
+
+
 # ── SSE Stream (Real-Time) ───────────────────────────────────────────
 
 @router.get("/stream")
