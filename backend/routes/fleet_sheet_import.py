@@ -99,6 +99,54 @@ def parse_price(raw: str) -> float:
         return 0.0
 
 
+# ── Known real driver names (normalized lowercase) ──
+KNOWN_DRIVERS = {
+    "karen", "armen", "lucien", "sargis", "suleyman", "hamlet", "vardan",
+    "mohand", "mohamed", "paul", "valentin", "steven", "arshak", "lalili",
+    "jean claude", "mk", "drai omar", "valenin", "rdv",
+}
+
+# Words that indicate the "driver" cell is actually a note, not a name
+DRIVER_NOISE_KEYWORDS = [
+    "cancel", "refund", "reschedul", "wrong", "update", "wpov", "wpuma",
+    "verjin", "pickup", "uzum", "infon", "suitcase", "luggage", "carry on",
+    "car seat", "child seat", "pieces", "corini", "sister", "shnorhavorel",
+    "confirmation", "harcrel", "poxecin", "grel", "chen ekel", "van",
+    "product", "minivan",
+]
+
+
+def normalize_driver_name(raw: str) -> str | None:
+    """Clean driver name from sheet. Returns None if not a real driver."""
+    if not raw:
+        return None
+    raw = raw.strip()
+    low = raw.lower()
+
+    # Check for noise keywords
+    for kw in DRIVER_NOISE_KEYWORDS:
+        if kw in low:
+            return None
+
+    # Strip suffixes like "+1h", "+2h", "+30euro cash", "(jam u kes...)"
+    cleaned = re.sub(r"\s*\+.*$", "", raw).strip()
+    cleaned = re.sub(r"\s*\(.*\)$", "", cleaned).strip()
+    cleaned = re.sub(r"\s*@.*$", "", cleaned).strip()
+    cleaned = re.sub(r"\s+\d+\s*EUR.*$", "", cleaned, flags=re.IGNORECASE).strip()
+
+    if not cleaned or len(cleaned) < 2:
+        return None
+
+    # Check if it looks like a real name (short, no special chars, in known list or capitalized)
+    if cleaned.lower() in KNOWN_DRIVERS:
+        return cleaned.title() if cleaned.islower() else cleaned
+    # If it's a short capitalized word (likely a name), accept it
+    if len(cleaned.split()) <= 2 and len(cleaned) <= 20 and cleaned[0].isupper():
+        return cleaned
+    # Reject anything else
+    return None
+
+
 def parse_code(code: str) -> dict:
     """Parse code like DEP-2, ARR-6, DEPGAR-2, ARRGAR-2, TRADIS-3."""
     code = code.strip().upper()
@@ -259,8 +307,8 @@ async def preview_sheet(request: Request, config: SheetConfig):
 
 @router.post("/import")
 async def import_from_sheet(request: Request):
-    """Import parsed bookings into fleet_reservations."""
-    token = get_token(request)
+    """Import parsed bookings into fleet_reservations (bulk insert)."""
+    get_token(request)
     company_id = get_company_id(request)
     db = get_db(request)
     body = await request.json()
@@ -286,27 +334,39 @@ async def import_from_sheet(request: Request):
     imported = 0
     duplicates = 0
     drivers_created = 0
+    skipped_cancelled = 0
     now = datetime.utcnow().isoformat()
+    bulk_docs = []
+    BATCH_SIZE = 500
 
     for b in bookings:
-        # Create unique reference: date + time + ref + driver
         sheet_ref = f"{b['date']}_{b['time']}_{b.get('reference', '')}_{b.get('driverName', '')}"
         if sheet_ref in existing_refs:
             duplicates += 1
             continue
 
+        # Normalize driver name (filter out notes/cancelled)
+        raw_driver = (b.get("driverName") or "").strip()
+        clean_driver = normalize_driver_name(raw_driver)
+
+        # Skip rows where driver column says "cancelled"/"refunded"
+        if raw_driver and not clean_driver:
+            low = raw_driver.lower()
+            if any(kw in low for kw in ["cancel", "refund"]):
+                skipped_cancelled += 1
+                existing_refs.add(sheet_ref)
+                continue
+
         # Auto-assign driver by name
         driver_data = None
-        driver_name = (b.get("driverName") or "").strip()
-        if driver_name:
-            key = driver_name.lower()
+        if clean_driver:
+            key = clean_driver.lower()
             if key not in local_drivers:
-                # Create local driver
                 driver_id = str(uuid.uuid4())
                 driver_doc = {
                     "id": driver_id,
                     "companyId": company_id,
-                    "firstName": driver_name,
+                    "firstName": clean_driver,
                     "lastName": "",
                     "phone": "",
                     "active": True,
@@ -316,8 +376,8 @@ async def import_from_sheet(request: Request):
                 await db.local_drivers.insert_one(driver_doc)
                 local_drivers[key] = driver_doc
                 drivers_created += 1
-                logger.info(f"Created local driver: {driver_name} ({driver_id})")
-            driver_data = {"id": local_drivers[key]["id"], "name": driver_name}
+                logger.info(f"Created local driver: {clean_driver} ({driver_id})")
+            driver_data = {"id": local_drivers[key]["id"], "name": clean_driver}
 
         doc = {
             "id": str(uuid.uuid4()),
@@ -345,18 +405,194 @@ async def import_from_sheet(request: Request):
             "sheetCode": b.get("code", ""),
             "sheetSource": b.get("source", ""),
             "sheetReference": b.get("reference", ""),
-            "sheetDriverName": b.get("driverName", ""),
+            "sheetDriverName": raw_driver,
             "createdAt": now,
             "importedAt": now,
         }
-        await db.fleet_reservations.insert_one(doc)
+        bulk_docs.append(doc)
         existing_refs.add(sheet_ref)
         imported += 1
+
+        # Bulk insert in batches
+        if len(bulk_docs) >= BATCH_SIZE:
+            await db.fleet_reservations.insert_many(bulk_docs)
+            bulk_docs = []
+
+    # Insert remaining
+    if bulk_docs:
+        await db.fleet_reservations.insert_many(bulk_docs)
 
     return {
         "success": True,
         "imported": imported,
         "duplicates": duplicates,
         "driversCreated": drivers_created,
+        "skippedCancelled": skipped_cancelled,
         "total": len(bookings),
+    }
+
+
+@router.post("/bulk-import")
+async def bulk_import_from_sheet(request: Request, config: SheetConfig):
+    """Server-side: fetch sheet + import all in one call (avoids large payloads)."""
+    get_token(request)
+    company_id = get_company_id(request)
+    db = get_db(request)
+
+    # Reuse preview logic to fetch and parse
+    m = re.search(r"/d/([a-zA-Z0-9_-]+)", config.sheetUrl)
+    if not m:
+        raise HTTPException(400, "URL Google Sheet invalide")
+    sheet_id = m.group(1)
+    gid_match = re.search(r"gid=(\d+)", config.sheetUrl)
+    gid = gid_match.group(1) if gid_match else "0"
+
+    csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
+    try:
+        async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
+            resp = await client.get(csv_url)
+            if resp.status_code != 200:
+                raise HTTPException(400, "Impossible de lire le Google Sheet.")
+            csv_text = resp.text
+    except httpx.HTTPError as e:
+        raise HTTPException(500, f"Erreur connexion Google: {e}")
+
+    reader = csv.reader(io.StringIO(csv_text))
+    rows = list(reader)
+    if len(rows) < 2:
+        raise HTTPException(400, "Le sheet est vide")
+
+    # Parse all rows
+    bookings = []
+    current_date = None
+    for i, row in enumerate(rows[1:], start=2):
+        date_raw = row[0].strip() if row else ""
+        if date_raw:
+            d = parse_fr_date(date_raw)
+            if d:
+                current_date = d
+        parsed = parse_sheet_row(row, current_date)
+        if not parsed:
+            continue
+        if config.dateFilter and parsed["date"] != config.dateFilter:
+            continue
+        bookings.append(parsed)
+
+    if not bookings:
+        raise HTTPException(400, "Aucune mission trouvee dans le sheet")
+
+    # Get existing refs
+    existing_refs = set()
+    cursor = db.fleet_reservations.find(
+        {"companyId": company_id, "sheetRef": {"$exists": True}},
+        {"_id": 0, "sheetRef": 1}
+    )
+    async for doc in cursor:
+        existing_refs.add(doc.get("sheetRef", ""))
+
+    # Build local driver map
+    local_drivers = {}
+    async for d in db.local_drivers.find({"companyId": company_id}, {"_id": 0}):
+        local_drivers[d.get("firstName", "").lower()] = d
+
+    imported = 0
+    duplicates = 0
+    drivers_created = 0
+    skipped_cancelled = 0
+    now = datetime.utcnow().isoformat()
+    bulk_docs = []
+    BATCH_SIZE = 500
+
+    for b in bookings:
+        sheet_ref = f"{b['date']}_{b['time']}_{b.get('reference', '')}_{b.get('driverName', '')}"
+        if sheet_ref in existing_refs:
+            duplicates += 1
+            continue
+
+        raw_driver = (b.get("driverName") or "").strip()
+        clean_driver = normalize_driver_name(raw_driver)
+
+        if raw_driver and not clean_driver:
+            low = raw_driver.lower()
+            if any(kw in low for kw in ["cancel", "refund"]):
+                skipped_cancelled += 1
+                existing_refs.add(sheet_ref)
+                continue
+
+        driver_data = None
+        if clean_driver:
+            key = clean_driver.lower()
+            if key not in local_drivers:
+                driver_id = str(uuid.uuid4())
+                driver_doc = {
+                    "id": driver_id,
+                    "companyId": company_id,
+                    "firstName": clean_driver,
+                    "lastName": "",
+                    "phone": "",
+                    "active": True,
+                    "isLocal": True,
+                    "createdAt": now,
+                }
+                await db.local_drivers.insert_one(driver_doc)
+                local_drivers[key] = driver_doc
+                drivers_created += 1
+
+            driver_data = {"id": local_drivers[key]["id"], "name": clean_driver}
+
+        doc = {
+            "id": str(uuid.uuid4()),
+            "companyId": company_id,
+            "type": b.get("type", "transfer"),
+            "date": b["date"],
+            "time": b["time"],
+            "status": "confirmed",
+            "driver": driver_data,
+            "pickupAddress": b.get("pickupAddress", ""),
+            "dropoffAddress": b.get("dropoffAddress", ""),
+            "clientName": b.get("clientName", ""),
+            "clientPhone": b.get("clientPhone", ""),
+            "passengers": b.get("passengers", 1),
+            "price": b.get("price", 0),
+            "hours": 0,
+            "comment": " | ".join(filter(None, [
+                b.get("source", ""),
+                b.get("reference", ""),
+                b.get("remarks", ""),
+                b.get("additional", ""),
+            ])),
+            "sentToZont": False,
+            "sheetRef": sheet_ref,
+            "sheetCode": b.get("code", ""),
+            "sheetSource": b.get("source", ""),
+            "sheetReference": b.get("reference", ""),
+            "sheetDriverName": raw_driver,
+            "createdAt": now,
+            "importedAt": now,
+        }
+        bulk_docs.append(doc)
+        existing_refs.add(sheet_ref)
+        imported += 1
+
+        if len(bulk_docs) >= BATCH_SIZE:
+            await db.fleet_reservations.insert_many(bulk_docs)
+            bulk_docs = []
+
+    if bulk_docs:
+        await db.fleet_reservations.insert_many(bulk_docs)
+
+    # Get stats
+    dates = sorted(set(b["date"] for b in bookings))
+    drivers = sorted(set(normalize_driver_name(b.get("driverName", "")) or "" for b in bookings))
+    drivers = [d for d in drivers if d]
+
+    return {
+        "success": True,
+        "imported": imported,
+        "duplicates": duplicates,
+        "driversCreated": drivers_created,
+        "skippedCancelled": skipped_cancelled,
+        "total": len(bookings),
+        "dateRange": {"first": dates[0] if dates else "", "last": dates[-1] if dates else ""},
+        "driversFound": drivers,
     }
