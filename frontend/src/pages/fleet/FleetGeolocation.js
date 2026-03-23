@@ -752,6 +752,63 @@ const FleetGeolocation = () => {
         </div>
       )}
 
+      {/* ── MOBILE MODE TOGGLE (floating, lg:hidden) ─────────── */}
+      <div className="lg:hidden absolute top-4 left-4 right-4 z-[1001] flex items-center gap-2" data-testid="mobile-mode-bar">
+        {mode === 'live' ? (
+          <>
+            <button onClick={() => setMobileExpanded(!mobileExpanded)}
+              className="w-10 h-10 bg-white/95 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200/80 flex items-center justify-center">
+              <Navigation className="w-5 h-5 text-emerald-500" />
+            </button>
+            <button onClick={() => { if (enriched.length > 0) switchToHistory(enriched[0].imei); }}
+              className="px-4 py-2.5 bg-white/95 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200/80 flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-blue-600 transition"
+              data-testid="mobile-history-btn">
+              <RouteIcon className="w-4 h-4" /> Historique
+            </button>
+          </>
+        ) : (
+          <div className="flex-1 bg-white/95 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200/80 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <RouteIcon className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Historique GPS</p>
+                  <p className="text-[10px] text-gray-400">{histDevice?.vehicleName || histImei} {histDevice?.licensePlate ? `- ${histDevice.licensePlate}` : ''}</p>
+                </div>
+              </div>
+              <button onClick={switchToLive} data-testid="mobile-back-live"
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 transition">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <select value={histImei || ''} onChange={e => { setHistImei(e.target.value); loadHistory(e.target.value, histDate); }}
+                className="flex-1 px-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 outline-none"
+                data-testid="mobile-hist-device">
+                {enriched.map(d => <option key={d.imei} value={d.imei}>{d.vehicleName || d.imei}</option>)}
+              </select>
+              <div className="relative">
+                <Calendar className="w-3.5 h-3.5 text-gray-400 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input type="date" value={histDate} onChange={e => setHistDate(e.target.value)}
+                  className="pl-7 pr-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-700 outline-none w-[130px]"
+                  data-testid="mobile-hist-date" />
+              </div>
+            </div>
+            {histLoading && <div className="flex justify-center mt-2"><Loader2 className="w-4 h-4 animate-spin text-blue-400" /></div>}
+            {!histLoading && histPositions.length > 0 && (
+              <div className="flex items-center gap-3 mt-2 text-[10px] text-gray-500">
+                <span>{histPositions.length} pts</span>
+                <span>{histStats.distance.toFixed(1)} km</span>
+                <span>{fmtDuration(histStats.duration)}</span>
+                <span>Max {Math.round(histStats.maxSpeed)} km/h</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* ── MOBILE BOTTOM SHEET (live mode) ────────────────────── */}
       {mode === 'live' && (
         <div className={`lg:hidden fixed left-0 right-0 bottom-0 z-[1000] transition-all duration-300 ease-out ${mobileExpanded ? 'top-[30vh]' : 'top-[calc(100vh-170px)]'}`}>
