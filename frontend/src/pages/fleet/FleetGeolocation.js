@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
+import { useNavigate } from 'react-router-dom';
 import {
   Search, RefreshCw, Wifi, WifiOff, Clock, X, Plus, Loader2,
-  Navigation, Satellite, Power, MapPin, Car, Radio, ChevronUp, Gauge, Zap
+  Navigation, Satellite, Power, MapPin, Car, Radio, ChevronUp, Gauge, Zap, History
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -323,6 +324,7 @@ const DetailContent = ({ vehicle, onClose }) => {
 // ── Main Page ────────────────────────────────────────────────────────
 const FleetGeolocation = () => {
   const { token, authFetch } = useFleetAuth();
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImei, setSelectedImei] = useState(null);
@@ -495,6 +497,10 @@ const FleetGeolocation = () => {
               </div>
             </div>
             <div className="flex items-center gap-0.5">
+              <button onClick={() => navigate('/fleet/gps-history')} data-testid="gps-history-btn"
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition" title="Historique GPS">
+                <History className="w-4 h-4" />
+              </button>
               <button onClick={manualRefresh} disabled={loading} data-testid="gps-refresh-btn"
                 className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition">
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />

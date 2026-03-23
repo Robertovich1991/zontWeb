@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useFleetAuth } from './FleetAuthContext';
-import { LayoutDashboard, Users, Car, User, LogOut, Menu, X, ChevronRight, Truck, CalendarClock, Route as RouteIcon, BookOpen, CalendarDays, MapPin } from 'lucide-react';
+import { LayoutDashboard, Users, Car, User, LogOut, Menu, X, ChevronRight, Truck, CalendarClock, Route as RouteIcon, BookOpen, CalendarDays, MapPin, History } from 'lucide-react';
 
 const navItems = [
   { path: '/fleet', icon: LayoutDashboard, label: 'Dashboard', exact: true },
@@ -12,6 +12,7 @@ const navItems = [
   { path: '/fleet/drivers', icon: Users, label: 'Chauffeurs' },
   { path: '/fleet/vehicles', icon: Car, label: 'Vehicules' },
   { path: '/fleet/geolocation', icon: MapPin, label: 'Geolocalisation' },
+  { path: '/fleet/gps-history', icon: History, label: 'Historique GPS' },
   { path: '/fleet/profile', icon: User, label: 'Mon profil' },
 ];
 
@@ -19,7 +20,7 @@ const FleetLayout = () => {
   const { company, logout, isAuthenticated } = useFleetAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const isFullScreen = location.pathname === '/fleet/geolocation';
+  const isFullScreen = location.pathname === '/fleet/geolocation' || location.pathname === '/fleet/gps-history';
 
   if (!isAuthenticated) return <Navigate to="/fleet/login" replace />;
 
