@@ -1,0 +1,91 @@
+{
+  "summary": "Unified Fleet GPS Page (LIVE + HISTORIQUE) - Complete testing of merged FleetGeolocation page. All 22 backend API tests passed (100%). All frontend E2E tests passed for LIVE mode, HISTORIQUE mode, mode toggle, replay controls, stats panel, and navigation flows. The /fleet/gps-history route correctly returns 404. 'Historique GPS' removed from sidebar.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "HISTORIQUE mode - Device Selector",
+        "issues": ["Console warning about HTML nesting (span inside select/option) - React dev tools injection, doesn't affect functionality"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_fleet_gps_history.py",
+    "/app/test_reports/pytest/fleet_gps_unified_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (22/22 tests passed)",
+    "frontend": "100% (all E2E flows working)"
+  },
+  "test_credentials": {
+    "Fleet User": "Nandetiri1@gmail.com / 12345678",
+    "Real IMEI": "350317176003840 (Lexus NX 300, DZ-960-CK)"
+  },
+  "seed_data_creation": "No new seed data created. Used existing real GPS data from Teltonika hardware.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Unified Fleet GPS page fully functional. FleetGeolocation.js now contains both LIVE and HISTORIQUE modes in a single page with mode toggle. The separate /fleet/gps-history route was removed and returns 404. 'Historique GPS' link removed from sidebar. Vehicle status logic shows 'A l arret' (amber) when GPS is stale but ignition is off, instead of 'Hors ligne' (red). Backend APIs unchanged: GET /api/fleet/gps/history/{imei}, GET /api/fleet/gps/history-days/{imei}, GET /api/fleet/gps/devices. WebSocket /api/fleet/gps/ws still works for live tracking. Real data available for dates 2026-03-22 (1093 positions, 74.8km) and 2026-03-23 (360 positions, 9.8km).",
+  "features_tested": {
+    "frontend_unified_page": [
+      "LIVE mode is default on page load ✓",
+      "Mode toggle (LIVE/HISTORIQUE) visible and functional ✓",
+      "LIVE mode: WebSocket connection for real-time updates ✓",
+      "LIVE mode: Vehicle list with search and filters ✓",
+      "LIVE mode: Map with car markers ✓",
+      "LIVE mode: Vehicle detail panel with 'Voir l'historique' button ✓",
+      "HISTORIQUE mode: Device selector dropdown ✓",
+      "HISTORIQUE mode: Date picker ✓",
+      "HISTORIQUE mode: Route polyline with speed coloring (green <50, amber 50-90, red >90 km/h) ✓",
+      "HISTORIQUE mode: Start marker (green dot) and end marker (red dot) ✓",
+      "HISTORIQUE mode: Blue car marker for replay position ✓",
+      "HISTORIQUE mode: Stats panel (distance, duration, max/avg speed, position count) ✓",
+      "HISTORIQUE mode: Replay controls (play/pause, skip, timeline slider, speed 1x-50x) ✓",
+      "Back arrow button (←) returns to LIVE mode ✓",
+      "'Voir l'historique' button switches to HISTORIQUE mode for selected vehicle ✓",
+      "/fleet/gps-history route returns 404 (removed) ✓",
+      "'Historique GPS' removed from sidebar navigation ✓",
+      "Vehicle status shows 'A l arret' (amber) when ignition off but GPS stale ✓"
+    ],
+    "backend_apis": [
+      "GET /api/fleet/gps/devices - returns devices array ✓",
+      "GET /api/fleet/gps/history/{imei} - returns position history ✓",
+      "GET /api/fleet/gps/history-days/{imei} - returns days with data ✓",
+      "WebSocket /api/fleet/gps/ws - live tracking ✓"
+    ]
+  },
+  "data_verification": {
+    "date_2026_03_22": {
+      "positions": 1093,
+      "distance_km": 74.8,
+      "duration": "10h41",
+      "max_speed_kmh": 119,
+      "avg_speed_kmh": 46
+    },
+    "date_2026_03_23": {
+      "positions": 360,
+      "distance_km": 9.8,
+      "duration": "18h50",
+      "max_speed_kmh": 67,
+      "avg_speed_kmh": 25
+    }
+  },
+  "route_coloring_verification": {
+    "green": "speed < 50 km/h",
+    "amber": "speed 50-90 km/h",
+    "red": "speed > 90 km/h"
+  },
+  "vehicle_status_logic": {
+    "moving": "speed > 2 and age < 120s",
+    "stopped_a_l_arret": "ignition off OR speed <= 2, age < 3600s (amber)",
+    "offline_hors_ligne": "age > 3600s when ignition off, or age > 600s otherwise (red)",
+    "gps_lost": "no lat/lng or no timestamp"
+  }
+}
