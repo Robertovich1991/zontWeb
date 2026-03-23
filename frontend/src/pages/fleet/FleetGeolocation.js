@@ -849,10 +849,68 @@ const FleetGeolocation = () => {
 
       {/* Mobile detail overlay (live mode) */}
       {mode === 'live' && selected && (
-        <div className="lg:hidden fixed inset-0 bg-black/40 z-[2000] flex items-end" onClick={() => setSelectedImei(null)}>
-          <div className="w-full bg-white rounded-t-2xl max-h-[80vh] overflow-y-auto shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="lg:hidden fixed inset-0 bg-black/40 z-[2000] flex items-end" data-testid="mobile-detail-overlay" onClick={() => setSelectedImei(null)}>
+          <div className="w-full bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3" />
-            <div className="p-5"><h3 className="text-lg font-bold">{selected.vehicleName}</h3></div>
+            {/* Header */}
+            <div className="px-5 pt-4 pb-3 border-b border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <div className={`flex items-center gap-2 px-2.5 py-1 rounded-full ${STATUS[getStatus(selected)].light}`}>
+                  <div className={`w-2 h-2 rounded-full ${STATUS[getStatus(selected)].bg}`} />
+                  <span className={`text-xs font-medium ${STATUS[getStatus(selected)].text}`}>{STATUS[getStatus(selected)].label}</span>
+                </div>
+                <button onClick={() => setSelectedImei(null)} className="p-1.5 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-400" /></button>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">{selected.vehicleName || 'Vehicule'}</h3>
+              {selected.licensePlate && <p className="text-sm text-gray-400 font-mono mt-0.5">{selected.licensePlate}</p>}
+            </div>
+            {/* Info rows */}
+            <div className="px-5 py-4 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0"><Car className="w-4 h-4 text-emerald-600" /></div>
+                <div><p className="text-[10px] text-gray-400 uppercase tracking-wider">Chauffeur</p><p className="text-sm text-gray-900 font-medium">{selected.driverName || 'Non assigne'}</p></div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0"><Radio className="w-4 h-4 text-gray-500" /></div>
+                <div><p className="text-[10px] text-gray-400 uppercase tracking-wider">IMEI</p><p className="text-sm text-gray-900 font-mono">{selected.imei}</p></div>
+              </div>
+              {selected.lat && selected.lng && (
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0"><MapPin className="w-4 h-4 text-blue-500" /></div>
+                  <div><p className="text-[10px] text-gray-400 uppercase tracking-wider">Position</p><p className="text-sm text-gray-900 font-mono">{selected.lat.toFixed(6)}, {selected.lng.toFixed(6)}</p></div>
+                </div>
+              )}
+              {/* Telemetry grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Vitesse</p>
+                  <div className="flex items-baseline gap-1"><span className="text-2xl font-bold text-gray-900">{selected.speed ?? 0}</span><span className="text-xs text-gray-400">km/h</span></div>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Cap</p>
+                  <div className="flex items-center gap-2"><Navigation className="w-4 h-4 text-gray-400" style={{ transform: `rotate(${selected.heading || 0}deg)` }} /><span className="text-2xl font-bold text-gray-900">{selected.heading ?? 0}<span className="text-xs text-gray-400 ml-0.5">deg</span></span></div>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Satellites</p>
+                  <span className="text-2xl font-bold text-gray-900">{selected.satellites ?? 0}</span>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Contact</p>
+                  <div className="flex items-center gap-2"><div className={`w-2.5 h-2.5 rounded-full ${selected.ignition ? 'bg-emerald-500' : 'bg-gray-300'}`} /><span className="text-2xl font-bold text-gray-900">{selected.ignition ? 'ON' : 'OFF'}</span></div>
+                </div>
+              </div>
+              {/* Timestamp */}
+              <div className="flex items-center gap-3 text-gray-400">
+                <Clock className="w-4 h-4 shrink-0" />
+                <div><p className="text-[10px] uppercase tracking-wider">Derniere MAJ</p><p className="text-sm text-gray-600 font-mono">{selected.timestamp ? new Date(selected.timestamp).toLocaleString('fr-FR') : '--'}</p></div>
+              </div>
+              {/* History shortcut */}
+              <button onClick={() => { setSelectedImei(null); switchToHistory(selected.imei); }}
+                className="w-full py-3 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium active:bg-blue-100 transition flex items-center justify-center gap-2 border border-blue-100"
+                data-testid="mobile-view-history-btn">
+                <RouteIcon className="w-4 h-4" /> Voir l'historique
+              </button>
+            </div>
           </div>
         </div>
       )}
