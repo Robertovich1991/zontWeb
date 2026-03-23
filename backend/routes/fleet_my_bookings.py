@@ -155,6 +155,7 @@ async def list_bookings(
     # Clamp limit
     limit = min(max(limit, 10), 200)
     skip = (max(page, 1) - 1) * limit
+    page = max(page, 1)
 
     total = await db.fleet_reservations.count_documents(query)
     cursor = db.fleet_reservations.find(query, {"_id": 0}).sort("date", -1).sort("time", -1).skip(skip).limit(limit)

@@ -1,100 +1,79 @@
-# PRD - Zont Fleet & Hotel Kiosk Management System
+# PRD - Zont Fleet Management Platform
 
 ## Original Problem Statement
-Multi-portal VTC platform (ZONT.cab) with Fleet GPS tracking, Hotel Kiosk, Driver PWA, Super Admin.
-External C# backend (api.zont.cab) + internal MongoDB. Custom Teltonika GPS integration replacing Wialon.
+Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an external C# backend (`api.zont.cab`) and internal MongoDB. Custom Teltonika GPS integration replacing Wialon. GPS Super Admin portal for managing 1000+ fleet companies.
 
 ## Core Architecture
-- **Frontend**: React + Tailwind CSS + Shadcn/UI + Leaflet (light CartoDB tiles)
-- **Backend**: FastAPI (Python) + MongoDB
-- **GPS**: Teltonika FMB/FMC via external VPS TCP decoder -> Webhook -> MongoDB -> WebSocket broadcast
-- **External**: C# backend (api.zont.cab) via proxy
-
-## Portals
-1. **Client Portal** - Public booking interface
-2. **Admin Portal** - /admin - Super admin CMS, SEO, hotels, partners
-3. **Hotel Portal** - /hotel - Hotel-specific bookings, revenue, invoices
-4. **Fleet Portal** - /fleet - Company fleet management, drivers, vehicles, planning, GPS
-5. **Driver PWA** - /driver - Mobile driver interface
-6. **GPS Admin Portal** - /gps-admin - Global GPS device & company management
+- **Backend:** FastAPI + MongoDB + C# proxy (`fleet_shared.py`)
+- **Frontend:** React + Tailwind + Leaflet maps
+- **GPS:** Custom TCP decoder (Node.js on external VPS) → Webhook → MongoDB
+- **Theme:** Light (white bg, emerald accents, gray borders)
 
 ## What's Been Implemented
 
-### AI Delay Risk Module (March 2026)
-- **Backend**: GET /api/fleet/planning/delay-risk?date=YYYY-MM-DD
-- **Scoring**: +40 overlap, +25 ETA>margin, +20 GPS inactive >10min, +15 no driver, +10 margin <10min
-- **Google Distance Matrix**: Real-time traffic ETA calculation
-- **Adaptive Caching**: >=60min→30min TTL, 20-60min→10min TTL, <20min→5min TTL
-- **Frontend**: Risk badges (green/amber/red) on events, colored ring borders, risk summary counter
-- **Tooltip**: Reasons, ETA with traffic, distance, margin, GPS status
-- **Sound + Push Alerts**: Two-tone alert sound + browser notification when score escalates to red (at_risk)
-- **Alert Toggle**: Persistent on/off button in header (localStorage), speaker icon
-- **Visual Flash**: Risk summary bar pulses red + ping animation on escalation
-- **Auto-refresh**: Every 30 seconds in day and week views
-- **Status**: on_time (0-39), tight (40-69), at_risk (70-100)
-- **Testing**: 100% backend (16/16) + 100% frontend E2E (iteration_44)
+### Phase 1 - Core Platform (Complete)
+- Multi-portal auth (Fleet, Admin, Hotel, Driver)
+- Fleet reservations CRUD with driver assignment
+- Zont C# API integration with caching/connection pooling
+- Hotel booking portal
+- Admin management dashboard
 
-### Google Sheets Planning Import (March 2026)
-- **Backend**: POST /api/fleet/planning/sheet/preview + /sheet/import
-- **Direct CSV Export**: No API key needed - reads sheet via public link (read-only)
-- **Smart Parsing**: French dates, time adjustments (07:25/06:59 → 06:59), address splitting (---), price formats (94,80€)
-- **Code Detection**: DEP=aéroport départ, ARR=arrivée, DEPGAR=gare départ, TRADIS=transfert
-- **Duplicate Detection**: sheetRef field prevents re-importing same bookings
-- **Frontend**: Import modal with URL input, date filter, preview table, import confirmation
-- **Testing**: Backend (preview + import + duplicate detection) all passing
-- **Merged into FleetGeolocation**: Single page with LIVE/HISTORIQUE toggle (no separate page)
-- **Mode Toggle**: Switch between real-time tracking and route replay on same map
-- **"Voir l'historique"**: Button on vehicle detail panel switches directly to that vehicle's history
-- **Features**: Device selector, date picker, speed-based route coloring, replay animation (1x-50x)
-- **Stats**: Distance, duration, max/avg speed, position count
-- **Testing**: 100% backend (22/22) + 100% frontend E2E (iteration_45)
+### Phase 2 - GPS System (Complete)
+- Custom Teltonika webhook (POST /api/fleet/gps/webhook)
+- Real-time WebSocket tracking with ping/pong keep-alive
+- Unified Live Map + History Replay in FleetGeolocation.js
+- Light-themed Leaflet map with Bento-grid telemetry panels
+- Node.js TCP decoder for external VPS (provided as zip)
 
-### GPS Real-Time WebSocket System (March 2026)
-- WebSocket backend broadcasting, SVG car icons with heading rotation
-- Bi-directional Ping/Pong for K8s proxy keep-alive
-- Testing: 100% (iterations 41, 42)
+### Phase 3 - Planning Intelligence (Complete)
+- AI Delay Risk module using Google Distance Matrix
+- Risk scoring (0-100) with visual badges (Green/Orange/Red)
+- Audio/visual alerts for Red status transitions
+- GPS status: Ignition-based "A l'arret" vs "Hors ligne" logic
 
-### GPS Admin Portal (March 2026)
-- 14 API endpoints, Login, Dashboard, Devices, Companies, Global Map
-- Testing: 100% (iteration_41)
+### Phase 4 - Google Sheets Import (Complete - March 2026)
+- Public CSV export parsing (bypasses Google API key restrictions)
+- Preview endpoint with date/driver/type extraction
+- Bulk import: 2947 missions imported, 19 drivers auto-created
+- Duplicate detection via sheetRef
+- Driver name normalization (filters notes/cancelled entries)
+- Temporary local drivers for sheet-imported names
 
-### Fleet GPS Tracking (March 2026)
-- Teltonika Codec8/8E TCP decoder (Node.js VPS kit)
-- Webhook + SSE + WebSocket endpoints, Wialon completely removed
+### Phase 5 - UX Improvements (Complete - March 2026)
+- **Mes Reservations pagination:** Server-side with page/limit/search/dateFrom/dateTo params (50/page, 60 pages for 2959 records)
+- **Planning collapsible panel:** "Missions non affectees" now starts collapsed, click to expand/collapse. Timeline always visible.
 
-### Fleet Management Portal
-- Planning Module, Driver Profiles, Vehicles CRUD, Company Bookings
-- Optimized C# proxy with caching/pooling
+## Key API Endpoints
+- POST /api/fleet/auth/login
+- GET /api/fleet/planning?date=YYYY-MM-DD&view=day
+- GET /api/fleet/planning/delay-risk
+- GET /api/fleet/my-bookings?page=1&limit=50&search=&dateFrom=&dateTo=
+- POST /api/fleet/planning/sheet/preview
+- POST /api/fleet/planning/sheet/bulk-import
+- POST /api/fleet/gps/webhook
+- WS /api/fleet/gps/stream
 
-### Hotel & Admin
-- Hotel Admin portal, Super Admin panel, SEO pages
-
-## Key Files
-- `/app/backend/routes/fleet_planning.py` - Planning + AI Delay Risk endpoint
-- `/app/frontend/src/pages/fleet/FleetPlanning.js` - Planning with risk badges/tooltips
-- `/app/frontend/src/pages/fleet/FleetGeolocation.js` - Live GPS map (WebSocket)
-- `/app/frontend/src/pages/fleet/FleetGPSHistory.js` - GPS Route Replay
-- `/app/backend/routes/fleet_gps.py` - GPS backend (WebSocket + webhook + history)
-- `/app/backend/routes/gps_admin.py` - GPS Admin backend
-
-## DB Collections (GPS)
-- `gps_devices`: {imei, companyId, vehicleName, licensePlate, driverName}
-- `gps_positions`: {imei, lat, lng, speed, heading, ignition, timestamp}
-- `gps_history`: {imei, lat, lng, speed, heading, altitude, satellites, ignition, timestamp}
-- `fleet_reservations`: {id, companyId, type, date, time, driver, pickupAddress, dropoffAddress, price}
-
-## Prioritized Backlog
-- **P0**: AI-assisted booking creation (LLM - paste email text → extract booking details)
-- **P1**: Google Sheets / CSV Planning Import
-- **P1**: Hotel Kiosk App (tablet interface)
-- **P2**: Geofences & GPS Alerts (zones, speed alerts)
-- **P2**: Editable Company Profile Page
-- **P2**: Partner ride cancellation (BLOCKED - waiting C# team API)
-- **P3**: Hotel automated invoicing
-- **P3**: Hotel leaderboard
+## Key DB Collections
+- `fleet_reservations` - Bookings (2959 total, 2947 imported from sheet)
+- `local_drivers` - Temporary drivers from sheet import (19 created)
+- `gps_devices` - IMEI to vehicle mapping
+- `gps_positions` - GPS telemetry data
+- `admin_users` - Admin credentials
 
 ## Test Credentials
-- GPS Admin: gps@zont.cab / gpsadmin123
 - Fleet: Nandetiri1@gmail.com / 12345678
-- Super Admin: admin@zont.cab / admin123
+- GPS Admin: gps@zont.cab / gpsadmin123
 - Hotel: admin@bristol.fr / hotel123
+- Super Admin: admin@zont.cab / admin123
+
+## Pending Issues
+- Partner Ride Cancellation local-only (BLOCKED - awaiting C# team API)
+
+## Backlog (Prioritized)
+- **P0:** AI-assisted Booking Creation (paste text → LLM extracts details)
+- **P1:** Android Hotel Kiosk App / Web-view
+- **P1:** Trip History Route Replay improvements
+- **P2:** Geofences & GPS Alerts
+- **P2:** Editable Company Profile Page
+- **P3:** Hotel Automated Invoicing
+- **P3:** Super Admin Hotel Leaderboard
