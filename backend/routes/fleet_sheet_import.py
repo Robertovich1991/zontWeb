@@ -278,8 +278,14 @@ async def import_from_sheet(request: Request):
     async for doc in cursor:
         existing_refs.add(doc.get("sheetRef", ""))
 
+    # Build local driver map (name -> id)
+    local_drivers = {}
+    async for d in db.local_drivers.find({"companyId": company_id}, {"_id": 0}):
+        local_drivers[d.get("firstName", "").lower()] = d
+
     imported = 0
     duplicates = 0
+    drivers_created = 0
     now = datetime.utcnow().isoformat()
 
     for b in bookings:
@@ -289,6 +295,30 @@ async def import_from_sheet(request: Request):
             duplicates += 1
             continue
 
+        # Auto-assign driver by name
+        driver_data = None
+        driver_name = (b.get("driverName") or "").strip()
+        if driver_name:
+            key = driver_name.lower()
+            if key not in local_drivers:
+                # Create local driver
+                driver_id = str(uuid.uuid4())
+                driver_doc = {
+                    "id": driver_id,
+                    "companyId": company_id,
+                    "firstName": driver_name,
+                    "lastName": "",
+                    "phone": "",
+                    "active": True,
+                    "isLocal": True,
+                    "createdAt": now,
+                }
+                await db.local_drivers.insert_one(driver_doc)
+                local_drivers[key] = driver_doc
+                drivers_created += 1
+                logger.info(f"Created local driver: {driver_name} ({driver_id})")
+            driver_data = {"id": local_drivers[key]["id"], "name": driver_name}
+
         doc = {
             "id": str(uuid.uuid4()),
             "companyId": company_id,
@@ -296,7 +326,7 @@ async def import_from_sheet(request: Request):
             "date": b["date"],
             "time": b["time"],
             "status": "confirmed",
-            "driver": None,
+            "driver": driver_data,
             "pickupAddress": b.get("pickupAddress", ""),
             "dropoffAddress": b.get("dropoffAddress", ""),
             "clientName": b.get("clientName", ""),
@@ -327,5 +357,6 @@ async def import_from_sheet(request: Request):
         "success": True,
         "imported": imported,
         "duplicates": duplicates,
+        "driversCreated": drivers_created,
         "total": len(bookings),
     }

@@ -148,26 +148,45 @@ async def _build_planning(token: str, company_id: str, db, date: str, view: str 
         company_assigned_raw,
         company_unassigned_raw,
         rest_days_raw,
+        local_drivers_raw,
     ) = await asyncio.gather(
         csharp_get("/api/Driver/company/getdriver", token),
         csharp_get("/api/Auction/company/auctions?count=100&pageNumber=1&isDescending=true", token),
         csharp_get("/api/Trip/driver?count=200&pageNumber=1", token),
-        db.fleet_reservations.find(mongo_assigned_query, {"_id": 0}).to_list(200),
-        db.fleet_reservations.find(mongo_unassigned_query, {"_id": 0}).to_list(200),
+        db.fleet_reservations.find(mongo_assigned_query, {"_id": 0}).to_list(500),
+        db.fleet_reservations.find(mongo_unassigned_query, {"_id": 0}).to_list(500),
         db.driver_rest_days.find(rest_days_query, {"_id": 0}).to_list(500),
+        db.local_drivers.find({"companyId": company_id, "active": True}, {"_id": 0}).to_list(200),
     )
 
-    # ── Parse drivers ──
+    # ── Parse drivers (C# + local) ──
     drivers = []
+    driver_ids = set()
     for d in (drivers_raw if isinstance(drivers_raw, list) else []):
+        did = d.get("id", "")
         drivers.append({
-            "id": d.get("id", ""),
+            "id": did,
             "firstName": d.get("firstName", ""),
             "lastName": d.get("lastName", ""),
             "isActivated": d.get("isActivated", False),
             "isOnline": d.get("isOnline", False),
             "phone": d.get("phoneNumber", ""),
         })
+        driver_ids.add(did)
+    # Add local drivers (from sheet import)
+    for d in (local_drivers_raw if isinstance(local_drivers_raw, list) else []):
+        did = d.get("id", "")
+        if did and did not in driver_ids:
+            drivers.append({
+                "id": did,
+                "firstName": d.get("firstName", ""),
+                "lastName": d.get("lastName", ""),
+                "isActivated": True,
+                "isOnline": False,
+                "phone": d.get("phone", ""),
+                "isLocal": True,
+            })
+            driver_ids.add(did)
 
     # ── Parse Zont auctions (assigned to drivers) ──
     zont_events = []
