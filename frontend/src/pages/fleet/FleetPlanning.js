@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
-import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck, Bell, BellOff, Volume2 } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck, Bell, BellOff, Volume2, FileSpreadsheet, Upload, Download, Check } from 'lucide-react';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_WIDTH = 120;
@@ -131,6 +131,17 @@ const FleetPlanning = () => {
   const [delayRisks, setDelayRisks] = useState({});
   const [riskHoveredEvent, setRiskHoveredEvent] = useState(null);
   const riskTimerRef = useRef(null);
+
+  // ── Google Sheet Import ──
+  const [showSheetImport, setShowSheetImport] = useState(false);
+  const [sheetUrl, setSheetUrl] = useState(() => {
+    try { return localStorage.getItem('fleet_sheet_url') || ''; } catch { return ''; }
+  });
+  const [sheetPreview, setSheetPreview] = useState(null);
+  const [sheetLoading, setSheetLoading] = useState(false);
+  const [sheetDateFilter, setSheetDateFilter] = useState('');
+  const [sheetImporting, setSheetImporting] = useState(false);
+  const [sheetResult, setSheetResult] = useState(null);
 
   const fetchPlanning = useCallback(async () => {
     setLoading(true);
@@ -267,6 +278,44 @@ const FleetPlanning = () => {
     Object.values(delayRisks).forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
     return counts;
   }, [delayRisks]);
+
+  // ── Google Sheet Import Functions ──
+  const previewSheet = useCallback(async () => {
+    if (!sheetUrl.trim()) return toast.error('Collez le lien Google Sheet');
+    setSheetLoading(true);
+    setSheetResult(null);
+    try {
+      localStorage.setItem('fleet_sheet_url', sheetUrl);
+      const res = await authFetch('/api/fleet/planning/sheet/preview', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sheetUrl, dateFilter: sheetDateFilter }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Erreur');
+      setSheetPreview(data);
+      if (data.parsedCount === 0) toast.info('Aucune mission trouvee pour ce filtre');
+    } catch (err) { toast.error(err.message); }
+    finally { setSheetLoading(false); }
+  }, [authFetch, sheetUrl, sheetDateFilter]);
+
+  const importSheet = useCallback(async () => {
+    if (!sheetPreview?.bookings?.length) return;
+    setSheetImporting(true);
+    try {
+      const res = await authFetch('/api/fleet/planning/sheet/import', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookings: sheetPreview.bookings }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Erreur');
+      setSheetResult(data);
+      toast.success(`${data.imported} missions importees${data.duplicates > 0 ? ` (${data.duplicates} doublons ignores)` : ''}`);
+      fetchPlanning();
+    } catch (err) { toast.error(err.message); }
+    finally { setSheetImporting(false); }
+  }, [authFetch, sheetPreview, fetchPlanning]);
+
+  const TYPE_LABELS = { depart_aeroport: 'DEP Aeroport', arrivee_aeroport: 'ARR Aeroport', depart_gare: 'DEP Gare', arrivee_gare: 'ARR Gare', transfer: 'Transfert' };
 
   useEffect(() => {
     if (view === 'day' && timelineRef.current && !loading) {
@@ -621,6 +670,10 @@ const FleetPlanning = () => {
           <button onClick={() => setShowFilters(!showFilters)} data-testid="planning-filter-toggle"
             className={`p-2 rounded-lg transition ${showFilters ? 'bg-emerald-50 text-emerald-600' : 'hover:bg-gray-100 text-gray-500'}`}>
             <Filter className="w-4 h-4" />
+          </button>
+          <button onClick={() => { setShowSheetImport(true); setSheetResult(null); }} data-testid="sheet-import-btn"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-emerald-600 transition" title="Importer Google Sheet">
+            <FileSpreadsheet className="w-4 h-4" />
           </button>
           {/* Risk AI Summary */}
           {(view === 'day' || view === 'week') && Object.keys(delayRisks).length > 0 && (
@@ -1257,7 +1310,113 @@ const FleetPlanning = () => {
           )}
         </div>
       )}
-    </div>
+
+      {/* ── Google Sheet Import Modal ── */}
+      {showSheetImport && (
+      <div className="fixed inset-0 bg-black/50 z-[2000] flex items-center justify-center p-4" onClick={() => setShowSheetImport(false)}>
+        <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[85vh] shadow-2xl border border-gray-100 flex flex-col" onClick={e => e.stopPropagation()} data-testid="sheet-import-modal">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center"><FileSpreadsheet className="w-5 h-5 text-emerald-600" /></div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Importer depuis Google Sheet</h3>
+                <p className="text-xs text-gray-400">Lecture seule — votre sheet ne sera jamais modifie</p>
+              </div>
+            </div>
+            <button onClick={() => setShowSheetImport(false)} className="p-2 hover:bg-gray-100 rounded-lg transition"><X className="w-5 h-5 text-gray-400" /></button>
+          </div>
+          <div className="px-6 py-4 border-b border-gray-50 shrink-0">
+            <div className="flex gap-3">
+              <div className="flex-1 relative">
+                <FileSpreadsheet className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input value={sheetUrl} onChange={e => setSheetUrl(e.target.value)} placeholder="Collez le lien Google Sheet ici..."
+                  className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                  data-testid="sheet-url-input" />
+              </div>
+              <select value={sheetDateFilter} onChange={e => { setSheetDateFilter(e.target.value); }} data-testid="sheet-date-filter"
+                className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 outline-none focus:border-emerald-500">
+                <option value="">Toutes les dates</option>
+                {sheetPreview?.dates?.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <button onClick={previewSheet} disabled={sheetLoading} data-testid="sheet-preview-btn"
+                className="px-5 py-2.5 bg-emerald-500 text-white rounded-lg font-medium text-sm hover:bg-emerald-600 transition disabled:opacity-50 flex items-center gap-2 shrink-0">
+                {sheetLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                Charger
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {!sheetPreview && !sheetLoading && (
+              <div className="flex items-center justify-center p-12 text-center">
+                <div><FileSpreadsheet className="w-12 h-12 text-gray-200 mx-auto mb-3" /><p className="text-sm text-gray-400">Collez le lien de votre Google Sheet et cliquez "Charger"</p></div>
+              </div>
+            )}
+            {sheetLoading && (
+              <div className="flex items-center justify-center p-12"><Loader2 className="w-6 h-6 animate-spin text-emerald-500" /><span className="ml-3 text-sm text-gray-500">Lecture du Google Sheet...</span></div>
+            )}
+            {sheetPreview && sheetPreview.bookings.length > 0 && (
+              <div className="p-4">
+                <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                  <span className="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-medium">{sheetPreview.parsedCount} missions</span>
+                  <span>{sheetPreview.drivers.length} chauffeurs</span>
+                  <span>{sheetPreview.dates.length} jours</span>
+                </div>
+                <div className="border border-gray-200 rounded-xl overflow-hidden">
+                  <table className="w-full text-xs" data-testid="sheet-preview-table">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-3 py-2.5 text-left font-semibold text-gray-500">Date</th>
+                        <th className="px-3 py-2.5 text-left font-semibold text-gray-500">Heure</th>
+                        <th className="px-3 py-2.5 text-left font-semibold text-gray-500">Type</th>
+                        <th className="px-3 py-2.5 text-left font-semibold text-gray-500">Client</th>
+                        <th className="px-3 py-2.5 text-left font-semibold text-gray-500">Pickup</th>
+                        <th className="px-3 py-2.5 text-left font-semibold text-gray-500">Dropoff</th>
+                        <th className="px-3 py-2.5 text-right font-semibold text-gray-500">Prix</th>
+                        <th className="px-3 py-2.5 text-left font-semibold text-gray-500">Chauffeur</th>
+                        <th className="px-3 py-2.5 text-center font-semibold text-gray-500">Pax</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sheetPreview.bookings.map((b, i) => (
+                        <tr key={i} className={`border-b border-gray-50 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-emerald-50/30`}>
+                          <td className="px-3 py-2 text-gray-700 font-mono">{b.date}</td>
+                          <td className="px-3 py-2 text-gray-900 font-bold font-mono">{b.time}</td>
+                          <td className="px-3 py-2"><span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${b.type?.includes('aeroport') ? 'bg-blue-50 text-blue-700' : b.type?.includes('gare') ? 'bg-purple-50 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>{b.code}</span></td>
+                          <td className="px-3 py-2 text-gray-700 max-w-[120px] truncate">{b.clientName}</td>
+                          <td className="px-3 py-2 text-gray-600 max-w-[140px] truncate">{b.pickupAddress}</td>
+                          <td className="px-3 py-2 text-gray-600 max-w-[140px] truncate">{b.dropoffAddress}</td>
+                          <td className="px-3 py-2 text-right text-gray-900 font-medium">{b.price > 0 ? `${b.price.toFixed(0)}€` : '-'}</td>
+                          <td className="px-3 py-2 text-gray-700 font-medium">{b.driverName || '-'}</td>
+                          <td className="px-3 py-2 text-center text-gray-500">{b.passengers}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+          {sheetPreview && sheetPreview.bookings.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between shrink-0 bg-gray-50/50">
+              {sheetResult ? (
+                <div className="flex items-center gap-2 text-sm"><Check className="w-5 h-5 text-emerald-500" /><span className="text-emerald-700 font-medium">{sheetResult.imported} importees</span>{sheetResult.duplicates > 0 && <span className="text-gray-400">({sheetResult.duplicates} doublons)</span>}</div>
+              ) : (
+                <p className="text-xs text-gray-400">{sheetPreview.parsedCount} missions pretes</p>
+              )}
+              <div className="flex items-center gap-3">
+                <button onClick={() => setShowSheetImport(false)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Fermer</button>
+                <button onClick={importSheet} disabled={sheetImporting || !!sheetResult} data-testid="sheet-import-confirm-btn"
+                  className="px-6 py-2.5 bg-emerald-500 text-white rounded-lg font-medium text-sm hover:bg-emerald-600 transition disabled:opacity-50 flex items-center gap-2">
+                  {sheetImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  Importer {sheetPreview.parsedCount} missions
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+  </div>
   );
 };
 

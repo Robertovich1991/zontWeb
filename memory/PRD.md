@@ -34,7 +34,14 @@ External C# backend (api.zont.cab) + internal MongoDB. Custom Teltonika GPS inte
 - **Status**: on_time (0-39), tight (40-69), at_risk (70-100)
 - **Testing**: 100% backend (16/16) + 100% frontend E2E (iteration_44)
 
-### GPS Route Replay / Trip History (March 2026)
+### Google Sheets Planning Import (March 2026)
+- **Backend**: POST /api/fleet/planning/sheet/preview + /sheet/import
+- **Direct CSV Export**: No API key needed - reads sheet via public link (read-only)
+- **Smart Parsing**: French dates, time adjustments (07:25/06:59 → 06:59), address splitting (---), price formats (94,80€)
+- **Code Detection**: DEP=aéroport départ, ARR=arrivée, DEPGAR=gare départ, TRADIS=transfert
+- **Duplicate Detection**: sheetRef field prevents re-importing same bookings
+- **Frontend**: Import modal with URL input, date filter, preview table, import confirmation
+- **Testing**: Backend (preview + import + duplicate detection) all passing
 - **Merged into FleetGeolocation**: Single page with LIVE/HISTORIQUE toggle (no separate page)
 - **Mode Toggle**: Switch between real-time tracking and route replay on same map
 - **"Voir l'historique"**: Button on vehicle detail panel switches directly to that vehicle's history

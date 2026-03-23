@@ -138,7 +138,9 @@ app.include_router(fleet_router)
 from routes.fleet_my_bookings import router as fleet_my_bookings_router
 app.include_router(fleet_my_bookings_router)
 from routes.fleet_planning import router as fleet_planning_router
+from routes.fleet_sheet_import import router as fleet_sheet_import_router
 app.include_router(fleet_planning_router)
+app.include_router(fleet_sheet_import_router)
 from routes.fleet_driver_profile import router as fleet_driver_profile_router
 app.include_router(fleet_driver_profile_router)
 from routes.fleet_gps import router as fleet_gps_router
