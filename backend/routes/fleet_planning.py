@@ -140,6 +140,15 @@ async def _build_planning(token: str, company_id: str, db, date: str, view: str 
         "date": {"$gte": date_start, "$lte": date_end},
     }
 
+    # Projection: only fetch fields needed by frontend
+    booking_fields = {
+        "_id": 0, "id": 1, "type": 1, "date": 1, "time": 1, "status": 1,
+        "driver": 1, "pickupAddress": 1, "dropoffAddress": 1,
+        "clientName": 1, "clientPhone": 1, "passengers": 1,
+        "price": 1, "hours": 1, "comment": 1, "source": 1,
+        "sentToZont": 1, "flightNumber": 1,
+    }
+
     # Launch ALL data fetches in parallel
     (
         drivers_raw,
@@ -153,10 +162,10 @@ async def _build_planning(token: str, company_id: str, db, date: str, view: str 
         csharp_get("/api/Driver/company/getdriver", token),
         csharp_get("/api/Auction/company/auctions?count=100&pageNumber=1&isDescending=true", token),
         csharp_get("/api/Trip/driver?count=200&pageNumber=1", token),
-        db.fleet_reservations.find(mongo_assigned_query, {"_id": 0}).to_list(500),
-        db.fleet_reservations.find(mongo_unassigned_query, {"_id": 0}).to_list(500),
+        db.fleet_reservations.find(mongo_assigned_query, booking_fields).to_list(2000),
+        db.fleet_reservations.find(mongo_unassigned_query, booking_fields).to_list(2000),
         db.driver_rest_days.find(rest_days_query, {"_id": 0}).to_list(500),
-        db.local_drivers.find({"companyId": company_id, "active": True}, {"_id": 0}).to_list(200),
+        db.local_drivers.find({"companyId": company_id, "active": True}, {"_id": 0, "id": 1, "firstName": 1, "lastName": 1, "phone": 1}).to_list(200),
     )
 
     # ── Parse drivers (C# + local) ──

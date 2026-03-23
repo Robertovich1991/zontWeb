@@ -508,6 +508,18 @@ const FleetPlanning = () => {
     setReassignConflict(null);
   };
 
+  // ── Optimistic local state update (instant, no API refetch) ──
+  const updatePlanningLocally = useCallback((mutator) => {
+    setPlanning(prev => {
+      if (!prev) return prev;
+      const updated = mutator(JSON.parse(JSON.stringify(prev)));
+      // Update cache too
+      const cacheKey = `${currentDate}_${view}`;
+      planningCacheRef.current[cacheKey] = updated;
+      return updated;
+    });
+  }, [currentDate, view]);
+
   const handleUnassign = async () => {
     const bookingId = getBookingIdFromEvent(selectedEvent);
     if (!bookingId) return;
@@ -516,8 +528,21 @@ const FleetPlanning = () => {
       const res = await authFetch(`/api/fleet/my-bookings/${bookingId}/unassign`, { method: 'PUT' });
       if (res.ok) {
         toast.success('Chauffeur retire - mission remise en attente');
+        const evt = { ...selectedEvent };
         handleCloseEventActions();
-        invalidateCache(); fetchPlanning();
+        // Optimistic update: move event from driver to unassigned
+        updatePlanningLocally(p => {
+          for (const d of p.drivers) {
+            const idx = d.events.findIndex(e => e.id === evt.id);
+            if (idx !== -1) {
+              const [removed] = d.events.splice(idx, 1);
+              removed.driver = null;
+              p.unassigned = [removed, ...(p.unassigned || [])];
+              break;
+            }
+          }
+          return p;
+        });
       } else {
         toast.error('Erreur lors du retrait');
       }
@@ -564,8 +589,21 @@ const FleetPlanning = () => {
       });
       if (res.ok) {
         toast.success(`Mission reassignee a ${driverName}`);
+        const evt = { ...selectedEvent };
         handleCloseEventActions();
-        invalidateCache(); fetchPlanning();
+        updatePlanningLocally(p => {
+          for (const d of p.drivers) {
+            const idx = d.events.findIndex(e => e.id === evt.id);
+            if (idx !== -1) { d.events.splice(idx, 1); break; }
+          }
+          const target = p.drivers.find(d => d.id === reassignDriverId);
+          if (target) {
+            evt.driver = { id: reassignDriverId, name: driverName };
+            target.events.push(evt);
+            target.events.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+          }
+          return p;
+        });
       } else {
         const err = await res.json().catch(() => ({}));
         toast.error(err.detail || 'Erreur');
@@ -614,8 +652,19 @@ const FleetPlanning = () => {
       });
       if (res.ok) {
         toast.success(`Mission affectee a ${driverName}`);
+        const bk = { ...booking };
         handleCancelAssign();
-        invalidateCache(); fetchPlanning();
+        // Optimistic: move from unassigned to driver
+        updatePlanningLocally(p => {
+          p.unassigned = (p.unassigned || []).filter(u => u.id !== bk.id);
+          const target = p.drivers.find(d => d.id === selectedDriverId);
+          if (target) {
+            bk.driver = { id: selectedDriverId, name: driverName };
+            target.events.push(bk);
+            target.events.sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+          }
+          return p;
+        });
       } else {
         const err = await res.json().catch(() => ({}));
         toast.error(err.detail || 'Erreur d\'affectation');
@@ -640,7 +689,11 @@ const FleetPlanning = () => {
         const res = await authFetch(`/api/fleet/planning/rest-day?driverId=${driverId}&date=${date}`, { method: 'DELETE' });
         if (res.ok) {
           toast.success('Jour de repos retire');
-          invalidateCache(); fetchPlanning();
+          updatePlanningLocally(p => {
+            const d = p.drivers.find(dr => dr.id === driverId);
+            if (d) d.restDays = (d.restDays || []).filter(r => r !== date);
+            return p;
+          });
         } else toast.error('Erreur');
       } else {
         const res = await authFetch('/api/fleet/planning/rest-day', {
@@ -650,7 +703,11 @@ const FleetPlanning = () => {
         });
         if (res.ok) {
           toast.success('Jour de repos ajoute');
-          invalidateCache(); fetchPlanning();
+          updatePlanningLocally(p => {
+            const d = p.drivers.find(dr => dr.id === driverId);
+            if (d) d.restDays = [...(d.restDays || []), date];
+            return p;
+          });
         } else toast.error('Erreur');
       }
     } catch { toast.error('Erreur de connexion'); }
