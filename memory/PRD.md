@@ -20,17 +20,25 @@ External C# backend (api.zont.cab) + internal MongoDB. Custom Teltonika GPS inte
 
 ## What's Been Implemented
 
+### GPS Route Replay / Trip History (March 2026)
+- **Backend**: GET /api/fleet/gps/history/{imei} (date range filter, limit, sorted ASC)
+- **Backend**: GET /api/fleet/gps/history-days/{imei} (available days with position counts)
+- **Frontend**: FleetGPSHistory.js with Leaflet map, speed-based route coloring (green/amber/red)
+- **Features**: Device selector, date picker, route polyline, start/end markers, replay animation
+- **Replay Controls**: Play/pause, timeline slider, speed buttons (1x-50x), skip forward/back
+- **Stats Panel**: Distance, duration, max speed, average speed, position count
+- **Navigation**: Sidebar link, History button on Geolocation page, back button
+- **Testing**: 100% backend (22/22) + 100% frontend E2E (iteration_43)
+
 ### GPS Real-Time WebSocket System (March 2026)
-- **WebSocket Backend**: GPSConnectionManager class in fleet_gps.py, broadcasts position_update on webhook receipt
+- **WebSocket Backend**: GPSConnectionManager class in fleet_gps.py
 - **Fleet WS Endpoint**: /api/fleet/gps/ws?token=xxx (C# JWT token, company-specific filtering)
 - **Admin WS Endpoint**: /api/gps-admin/ws?token=xxx (PyJWT, global view)
-- **Frontend**: Both maps use WebSocket primary with polling fallback (3s interval)
 - **Car SVG Icons**: Top-down car shape with heading rotation, 4 status colors
-- **Statuses**: Moving (green, speed>2), Stopped (amber), Offline (red, >10min), GPS Lost (gray)
+- **Statuses**: Moving (green), Stopped (amber), Offline (red, >10min), GPS Lost (gray)
 - **Smooth Animation**: requestAnimationFrame interpolation between positions
-- **Vehicle Detail**: Full telemetry panel (speed, heading, satellites, ignition, timestamp, coordinates)
-- **Company Filter**: GPS Admin map has dropdown to filter by company/unassigned
-- **Testing**: 100% backend (10/10) + 100% frontend E2E (iteration_42)
+- **Bi-directional Ping/Pong**: Keeps K8s WebSocket connections alive
+- **Testing**: 100% (iterations 41, 42)
 
 ### GPS Admin Portal (March 2026)
 - **Backend**: 14 API endpoints (auth, companies CRUD, devices CRUD, assign/unassign, positions, stats)
@@ -51,21 +59,22 @@ External C# backend (api.zont.cab) + internal MongoDB. Custom Teltonika GPS inte
 
 ## Key Files
 - `/app/frontend/src/pages/fleet/FleetGeolocation.js` - Fleet GPS map (WebSocket + car icons)
+- `/app/frontend/src/pages/fleet/FleetGPSHistory.js` - GPS Route Replay
+- `/app/frontend/src/pages/fleet/FleetLayout.js` - Fleet sidebar (includes Historique GPS)
 - `/app/frontend/src/pages/gps-admin/GpsAdminMap.js` - GPS Admin global map
-- `/app/frontend/src/pages/gps-admin/*` - GPS Admin Portal (7 files)
-- `/app/backend/routes/fleet_gps.py` - GPS backend (WebSocket + webhook + SSE)
-- `/app/backend/routes/gps_admin.py` - GPS Admin backend (WebSocket + CRUD)
-- `/app/backend/vps-teltonika/` - VPS TCP decoder kit
+- `/app/backend/routes/fleet_gps.py` - GPS backend (WebSocket + webhook + history)
+- `/app/backend/routes/gps_admin.py` - GPS Admin backend
 
 ## DB Collections (GPS)
 - `gps_admin_users`: {id, email, passwordHash, name}
 - `gps_companies`: {id, name, companyId, contactEmail, phone, active, maxDevices}
 - `gps_devices`: {id, imei, companyId, companyName, vehicleName, licensePlate, driverName}
 - `gps_positions`: {imei, lat, lng, speed, heading, ignition, timestamp}
+- `gps_history`: {imei, lat, lng, speed, heading, altitude, satellites, ignition, timestamp, receivedAt}
 
 ## Prioritized Backlog
 - **P0**: AI-assisted booking creation (LLM integration needed)
-- **P1**: Google Sheets Planning Import, Hotel Kiosk, Trip History/Route Replay
+- **P1**: Google Sheets Planning Import, Hotel Kiosk
 - **P2**: Geofences & GPS Alerts, Editable Company Profile, Partner cancellation (blocked C# team)
 - **P3**: Hotel automated invoicing, Hotel leaderboard
 
