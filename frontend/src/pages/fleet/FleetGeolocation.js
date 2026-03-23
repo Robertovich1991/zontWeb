@@ -22,8 +22,16 @@ function getStatus(v) {
   if (!v.lat || !v.lng) return 'gps_lost';
   if (!v.timestamp) return 'gps_lost';
   const age = (Date.now() - new Date(v.timestamp).getTime()) / 1000;
+  // Moving: recent data + speed
+  if (v.speed > 2 && age < 120) return 'moving';
+  // Stopped: ignition off or speed 0 — Teltonika sends less often when parked
+  if (v.ignition === false || v.speed <= 2) {
+    // Truly offline only after 1 hour of silence
+    if (age > 3600) return 'offline';
+    return 'stopped';
+  }
+  // No ignition data: fallback to time-based
   if (age > 600) return 'offline';
-  if (v.speed > 2) return 'moving';
   return 'stopped';
 }
 

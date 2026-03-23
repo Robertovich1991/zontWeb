@@ -16,8 +16,12 @@ function getStatus(v) {
   if (!v.lat || !v.lng) return 'gps_lost';
   if (!v.timestamp) return 'gps_lost';
   const age = (Date.now() - new Date(v.timestamp).getTime()) / 1000;
+  if (v.speed > 2 && age < 120) return 'moving';
+  if (v.ignition === false || v.speed <= 2) {
+    if (age > 3600) return 'offline';
+    return 'stopped';
+  }
   if (age > 600) return 'offline';
-  if (v.speed > 2) return 'moving';
   return 'stopped';
 }
 
