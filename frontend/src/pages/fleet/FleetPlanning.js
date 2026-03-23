@@ -156,7 +156,7 @@ const FleetPlanning = () => {
   }, [authFetch, currentDate]);
 
   useEffect(() => {
-    if (view === 'day') {
+    if (view === 'day' || view === 'week') {
       fetchDelayRisk();
       riskTimerRef.current = setInterval(fetchDelayRisk, 30000);
       return () => clearInterval(riskTimerRef.current);
@@ -527,7 +527,7 @@ const FleetPlanning = () => {
             <Filter className="w-4 h-4" />
           </button>
           {/* Risk AI Summary */}
-          {view === 'day' && Object.keys(delayRisks).length > 0 && (
+          {(view === 'day' || view === 'week') && Object.keys(delayRisks).length > 0 && (
             <div className="flex items-center gap-1.5 ml-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg" data-testid="risk-summary">
               <ShieldAlert className="w-3.5 h-3.5 text-gray-400" />
               {riskSummary.at_risk > 0 && (
