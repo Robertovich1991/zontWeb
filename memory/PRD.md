@@ -35,10 +35,12 @@ External C# backend (api.zont.cab) + internal MongoDB. Custom Teltonika GPS inte
 - **Testing**: 100% backend (16/16) + 100% frontend E2E (iteration_44)
 
 ### GPS Route Replay / Trip History (March 2026)
-- **Backend**: GET /api/fleet/gps/history/{imei}, GET /api/fleet/gps/history-days/{imei}
-- **Frontend**: FleetGPSHistory.js - Leaflet map with speed-based route coloring, replay animation
-- **Features**: Device selector, date picker, polyline, start/end markers, replay controls (1x-50x)
-- **Testing**: 100% (iteration_43)
+- **Merged into FleetGeolocation**: Single page with LIVE/HISTORIQUE toggle (no separate page)
+- **Mode Toggle**: Switch between real-time tracking and route replay on same map
+- **"Voir l'historique"**: Button on vehicle detail panel switches directly to that vehicle's history
+- **Features**: Device selector, date picker, speed-based route coloring, replay animation (1x-50x)
+- **Stats**: Distance, duration, max/avg speed, position count
+- **Testing**: 100% backend (22/22) + 100% frontend E2E (iteration_45)
 
 ### GPS Real-Time WebSocket System (March 2026)
 - WebSocket backend broadcasting, SVG car icons with heading rotation
