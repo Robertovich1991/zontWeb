@@ -495,15 +495,15 @@ async def get_delay_risk(request: Request, date: str = ""):
             except (ValueError, KeyError):
                 continue
 
-            # Only calculate for future events
-            if start_time <= now:
-                continue
-
             minutes_until = (start_time - now).total_seconds() / 60
 
-            # Only analyze events within next 2 hours
-            if minutes_until > 120:
+            # For past events today, skip them
+            if minutes_until < -60:
                 continue
+
+            # Analyse all events of the selected day (not just 2h window)
+            # The 2h window only applies to GPS ETA checks (real-time)
+            is_imminent = 0 < minutes_until <= 120
 
             score = 0
             reasons = []
@@ -534,37 +534,38 @@ async def get_delay_risk(request: Request, date: str = ""):
                     score += 10
                     reasons.append(f"Marge de seulement {int(margin_minutes)} min entre les missions")
 
-            # ── GPS inactive > 10 min (+20) ──
-            if gps:
-                gps_ts = gps.get("timestamp")
-                if gps_ts:
-                    try:
-                        gps_time = datetime.fromisoformat(gps_ts.replace("Z", "+00:00"))
-                        gps_age_min = (now_utc - gps_time).total_seconds() / 60
-                        if gps_age_min > 10:
+            # ── GPS inactive > 10 min (+20) — only for imminent events ──
+            if is_imminent:
+                if gps:
+                    gps_ts = gps.get("timestamp")
+                    if gps_ts:
+                        try:
+                            gps_time = datetime.fromisoformat(gps_ts.replace("Z", "+00:00"))
+                            gps_age_min = (now_utc - gps_time).total_seconds() / 60
+                            if gps_age_min > 10:
+                                score += 20
+                                reasons.append(f"Le GPS est inactif depuis {int(gps_age_min)} minutes")
+                            else:
+                                gps_active = True
+                        except Exception:
                             score += 20
-                            reasons.append(f"Le GPS est inactif depuis {int(gps_age_min)} minutes")
-                        else:
-                            gps_active = True
-                    except Exception:
+                            reasons.append("Impossible de lire le timestamp GPS")
+                    else:
                         score += 20
-                        reasons.append("Impossible de lire le timestamp GPS")
+                        reasons.append("Pas de timestamp GPS disponible")
                 else:
                     score += 20
-                    reasons.append("Pas de timestamp GPS disponible")
-            else:
-                score += 20
-                reasons.append("Aucun traceur GPS associe a ce chauffeur")
+                    reasons.append("Aucun traceur GPS associe a ce chauffeur")
 
             # ── No driver assigned (+15) ──
             if not event.get("driverId"):
                 score += 15
                 reasons.append("Chauffeur non assigne a cette mission")
 
-            # ── ETA vs margin: Google Distance Matrix (+25) ──
+            # ── ETA vs margin: Google Distance Matrix (+25) — only for imminent ──
             pickup_address = event.get("pickupAddress", "")
             has_gps_position = gps and gps.get("lat") and gps.get("lng")
-            if has_gps_position and pickup_address:
+            if is_imminent and has_gps_position and pickup_address:
                 cache_ttl = _adaptive_cache_ttl(minutes_until)
                 cached_eta = _get_cached_eta(
                     f"{gps['lat']},{gps['lng']}", pickup_address, ttl=cache_ttl
