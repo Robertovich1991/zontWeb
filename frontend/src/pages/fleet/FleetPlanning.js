@@ -114,6 +114,15 @@ const FleetPlanning = () => {
   const [sourceFilter, setSourceFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const timelineRef = useRef(null);
+  const planningCacheRef = useRef({});
+  const riskCacheRef = useRef({});
+
+  // Invalidate cache for current date (after mutations)
+  const invalidateCache = useCallback(() => {
+    const cacheKey = `${currentDate}_${view}`;
+    delete planningCacheRef.current[cacheKey];
+    delete riskCacheRef.current[currentDate];
+  }, [currentDate, view]);
 
   // Assignment state (unassigned panel)
   const [assigningBookingId, setAssigningBookingId] = useState(null);
@@ -144,15 +153,53 @@ const FleetPlanning = () => {
   const [sheetImporting, setSheetImporting] = useState(false);
   const [sheetResult, setSheetResult] = useState(null);
 
-  const fetchPlanning = useCallback(async () => {
-    setLoading(true);
+  // Helper: get adjacent dates
+  const getAdjacentDates = useCallback((dateStr) => {
+    const d = new Date(dateStr + 'T12:00:00');
+    const prev = new Date(d); prev.setDate(d.getDate() - 1);
+    const next = new Date(d); next.setDate(d.getDate() + 1);
+    const fmt = (dt) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    return [fmt(prev), fmt(next)];
+  }, []);
+
+  const fetchPlanningForDate = useCallback(async (date, isBackground = false) => {
     try {
-      const res = await authFetch(`/api/fleet/planning?date=${currentDate}&view=${view}`);
-      if (res.ok) setPlanning(await res.json());
+      const res = await authFetch(`/api/fleet/planning?date=${date}&view=${view}`);
+      if (res.ok) {
+        const data = await res.json();
+        planningCacheRef.current[`${date}_${view}`] = data;
+        return data;
+      }
+    } catch {}
+    return null;
+  }, [authFetch, view]);
+
+  const fetchPlanning = useCallback(async () => {
+    const cacheKey = `${currentDate}_${view}`;
+    const cached = planningCacheRef.current[cacheKey];
+    if (cached) {
+      setPlanning(cached);
+      setLoading(false);
+      // Refresh in background (silent update)
+      fetchPlanningForDate(currentDate).then(data => {
+        if (data) setPlanning(data);
+      });
+    } else {
+      setLoading(true);
+      const data = await fetchPlanningForDate(currentDate);
+      if (data) setPlanning(data);
       else toast.error('Erreur de chargement');
-    } catch { toast.error('Erreur de connexion'); }
-    finally { setLoading(false); }
-  }, [authFetch, currentDate, view]);
+      setLoading(false);
+    }
+    // Pre-fetch adjacent dates in background
+    const [prevDate, nextDate] = getAdjacentDates(currentDate);
+    [prevDate, nextDate].forEach(d => {
+      const key = `${d}_${view}`;
+      if (!planningCacheRef.current[key]) {
+        fetchPlanningForDate(d, true);
+      }
+    });
+  }, [authFetch, currentDate, view, fetchPlanningForDate, getAdjacentDates]);
 
   useEffect(() => { fetchPlanning(); }, [fetchPlanning]);
 
@@ -248,16 +295,34 @@ const FleetPlanning = () => {
 
   const fetchDelayRisk = useCallback(async () => {
     try {
+      // Check cache first
+      const cached = riskCacheRef.current[currentDate];
+      if (cached) {
+        checkRiskEscalations(cached);
+        prevRisksRef.current = cached;
+        setDelayRisks(cached);
+      }
       const res = await authFetch(`/api/fleet/planning/delay-risk?date=${currentDate}`);
       if (res.ok) {
         const data = await res.json();
         const newRisks = data.risks || {};
+        riskCacheRef.current[currentDate] = newRisks;
         checkRiskEscalations(newRisks);
         prevRisksRef.current = newRisks;
         setDelayRisks(newRisks);
       }
+      // Pre-fetch adjacent risks
+      const [prevDate, nextDate] = getAdjacentDates(currentDate);
+      [prevDate, nextDate].forEach(async d => {
+        if (!riskCacheRef.current[d]) {
+          try {
+            const r = await authFetch(`/api/fleet/planning/delay-risk?date=${d}`);
+            if (r.ok) { const rd = await r.json(); riskCacheRef.current[d] = rd.risks || {}; }
+          } catch {}
+        }
+      });
     } catch {}
-  }, [authFetch, currentDate, checkRiskEscalations]);
+  }, [authFetch, currentDate, checkRiskEscalations, getAdjacentDates]);
 
   useEffect(() => {
     if (view === 'day' || view === 'week') {
@@ -311,10 +376,10 @@ const FleetPlanning = () => {
       if (!res.ok) throw new Error(data.detail || 'Erreur');
       setSheetResult(data);
       toast.success(`${data.imported} missions importees${data.duplicates > 0 ? ` (${data.duplicates} doublons ignores)` : ''}`);
-      fetchPlanning();
+      invalidateCache(); fetchPlanning();
     } catch (err) { toast.error(err.message); }
     finally { setSheetImporting(false); }
-  }, [authFetch, sheetPreview, fetchPlanning]);
+  }, [authFetch, sheetPreview, fetchPlanning, invalidateCache]);
 
   const TYPE_LABELS = { depart_aeroport: 'DEP Aeroport', arrivee_aeroport: 'ARR Aeroport', depart_gare: 'DEP Gare', arrivee_gare: 'ARR Gare', transfer: 'Transfert' };
 
@@ -452,7 +517,7 @@ const FleetPlanning = () => {
       if (res.ok) {
         toast.success('Chauffeur retire - mission remise en attente');
         handleCloseEventActions();
-        fetchPlanning();
+        invalidateCache(); fetchPlanning();
       } else {
         toast.error('Erreur lors du retrait');
       }
@@ -500,7 +565,7 @@ const FleetPlanning = () => {
       if (res.ok) {
         toast.success(`Mission reassignee a ${driverName}`);
         handleCloseEventActions();
-        fetchPlanning();
+        invalidateCache(); fetchPlanning();
       } else {
         const err = await res.json().catch(() => ({}));
         toast.error(err.detail || 'Erreur');
@@ -550,7 +615,7 @@ const FleetPlanning = () => {
       if (res.ok) {
         toast.success(`Mission affectee a ${driverName}`);
         handleCancelAssign();
-        fetchPlanning();
+        invalidateCache(); fetchPlanning();
       } else {
         const err = await res.json().catch(() => ({}));
         toast.error(err.detail || 'Erreur d\'affectation');
@@ -575,7 +640,7 @@ const FleetPlanning = () => {
         const res = await authFetch(`/api/fleet/planning/rest-day?driverId=${driverId}&date=${date}`, { method: 'DELETE' });
         if (res.ok) {
           toast.success('Jour de repos retire');
-          fetchPlanning();
+          invalidateCache(); fetchPlanning();
         } else toast.error('Erreur');
       } else {
         const res = await authFetch('/api/fleet/planning/rest-day', {
@@ -585,7 +650,7 @@ const FleetPlanning = () => {
         });
         if (res.ok) {
           toast.success('Jour de repos ajoute');
-          fetchPlanning();
+          invalidateCache(); fetchPlanning();
         } else toast.error('Erreur');
       }
     } catch { toast.error('Erreur de connexion'); }
