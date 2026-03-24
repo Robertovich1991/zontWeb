@@ -3,36 +3,28 @@ import { useLanguage } from '@/context/LanguageContext';
 
 const TRIPADVISOR_WIDGETS = {
   en: {
-    id: 'TA_cdswritereviewlg4',
-    html: `<ul id="HCzivZ" class="TA_links vyBbnHUnMq"><li id="BALOmnSttUsl" class="NwmT5ODGA"><a target="_blank" href="https://www.tripadvisor.com/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" alt="TripAdvisor"/></a></li></ul>`,
-    script: 'https://www.jscache.com/wejs?wtype=cdswritereviewlg&uniq=4&locationId=17154566&lang=en_US&display_version=2',
+    id: 'TA_selfserveprop806',
+    html: `<ul id="NHw9OoxBO9" class="TA_links QOzY8iqD"><li id="mt5rqTW0u1GU" class="vY1bK9KN"><a target="_blank" href="https://www.tripadvisor.com/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html"><img src="https://www.tripadvisor.com/img/cdsi/img2/branding/v2/Tripadvisor_lockup_horizontal_secondary_registered-11900-2.svg" alt="TripAdvisor"/></a></li></ul>`,
+    script: 'https://www.jscache.com/wejs?wtype=selfserveprop&uniq=806&locationId=17154566&lang=en_US&rating=true&nreviews=4&writereviewlink=true&popIdx=true&iswide=true&border=true&display_version=2',
   },
   fr: {
-    id: 'TA_cdswritereviewlg722',
-    html: `<ul id="aqPsy8tq" class="TA_links iykyYNFkRKU9"><li id="ZHhEgtM" class="i9EfBOIfAe1"><a target="_blank" href="https://www.tripadvisor.fr/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" alt="TripAdvisor"/></a></li></ul>`,
-    script: 'https://www.jscache.com/wejs?wtype=cdswritereviewlg&uniq=722&locationId=17154566&lang=fr&display_version=2',
+    id: 'TA_selfserveprop49',
+    html: `<ul id="87cTzk7Mza" class="TA_links 6mWQ7k3c8Fgl"><li id="devvde0FrZZ" class="ExBPQb9Np1"><a target="_blank" href="https://www.tripadvisor.fr/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html"><img src="https://www.tripadvisor.fr/img/cdsi/img2/branding/v2/Tripadvisor_lockup_horizontal_secondary_registered-11900-2.svg" alt="TripAdvisor"/></a></li></ul>`,
+    script: 'https://www.jscache.com/wejs?wtype=selfserveprop&uniq=49&locationId=17154566&lang=fr&rating=true&nreviews=4&writereviewlink=true&popIdx=true&iswide=true&border=true&display_version=2',
   },
   ru: {
-    id: 'TA_cdswritereviewlg789',
-    html: `<ul id="sZ8jBkl7i6" class="TA_links 6ZeiIHpUV6X"><li id="1p8j95" class="7So8BwwP5W"><a target="_blank" href="https://www.tripadvisor.ru/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html"><img src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg" alt="TripAdvisor"/></a></li></ul>`,
-    script: 'https://www.jscache.com/wejs?wtype=cdswritereviewlg&uniq=789&locationId=17154566&lang=ru&display_version=2',
+    id: 'TA_selfserveprop570',
+    html: `<ul id="8HZwyXVFbWIc" class="TA_links x5gkMJWQ"><li id="AiO6yNjXmUz" class="ZhmtlktRNl8"><a target="_blank" href="https://www.tripadvisor.ru/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html"><img src="https://www.tripadvisor.ru/img/cdsi/img2/branding/v2/Tripadvisor_lockup_horizontal_secondary_registered-11900-2.svg" alt="TripAdvisor"/></a></li></ul>`,
+    script: 'https://www.jscache.com/wejs?wtype=selfserveprop&uniq=570&locationId=17154566&lang=ru&rating=true&nreviews=4&writereviewlink=true&popIdx=true&iswide=true&border=true&display_version=2',
   },
 };
 
 TRIPADVISOR_WIDGETS.hy = TRIPADVISOR_WIDGETS.en;
 
-const labels = {
-  en: 'Review us on TripAdvisor',
-  fr: 'Donnez votre avis sur TripAdvisor',
-  ru: 'Ostavte otzyv na TripAdvisor',
-  hy: 'Review us on TripAdvisor',
-};
-
 const TripAdvisorWidget = () => {
   const { language } = useLanguage();
   const containerRef = useRef(null);
   const widget = TRIPADVISOR_WIDGETS[language] || TRIPADVISOR_WIDGETS.en;
-  const label = labels[language] || labels.en;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -50,11 +42,10 @@ const TripAdvisorWidget = () => {
   }, [widget.script]);
 
   return (
-    <div className="flex flex-col items-center gap-3" data-testid="tripadvisor-widget" ref={containerRef}>
-      <p className="text-gray-400 text-sm font-medium tracking-wide uppercase">{label}</p>
+    <div className="flex flex-col items-center" data-testid="tripadvisor-widget" ref={containerRef}>
       <div
         id={widget.id}
-        className="TA_cdswritereviewlg"
+        className="TA_selfserveprop"
         dangerouslySetInnerHTML={{ __html: widget.html }}
       />
     </div>
