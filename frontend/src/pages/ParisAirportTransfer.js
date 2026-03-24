@@ -95,6 +95,10 @@ const content = {
     otherCitiesTitle: 'Мы обслуживаем 120+ городов Европы', otherCitiesBtn: 'Все Направления',
     rating: '4.9/5 (4 500+ отзывов)',
   },
+  hy: {
+    title: 'Փարիզի Օdelays delaysdelays delaysdelaysdelays delays delaysdelays delaysdelays delaysransfer - CDG, Orly delays Beauvais',
+    subtitle: 'Մdelays delaysdelays delaysdelaysdelays delays delaysdelays delaysdelays delaysdelays delaysdelaysdelays delaysdelaysdelays delays delaysdelays delaysdelays delaysdelays delaysdelays delays delays delaysdelays delays delaysdelays delaysdelays delaysdelays delaysdelays delaysdelays delaysdelays delaysdelays delays delaysdelaysdelays delaysdelaysdelays delaysdelays delays delays delaysdelays delaysdelays delaysdelays delaysdelays delaysdelays delaysdelays delaysdelays delays delaysdelaysdelays delaysdelaysdelays delaysdelaysdelays delaysdelays delaysdelays delays delaysdelays delaysdelaysdelays delays delaysdelays delaysdelays delaysdelays delaysdelaysdelays delaysdelays delaysdelaysdelays delays delaysdelays delaysdelays delays delaysdelaysdelays delaysdelays delaysdelaysdelays delays delays delaysdelaysdelays delays delaysdelays delaysdelaysdelays delaysdelays delaysdelays delaysdelays delaysdelaysdelays delays delaysdelays delaysdelays delays delaysdelays delays',
+  },
 };
 
 const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 130, minibus: 190 };
