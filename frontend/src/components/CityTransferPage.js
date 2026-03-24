@@ -24,29 +24,6 @@ const trustLabels = {
   ru: { trips: 'Выполненных Поездок', available: 'Доступно', fixed: 'Фиксированные Цены', rating: 'Рейтинг', reviews: 'отзывов', trustTitle: 'Доверие тысяч путешественников', paySecure: 'Безопасная Оплата', payDesc: 'Все карты принимаются', verifiedDriver: 'Проверенные Водители', verifiedDesc: 'Лицензированные профессионалы', flightTrack: 'Отслеживание Рейса', flightDesc: 'Мониторинг в реальном времени', freeCancel: 'Бесплатная Отмена', cancelDesc: 'До 24 часов' },
 };
 
-const reviewsData = {
-  en: [
-    { name: 'Sarah M.', city: 'London', text: 'Excellent service! Driver was waiting with a sign, very professional. Car was spotless. Will use again.', stars: 5 },
-    { name: 'Jean-Pierre D.', city: 'Paris', text: 'Perfect transfer from the airport. Fixed price, no surprises. The driver helped with all our luggage.', stars: 5 },
-    { name: 'Marco R.', city: 'Milan', text: 'Best airport transfer I\'ve ever had. On time, clean car, polite driver. Highly recommended!', stars: 5 },
-  ],
-  fr: [
-    { name: 'Sarah M.', city: 'Londres', text: 'Excellent service ! Le chauffeur attendait avec une pancarte, tres professionnel. Voiture impeccable.', stars: 5 },
-    { name: 'Jean-Pierre D.', city: 'Paris', text: 'Transfert parfait depuis l\'aeroport. Prix fixe, pas de surprises. Le chauffeur nous a aide avec tous nos bagages.', stars: 5 },
-    { name: 'Marco R.', city: 'Milan', text: 'Meilleur transfert aeroport que j\'ai eu. Ponctuel, voiture propre, chauffeur poli. Je recommande vivement !', stars: 5 },
-  ],
-  hy: [
-    { name: 'Sarah M.', city: 'Լոնդոն', text: 'Գերազանց ծառայություն! Վարորդը սպասում էր ցուցանակով, շատ պրոֆեսիոնալ: Մեքենան անթերի էր:', stars: 5 },
-    { name: 'Jean-Pierre D.', city: 'Փարիզ', text: 'Կատարյալ տրանսֆեր օդանավակայանից: Հաստատ գին, անակնկալներ չկան: Վարորդը օգնեց ուղեբեռներով:', stars: 5 },
-    { name: 'Marco R.', city: 'Միլան', text: 'Լավագույն օդանավակայանի տրանսֆեր: Ժամանին, մաքուր մեքենա, քաղաքավարի վարորդ: Խորհուրդ եմ տալիս!', stars: 5 },
-  ],
-  ru: [
-    { name: 'Сара М.', city: 'Лондон', text: 'Отличный сервис! Водитель ждал с табличкой, очень профессионально. Машина идеально чистая.', stars: 5 },
-    { name: 'Жан-Пьер Д.', city: 'Париж', text: 'Идеальный трансфер из аэропорта. Фиксированная цена, никаких сюрпризов. Водитель помог с багажом.', stars: 5 },
-    { name: 'Марко Р.', city: 'Милан', text: 'Лучший трансфер из аэропорта. Вовремя, чистая машина, вежливый водитель. Рекомендую!', stars: 5 },
-  ],
-};
-
 const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -108,7 +85,6 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
 
   const c = content[language] || content.en;
   const tr = trustLabels[language] || trustLabels.en;
-  const revs = reviewsData[language] || reviewsData.en;
 
   // CMS overrides for SEO fields
   const seoTitle = (cmsPage?.seo?.title?.[language]) || c.title;
@@ -422,34 +398,12 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
           </section>
         )}
 
-        {/* REVIEWS / Social Proof */}
+        {/* REVIEWS - TripAdvisor */}
         <section className="py-12 md:py-20 px-4 bg-[#1a2332]">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-2">{tr.trustTitle}</h2>
-            <div className="flex justify-center mb-8">
-              <div className="flex items-center space-x-1">
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" aria-hidden="true" />)}
-                <span className="text-gray-300 ml-2 text-sm">4.9/5 — 10,000+ {tr.reviews}</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-              {revs.map((rev, i) => (
-                <div key={i} className="bg-[#0f1419] rounded-xl p-5 border border-gray-700">
-                  <div className="flex items-center space-x-1 mb-3">
-                    {[...Array(rev.stars)].map((_, j) => <Star key={j} className="w-4 h-4 text-yellow-400 fill-current" aria-hidden="true" />)}
-                  </div>
-                  <p className="text-gray-300 text-sm mb-4 italic">"{rev.text}"</p>
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-[#2ecc71] rounded-full flex items-center justify-center text-white font-bold text-sm mr-3" aria-hidden="true">
-                      {rev.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-white font-semibold text-sm">{rev.name}</p>
-                      <p className="text-gray-500 text-xs">{rev.city}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">{tr.trustTitle}</h2>
+            <div className="flex justify-center">
+              <TripAdvisorWidget />
             </div>
           </div>
         </section>

@@ -36,11 +36,6 @@ const homeContent = {
     f4Title: 'Fixed Prices', f4Desc: 'Price confirmed at booking. No hidden fees, tolls included.',
     popularTitle: 'Popular Destinations',
     reviewsTitle: 'What Travelers Say',
-    reviews: [
-      { name: 'Sarah M.', city: 'London', text: 'Excellent service! Driver was waiting with a sign at CDG. Very professional, clean car. Will use again for every Paris trip.' },
-      { name: 'Jean-Pierre D.', city: 'Paris', text: 'Perfect transfer from CDG. Fixed price, no surprises. The driver helped with all our luggage. Highly recommended!' },
-      { name: 'Marco R.', city: 'Milan', text: 'Best airport transfer service in Europe. On time, premium car, polite driver. Used in 3 different cities, always excellent.' },
-    ],
     ctaTitle: 'Ready to Book Your Transfer?', ctaBtn: 'Book Now',
     howTitle: 'How It Works',
     s1: 'Book Online', s1d: 'Enter your flight details and destination. Instant price confirmation.',
@@ -66,11 +61,6 @@ const homeContent = {
     f4Title: 'Prix Fixes Garantis', f4Desc: 'Prix confirme a la reservation. Pas de frais caches, peages inclus.',
     popularTitle: 'Destinations Populaires',
     reviewsTitle: 'Ce Que Disent Nos Clients',
-    reviews: [
-      { name: 'Sarah M.', city: 'Londres', text: 'Excellent service ! Le chauffeur attendait avec une pancarte a CDG. Tres professionnel, voiture impeccable. Je reutiliserai pour chaque voyage a Paris.' },
-      { name: 'Jean-Pierre D.', city: 'Paris', text: 'Transfert parfait depuis CDG. Prix fixe, pas de surprises. Le chauffeur nous a aide avec tous nos bagages. Je recommande vivement !' },
-      { name: 'Marco R.', city: 'Milan', text: 'Meilleur service de transfert aeroport en Europe. Ponctuel, voiture premium, chauffeur poli. Utilise dans 3 villes, toujours excellent.' },
-    ],
     ctaTitle: 'Pret a Reserver Votre Transfert ?', ctaBtn: 'Reserver Maintenant',
     howTitle: 'Comment Ca Marche',
     s1: 'Reservez en Ligne', s1d: 'Entrez les details de votre vol et destination. Confirmation du prix immediate.',
@@ -96,11 +86,6 @@ const homeContent = {
     f4Title: 'Фиксированные Цены', f4Desc: 'Цена подтверждена при бронировании. Без скрытых платежей.',
     popularTitle: 'Популярные Направления',
     reviewsTitle: 'Отзывы Клиентов',
-    reviews: [
-      { name: 'Сара М.', city: 'Лондон', text: 'Отличный сервис! Водитель ждал с табличкой в CDG. Очень профессионально.' },
-      { name: 'Жан-Пьер Д.', city: 'Париж', text: 'Идеальный трансфер из CDG. Фиксированная цена, никаких сюрпризов.' },
-      { name: 'Марко Р.', city: 'Милан', text: 'Лучший трансфер в Европе. Вовремя, премиум авто, вежливый водитель.' },
-    ],
     ctaTitle: 'Готовы Забронировать Трансфер?', ctaBtn: 'Забронировать',
     howTitle: 'Как Это Работает',
     s1: 'Бронируйте Онлайн', s1d: 'Введите данные рейса и адрес назначения.',
@@ -126,11 +111,6 @@ const homeContent = {
     f4Title: 'Հաստատ Գներ', f4Desc: 'Գինը հաստատվում է ամրագրման ժամանակ: Թաքնված վճարներ չկան:',
     popularTitle: 'Հանրահայտ Ուղղություններ',
     reviewsTitle: 'Ինչ Ասում Են Ճամորդները',
-    reviews: [
-      { name: 'Sarah M.', city: 'Լոնդոն', text: 'Գերազանց ծառայություն! Վարորդը սպասում էր ցուցանակով CDG-ում: Շատ պրոֆեսիոնալ, մաքուր մեքենա:' },
-      { name: 'Jean-Pierre D.', city: 'Փարիզ', text: 'Կատարյալ տրանսֆեր CDG-ից: Հաստատ գին, անակնկալներ չկան: Վարորդը օգնեց բոլոր ուղեբեռներով:' },
-      { name: 'Marco R.', city: 'Միլան', text: 'Լավագույն օդանավակայանի տրանսֆեր Եվրոպայում: Ժամանին, պրեմիում մեքենա:' },
-    ],
     ctaTitle: 'Պատրաստ՞ Եք Ամրագրել Տրանսֆերը:', ctaBtn: 'Ամրագրել Հիմա',
     howTitle: 'Ինչպես Է Աշխատում',
     s1: 'Ամրագրեք Առցանց', s1d: 'Մուտքագրեք ձեր թռիչքի տվյալները և ուղղությունը: Գնի ակնթարտ հաստատում:',
@@ -529,29 +509,11 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Reviews */}
+        {/* Reviews - TripAdvisor */}
         <section className="py-12 md:py-20 px-4 bg-[#1a2332]">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-2">{c.reviewsTitle}</h2>
-            <div className="flex justify-center mb-8">
-              <div className="flex items-center space-x-1">
-                {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" aria-hidden="true" />)}
-                <span className="text-gray-300 ml-2 text-sm">4.9/5</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {c.reviews.map((r, i) => (
-                <div key={i} className="bg-[#0f1419] rounded-xl p-5 border border-gray-700">
-                  <div className="flex space-x-1 mb-3">{[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 text-yellow-400 fill-current" aria-hidden="true" />)}</div>
-                  <p className="text-gray-300 text-sm mb-4 italic">"{r.text}"</p>
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-[#2ecc71] rounded-full flex items-center justify-center text-white font-bold text-sm mr-3" aria-hidden="true">{r.name.charAt(0)}</div>
-                    <div><p className="text-white font-semibold text-sm">{r.name}</p><p className="text-gray-500 text-xs">{r.city}</p></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-10 flex justify-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">{c.reviewsTitle}</h2>
+            <div className="flex justify-center">
               <TripAdvisorWidget />
             </div>
           </div>
