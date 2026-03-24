@@ -123,7 +123,7 @@ const content = {
     defaultPickup: '',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5',
+    rating: '4.5/5 Tripadvisor',
   },
 };
 

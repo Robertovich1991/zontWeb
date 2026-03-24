@@ -31,7 +31,7 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: 'Beauvais-Tille Airport',
     otherCitiesTitle: 'Also available from CDG and Orly airports', otherCitiesBtn: 'View All Destinations',
-    rating: '4.9/5 (1,400+ reviews)',
+    rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
     title: 'Transfert Aeroport Beauvais - Voiture Privee vers Paris',
@@ -62,7 +62,7 @@ const content = {
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: 'Aeroport Beauvais-Tille',
     otherCitiesTitle: 'Egalement depuis CDG et Orly', otherCitiesBtn: 'Voir Toutes les Destinations',
-    rating: '4.9/5 (1 400+ avis)',
+    rating: '4.5/5 Tripadvisor (29 avis)',
   },
   ru: {
     title: 'Трансфер из Аэропорта Бове - Частный Автомобиль до Парижа',
@@ -93,7 +93,7 @@ const content = {
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: 'Аэропорт Бове-Тийе',
     otherCitiesTitle: 'Также из CDG и Орли', otherCitiesBtn: 'Все Направления',
-    rating: '4.9/5 (1 400+ отзывов)',
+    rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
     title: 'Տրանսֆեր Beauvais օդանավայանից',
@@ -123,7 +123,7 @@ const content = {
     defaultPickup: '',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5',
+    rating: '4.5/5 Tripadvisor',
   },
 };
 

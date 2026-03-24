@@ -31,7 +31,7 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: 'Gare du Nord, Paris',
     otherCitiesTitle: 'Also available for Paris airports', otherCitiesBtn: 'View All Destinations',
-    rating: '4.9/5 (1,800+ reviews)',
+    rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
     title: 'Transfert Gare de Paris - Voiture Privee avec Chauffeur',
@@ -62,7 +62,7 @@ const content = {
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: 'Gare du Nord, Paris',
     otherCitiesTitle: 'Egalement disponible pour les aeroports parisiens', otherCitiesBtn: 'Voir Toutes les Destinations',
-    rating: '4.9/5 (1 800+ avis)',
+    rating: '4.5/5 Tripadvisor (29 avis)',
   },
   ru: {
     title: 'Трансфер с Вокзалов Парижа - Частный Автомобиль',
@@ -93,7 +93,7 @@ const content = {
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: 'Гар дю Нор, Париж',
     otherCitiesTitle: 'Также из аэропортов Парижа', otherCitiesBtn: 'Все Направления',
-    rating: '4.9/5 (1 800+ отзывов)',
+    rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
     title: 'Փարիզի կայարանների տրանսֆեր',
@@ -123,7 +123,7 @@ const content = {
     defaultPickup: '',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5',
+    rating: '4.5/5 Tripadvisor',
   },
 };
 

@@ -31,7 +31,7 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: 'Paris CDG Airport',
     otherCitiesTitle: 'We serve 120+ cities across Europe', otherCitiesBtn: 'View All Destinations',
-    rating: '4.9/5 (4,500+ reviews)',
+    rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
     title: 'Transfert Aeroport Paris - CDG, Orly et Beauvais',
@@ -62,7 +62,7 @@ const content = {
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: 'Aeroport Paris CDG',
     otherCitiesTitle: 'Nous desservons plus de 120 villes en Europe', otherCitiesBtn: 'Voir Toutes les Destinations',
-    rating: '4.9/5 (4 500+ avis)',
+    rating: '4.5/5 Tripadvisor (29 avis)',
   },
   ru: {
     title: 'Трансфер из Аэропорта Парижа - CDG, Орли и Бове',
@@ -93,7 +93,7 @@ const content = {
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: 'Аэропорт Париж CDG',
     otherCitiesTitle: 'Мы обслуживаем 120+ городов Европы', otherCitiesBtn: 'Все Направления',
-    rating: '4.9/5 (4 500+ отзывов)',
+    rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
     title: 'Փարիզի օդանավայանին տրանսֆեր - CDG, Orly և Beauvais',
@@ -130,7 +130,7 @@ const content = {
     defaultPickup: 'Փարիզ CDG օդանավայան',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5 (4 500+ կարծիք)',
+    rating: '4.5/5 Tripadvisor (29 կարծիք)',
   },
 };
 

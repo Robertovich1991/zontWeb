@@ -31,7 +31,7 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: 'Nice Cote d\'Azur Airport (NCE)',
     otherCitiesTitle: 'We also serve other cities in Europe', otherCitiesBtn: 'View All Destinations',
-    rating: '4.9/5 (980+ reviews)',
+    rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
     title: 'Transfert Aeroport Monaco - Service Voiture Privee',
@@ -62,7 +62,7 @@ const content = {
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: 'Aeroport Nice Cote d\'Azur (NCE)',
     otherCitiesTitle: 'Nous desservons aussi d\'autres villes en Europe', otherCitiesBtn: 'Voir Toutes les Destinations',
-    rating: '4.9/5 (980+ avis)',
+    rating: '4.5/5 Tripadvisor (29 avis)',
   },
   ru: {
     title: 'Трансфер в Монако из Аэропорта - Частный Автомобиль',
@@ -93,7 +93,7 @@ const content = {
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: 'Аэропорт Ницца Лазурный Берег (NCE)',
     otherCitiesTitle: 'Мы также обслуживаем другие города Европы', otherCitiesBtn: 'Все Направления',
-    rating: '4.9/5 (980+ отзывов)',
+    rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
     title: 'Տրանսֆեր Մոնակո',
@@ -123,7 +123,7 @@ const content = {
     defaultPickup: '',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5',
+    rating: '4.5/5 Tripadvisor',
   },
 };
 

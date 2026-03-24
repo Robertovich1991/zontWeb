@@ -35,7 +35,7 @@ const translations = {
     heroTitle: 'Airport Transfers', heroAccent: 'Across Europe',
     heroSub: 'Premium private driver service in 120+ cities. Book your airport transfer with fixed prices and professional drivers.',
     searchPh: 'Search a city or airport...',
-    stats: [{ v: '120+', l: 'Cities' }, { v: '40+', l: 'Countries' }, { v: '24/7', l: 'Service' }, { v: '4.9/5', l: 'Rating' }],
+    stats: [{ v: '120+', l: 'Cities' }, { v: '40+', l: 'Countries' }, { v: '24/7', l: 'Service' }, { v: '4.5/5', l: 'Rating' }],
     browseTitle: 'Choose Your Destination',
     viewCity: 'Book Transfer', from: 'From', airports: 'Airports',
     noResults: 'No destinations found for',
@@ -53,7 +53,7 @@ const translations = {
     heroTitle: 'Transferts Aeroport', heroAccent: 'Partout en Europe',
     heroSub: 'Service de chauffeur prive premium dans plus de 120 villes. Reservez votre transfert aeroport a prix fixes.',
     searchPh: 'Rechercher une ville ou un aeroport...',
-    stats: [{ v: '120+', l: 'Villes' }, { v: '40+', l: 'Pays' }, { v: '24/7', l: 'Service' }, { v: '4.9/5', l: 'Note' }],
+    stats: [{ v: '120+', l: 'Villes' }, { v: '40+', l: 'Pays' }, { v: '24/7', l: 'Service' }, { v: '4.5/5', l: 'Note' }],
     browseTitle: 'Choisissez Votre Destination',
     viewCity: 'Reserver un Transfert', from: 'A partir de', airports: 'Aeroports',
     noResults: 'Aucune destination trouvee pour',
@@ -71,7 +71,7 @@ const translations = {
     heroTitle: 'Трансферы из Аэропортов', heroAccent: 'По Всей Европе',
     heroSub: 'Премиум-сервис частного водителя в 120+ городах. Забронируйте трансфер по фиксированным ценам.',
     searchPh: 'Поиск города или аэропорта...',
-    stats: [{ v: '120+', l: 'Городов' }, { v: '40+', l: 'Стран' }, { v: '24/7', l: 'Сервис' }, { v: '4.9/5', l: 'Рейтинг' }],
+    stats: [{ v: '120+', l: 'Городов' }, { v: '40+', l: 'Стран' }, { v: '24/7', l: 'Сервис' }, { v: '4.5/5', l: 'Рейтинг' }],
     browseTitle: 'Выберите Направление',
     viewCity: 'Забронировать', from: 'От', airports: 'Аэропорты',
     noResults: 'Направлений не найдено для',
@@ -89,7 +89,7 @@ const translations = {
     heroTitle: 'Օդանավակայանի Տրանսֆերներ', heroAccent: 'Ամբողջ Եվրոպայում',
     heroSub: 'Պրեմիում անձնական վարորդի ծառայություն 120+ քաղաքներում: Ամրագրեք հաստատ գներով:',
     searchPh: 'Որոնել քաղաք կամ օդանավակայան...',
-    stats: [{ v: '120+', l: 'Քաղաքներ' }, { v: '40+', l: 'Երկրներ' }, { v: '24/7', l: 'Սպասարկում' }, { v: '4.9/5', l: 'Վարկանիշ' }],
+    stats: [{ v: '120+', l: 'Քաղաքներ' }, { v: '40+', l: 'Երկրներ' }, { v: '24/7', l: 'Սպասարկում' }, { v: '4.5/5', l: 'Վարկանիշ' }],
     browseTitle: 'Ընտրեք Ձեր Ուղղությունը',
     viewCity: 'Ամրագրել Տրանսֆեր', from: 'Սկսած', airports: 'Օդանավակայաններ',
     noResults: 'Ուղղություններ չգտնվեցին',
@@ -170,7 +170,7 @@ const Countries = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-4">
               <div className="bg-[#2ecc71]/20 text-[#2ecc71] px-4 py-1.5 rounded-full text-sm font-semibold inline-flex items-center">
-                <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />4.9/5 - 10,000+ {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : 'reviews'}
+                <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />4.5/5 - 29 {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : 'reviews'}
               </div>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2" data-testid="countries-hero-title">{t.heroTitle}</h1>

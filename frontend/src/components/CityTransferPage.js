@@ -203,7 +203,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
                       <div className="text-xs text-gray-400">{tr.available}</div>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                      <div className="text-xl font-bold text-[#2ecc71]">4.9/5</div>
+                      <div className="text-xl font-bold text-[#2ecc71]">4.5/5</div>
                       <div className="text-xs text-gray-400">{tr.rating}</div>
                     </div>
                   </div>

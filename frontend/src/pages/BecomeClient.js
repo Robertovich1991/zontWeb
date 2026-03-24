@@ -49,7 +49,7 @@ const content = {
     stats: [
       { val: '50,000+', label: 'Completed Trips' },
       { val: '120+', label: 'European Cities' },
-      { val: '4.9/5', label: 'Average Rating' },
+      { val: '4.5/5', label: 'Average Rating' },
       { val: '24/7', label: 'Customer Support' },
     ],
     reviewsTitle: 'What Our Clients Say',
@@ -108,7 +108,7 @@ const content = {
     stats: [
       { val: '50 000+', label: 'Courses Effectuees' },
       { val: '120+', label: 'Villes Europeennes' },
-      { val: '4.9/5', label: 'Note Moyenne' },
+      { val: '4.5/5', label: 'Note Moyenne' },
       { val: '24/7', label: 'Support Client' },
     ],
     reviewsTitle: 'Ce Que Disent Nos Clients',
@@ -167,7 +167,7 @@ const content = {
     stats: [
       { val: '50 000+', label: 'Поездок' },
       { val: '120+', label: 'Городов Европы' },
-      { val: '4.9/5', label: 'Средний Рейтинг' },
+      { val: '4.5/5', label: 'Средний Рейтинг' },
       { val: '24/7', label: 'Поддержка' },
     ],
     reviewsTitle: 'Отзывы Клиентов',
@@ -226,7 +226,7 @@ const content = {
     stats: [
       { val: '50 000+', label: 'Katarvats Ughevorut yunner' },
       { val: '120+', label: 'Evropakan Qaghaqner' },
-      { val: '4.9/5', label: 'Mijin Varkanish' },
+      { val: '4.5/5', label: 'Mijin Varkanish' },
       { val: '24/7', label: 'Ajaktsut yun' },
     ],
     reviewsTitle: 'Inch Asum En Mer Hashakhordnery',
@@ -425,7 +425,7 @@ const BecomeClient = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{c.reviewsTitle}</h2>
             <div className="flex items-center justify-center gap-1 mt-2">
               {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />)}
-              <span className="text-gray-300 text-sm ml-2">4.9/5</span>
+              <span className="text-gray-300 text-sm ml-2">4.5/5</span>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

@@ -31,7 +31,7 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: 'Zvartnots International Airport (EVN)',
     otherCitiesTitle: 'We also serve European cities', otherCitiesBtn: 'View All Destinations',
-    rating: '4.9/5 (2,300+ reviews)',
+    rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
     title: 'Transfert Aeroport Erevan - Zvartnots International',
@@ -61,7 +61,7 @@ const content = {
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: 'Aeroport International Zvartnots (EVN)',
     otherCitiesTitle: 'Nous desservons aussi les villes europeennes', otherCitiesBtn: 'Voir Toutes les Destinations',
-    rating: '4.9/5 (2 300+ avis)',
+    rating: '4.5/5 Tripadvisor (29 avis)',
   },
   ru: {
     title: 'Трансфер из Аэропорта Еревана - Звартноц',
@@ -91,7 +91,7 @@ const content = {
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: 'Аэропорт Звартноц (EVN)',
     otherCitiesTitle: 'Другие города', otherCitiesBtn: 'Все Направления',
-    rating: '4.9/5 (2 300+ отзывов)',
+    rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
     title: 'Տրանսֆեր Երևանի օդանավայանից',
@@ -121,7 +121,7 @@ const content = {
     defaultPickup: '',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5',
+    rating: '4.5/5 Tripadvisor',
   },
 };
 

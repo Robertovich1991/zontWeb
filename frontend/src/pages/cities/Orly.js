@@ -31,7 +31,7 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: 'Paris Orly Airport',
     otherCitiesTitle: 'Also available from CDG and Beauvais airports', otherCitiesBtn: 'View All Destinations',
-    rating: '4.9/5 (2,100+ reviews)',
+    rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
     title: 'Transfert Aeroport Orly - Voiture Privee avec Chauffeur',
@@ -62,7 +62,7 @@ const content = {
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: 'Aeroport Paris Orly',
     otherCitiesTitle: 'Egalement depuis CDG et Beauvais', otherCitiesBtn: 'Voir Toutes les Destinations',
-    rating: '4.9/5 (2 100+ avis)',
+    rating: '4.5/5 Tripadvisor (29 avis)',
   },
   ru: {
     title: 'Трансфер из Аэропорта Орли - Частный Автомобиль с Водителем',
@@ -93,7 +93,7 @@ const content = {
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: 'Аэропорт Париж Орли',
     otherCitiesTitle: 'Также из CDG и Бове', otherCitiesBtn: 'Все Направления',
-    rating: '4.9/5 (2 100+ отзывов)',
+    rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
     title: 'Տրանսֆեր Orly օդանավայանից',
@@ -123,7 +123,7 @@ const content = {
     defaultPickup: '',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5',
+    rating: '4.5/5 Tripadvisor',
   },
 };
 

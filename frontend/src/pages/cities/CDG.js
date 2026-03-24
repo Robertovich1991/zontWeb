@@ -31,7 +31,7 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: 'Paris CDG Airport (Terminal 2)',
     otherCitiesTitle: 'Also available from other Paris airports', otherCitiesBtn: 'View All Destinations',
-    rating: '4.9/5 (3,200+ reviews)',
+    rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
     title: 'Transfert Aeroport CDG - Charles de Gaulle Voiture Privee',
@@ -62,7 +62,7 @@ const content = {
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: 'Aeroport Paris CDG (Terminal 2)',
     otherCitiesTitle: 'Egalement disponible depuis les autres aeroports parisiens', otherCitiesBtn: 'Voir Toutes les Destinations',
-    rating: '4.9/5 (3 200+ avis)',
+    rating: '4.5/5 Tripadvisor (29 avis)',
   },
   ru: {
     title: 'Трансфер из Аэропорта CDG - Шарль де Голль Частный Автомобиль',
@@ -93,7 +93,7 @@ const content = {
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: 'Аэропорт Париж CDG (Терминал 2)',
     otherCitiesTitle: 'Также из других парижских аэропортов', otherCitiesBtn: 'Все Направления',
-    rating: '4.9/5 (3 200+ отзывов)',
+    rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
     title: 'Տրանսֆեր CDG օդանավայանից - Շարլ դը Գոլի',
@@ -123,7 +123,7 @@ const content = {
     defaultPickup: '',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5',
+    rating: '4.5/5 Tripadvisor',
   },
 };
 

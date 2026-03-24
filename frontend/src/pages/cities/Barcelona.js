@@ -31,7 +31,7 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: 'Barcelona El Prat Airport (BCN)',
     otherCitiesTitle: 'We serve other European cities', otherCitiesBtn: 'View All Destinations',
-    rating: '4.9/5 (1,900+ reviews)',
+    rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
     title: 'Transfert Aeroport Barcelone - El Prat',
@@ -61,7 +61,7 @@ const content = {
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: 'Aeroport Barcelone El Prat (BCN)',
     otherCitiesTitle: 'Nous desservons d\'autres villes europeennes', otherCitiesBtn: 'Voir Toutes les Destinations',
-    rating: '4.9/5 (1 900+ avis)',
+    rating: '4.5/5 Tripadvisor (29 avis)',
   },
   ru: {
     title: 'Трансфер из Аэропорта Барселоны - Эль-Прат',
@@ -91,7 +91,7 @@ const content = {
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: 'Аэропорт Барселона Эль-Прат (BCN)',
     otherCitiesTitle: 'Другие города', otherCitiesBtn: 'Все Направления',
-    rating: '4.9/5 (1 900+ отзывов)',
+    rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
     title: 'Տրանսֆեր Բարսելոնայի օդանավայանից',
@@ -121,7 +121,7 @@ const content = {
     defaultPickup: '',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5',
+    rating: '4.5/5 Tripadvisor',
   },
 };
 

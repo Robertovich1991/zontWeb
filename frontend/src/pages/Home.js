@@ -28,7 +28,7 @@ const homeContent = {
     pickupPh: 'Airport, hotel, address...', dropoffPh: 'Hotel, city center, address...',
     bookNow: 'SEARCH TRANSFER', searching: 'SEARCHING...',
     fixedPrices: 'Fixed Prices', securePay: 'Secure Payment',
-    stats: { trips: '50K+', tripsLabel: 'Completed Trips', cities: '120+', citiesLabel: 'Cities', available: '24/7', availableLabel: 'Service', rating: '4.9/5', ratingLabel: 'Rating' },
+    stats: { trips: '50K+', tripsLabel: 'Completed Trips', cities: '120+', citiesLabel: 'Cities', available: '24/7', availableLabel: 'Service', rating: '4.5/5', ratingLabel: 'Rating' },
     trustTitle: 'Why Travelers Trust Zont',
     f1Title: 'Meet & Greet', f1Desc: 'Your driver waits at arrivals with a personalized name sign. 60 min free waiting for flight delays.',
     f2Title: 'Flight Tracking', f2Desc: 'Real-time monitoring of your flight. No extra charge if delayed.',
@@ -53,7 +53,7 @@ const homeContent = {
     pickupPh: 'Aeroport, hotel, adresse...', dropoffPh: 'Hotel, centre-ville, adresse...',
     bookNow: 'RECHERCHER UN TRANSFERT', searching: 'RECHERCHE...',
     fixedPrices: 'Prix Fixes', securePay: 'Paiement Securise',
-    stats: { trips: '50K+', tripsLabel: 'Courses Effectuees', cities: '120+', citiesLabel: 'Villes', available: '24/7', availableLabel: 'Service', rating: '4.9/5', ratingLabel: 'Note' },
+    stats: { trips: '50K+', tripsLabel: 'Courses Effectuees', cities: '120+', citiesLabel: 'Villes', available: '24/7', availableLabel: 'Service', rating: '4.5/5', ratingLabel: 'Note' },
     trustTitle: 'Pourquoi les Voyageurs Font Confiance a Zont',
     f1Title: 'Accueil Personnalise', f1Desc: 'Votre chauffeur vous attend aux arrivees avec une pancarte a votre nom. 60 min d\'attente gratuites.',
     f2Title: 'Suivi des Vols', f2Desc: 'Surveillance en temps reel de votre vol. Aucun supplement en cas de retard.',
@@ -78,7 +78,7 @@ const homeContent = {
     pickupPh: 'Аэропорт, отель, адрес...', dropoffPh: 'Отель, центр города...',
     bookNow: 'НАЙТИ ТРАНСФЕР', searching: 'ПОИСК...',
     fixedPrices: 'Фиксированные Цены', securePay: 'Безопасная Оплата',
-    stats: { trips: '50K+', tripsLabel: 'Поездок', cities: '120+', citiesLabel: 'Городов', available: '24/7', availableLabel: 'Сервис', rating: '4.9/5', ratingLabel: 'Рейтинг' },
+    stats: { trips: '50K+', tripsLabel: 'Поездок', cities: '120+', citiesLabel: 'Городов', available: '24/7', availableLabel: 'Сервис', rating: '4.5/5', ratingLabel: 'Рейтинг' },
     trustTitle: 'Почему Путешественники Доверяют Zont',
     f1Title: 'Встреча с Табличкой', f1Desc: 'Водитель ждет с именной табличкой. 60 минут бесплатного ожидания.',
     f2Title: 'Отслеживание Рейсов', f2Desc: 'Мониторинг вашего рейса в реальном времени. Без доплаты за задержку.',
@@ -103,7 +103,7 @@ const homeContent = {
     pickupPh: 'Օդանավակայան, հյուրանոց, հասցե...', dropoffPh: 'Հյուրանոց, կենտրոն, հասցե...',
     bookNow: 'ՈՌՈՆԵԼ ՏՌԱՆՍՖԵՌ', searching: 'ՈՌՈՆՈՒՄ...',
     fixedPrices: 'Հաստատ Գներ', securePay: 'Ապահով Վճարում',
-    stats: { trips: '50K+', tripsLabel: 'Կատարված Ուղևորություններ', cities: '120+', citiesLabel: 'Քաղաքներ', available: '24/7', availableLabel: 'Սպասարկում', rating: '4.9/5', ratingLabel: 'Վարկանիշ' },
+    stats: { trips: '50K+', tripsLabel: 'Կատարված Ուղևորություններ', cities: '120+', citiesLabel: 'Քաղաքներ', available: '24/7', availableLabel: 'Սպասարկում', rating: '4.5/5', ratingLabel: 'Վարկանիշ' },
     trustTitle: 'Ինչու Ճամորդները Վստահում Են Zont-ին',
     f1Title: 'Դիմավորում', f1Desc: 'Վարորդը սպասում է ժամանման վայրում անվանական ցուցանակով: 60 րոպե անվճար սպասում:',
     f2Title: 'Թռիչքի Հետևելում', f2Desc: 'Ձեր թռիչքի հետևելում իրական ժամանակում: Հավելյալ վճար ուշացման դեպքում:',
@@ -298,7 +298,7 @@ const Home = () => {
                 <div className="text-center lg:text-left">
                   <div className="flex justify-center lg:justify-start mb-4">
                     <div className="bg-[#2ecc71]/20 text-[#2ecc71] px-4 py-1.5 rounded-full text-sm font-semibold inline-flex items-center" data-testid="home-trust-badge">
-                      <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />{c.stats.rating} - 10,000+ {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : 'reviews'}
+                      <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />4.5/5 Tripadvisor - 29 {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : 'reviews'}
                     </div>
                   </div>
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 leading-tight" data-testid="home-hero-title">

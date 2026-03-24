@@ -12,7 +12,7 @@ const content = {
     heroStats: [
       { value: '120+', label: 'Cities in Europe' },
       { value: '24h', label: 'Quote Response' },
-      { value: '4.9/5', label: 'Traveler Rating' },
+      { value: '4.5/5', label: 'Traveler Rating' },
       { value: '0', label: 'Hidden Fees' },
     ],
     benefitsTitle: 'Why Agencies Choose Zont',
@@ -66,7 +66,7 @@ const content = {
     heroStats: [
       { value: '120+', label: 'Villes en Europe' },
       { value: '24h', label: 'Reponse Devis' },
-      { value: '4.9/5', label: 'Note Voyageurs' },
+      { value: '4.5/5', label: 'Note Voyageurs' },
       { value: '0', label: 'Frais Caches' },
     ],
     benefitsTitle: 'Pourquoi les Agences Choisissent Zont',
@@ -120,7 +120,7 @@ const content = {
     heroStats: [
       { value: '120+', label: 'Городов в Европе' },
       { value: '24ч', label: 'Ответ на Запрос' },
-      { value: '4.9/5', label: 'Рейтинг Путешественников' },
+      { value: '4.5/5', label: 'Рейтинг Путешественников' },
       { value: '0', label: 'Скрытых Комиссий' },
     ],
     benefitsTitle: 'Почему Агентства Выбирают Zont',

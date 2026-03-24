@@ -32,7 +32,7 @@ const content = {
     pickupLabel: 'Adresse de depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: '',
     otherCitiesTitle: 'Besoin de plus de places ? Decouvrez notre VTC 8 places', otherCitiesBtn: 'Voir Toutes Nos Destinations',
-    rating: '4.9/5 (3 200+ avis)',
+    rating: '4.5/5 Tripadvisor (29 avis)',
   },
   en: {
     title: 'VTC 7 Seats - Van with Private Driver | Zont.cab',
@@ -63,7 +63,7 @@ const content = {
     pickupLabel: 'Pickup address', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: '',
     otherCitiesTitle: 'Need more seats? Discover our 8-seat VTC', otherCitiesBtn: 'View All Destinations',
-    rating: '4.9/5 (3,200+ reviews)',
+    rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   ru: {
     title: 'VTC 7 Мест - Вэн с Частным Водителем | Zont.cab',
@@ -91,7 +91,7 @@ const content = {
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: '',
     otherCitiesTitle: 'Также: VTC 8 мест, седаны и минибусы', otherCitiesBtn: 'Все Направления',
-    rating: '4.9/5 (3 200+ отзывов)',
+    rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
     title: 'VTC 7 տեղ - Մինիվեն վարորդով',
@@ -121,7 +121,7 @@ const content = {
     defaultPickup: '',
     otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
-    rating: '4.9/5',
+    rating: '4.5/5 Tripadvisor',
   },
 };
 
