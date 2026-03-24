@@ -264,13 +264,13 @@ const BecomeClient = () => {
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
-        canonical="https://zont.cab/become-client"
+        canonical="https://www.zont.cab/become-client"
         jsonLd={[{
           "@context": "https://schema.org",
           "@type": "Service",
           "name": "Zont Airport Transfer",
           "description": c.seoDesc,
-          "provider": { "@type": "Organization", "name": "Zont", "url": "https://zont.cab" },
+          "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" },
           "areaServed": { "@type": "Place", "name": "Europe" },
           "hasOfferCatalog": {
             "@type": "OfferCatalog",

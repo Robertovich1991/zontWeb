@@ -256,17 +256,17 @@ const Partners = () => {
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
-        canonical="https://zont.cab/partners"
+        canonical="https://www.zont.cab/partners"
         ogType="website"
         ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
         hreflang={[
-          { lang: 'en', href: 'https://zont.cab/partners' },
-          { lang: 'fr', href: 'https://zont.cab/partners' },
-          { lang: 'ru', href: 'https://zont.cab/partners' },
+          { lang: 'en', href: 'https://www.zont.cab/partners' },
+          { lang: 'fr', href: 'https://www.zont.cab/partners' },
+          { lang: 'ru', href: 'https://www.zont.cab/partners' },
         ]}
         jsonLd={[
-          { "@context": "https://schema.org", "@type": "Service", "name": c.seoTitle, "description": c.seoDesc, "provider": { "@type": "Organization", "name": "Zont", "url": "https://zont.cab" }, "serviceType": "B2B Airport Transfer & Chauffeur Service", "areaServed": ["Paris","France","Monaco","Europe"] },
-          { "@context": "https://schema.org", "@type": "WebPage", "name": c.seoTitle, "url": "https://zont.cab/partners", "description": c.seoDesc }
+          { "@context": "https://schema.org", "@type": "Service", "name": c.seoTitle, "description": c.seoDesc, "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" }, "serviceType": "B2B Airport Transfer & Chauffeur Service", "areaServed": ["Paris","France","Monaco","Europe"] },
+          { "@context": "https://schema.org", "@type": "WebPage", "name": c.seoTitle, "url": "https://www.zont.cab/partners", "description": c.seoDesc }
         ]}
       />
       <Header />

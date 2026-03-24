@@ -200,7 +200,7 @@ const BecomeDriver = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="become-driver-page">
-      <SEO title={c.seoTitle} description={c.seoDesc} canonical="https://zont.cab/become-driver" />
+      <SEO title={c.seoTitle} description={c.seoDesc} canonical="https://www.zont.cab/become-driver" />
       <Header />
 
       <main className="flex-1 pt-16">

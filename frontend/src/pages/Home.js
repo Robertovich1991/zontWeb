@@ -243,21 +243,21 @@ const Home = () => {
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
-        canonical="https://zont.cab"
+        canonical="https://www.zont.cab"
         ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
         hreflang={[
-          { lang: 'fr', href: 'https://zont.cab/' },
-          { lang: 'en', href: 'https://zont.cab/' },
-          { lang: 'ru', href: 'https://zont.cab/' },
-          { lang: 'hy', href: 'https://zont.cab/' },
+          { lang: 'fr', href: 'https://www.zont.cab/' },
+          { lang: 'en', href: 'https://www.zont.cab/' },
+          { lang: 'ru', href: 'https://www.zont.cab/' },
+          { lang: 'hy', href: 'https://www.zont.cab/' },
         ]}
         jsonLd={[
           {
             "@context": "https://schema.org",
             "@type": "Organization",
             "name": "Zont",
-            "url": "https://zont.cab",
-            "logo": "https://zont.cab/logo.png",
+            "url": "https://www.zont.cab",
+            "logo": "https://www.zont.cab/logo.png",
             "description": c.seoDesc,
             "contactPoint": { "@type": "ContactPoint", "telephone": "+33-1-23-45-67-89", "contactType": "customer service", "availableLanguage": ["French", "English", "Russian", "Armenian"] },
             "sameAs": ["https://apps.apple.com/am/app/zont-cab/id1468482270", "https://play.google.com/store/apps/details?id=com.zont.rider"]
@@ -266,8 +266,8 @@ const Home = () => {
             "@context": "https://schema.org",
             "@type": "WebSite",
             "name": "Zont",
-            "url": "https://zont.cab",
-            "potentialAction": { "@type": "SearchAction", "target": "https://zont.cab/countries?q={search_term_string}", "query-input": "required name=search_term_string" }
+            "url": "https://www.zont.cab",
+            "potentialAction": { "@type": "SearchAction", "target": "https://www.zont.cab/countries?q={search_term_string}", "query-input": "required name=search_term_string" }
           }
         ]}
       />

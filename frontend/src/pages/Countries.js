@@ -146,15 +146,15 @@ const Countries = () => {
       <SEO
         title={t.seoTitle}
         description={t.seoDesc}
-        canonical="https://zont.cab/countries"
+        canonical="https://www.zont.cab/countries"
         ogImage="https://images.unsplash.com/photo-1762983166320-8e301ab178f7?w=1200&q=80&auto=format"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           "name": t.seoTitle,
           "description": t.seoDesc,
-          "url": "https://zont.cab/countries",
-          "provider": { "@type": "Organization", "name": "Zont", "url": "https://zont.cab" },
+          "url": "https://www.zont.cab/countries",
+          "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" },
           "about": { "@type": "Service", "serviceType": "Airport Transfer", "areaServed": "Europe" }
         }}
       />

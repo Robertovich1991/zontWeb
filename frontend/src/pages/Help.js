@@ -175,7 +175,7 @@ const Help = () => {
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
-        canonical="https://zont.cab/help"
+        canonical="https://www.zont.cab/help"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "FAQPage",

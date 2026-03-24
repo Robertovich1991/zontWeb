@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'sonner';
@@ -48,8 +48,9 @@ const reviewsData = {
 
 const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { startBooking } = useBooking();
-  const { language } = useLanguage();
+  const { language, changeLanguage } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const bookingFormRef = useRef(null);
@@ -59,8 +60,37 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const [time, setTime] = useState('');
   const [cmsPage, setCmsPage] = useState(null);
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
+  const langSyncRef = useRef(false);
 
   const API = process.env.REACT_APP_BACKEND_URL;
+
+  // Auto-detect language from URL on mount
+  useEffect(() => {
+    if (!seoUrls) return;
+    const currentPath = location.pathname;
+    for (const [lang, url] of Object.entries(seoUrls)) {
+      if (currentPath === url) {
+        if (lang !== language) {
+          langSyncRef.current = true;
+          changeLanguage(lang);
+        }
+        break;
+      }
+    }
+  }, [location.pathname, seoUrls]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Navigate to correct URL when language changes (user-initiated)
+  useEffect(() => {
+    if (!seoUrls) return;
+    if (langSyncRef.current) {
+      langSyncRef.current = false;
+      return;
+    }
+    const targetUrl = seoUrls[language];
+    if (targetUrl && targetUrl !== location.pathname) {
+      navigate(targetUrl, { replace: true });
+    }
+  }, [language, seoUrls]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     // Fetch CMS page data by slug
@@ -130,20 +160,20 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
       <SEO
         title={seoTitle}
         description={seoDesc}
-        canonical={seoUrls ? `https://zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
+        canonical={seoUrls ? `https://www.zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
         ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
         hreflang={seoUrls ? [
-          { lang: 'en', href: `https://zont.cab${seoUrls.en}` },
-          { lang: 'fr', href: `https://zont.cab${seoUrls.fr}` },
-          { lang: 'ru', href: `https://zont.cab${seoUrls.ru}` },
-          { lang: 'hy', href: `https://zont.cab${seoUrls.hy || seoUrls.en}` },
+          { lang: 'en', href: `https://www.zont.cab${seoUrls.en}` },
+          { lang: 'fr', href: `https://www.zont.cab${seoUrls.fr}` },
+          { lang: 'ru', href: `https://www.zont.cab${seoUrls.ru}` },
+          { lang: 'hy', href: `https://www.zont.cab${seoUrls.hy || seoUrls.en}` },
         ] : undefined}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Service",
           "name": c.title,
           "description": c.description,
-          "provider": { "@type": "Organization", "name": "Zont", "url": "https://zont.cab" },
+          "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" },
           "serviceType": "Airport Transfer",
           "areaServed": { "@type": "Place", "name": c.title.split(' - ')[0] },
           "offers": vehiclesPrices ? {

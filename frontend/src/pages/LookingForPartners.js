@@ -71,7 +71,7 @@ const LookingForPartners = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="looking-for-partners-page">
-      <SEO title={c.seoTitle} description={c.seoDesc} canonical="https://zont.cab/looking-for-partners" />
+      <SEO title={c.seoTitle} description={c.seoDesc} canonical="https://www.zont.cab/looking-for-partners" />
       <Header />
 
       <section className="pt-32 pb-12 px-4 bg-gradient-to-br from-[#2ecc71] to-[#27ae60] text-white">

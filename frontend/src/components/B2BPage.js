@@ -47,20 +47,20 @@ const B2BPage = ({ content, seoUrls, relatedPages }) => {
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
-        canonical={seoUrls ? `https://zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
+        canonical={seoUrls ? `https://www.zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
         ogType="website"
         ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
         hreflang={seoUrls ? [
-          { lang: 'en', href: `https://zont.cab${seoUrls.en}` },
-          { lang: 'fr', href: `https://zont.cab${seoUrls.fr || seoUrls.en}` },
-          { lang: 'ru', href: `https://zont.cab${seoUrls.ru || seoUrls.en}` },
+          { lang: 'en', href: `https://www.zont.cab${seoUrls.en}` },
+          { lang: 'fr', href: `https://www.zont.cab${seoUrls.fr || seoUrls.en}` },
+          { lang: 'ru', href: `https://www.zont.cab${seoUrls.ru || seoUrls.en}` },
         ] : undefined}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Service",
           "name": c.seoTitle,
           "description": c.seoDesc,
-          "provider": { "@type": "Organization", "name": "Zont", "url": "https://zont.cab" },
+          "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" },
           "serviceType": "B2B Airport Transfer & Chauffeur Service",
           "areaServed": ["Paris", "France", "Monaco", "Europe"],
         }}
