@@ -353,7 +353,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
         <section className="py-10 px-4 bg-[#0f1419]">
           <div className="max-w-4xl mx-auto">
             <p className="text-base text-gray-300 leading-relaxed">{introText}</p>
-            {mainContent && <p className="text-sm text-gray-400 leading-relaxed mt-3">{mainContent}</p>}
+            {mainContent && <p className="text-sm text-gray-400 leading-relaxed mt-4">{mainContent}</p>}
+            {c.description3 && <p className="text-sm text-gray-400 leading-relaxed mt-4">{c.description3}</p>}
           </div>
         </section>
 
