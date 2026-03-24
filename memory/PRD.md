@@ -1,72 +1,81 @@
-# PRD - Zont Fleet Management Platform
+# PRD - Zont Fleet Management & VTC Platform
 
 ## Original Problem Statement
-Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an external C# backend (`api.zont.cab`) and internal MongoDB. Custom Teltonika GPS integration replacing Wialon. GPS Super Admin portal for managing 1000+ fleet companies.
+Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an external C# backend (`api.zont.cab`) and internal MongoDB. Features include custom Teltonika GPS integration, fleet planning, multi-language SEO pages, and B2B hotel partnerships.
 
-## Core Architecture
-- **Backend:** FastAPI + MongoDB + C# proxy (`fleet_shared.py`)
-- **Frontend:** React + Tailwind + Leaflet maps
-- **GPS:** Custom TCP decoder (Node.js on external VPS) → Webhook → MongoDB
-- **Theme:** Light (white bg, emerald accents, gray borders)
+## User Personas
+- **Client**: Books airport/city transfers online
+- **Fleet Admin**: Manages drivers, vehicles, planning, GPS tracking
+- **Hotel Admin**: Books rides for hotel guests, manages commissions
+- **Super Admin**: Oversees all companies, hotels, GPS devices
+- **Driver**: Receives and manages ride assignments
+
+## Core Requirements
+- Multi-portal authentication (Client, Admin, Hotel, Fleet, Driver, GPS Admin)
+- Real-time GPS tracking with custom Teltonika integration
+- Fleet planning with Google Sheets import capability
+- Multi-language support (FR, EN, RU, HY) with translated URLs
+- SEO optimization with proper canonical, hreflang, sitemap
+- B2B pages for hotel/business partnerships
 
 ## What's Been Implemented
 
-### Phase 1 - Core Platform (Complete)
-- Multi-portal auth (Fleet, Admin, Hotel, Driver)
-- Fleet reservations CRUD with driver assignment
-- Zont C# API integration with caching/connection pooling
-- Hotel booking portal + Admin management dashboard
+### SEO & Analytics (March 2026)
+- ✅ Domain canonicalization: `www.zont.cab` as primary domain
+- ✅ JS redirect from `zont.cab` → `www.zont.cab` in index.html
+- ✅ All sitemap URLs use `https://www.zont.cab`
+- ✅ All canonical/hreflang tags use `https://www.zont.cab`
+- ✅ Google Analytics (G-MNN6VJZYDP) added
+- ✅ Yandex.Metrika (91814401) added with Webvisor
+- ✅ Language-URL synchronization: changing language navigates to translated URL
+- ✅ Auto-detect language from URL on page load
+- ✅ PWA manifest + favicons
 
-### Phase 2 - GPS System (Complete)
-- Custom Teltonika webhook (POST /api/fleet/gps/webhook)
-- Real-time WebSocket tracking with ping/pong keep-alive
-- Unified Live Map + History Replay in FleetGeolocation.js
-- Light-themed Leaflet map with Bento-grid telemetry panels
-- **Mobile: Full history controls** (toggle, vehicle selector, date, playback, stats)
-- **Mobile: Vehicle detail panel** (status, IMEI, position, speed, satellites, contact)
+### Fleet Management
+- ✅ Bulk CSV import from Google Sheets (~3000 missions)
+- ✅ Optimistic UI updates for planning (instant driver assignment)
+- ✅ Frontend date caching + background pre-fetching
+- ✅ Collapsible "Unassigned missions" panel
+- ✅ AI Delay Risk evaluation (full day, Google Distance Matrix)
+- ✅ Server-side pagination for "Mes Réservations"
 
-### Phase 3 - Planning Intelligence (Complete)
-- AI Delay Risk module using Google Distance Matrix
-- Risk scoring for **all events of the day** (not just 2h window)
-- Visual badges (Green/Orange/Red) on timeline event blocks
-- Audio/visual alerts for Red status transitions
+### GPS Tracking
+- ✅ Custom Teltonika webhook (`fleet_gps.py`)
+- ✅ Light-theme Fleet Geolocation map with real-time SSE
+- ✅ Mobile UI parity (toggle pill, bottom-sheet vehicle details)
+- ✅ VPS TCP decoder (Node.js) provided to user
 
-### Phase 4 - Google Sheets Import (Complete - March 2026)
-- Public CSV export parsing (bypasses Google API key restrictions)
-- Bulk import: **2947 missions** imported, 19 drivers auto-created
-- Duplicate detection, driver name normalization
+### GPS Super Admin Portal
+- ✅ Backend routes (`gps_admin.py`)
+- ✅ Frontend pages routed in App.js
 
-### Phase 5 - Performance Optimization (Complete - March 2026)
-- **Mes Reservations**: Server-side pagination (2959 records, 60 pages)
-- **Planning cache frontend**: Navigation instantanée entre dates visitées (~0.15s)
-- **Pre-fetching**: Jours adjacents chargés en arrière-plan
-- **Optimistic UI updates**: Assign/unassign/rest-day sans rechargement API
-- **Collapsible unassigned panel**: Ne bloque plus la timeline
-- **MongoDB indexes**: Compound indexes pour fleet_reservations + local_drivers
-- **Backend projection**: Champs minimaux renvoyés par l'API
+## Prioritized Backlog
 
-## Key API Endpoints
-- POST /api/fleet/auth/login
-- GET /api/fleet/planning?date=YYYY-MM-DD&view=day|week|month
-- GET /api/fleet/planning/delay-risk?date=YYYY-MM-DD
-- GET /api/fleet/my-bookings?page=1&limit=50&search=&dateFrom=&dateTo=
-- POST /api/fleet/planning/sheet/bulk-import
-- POST /api/fleet/gps/webhook
-- WS /api/fleet/gps/stream
+### P0
+- AI-assisted Booking Creation (paste text → LLM extracts booking details)
 
-## Test Credentials
-- Fleet: Nandetiri1@gmail.com / 12345678
-- GPS Admin: gps@zont.cab / gpsadmin123
-- Hotel: admin@bristol.fr / hotel123
-- Super Admin: admin@zont.cab / admin123
+### P1
+- Hotel Kiosk PWA (`/kiosk` route, tablet-optimized)
+- Google Sheets Planning Import (direct API integration)
 
-## Pending Issues
-- Partner Ride Cancellation local-only (BLOCKED - awaiting C# team API)
+### P2
+- Geofences & GPS Alerts
+- Editable Company Profile Page
+- Partner Ride Cancellation sync (BLOCKED - needs C# API)
 
-## Backlog (Prioritized)
-- **P0:** AI-assisted Booking Creation (paste text → LLM extracts details)
-- **P1:** Android Hotel Kiosk App / Web-view
-- **P2:** Geofences & GPS Alerts
-- **P2:** Editable Company Profile Page
-- **P3:** Hotel Automated Invoicing
-- **P3:** Super Admin Hotel Leaderboard
+### P3
+- Hotel Admin Automated Invoicing
+- Super Admin Hotel Leaderboard
+- Trip History & Route Replay
+
+## Technical Architecture
+- Frontend: React (CRA) with Shadcn/UI
+- Backend: FastAPI + MongoDB
+- External: C# API (`api.zont.cab`), Google Maps, Teltonika GPS
+- Deployment: Emergent Platform with custom domain `www.zont.cab`
+
+## Key Credentials
+- GPS Admin: `gps@zont.cab` / `gpsadmin123`
+- Fleet Admin: `Nandetiri1@gmail.com` / `12345678`
+- Hotel Admin: `admin@bristol.fr` / `hotel123`
+- Super Admin: `admin@zont.cab` / `admin123`
