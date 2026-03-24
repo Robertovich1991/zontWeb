@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'sonner';
@@ -149,10 +149,13 @@ const popularDest = [
   { nameEn: 'Monaco', nameFr: 'Monaco', nameRu: 'Монако', nameHy: 'Մոնակո', price: 65, url: '/transfert-aeroport-monaco' },
 ];
 
+const homeSeoUrls = { en: '/', fr: '/fr', ru: '/ru', hy: '/hy' };
+
 const Home = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { startBooking, setVehicleResults } = useBooking();
-  const { t, language } = useLanguage();
+  const { t, language, changeLanguage } = useLanguage();
   const [loading, setLoading] = useState(false);
   const bookingRef = useRef(null);
   const [pickup, setPickup] = useState({ address: '', latitude: null, longitude: null });
@@ -161,8 +164,35 @@ const Home = () => {
   const [time, setTime] = useState('');
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
   const [cmsHomepage, setCmsHomepage] = useState(null);
+  const langSyncRef = useRef(false);
 
   const API = process.env.REACT_APP_BACKEND_URL;
+
+  // Auto-detect language from home URL
+  useEffect(() => {
+    const currentPath = location.pathname;
+    for (const [lang, url] of Object.entries(homeSeoUrls)) {
+      if (currentPath === url) {
+        if (lang !== language) {
+          langSyncRef.current = true;
+          changeLanguage(lang);
+        }
+        break;
+      }
+    }
+  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Navigate to correct URL when language changes
+  useEffect(() => {
+    if (langSyncRef.current) {
+      langSyncRef.current = false;
+      return;
+    }
+    const targetUrl = homeSeoUrls[language];
+    if (targetUrl && targetUrl !== location.pathname) {
+      navigate(targetUrl, { replace: true });
+    }
+  }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetch(`${API}/api/public/trust-blocks`).then(r => r.json()).then(setCmsTrustBlocks).catch(() => {});

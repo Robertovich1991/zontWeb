@@ -145,6 +145,9 @@ function App() {
               <Suspense fallback={<Loading />}>
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/fr" element={<Home />} />
+                  <Route path="/ru" element={<Home />} />
+                  <Route path="/hy" element={<Home />} />
                   {/* Paris */}
                   <Route path="/paris-airport-transfer" element={<ParisAirportTransfer />} />
                   <Route path="/transfert-aeroport-paris" element={<ParisAirportTransfer />} />

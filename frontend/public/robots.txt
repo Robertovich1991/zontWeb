@@ -1,9 +1,17 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://zont.cab/sitemap.xml
+Sitemap: https://www.zont.cab/sitemap.xml
 
-# Disallow internal/utility pages
 Disallow: /car-selection
 Disallow: /checkout
 Disallow: /booking-confirmation
+Disallow: /my-bookings
+Disallow: /my-account
+Disallow: /reset-password
+Disallow: /forgetpassword/
+Disallow: /admin/
+Disallow: /fleet/
+Disallow: /hotel/
+Disallow: /driver/
+Disallow: /gps-admin/
