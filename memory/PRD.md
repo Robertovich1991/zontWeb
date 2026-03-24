@@ -20,39 +20,42 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 
 ## What's Been Implemented
 
-### SEO & Analytics (March 2026)
-- ✅ Domain canonicalization: `www.zont.cab` as primary domain
-- ✅ JS redirect from `zont.cab` → `www.zont.cab` in index.html
-- ✅ All sitemap URLs use `https://www.zont.cab`
-- ✅ All canonical/hreflang tags use `https://www.zont.cab`
-- ✅ Google Analytics (G-MNN6VJZYDP) added
-- ✅ Yandex.Metrika (91814401) added with Webvisor
-- ✅ Language-URL synchronization: changing language navigates to translated URL
-- ✅ Auto-detect language from URL on page load
-- ✅ PWA manifest + favicons
+### SEO & Content (March 2026)
+- Domain canonicalization: `www.zont.cab` as primary domain
+- JS redirect from `zont.cab` to `www.zont.cab` in index.html
+- All sitemap URLs use `https://www.zont.cab`
+- All canonical/hreflang tags use `https://www.zont.cab`
+- Google Analytics (G-MNN6VJZYDP) added
+- Yandex.Metrika (91814401) added with Webvisor
+- Language-URL synchronization: changing language navigates to translated URL
+- Auto-detect language from URL on page load
+- PWA manifest + favicons
+- **17 pages enriched with unique SEO content** (3 paragraphs × 3 languages each):
+  - Paris, CDG, Orly, Beauvais, Gares, Nice, Monaco, Cannes
+  - Berlin, Munich, Rome, Milan, Alicante, Barcelona, Yerevan
+  - VTC 7 Places, VTC 8 Places
 
 ### Fleet Management
-- ✅ Bulk CSV import from Google Sheets (~3000 missions)
-- ✅ Optimistic UI updates for planning (instant driver assignment)
-- ✅ Frontend date caching + background pre-fetching
-- ✅ Collapsible "Unassigned missions" panel
-- ✅ AI Delay Risk evaluation (full day, Google Distance Matrix)
-- ✅ Server-side pagination for "Mes Réservations"
+- Bulk CSV import from Google Sheets (~3000 missions)
+- Optimistic UI updates for planning
+- Frontend date caching + background pre-fetching
+- Collapsible "Unassigned missions" panel
+- AI Delay Risk evaluation (full day, Google Distance Matrix)
+- Server-side pagination for "Mes Reservations"
 
 ### GPS Tracking
-- ✅ Custom Teltonika webhook (`fleet_gps.py`)
-- ✅ Light-theme Fleet Geolocation map with real-time SSE
-- ✅ Mobile UI parity (toggle pill, bottom-sheet vehicle details)
-- ✅ VPS TCP decoder (Node.js) provided to user
+- Custom Teltonika webhook
+- Light-theme Fleet Geolocation map with real-time SSE
+- Mobile UI parity
+- VPS TCP decoder (Node.js) provided to user
 
 ### GPS Super Admin Portal
-- ✅ Backend routes (`gps_admin.py`)
-- ✅ Frontend pages routed in App.js
+- Backend routes + Frontend pages routed in App.js
 
 ## Prioritized Backlog
 
 ### P0
-- AI-assisted Booking Creation (paste text → LLM extracts booking details)
+- AI-assisted Booking Creation (paste text -> LLM extracts booking details)
 
 ### P1
 - Hotel Kiosk PWA (`/kiosk` route, tablet-optimized)
