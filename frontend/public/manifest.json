@@ -1,0 +1,26 @@
+{
+  "name": "Zont - Transfert Aeroport Premium",
+  "short_name": "Zont",
+  "description": "Service de chauffeur prive premium. Prix fixes, suivi de vol, accueil personnalise.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a2332",
+  "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
