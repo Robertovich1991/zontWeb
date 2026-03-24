@@ -38,7 +38,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 - **Armenian SEO URLs** added for all 17 pages (e.g., `/pariz-odanavakayani-transfer`, `/erevan-odanavakayani-transfer`) with routes in App.js and auto-language-detection from URL
 - **Home page language URLs**: `/` (EN), `/fr` (FR), `/ru` (RU), `/hy` (HY) with bidirectional sync
 - **Sitemap.xml** rebuilt with 86 URLs, hreflang tags for 4 languages, Armenian URLs included
-- **Robots.txt** corrected to reference `www.zont.cab/sitemap.xml` with proper Disallow rules for admin portals
+- **TripAdvisor Widget** intégré sur Home + toutes les pages de transfert, avec version FR/EN/RU adaptée à la langue
 
 ### Fleet Management
 - Bulk CSV import from Google Sheets (~3000 missions)

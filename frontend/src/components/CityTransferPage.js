@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
+import TripAdvisorWidget from '@/components/TripAdvisorWidget';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
 
@@ -355,6 +356,9 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
             <p className="text-base text-gray-300 leading-relaxed">{introText}</p>
             {mainContent && <p className="text-sm text-gray-400 leading-relaxed mt-4">{mainContent}</p>}
             {c.description3 && <p className="text-sm text-gray-400 leading-relaxed mt-4">{c.description3}</p>}
+            <div className="mt-8 flex justify-center">
+              <TripAdvisorWidget />
+            </div>
           </div>
         </section>
 

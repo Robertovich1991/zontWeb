@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
+import TripAdvisorWidget from '@/components/TripAdvisorWidget';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import { transferService } from '@/services/api';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight } from 'lucide-react';
@@ -549,6 +550,9 @@ const Home = () => {
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="mt-10 flex justify-center">
+              <TripAdvisorWidget />
             </div>
           </div>
         </section>
