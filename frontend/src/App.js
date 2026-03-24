@@ -149,62 +149,77 @@ function App() {
                   <Route path="/paris-airport-transfer" element={<ParisAirportTransfer />} />
                   <Route path="/transfert-aeroport-paris" element={<ParisAirportTransfer />} />
                   <Route path="/taksi-iz-aeroporta-parij" element={<ParisAirportTransfer />} />
+                  <Route path="/pariz-odanavakayani-transfer" element={<ParisAirportTransfer />} />
                   {/* CDG */}
                   <Route path="/cdg-airport-transfer" element={<CDGTransfer />} />
                   <Route path="/transfert-aeroport-cdg" element={<CDGTransfer />} />
                   <Route path="/taksi-iz-aeroporta-cdg" element={<CDGTransfer />} />
+                  <Route path="/cdg-odanavakayani-transfer" element={<CDGTransfer />} />
                   {/* Orly */}
                   <Route path="/orly-airport-transfer" element={<OrlyTransfer />} />
                   <Route path="/transfert-aeroport-orly" element={<OrlyTransfer />} />
                   <Route path="/taksi-iz-aeroporta-orli" element={<OrlyTransfer />} />
+                  <Route path="/orli-odanavakayani-transfer" element={<OrlyTransfer />} />
                   {/* Beauvais */}
                   <Route path="/beauvais-airport-transfer" element={<BeauvaisTransfer />} />
                   <Route path="/transfert-aeroport-beauvais" element={<BeauvaisTransfer />} />
                   <Route path="/taksi-iz-aeroporta-bove" element={<BeauvaisTransfer />} />
+                  <Route path="/bove-odanavakayani-transfer" element={<BeauvaisTransfer />} />
                   {/* Paris Train Station */}
                   <Route path="/paris-train-station-transfer" element={<ParisTrainStationTransfer />} />
                   <Route path="/transfert-gare-paris" element={<ParisTrainStationTransfer />} />
                   <Route path="/transfer-vokzal-parizh" element={<ParisTrainStationTransfer />} />
+                  <Route path="/pariz-kayarani-transfer" element={<ParisTrainStationTransfer />} />
                   {/* Nice */}
                   <Route path="/nice-airport-transfer" element={<NiceTransfer />} />
                   <Route path="/transfert-aeroport-nice" element={<NiceTransfer />} />
                   <Route path="/taksi-iz-aeroporta-nitstsa" element={<NiceTransfer />} />
+                  <Route path="/nis-odanavakayani-transfer" element={<NiceTransfer />} />
                   {/* Monaco */}
                   <Route path="/monaco-airport-transfer" element={<MonacoTransfer />} />
                   <Route path="/transfert-aeroport-monaco" element={<MonacoTransfer />} />
                   <Route path="/taksi-iz-aeroporta-monako" element={<MonacoTransfer />} />
+                  <Route path="/monako-odanavakayani-transfer" element={<MonacoTransfer />} />
                   {/* Cannes */}
                   <Route path="/cannes-airport-transfer" element={<CannesTransfer />} />
                   <Route path="/transfert-aeroport-cannes" element={<CannesTransfer />} />
                   <Route path="/taksi-iz-aeroporta-kanny" element={<CannesTransfer />} />
+                  <Route path="/kann-odanavakayani-transfer" element={<CannesTransfer />} />
                   {/* Berlin */}
                   <Route path="/berlin-airport-transfer" element={<BerlinTransfer />} />
                   <Route path="/transfert-aeroport-berlin" element={<BerlinTransfer />} />
                   <Route path="/taksi-iz-aeroporta-berlin" element={<BerlinTransfer />} />
+                  <Route path="/berlin-odanavakayani-transfer" element={<BerlinTransfer />} />
                   {/* Munich */}
                   <Route path="/munich-airport-transfer" element={<MunichTransfer />} />
                   <Route path="/transfert-aeroport-munich" element={<MunichTransfer />} />
                   <Route path="/taksi-iz-aeroporta-munhen" element={<MunichTransfer />} />
+                  <Route path="/myunkhen-odanavakayani-transfer" element={<MunichTransfer />} />
                   {/* Rome */}
                   <Route path="/rome-airport-transfer" element={<RomeTransfer />} />
                   <Route path="/transfert-aeroport-rome" element={<RomeTransfer />} />
                   <Route path="/taksi-iz-aeroporta-rim" element={<RomeTransfer />} />
+                  <Route path="/hrom-odanavakayani-transfer" element={<RomeTransfer />} />
                   {/* Milan */}
                   <Route path="/milan-airport-transfer" element={<MilanTransfer />} />
                   <Route path="/transfert-aeroport-milan" element={<MilanTransfer />} />
                   <Route path="/taksi-iz-aeroporta-milan" element={<MilanTransfer />} />
+                  <Route path="/milan-odanavakayani-transfer" element={<MilanTransfer />} />
                   {/* Alicante */}
                   <Route path="/alicante-airport-transfer" element={<AlicanteTransfer />} />
                   <Route path="/transfert-aeroport-alicante" element={<AlicanteTransfer />} />
                   <Route path="/taksi-iz-aeroporta-alikante" element={<AlicanteTransfer />} />
+                  <Route path="/alikante-odanavakayani-transfer" element={<AlicanteTransfer />} />
                   {/* Barcelona */}
                   <Route path="/barcelona-airport-transfer" element={<BarcelonaTransfer />} />
                   <Route path="/transfert-aeroport-barcelone" element={<BarcelonaTransfer />} />
                   <Route path="/taksi-iz-aeroporta-barselona" element={<BarcelonaTransfer />} />
+                  <Route path="/barselona-odanavakayani-transfer" element={<BarcelonaTransfer />} />
                   {/* Yerevan */}
                   <Route path="/yerevan-airport-transfer" element={<YerevanTransfer />} />
                   <Route path="/transfert-aeroport-erevan" element={<YerevanTransfer />} />
                   <Route path="/taksi-iz-aeroporta-erevan" element={<YerevanTransfer />} />
+                  <Route path="/erevan-odanavakayani-transfer" element={<YerevanTransfer />} />
                   {/* General pages */}
                   <Route path="/car-selection" element={<CarSelection />} />
                   <Route path="/checkout" element={<Checkout />} />
@@ -224,9 +239,11 @@ function App() {
                   <Route path="/vtc-8-places" element={<VTC8Places />} />
                   <Route path="/vtc-8-seats" element={<VTC8Places />} />
                   <Route path="/vtc-8-mest" element={<VTC8Places />} />
+                  <Route path="/vtc-8-tegh" element={<VTC8Places />} />
                   <Route path="/vtc-7-places" element={<VTC7Places />} />
                   <Route path="/vtc-7-seats" element={<VTC7Places />} />
                   <Route path="/vtc-7-mest" element={<VTC7Places />} />
+                  <Route path="/vtc-7-tegh" element={<VTC7Places />} />
                   <Route path="/travel-agencies" element={<TravelAgencies />} />
                   <Route path="/tourism-agencies" element={<TourismAgencies />} />
                   <Route path="/hotels" element={<HotelsB2B />} />

@@ -35,6 +35,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
   - Berlin, Munich, Rome, Milan, Alicante, Barcelona, Yerevan
   - VTC 7 Places, VTC 8 Places
 - **Armenian (HY) translations complete** for all 17 pages (title, subtitle, descriptions, UI labels)
+- **Armenian SEO URLs** added for all 17 pages (e.g., `/pariz-odanavakayani-transfer`, `/erevan-odanavakayani-transfer`) with routes in App.js and auto-language-detection from URL
 
 ### Fleet Management
 - Bulk CSV import from Google Sheets (~3000 missions)

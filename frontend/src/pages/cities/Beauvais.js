@@ -129,6 +129,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 120, luxury: 165, minivan: 200, minibus: 280 };
 
-const seoUrls = { en: '/beauvais-airport-transfer', fr: '/transfert-aeroport-beauvais', ru: '/taksi-iz-aeroporta-bove' };
+const seoUrls = { en: '/beauvais-airport-transfer', fr: '/transfert-aeroport-beauvais', ru: '/taksi-iz-aeroporta-bove', hy: '/bove-odanavakayani-transfer' };
 const BeauvaisTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default BeauvaisTransfer;

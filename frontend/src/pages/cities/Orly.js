@@ -129,6 +129,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 45, luxury: 70, minivan: 100, minibus: 160 };
 
-const seoUrls = { en: '/orly-airport-transfer', fr: '/transfert-aeroport-orly', ru: '/taksi-iz-aeroporta-orli' };
+const seoUrls = { en: '/orly-airport-transfer', fr: '/transfert-aeroport-orly', ru: '/taksi-iz-aeroporta-orli', hy: '/orli-odanavakayani-transfer' };
 const OrlyTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default OrlyTransfer;

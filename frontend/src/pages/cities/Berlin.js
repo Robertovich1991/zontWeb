@@ -129,6 +129,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 45, luxury: 70, minivan: 95, minibus: 150 };
 
-const seoUrls = { en: '/berlin-airport-transfer', fr: '/transfert-aeroport-berlin', ru: '/taksi-iz-aeroporta-berlin' };
+const seoUrls = { en: '/berlin-airport-transfer', fr: '/transfert-aeroport-berlin', ru: '/taksi-iz-aeroporta-berlin', hy: '/berlin-odanavakayani-transfer' };
 const BerlinTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default BerlinTransfer;

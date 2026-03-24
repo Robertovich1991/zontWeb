@@ -127,6 +127,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 70, luxury: 95, minivan: 130, minibus: 190 };
 
-const seoUrls = { en: '/milan-airport-transfer', fr: '/transfert-aeroport-milan', ru: '/taksi-iz-aeroporta-milan' };
+const seoUrls = { en: '/milan-airport-transfer', fr: '/transfert-aeroport-milan', ru: '/taksi-iz-aeroporta-milan', hy: '/milan-odanavakayani-transfer' };
 const MilanTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default MilanTransfer;

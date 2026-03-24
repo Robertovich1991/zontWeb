@@ -127,7 +127,7 @@ const content = {
 };
 
 const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 150, minibus: 190 };
-const seoUrls = { en: '/vtc-8-seats', fr: '/vtc-8-places', ru: '/vtc-8-mest' };
+const seoUrls = { en: '/vtc-8-seats', fr: '/vtc-8-places', ru: '/vtc-8-mest', hy: '/vtc-8-tegh' };
 
 const VTC8Places = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default VTC8Places;
