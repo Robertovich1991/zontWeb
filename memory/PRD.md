@@ -30,10 +30,11 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 - Language-URL synchronization: changing language navigates to translated URL
 - Auto-detect language from URL on page load
 - PWA manifest + favicons
-- **17 pages enriched with unique SEO content** (3 paragraphs × 3 languages each):
+- **17 pages enriched with unique SEO content** (3 paragraphs × 4 languages each: EN, FR, RU, HY):
   - Paris, CDG, Orly, Beauvais, Gares, Nice, Monaco, Cannes
   - Berlin, Munich, Rome, Milan, Alicante, Barcelona, Yerevan
   - VTC 7 Places, VTC 8 Places
+- **Armenian (HY) translations complete** for all 17 pages (title, subtitle, descriptions, UI labels)
 
 ### Fleet Management
 - Bulk CSV import from Google Sheets (~3000 missions)
