@@ -28,12 +28,13 @@ const TripAdvisorWidget = () => {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const existing = containerRef.current.querySelector('script');
+    const existing = containerRef.current.querySelector('script[data-ta]');
     if (existing) existing.remove();
 
     const script = document.createElement('script');
     script.src = widget.script;
     script.async = true;
+    script.setAttribute('data-ta', 'true');
     containerRef.current.appendChild(script);
 
     return () => {
@@ -42,7 +43,15 @@ const TripAdvisorWidget = () => {
   }, [widget.script]);
 
   return (
-    <div className="flex flex-col items-center" data-testid="tripadvisor-widget" ref={containerRef}>
+    <div data-testid="tripadvisor-widget" ref={containerRef}
+      className="flex flex-col items-center w-full max-w-2xl mx-auto"
+      style={{ minHeight: '80px' }}
+    >
+      <style>{`
+        .TA_selfserveprop { width: 100%; max-width: 600px; }
+        .TA_selfserveprop img { max-width: 200px; height: auto; }
+        .TA_selfserveprop .widSSP { background: #fff; border-radius: 8px; padding: 16px; }
+      `}</style>
       <div
         id={widget.id}
         className="TA_selfserveprop"
