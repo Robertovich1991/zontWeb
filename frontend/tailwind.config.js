@@ -9,8 +9,8 @@ module.exports = {
     extend: {
       fontFamily: {
         heading: ['Manrope', 'sans-serif'],
-        sans: ['IBM Plex Sans', 'sans-serif'],
-        mono: ['IBM Plex Mono', 'monospace'],
+        sans: ['Inter', 'Manrope', 'sans-serif'],
+        mono: ['monospace'],
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -20,6 +20,12 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 
 ## What's Been Implemented
 
+### Mobile PageSpeed Optimization (March 2026)
+- **Image compression**: Paris CDG driver photo 660KB PNG → 55KB WebP (92% reduction), stored locally at `/public/images/driver-paris.webp`
+- **Font cleanup**: Removed IBM Plex Mono & IBM Plex Sans from `index.html` and `tailwind.config.js`. Kept only Inter, Manrope, Noto Sans Armenian loaded async
+- **TripAdvisor lazy-load**: Widget script (`jscache.com`) now loads via `IntersectionObserver` only when section scrolls into view
+- **Unsplash images**: Reduced `w=` from 1200/600 to 800/400 and `q=` from 80/75 to 70 across all hero/card images
+
 ### Flight Tracking (March 2026)
 - **Backend**: `GET /api/flight-status?flight=AF123` — appelle Aviationstack, cache MongoDB 60min
 - **Frontend**: FlightBadge component (compact + detail) intégré dans FleetMyBookings + FleetPlanning
