@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
 import { Plus, Search, Loader2, MapPin, Clock, User, Send, ChevronDown, ChevronUp, RefreshCw, Plane, Timer, Mountain, XCircle, UserPlus, ChevronLeft, ChevronRight } from 'lucide-react';
+import FlightBadge from '@/components/FlightBadge';
 
 const TYPE_CONFIG = {
   transfer: { label: 'Transfer', cls: 'bg-blue-50 text-blue-700', icon: Plane },
@@ -20,6 +21,16 @@ const STATUS_CONFIG = {
 
 const getType = (t) => TYPE_CONFIG[t] || { label: t, cls: 'bg-gray-100 text-gray-600', icon: Plane };
 const getStatus = (s) => STATUS_CONFIG[s] || { label: s, cls: 'bg-gray-100 text-gray-600' };
+
+// Extract flight number from pickup text (legacy C# bookings) or flightNumber field
+const extractFlightNumber = (booking) => {
+  if (booking.flightNumber) return booking.flightNumber;
+  const pickup = booking.pickupAddress || booking.pickup || '';
+  // Remove airport codes from text to avoid false positives
+  const cleaned = pickup.replace(/\b(CDG|BVA|ORY|LBG|JFK|LAX)\b/g, '');
+  const match = cleaned.match(/\b([A-Z]{2})\s?(\d{1,4})\b/);
+  return match ? match[1] + match[2] : null;
+};
 
 const FleetMyBookings = () => {
   const { authFetch } = useFleetAuth();
@@ -241,7 +252,7 @@ const FleetMyBookings = () => {
                     </div>
                     {b.price > 0 && <p className="text-gray-900 font-semibold">{b.price.toFixed(2)} EUR</p>}
                     {b.clientName && <p className="text-xs text-gray-600 mt-0.5"><User className="w-3 h-3 inline" /> {b.clientName}</p>}
-                    {b.flightNumber && <p className="text-xs text-gray-400 mt-0.5"><Plane className="w-3 h-3 inline" /> {b.flightNumber}</p>}
+                    {extractFlightNumber(b) && <div className="mt-0.5"><FlightBadge flightNumber={extractFlightNumber(b)} compact /></div>}
                     {b.driver && <p className="text-xs text-blue-600 mt-0.5"><User className="w-3 h-3 inline" /> {b.driver.name}</p>}
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400 mt-1 ml-auto" /> : <ChevronDown className="w-4 h-4 text-gray-400 mt-1 ml-auto" />}
                   </div>
@@ -274,6 +285,12 @@ const FleetMyBookings = () => {
                       </div>
                     </div>
                     {b.comment && <div className="text-sm"><span className="text-gray-400 text-xs">Note:</span> <span className="text-gray-700">{b.comment}</span></div>}
+
+                    {extractFlightNumber(b) && (
+                      <div className="mt-2">
+                        <FlightBadge flightNumber={extractFlightNumber(b)} />
+                      </div>
+                    )}
 
                     {/* Actions */}
                     {b.status !== 'cancelled' && b.status !== 'completed' && (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
+import FlightBadge from '@/components/FlightBadge';
 import { CalendarDays, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck, Bell, BellOff, Volume2, FileSpreadsheet, Upload, Download, Check } from 'lucide-react';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -98,6 +99,14 @@ const RiskTooltip = ({ risk, event }) => {
 const formatDate = (d) => {
   const dt = new Date(d + 'T00:00:00');
   return `${DAYS_FR[dt.getDay()]} ${dt.getDate()}/${dt.getMonth() + 1}`;
+};
+
+const extractFlightFromPickup = (b) => {
+  if (b.flightNumber) return b.flightNumber;
+  const pickup = b.pickupAddress || b.pickup || '';
+  const cleaned = pickup.replace(/\b(CDG|BVA|ORY|LBG|JFK|LAX)\b/g, '');
+  const match = cleaned.match(/\b([A-Z]{2})\s?(\d{1,4})\b/);
+  return match ? match[1] + match[2] : null;
 };
 
 const FleetPlanning = () => {
@@ -924,7 +933,7 @@ const FleetPlanning = () => {
                       )}
                       <div className="flex items-center gap-3 text-xs text-gray-500">
                         {b.clientName && <span className="flex items-center gap-1"><User className="w-3 h-3" />{b.clientName}</span>}
-                        {b.flightNumber && <span className="flex items-center gap-1"><Plane className="w-3 h-3" />{b.flightNumber}</span>}
+                        {extractFlightFromPickup(b) && <FlightBadge flightNumber={extractFlightFromPickup(b)} compact />}
                         {b.passengers > 0 && <span>{b.passengers} pax</span>}
                         {b.hours > 0 && <span>{b.hours}h</span>}
                       </div>

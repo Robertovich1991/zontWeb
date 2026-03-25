@@ -20,6 +20,14 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 
 ## What's Been Implemented
 
+### Flight Tracking (March 2026)
+- **Backend**: `GET /api/flight-status?flight=AF123` — appelle Aviationstack, cache MongoDB 60min
+- **Frontend**: FlightBadge component (compact + detail) intégré dans FleetMyBookings + FleetPlanning
+- **Extraction auto** du numéro de vol depuis le texte pickup C# (regex: 2 lettres + chiffres)
+- **Couleurs**: vert (à l'heure/atterri), orange (retardé), bleu (en vol), rouge (annulé), gris (inconnu)
+- **Cache**: TTL 60min, stale fallback si quota dépassé
+- **Quota**: Plan gratuit 100 req/mois, appel uniquement sur clic manuel
+
 ### SEO & Content (March 2026)
 - Domain canonicalization: `www.zont.cab` as primary domain
 - JS redirect from `zont.cab` to `www.zont.cab` in index.html

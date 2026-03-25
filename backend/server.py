@@ -148,6 +148,9 @@ app.include_router(fleet_gps_router)
 from routes.gps_admin import router as gps_admin_router
 app.include_router(gps_admin_router)
 
+from routes.flight_tracking import router as flight_tracking_router
+app.include_router(flight_tracking_router)
+
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
