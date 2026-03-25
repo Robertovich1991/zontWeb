@@ -8,7 +8,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import TripAdvisorWidget from '@/components/TripAdvisorWidget';
-import PlacesAutocomplete from '@/components/PlacesAutocomplete';
+import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
 
 const IMAGES = {
@@ -108,7 +108,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
 
   const routes = c.routes || [];
 
-  const geocodeAddress = (address) => {
+  const geocodeAddress = async (address) => {
+    await loadGoogleMaps();
     return new Promise((resolve, reject) => {
       if (!window.google?.maps?.Geocoder) return reject('No geocoder');
       const geocoder = new window.google.maps.Geocoder();

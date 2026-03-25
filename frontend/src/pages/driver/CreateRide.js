@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
 import { toast } from 'sonner';
 import { ArrowLeft, Loader2, MapPin, Car, DollarSign, User, Plane, Calendar, Clock, Route, CreditCard, Shield, Plus, CheckCircle } from 'lucide-react';
+import { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -13,22 +14,25 @@ const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
   const autocompleteRef = useRef(null);
 
   useEffect(() => {
-    if (!window.google?.maps?.places || !inputRef.current) return;
-    if (autocompleteRef.current) return;
-    const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['geocode', 'establishment'],
+    let cancelled = false;
+    loadGoogleMaps().then(() => {
+      if (cancelled || !inputRef.current || autocompleteRef.current) return;
+      const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ['geocode', 'establishment'],
+      });
+      ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if (place?.geometry) {
+          onChange({
+            address: place.formatted_address || place.name,
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          });
+        }
+      });
+      autocompleteRef.current = ac;
     });
-    ac.addListener('place_changed', () => {
-      const place = ac.getPlace();
-      if (place?.geometry) {
-        onChange({
-          address: place.formatted_address || place.name,
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-        });
-      }
-    });
-    autocompleteRef.current = ac;
+    return () => { cancelled = true; };
   }, []);
 
   return (

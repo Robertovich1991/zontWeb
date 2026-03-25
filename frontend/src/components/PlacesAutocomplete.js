@@ -1,5 +1,26 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 
+// Dynamic Google Maps loader — loads the script only once, on demand
+let googleMapsPromise = null;
+function loadGoogleMaps() {
+  if (window.google?.maps?.places) return Promise.resolve();
+  if (googleMapsPromise) return googleMapsPromise;
+  googleMapsPromise = new Promise((resolve, reject) => {
+    const key = process.env.REACT_APP_GOOGLE_MAPS_KEY;
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  return googleMapsPromise;
+}
+
+// Export for use in geocodeAddress (Home.js, CityTransferPage.js)
+export { loadGoogleMaps };
+
 const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon, ...props }) => {
   const inputRef = useRef(null);
   const autocompleteRef = useRef(null);
@@ -16,22 +37,18 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
   }, [onChange]);
 
   useEffect(() => {
-    const waitForGoogle = () => {
-      if (!window.google?.maps?.places || !inputRef.current) {
-        setTimeout(waitForGoogle, 200);
-        return;
-      }
-      if (autocompleteRef.current) return;
-
+    let cancelled = false;
+    loadGoogleMaps().then(() => {
+      if (cancelled || !inputRef.current || autocompleteRef.current) return;
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
         types: ['establishment', 'geocode'],
         fields: ['formatted_address', 'geometry', 'name', 'place_id'],
       });
       autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
-    };
-    waitForGoogle();
+    });
 
     return () => {
+      cancelled = true;
       if (autocompleteRef.current) {
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }

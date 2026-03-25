@@ -7,7 +7,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import TripAdvisorWidget from '@/components/TripAdvisorWidget';
-import PlacesAutocomplete from '@/components/PlacesAutocomplete';
+import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import { transferService } from '@/services/api';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight } from 'lucide-react';
 
@@ -183,7 +183,8 @@ const Home = () => {
 
   const c = homeContent[language] || homeContent.en;
 
-  const geocodeAddress = (address) => {
+  const geocodeAddress = async (address) => {
+    await loadGoogleMaps();
     return new Promise((resolve, reject) => {
       if (!window.google?.maps?.Geocoder) return reject('No geocoder');
       const geocoder = new window.google.maps.Geocoder();

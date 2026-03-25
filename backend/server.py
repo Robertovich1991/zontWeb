@@ -1,7 +1,9 @@
 from fastapi import FastAPI, APIRouter, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.types import ASGIApp, Receive, Scope, Send
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
@@ -10,6 +12,49 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 from datetime import datetime, timezone
 import uuid
+
+
+# Lightweight ASGI middleware for cache headers (NOT BaseHTTPMiddleware)
+class CacheHeaderMiddleware:
+    """Sets long cache headers for static assets (JS, CSS, images, fonts)."""
+    LONG_CACHE = "public, max-age=31536000, immutable"
+    MEDIUM_CACHE = "public, max-age=2592000"
+    STATIC_EXTS = {'.js', '.css', '.map'}
+    IMAGE_EXTS = {'.png', '.jpg', '.jpeg', '.webp', '.svg', '.ico', '.gif', '.avif'}
+    FONT_EXTS = {'.woff', '.woff2', '.ttf', '.eot'}
+
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        path = scope.get("path", "")
+        ext = Path(path).suffix.lower()
+
+        # Determine cache policy based on extension
+        cache_value = None
+        if ext in self.STATIC_EXTS or ext in self.FONT_EXTS:
+            cache_value = self.LONG_CACHE
+        elif ext in self.IMAGE_EXTS:
+            cache_value = self.LONG_CACHE
+        elif path.startswith("/api/uploads/"):
+            cache_value = self.MEDIUM_CACHE
+
+        if cache_value is None:
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_cache(message):
+            if message["type"] == "http.response.start":
+                headers = list(message.get("headers", []))
+                headers.append((b"cache-control", cache_value.encode()))
+                message["headers"] = headers
+            await send(message)
+
+        await self.app(scope, receive, send_with_cache)
 
 
 ROOT_DIR = Path(__file__).parent
@@ -23,6 +68,9 @@ db = client[os.environ['DB_NAME']]
 # Create the main app without a prefix
 app = FastAPI()
 app.state.db = db
+
+# Add cache headers for static assets (lightweight ASGI middleware, NOT BaseHTTPMiddleware)
+app.add_middleware(CacheHeaderMiddleware)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
