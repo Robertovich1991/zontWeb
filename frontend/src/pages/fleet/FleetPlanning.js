@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useFleetAuth } from './FleetAuthContext';
 import { toast } from 'sonner';
 import FlightBadge from '@/components/FlightBadge';
-import { CalendarDays, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck, Bell, BellOff, Volume2, FileSpreadsheet, Upload, Download, Check } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Loader2, MapPin, Clock, User, Filter, X, Plane, Timer, Mountain, UserPlus, AlertTriangle, CheckCircle, UserMinus, RefreshCw, BedDouble, Gauge, Navigation, Shield, ShieldAlert, ShieldCheck, Bell, BellOff, Volume2, FileSpreadsheet, Upload, Download, Check, Maximize2, Minimize2 } from 'lucide-react';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_WIDTH = 120;
-const ROW_HEIGHT = 80;
+const ROW_HEIGHT = 56;
 
 const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 const MONTHS_FR = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];
@@ -113,6 +113,7 @@ const FleetPlanning = () => {
   const { authFetch } = useFleetAuth();
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('day');
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentDate, setCurrentDate] = useState(() => {
     const n = new Date();
     return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
@@ -745,7 +746,7 @@ const FleetPlanning = () => {
   }
 
   return (
-    <div className="space-y-4" data-testid="fleet-planning">
+    <div className={`${isFullscreen ? 'fixed inset-0 z-[100] bg-gray-50 overflow-auto p-4' : 'space-y-4'}`} data-testid="fleet-planning">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Planning Chauffeurs</h1>
@@ -836,6 +837,14 @@ const FleetPlanning = () => {
               </button>
             </div>
           )}
+          <button
+            onClick={() => setIsFullscreen(f => !f)}
+            data-testid="planning-fullscreen-btn"
+            className="p-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition"
+            title={isFullscreen ? 'Quitter le plein ecran' : 'Plein ecran'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
         </div>
       </div>
 
