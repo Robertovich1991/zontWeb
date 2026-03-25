@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 
 const TRIPADVISOR_WIDGETS = {
@@ -24,10 +24,24 @@ TRIPADVISOR_WIDGETS.hy = TRIPADVISOR_WIDGETS.en;
 const TripAdvisorWidget = () => {
   const { language } = useLanguage();
   const containerRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
   const widget = TRIPADVISOR_WIDGETS[language] || TRIPADVISOR_WIDGETS.en;
 
+  // Lazy-load: only trigger when widget scrolls into viewport
   useEffect(() => {
-    if (!containerRef.current) return;
+    const node = containerRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
+      { rootMargin: '200px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  // Load the TripAdvisor script only after visible
+  useEffect(() => {
+    if (!isVisible || !containerRef.current) return;
     const existing = containerRef.current.querySelector('script[data-ta]');
     if (existing) existing.remove();
 
@@ -37,10 +51,8 @@ const TripAdvisorWidget = () => {
     script.setAttribute('data-ta', 'true');
     containerRef.current.appendChild(script);
 
-    return () => {
-      if (script.parentNode) script.parentNode.removeChild(script);
-    };
-  }, [widget.script]);
+    return () => { if (script.parentNode) script.parentNode.removeChild(script); };
+  }, [isVisible, widget.script]);
 
   return (
     <div data-testid="tripadvisor-widget" ref={containerRef}

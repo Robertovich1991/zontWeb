@@ -12,11 +12,11 @@ import { transferService } from '@/services/api';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight } from 'lucide-react';
 
 const IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format',
-  sedan: 'https://images.unsplash.com/photo-1764090317623-06968349ad23?w=600&q=75&auto=format',
-  interior: 'https://images.unsplash.com/photo-1661220715153-95724e5f3500?w=600&q=75&auto=format',
-  airport: 'https://images.unsplash.com/photo-1689772640958-7c186dbdfe26?w=600&q=75&auto=format',
-  cdgDriver: 'https://customer-assets.emergentagent.com/job_3eaa677a-2db2-4490-9e5b-279a76eba5d5/artifacts/jai1ipi2_privat%20driver%20paris.png',
+  hero: 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=800&q=70&auto=format',
+  sedan: 'https://images.unsplash.com/photo-1764090317623-06968349ad23?w=400&q=70&auto=format',
+  interior: 'https://images.unsplash.com/photo-1661220715153-95724e5f3500?w=400&q=70&auto=format',
+  airport: 'https://images.unsplash.com/photo-1689772640958-7c186dbdfe26?w=400&q=70&auto=format',
+  cdgDriver: '/images/driver-paris.webp',
 };
 
 const homeContent = {
