@@ -25,6 +25,9 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 - **Font cleanup**: Removed IBM Plex Mono & IBM Plex Sans from `index.html` and `tailwind.config.js`. Kept only Inter, Manrope, Noto Sans Armenian loaded async
 - **TripAdvisor lazy-load**: Widget script (`jscache.com`) now loads via `IntersectionObserver` only when section scrolls into view
 - **Unsplash images**: Reduced `w=` from 1200/600 to 800/400 and `q=` from 80/75 to 70 across all hero/card images
+- **Google Maps lazy-load**: Removed from `index.html`. Now loads dynamically via `loadGoogleMaps()` in `PlacesAutocomplete.js` only when a page with autocomplete is rendered (~250KB saved on other pages)
+- **Analytics deferred**: PostHog (~196KB), Yandex Metrika (~86KB), Google Analytics — all load after first user interaction (scroll/click/touch) or 4s timeout. No longer render-blocking
+- **Cache headers**: ASGI middleware `CacheHeaderMiddleware` in `server.py` sets immutable 1-year cache for JS/CSS/images/fonts, 30-day cache for uploads
 
 ### Flight Tracking (March 2026)
 - **Backend**: `GET /api/flight-status?flight=AF123` — appelle Aviationstack, cache MongoDB 60min
