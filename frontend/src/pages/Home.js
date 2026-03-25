@@ -16,6 +16,7 @@ const IMAGES = {
   sedan: 'https://images.unsplash.com/photo-1764090317623-06968349ad23?w=600&q=75&auto=format',
   interior: 'https://images.unsplash.com/photo-1661220715153-95724e5f3500?w=600&q=75&auto=format',
   airport: 'https://images.unsplash.com/photo-1689772640958-7c186dbdfe26?w=600&q=75&auto=format',
+  cdgDriver: 'https://customer-assets.emergentagent.com/job_3eaa677a-2db2-4490-9e5b-279a76eba5d5/artifacts/jai1ipi2_privat%20driver%20paris.png',
 };
 
 const homeContent = {
@@ -438,7 +439,7 @@ const Home = () => {
               {popularDest.map((d, i) => (
                 <Link key={i} to={d.url} className="group bg-[#0f1419] rounded-xl overflow-hidden border border-gray-700 hover:border-[#2ecc71] transition-all" data-testid={`popular-dest-${i}`}>
                   <div className="h-24 md:h-32 overflow-hidden">
-                    <img src={i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    <img src={i === 0 ? IMAGES.cdgDriver : i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   </div>
                   <div className="p-3 md:p-4">
                     <h3 className="text-white font-bold text-sm md:text-base group-hover:text-[#2ecc71] transition-colors">{getName(d)}</h3>
