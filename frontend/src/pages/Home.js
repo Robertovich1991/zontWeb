@@ -186,16 +186,27 @@ const Home = () => {
     return new Promise((resolve, reject) => {
       if (!window.google?.maps?.Geocoder) return reject('No geocoder');
       const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ address }, (results, status) => {
-        if (status === 'OK' && results[0]?.geometry) {
-          resolve({
-            latitude: results[0].geometry.location.lat(),
-            longitude: results[0].geometry.location.lng(),
+      const tryGeocode = (addr) => {
+        return new Promise((res, rej) => {
+          geocoder.geocode({ address: addr }, (results, status) => {
+            if (status === 'OK' && results[0]?.geometry) {
+              res({
+                latitude: results[0].geometry.location.lat(),
+                longitude: results[0].geometry.location.lng(),
+              });
+            } else {
+              rej(status);
+            }
           });
-        } else {
-          reject(status);
-        }
-      });
+        });
+      };
+      // Try original address first, then simplified version (remove parentheses, codes)
+      tryGeocode(address)
+        .then(resolve)
+        .catch(() => {
+          const simplified = address.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
+          tryGeocode(simplified).then(resolve).catch(reject);
+        });
     });
   };
 
