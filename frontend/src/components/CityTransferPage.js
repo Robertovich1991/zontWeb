@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'sonner';
+import { transferService } from '@/services/api';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
@@ -27,7 +28,7 @@ const trustLabels = {
 const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { startBooking } = useBooking();
+  const { startBooking, setVehicleResults } = useBooking();
   const { language, changeLanguage } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -107,18 +108,42 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
 
   const routes = c.routes || [];
 
+  const geocodeAddress = async (address) => {
+    const res = await fetch(`${API}/api/geocode?address=${encodeURIComponent(address)}`);
+    if (!res.ok) throw new Error('Geocode failed');
+    return await res.json();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!pickup.address || !dropoff.address) {
+    const pickupAddr = pickup.address || '';
+    const dropoffAddr = dropoff.address || '';
+    if (!pickupAddr || !dropoffAddr) {
       toast.error(language === 'fr' ? 'Veuillez remplir les adresses' : 'Please fill in the addresses');
       return;
     }
     setLoading(true);
     try {
-      startBooking({ pickup, dropoff, date, time, selectedVehicle });
+      let pickupCoords = pickup.latitude ? { latitude: pickup.latitude, longitude: pickup.longitude } : null;
+      let dropoffCoords = dropoff.latitude ? { latitude: dropoff.latitude, longitude: dropoff.longitude } : null;
+
+      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr);
+      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr);
+
+      const vehicles = await transferService.calculatePreorderPrice(pickupCoords, dropoffCoords);
+      setVehicleResults(vehicles);
+      startBooking({
+        pickup: pickupAddr,
+        dropoff: dropoffAddr,
+        pickupCoords,
+        dropoffCoords,
+        date,
+        time,
+        selectedVehicle,
+      });
       navigate('/car-selection');
     } catch (error) {
-      toast.error('An error occurred');
+      toast.error(language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.');
     } finally {
       setLoading(false);
     }
