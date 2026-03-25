@@ -108,10 +108,21 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
 
   const routes = c.routes || [];
 
-  const geocodeAddress = async (address) => {
-    const res = await fetch(`${API}/api/geocode?address=${encodeURIComponent(address)}`);
-    if (!res.ok) throw new Error('Geocode failed');
-    return await res.json();
+  const geocodeAddress = (address) => {
+    return new Promise((resolve, reject) => {
+      if (!window.google?.maps?.Geocoder) return reject('No geocoder');
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ address }, (results, status) => {
+        if (status === 'OK' && results[0]?.geometry) {
+          resolve({
+            latitude: results[0].geometry.location.lat(),
+            longitude: results[0].geometry.location.lng(),
+          });
+        } else {
+          reject(status);
+        }
+      });
+    });
   };
 
   const handleSubmit = async (e) => {
