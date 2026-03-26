@@ -29,6 +29,12 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 - **Analytics deferred**: PostHog (~196KB), Yandex Metrika (~86KB), Google Analytics — all load after first user interaction (scroll/click/touch) or 4s timeout. No longer render-blocking
 - **Cache headers**: ASGI middleware `CacheHeaderMiddleware` in `server.py` sets immutable 1-year cache for JS/CSS/images/fonts, 30-day cache for uploads
 
+### Google Sign-In Integration (March 2026)
+- **Frontend**: Google Identity Services (GIS) loaded dynamically in AuthModal. "Continue with Google" button on both Sign-in and Sign-up tabs
+- **Backend**: Proxy endpoint `/api/proxy/auth/google-login` forwards Google ID token to `api.zont.cab/api/Client/googleLogin`
+- **Auth Context**: Added `loginDirect()` method for Google auth (sets user state directly, localStorage already set by authService)
+- **Same account**: Client connected via Google on the website has the same account as on the mobile app (C# backend manages both)
+
 ### Flight Tracking (March 2026)
 - **Backend**: `GET /api/flight-status?flight=AF123` — appelle Aviationstack, cache MongoDB 60min
 - **Frontend**: FlightBadge component (compact + detail) intégré dans FleetMyBookings + FleetPlanning
