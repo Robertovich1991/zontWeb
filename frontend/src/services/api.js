@@ -139,6 +139,22 @@ export const authService = {
     return data;
   },
 
+  googleLogin: async (idToken) => {
+    const resp = await fetch(`${API}/api/proxy/auth/google-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw { response: { data } };
+    const firstName = data.firstName || '';
+    const lastName = data.lastName || '';
+    const name = firstName ? `${firstName} ${lastName}`.trim() : '';
+    localStorage.setItem('auth_token', data.accessToken);
+    localStorage.setItem('user', JSON.stringify({ token: data.accessToken, roles: data.roles, name, firstName, lastName }));
+    return { user: { token: data.accessToken, roles: data.roles, name, firstName, lastName }, token: data.accessToken };
+  },
+
   login: async (credentials) => {
     const resp = await fetch(`${API}/api/proxy/auth/login`, {
       method: 'POST',

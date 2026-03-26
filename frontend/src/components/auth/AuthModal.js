@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { X, Loader2, Mail, CheckCircle, AlertCircle, ArrowLeft, KeyRound } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { authService } from '@/services/api';
 import PhoneInput from '@/components/PhoneInput';
+
+const GOOGLE_CLIENT_ID = '71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com';
 
 // Map C# API error keys to French messages
 const errorTranslations = {
@@ -48,11 +50,76 @@ const parseApiErrors = (error) => {
   return errors;
 };
 
+// Dynamically load Google Identity Services
+let gisPromise = null;
+function loadGIS() {
+  if (window.google?.accounts?.id) return Promise.resolve();
+  if (gisPromise) return gisPromise;
+  gisPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    s.defer = true;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return gisPromise;
+}
+
+// Google Sign-In button (rendered via GIS library)
+const GoogleSignInButton = ({ onSuccess, disabled }) => {
+  const btnRef = useRef(null);
+  const [gisReady, setGisReady] = useState(false);
+
+  useEffect(() => {
+    loadGIS().then(() => {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (response) => {
+          if (response.credential) onSuccess(response.credential);
+        },
+        auto_select: false,
+        ux_mode: 'popup',
+      });
+      setGisReady(true);
+    }).catch(() => {});
+  }, [onSuccess]);
+
+  useEffect(() => {
+    if (gisReady && btnRef.current) {
+      window.google.accounts.id.renderButton(btnRef.current, {
+        type: 'standard',
+        theme: 'filled_blue',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'pill',
+        width: btnRef.current.offsetWidth || 340,
+        locale: 'fr',
+      });
+    }
+  }, [gisReady]);
+
+  if (!gisReady) {
+    return (
+      <button disabled className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-full border border-gray-600 bg-gray-700/30 text-gray-400 text-sm font-medium">
+        <Loader2 className="w-4 h-4 animate-spin" /> Chargement Google...
+      </button>
+    );
+  }
+
+  return (
+    <div className="w-full flex justify-center">
+      <div ref={btnRef} data-testid="google-signin-button" className="w-full" style={{ minHeight: 44, opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }} />
+    </div>
+  );
+};
+
 const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
-  const { login } = useAuth();
+  const { login, loginDirect } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [step, setStep] = useState('form'); // form | verify | verified | forgot | forgot-sent
+  const [step, setStep] = useState('form');
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
   const [forgotEmail, setForgotEmail] = useState('');
@@ -81,6 +148,30 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     const num = cleaned.startsWith('0') ? cleaned.slice(1) : cleaned;
     return phoneCountry + num;
   };
+
+  // Google Sign-In handler
+  const handleGoogleSuccess = useCallback(async (idToken) => {
+    setLoading(true);
+    setErrors({});
+    try {
+      const result = await authService.googleLogin(idToken);
+      if (result.user) {
+        loginDirect(result.user);
+      }
+      toast.success('Connexion Google reussie !');
+      handleClose();
+    } catch (error) {
+      const apiErrors = parseApiErrors(error);
+      if (Object.keys(apiErrors).length > 0) {
+        setErrors({ general: Object.values(apiErrors)[0] || 'Erreur de connexion Google' });
+      } else {
+        setErrors({ general: 'Erreur de connexion Google. Reessayez.' });
+      }
+      toast.error('Erreur de connexion Google');
+    } finally {
+      setLoading(false);
+    }
+  }, [login]);
 
   // Client-side validation
   const validateSignUp = () => {
@@ -247,6 +338,15 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
 
   const isFormStep = step === 'form' || step === 'forgot' || step === 'forgot-sent';
 
+  // Divider between Google and classic auth
+  const OrDivider = () => (
+    <div className="flex items-center gap-3 my-4">
+      <div className="flex-1 h-px bg-gray-700" />
+      <span className="text-xs text-gray-500 uppercase tracking-wider">ou</span>
+      <div className="flex-1 h-px bg-gray-700" />
+    </div>
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-testid="auth-modal">
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose} />
@@ -292,91 +392,99 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
 
           {/* ===== SIGN IN ===== */}
           {mode === 'signin' && step === 'form' && (
-            <form onSubmit={handleSignIn} className="space-y-4" data-testid="signin-form">
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Email *</label>
-                <input type="text" name="email" value={formData.email} onChange={handleChange}
-                  placeholder="email@exemple.com" className={inputCls('email')} data-testid="signin-email" />
-                <FieldError field="email" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Mot de passe *</label>
-                <input type="password" name="password" value={formData.password} onChange={handleChange}
-                  placeholder="Votre mot de passe" className={inputCls('password')} data-testid="signin-password" />
-                <FieldError field="password" />
-              </div>
-              <div className="flex justify-end">
-                <button type="button" onClick={() => { setStep('forgot'); setErrors({}); setForgotEmail(formData.email); }}
-                  className="text-sm text-[#2ecc71] hover:text-[#27ae60] transition-colors" data-testid="forgot-password-link">
-                  Mot de passe oublie ?
+            <>
+              <GoogleSignInButton onSuccess={handleGoogleSuccess} disabled={loading} />
+              <OrDivider />
+              <form onSubmit={handleSignIn} className="space-y-4" data-testid="signin-form">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Email *</label>
+                  <input type="text" name="email" value={formData.email} onChange={handleChange}
+                    placeholder="email@exemple.com" className={inputCls('email')} data-testid="signin-email" />
+                  <FieldError field="email" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Mot de passe *</label>
+                  <input type="password" name="password" value={formData.password} onChange={handleChange}
+                    placeholder="Votre mot de passe" className={inputCls('password')} data-testid="signin-password" />
+                  <FieldError field="password" />
+                </div>
+                <div className="flex justify-end">
+                  <button type="button" onClick={() => { setStep('forgot'); setErrors({}); setForgotEmail(formData.email); }}
+                    className="text-sm text-[#2ecc71] hover:text-[#27ae60] transition-colors" data-testid="forgot-password-link">
+                    Mot de passe oublie ?
+                  </button>
+                </div>
+                <button type="submit" disabled={loading} data-testid="signin-submit"
+                  className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
+                  {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Connexion...</> : 'Se connecter'}
                 </button>
-              </div>
-              <button type="submit" disabled={loading} data-testid="signin-submit"
-                className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
-                {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Connexion...</> : 'Se connecter'}
-              </button>
-            </form>
+              </form>
+            </>
           )}
 
           {/* ===== SIGN UP ===== */}
           {mode === 'signup' && step === 'form' && (
-            <form onSubmit={handleSignUp} className="space-y-3" data-testid="signup-form">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Prenom *</label>
-                  <input type="text" name="firstName" value={formData.firstName} onChange={handleChange}
-                    placeholder="Prenom" className={inputCls('firstName')} data-testid="signup-firstname" />
-                  <FieldError field="firstName" />
+            <>
+              <GoogleSignInButton onSuccess={handleGoogleSuccess} disabled={loading} />
+              <OrDivider />
+              <form onSubmit={handleSignUp} className="space-y-3" data-testid="signup-form">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Prenom *</label>
+                    <input type="text" name="firstName" value={formData.firstName} onChange={handleChange}
+                      placeholder="Prenom" className={inputCls('firstName')} data-testid="signup-firstname" />
+                    <FieldError field="firstName" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Nom *</label>
+                    <input type="text" name="lastName" value={formData.lastName} onChange={handleChange}
+                      placeholder="Nom" className={inputCls('lastName')} data-testid="signup-lastname" />
+                    <FieldError field="lastName" />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Nom *</label>
-                  <input type="text" name="lastName" value={formData.lastName} onChange={handleChange}
-                    placeholder="Nom" className={inputCls('lastName')} data-testid="signup-lastname" />
-                  <FieldError field="lastName" />
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Email *</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleChange}
+                    placeholder="email@exemple.com" className={inputCls('email')} data-testid="signup-email" />
+                  <FieldError field="email" />
                 </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Email *</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange}
-                  placeholder="email@exemple.com" className={inputCls('email')} data-testid="signup-email" />
-                <FieldError field="email" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Telephone *</label>
-                <PhoneInput
-                  value={formData.phone}
-                  onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); if (errors.phone) setErrors({ ...errors, phone: null }); }}
-                  onCountryChange={setPhoneCountry}
-                  error={errors.phone}
-                  darkMode={true}
-                />
-                <FieldError field="phone" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Mot de passe *</label>
-                <input type="password" name="password" value={formData.password} onChange={handleChange}
-                  placeholder="Minimum 6 caracteres" className={inputCls('password')} data-testid="signup-password" />
-                <FieldError field="password" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Confirmer *</label>
-                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
-                  placeholder="Confirmer le mot de passe" className={inputCls('confirmPassword')} data-testid="signup-confirm-password" />
-                <FieldError field="confirmPassword" />
-              </div>
-              <div>
-                <div className="flex items-start gap-2.5 pt-1">
-                  <input type="checkbox" name="agreeTerms" checked={formData.agreeTerms} onChange={handleChange}
-                    className="mt-0.5 w-4 h-4 accent-[#2ecc71] bg-gray-700 border-gray-600 rounded" data-testid="signup-terms" />
-                  <label className="text-xs text-gray-400">J'accepte les <span className="text-[#2ecc71] underline cursor-pointer">Conditions d'utilisation</span> et la <span className="text-[#2ecc71] underline cursor-pointer">Politique de confidentialite</span></label>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Telephone *</label>
+                  <PhoneInput
+                    value={formData.phone}
+                    onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); if (errors.phone) setErrors({ ...errors, phone: null }); }}
+                    onCountryChange={setPhoneCountry}
+                    error={errors.phone}
+                    darkMode={true}
+                  />
+                  <FieldError field="phone" />
                 </div>
-                <FieldError field="agreeTerms" />
-              </div>
-              <button type="submit" disabled={loading} data-testid="signup-submit"
-                className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
-                {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Inscription...</> : 'S\'inscrire'}
-              </button>
-            </form>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Mot de passe *</label>
+                  <input type="password" name="password" value={formData.password} onChange={handleChange}
+                    placeholder="Minimum 6 caracteres" className={inputCls('password')} data-testid="signup-password" />
+                  <FieldError field="password" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Confirmer *</label>
+                  <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
+                    placeholder="Confirmer le mot de passe" className={inputCls('confirmPassword')} data-testid="signup-confirm-password" />
+                  <FieldError field="confirmPassword" />
+                </div>
+                <div>
+                  <div className="flex items-start gap-2.5 pt-1">
+                    <input type="checkbox" name="agreeTerms" checked={formData.agreeTerms} onChange={handleChange}
+                      className="mt-0.5 w-4 h-4 accent-[#2ecc71] bg-gray-700 border-gray-600 rounded" data-testid="signup-terms" />
+                    <label className="text-xs text-gray-400">J'accepte les <span className="text-[#2ecc71] underline cursor-pointer">Conditions d'utilisation</span> et la <span className="text-[#2ecc71] underline cursor-pointer">Politique de confidentialite</span></label>
+                  </div>
+                  <FieldError field="agreeTerms" />
+                </div>
+                <button type="submit" disabled={loading} data-testid="signup-submit"
+                  className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20">
+                  {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Inscription...</> : 'S\'inscrire'}
+                </button>
+              </form>
+            </>
           )}
 
           {/* ===== FORGOT PASSWORD - Enter email ===== */}

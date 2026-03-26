@@ -29,6 +29,10 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const loginDirect = (userData) => {
+    setUser(userData);
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -37,6 +41,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     login,
+    loginDirect,
     logout,
     isAuthenticated: !!user,
     loading,

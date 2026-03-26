@@ -144,6 +144,52 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class GoogleLoginRequest(BaseModel):
+    idToken: str
+
+
+@router.post("/auth/google-login")
+async def proxy_google_login(req: GoogleLoginRequest):
+    """Login or register client via Google ID token → C# API."""
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/Client/googleLogin",
+                json={"idToken": req.idToken},
+                headers={
+                    "Content-Type": "application/json",
+                    "Origin": "https://zont.cab",
+                    "Referer": "https://zont.cab/",
+                },
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                token = data.get("accessToken")
+                if token:
+                    try:
+                        profile_resp = await client.get(
+                            f"{CSHARP_API}/api/Client",
+                            headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+                        )
+                        if profile_resp.status_code == 200:
+                            profile = profile_resp.json()
+                            data["firstName"] = profile.get("firstName", "")
+                            data["lastName"] = profile.get("lastName", "")
+                    except Exception:
+                        pass
+                return data
+            try:
+                error_data = resp.json() if resp.text else {}
+            except Exception:
+                error_data = {}
+            raise HTTPException(status_code=resp.status_code if resp.status_code < 500 else 401, detail=error_data.get("message", "Google login failed - invalid token"))
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Google login error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+
+
 @router.post("/auth/register-phone")
 async def proxy_register_phone(req: RegisterPhoneRequest):
     """Step 1: Register phone number and get verification code."""
