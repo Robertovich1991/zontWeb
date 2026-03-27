@@ -12,10 +12,8 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('signin');
-  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState('France');
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -38,10 +36,6 @@ const Header = () => {
     navigate('/');
   };
 
-  const handleCountrySelect = (country) => {
-    setSelectedCountry(country);
-    setCountryDropdownOpen(false);
-  };
 
   const handleLanguageChange = (langCode) => {
     changeLanguage(langCode);
@@ -146,32 +140,7 @@ const Header = () => {
                 <span className="text-xs font-semibold">+33 7 83 77 70 27</span>
               </a>
 
-              {/* Country Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setCountryDropdownOpen(!countryDropdownOpen)}
-                  className="flex items-center space-x-1 text-white hover:text-gray-300 transition-colors text-sm font-medium"
-                >
-                  <span>{selectedCountry}</span>
-                  <ChevronDown size={16} />
-                </button>
-                {countryDropdownOpen && (
-                  <div className="absolute top-full mt-2 bg-[#1a2332] border border-gray-700 rounded shadow-lg py-2 min-w-[150px]">
-                    <button
-                      onClick={() => handleCountrySelect('France')}
-                      className="w-full px-4 py-2 text-left text-white hover:bg-gray-700 transition-colors text-sm"
-                    >
-                      France
-                    </button>
-                    <button
-                      onClick={() => handleCountrySelect('Armenia')}
-                      className="w-full px-4 py-2 text-left text-white hover:bg-gray-700 transition-colors text-sm"
-                    >
-                      Armenia
-                    </button>
-                  </div>
-                )}
-              </div>
+
 
               {/* Language Selector */}
               <div className="relative">
@@ -282,16 +251,7 @@ const Header = () => {
                 B2B Partners
               </Link>
 
-              <div className="py-2">
-                <select
-                  value={selectedCountry}
-                  onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm"
-                >
-                  <option value="France">France</option>
-                  <option value="Armenia">Armenia</option>
-                </select>
-              </div>
+
 
               <div className="py-2">
                 <select
