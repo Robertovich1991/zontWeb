@@ -149,6 +149,11 @@ const Home = () => {
   const [cmsHomepage, setCmsHomepage] = useState(null);
   const langSyncRef = useRef(false);
 
+  // IMMUNE REFS: Coordinates stored here can NEVER be cleared by mobile browser onChange events.
+  // Only handlePlaceSelect (autocomplete selection) writes to these refs.
+  const pickupSafeRef = useRef({ latitude: null, longitude: null, placeId: null, address: '' });
+  const dropoffSafeRef = useRef({ latitude: null, longitude: null, placeId: null, address: '' });
+
   const API = process.env.REACT_APP_BACKEND_URL;
 
   // Auto-detect language from home URL
@@ -235,8 +240,6 @@ const Home = () => {
     e.preventDefault();
     setLoading(true);
 
-    let pickupCoords = pickup.latitude ? { latitude: pickup.latitude, longitude: pickup.longitude } : null;
-    let dropoffCoords = dropoff.latitude ? { latitude: dropoff.latitude, longitude: dropoff.longitude } : null;
     const pickupAddr = pickup.address || document.getElementById('h-pickup')?.value || '';
     const dropoffAddr = dropoff.address || document.getElementById('h-dropoff')?.value || '';
 
@@ -246,9 +249,30 @@ const Home = () => {
       return;
     }
 
+    // Priority: safeRef coords > state coords > geocode
+    // SafeRef can NEVER be cleared by mobile browser onChange events
+    const getCoords = (safeRef, stateObj, addr) => {
+      // 1) Try safeRef (immune to race conditions)
+      if (safeRef.current.latitude != null) {
+        const refP = safeRef.current.address.substring(0, 12).toLowerCase();
+        const addrP = addr.substring(0, 12).toLowerCase();
+        if (refP === addrP) {
+          return { latitude: safeRef.current.latitude, longitude: safeRef.current.longitude };
+        }
+      }
+      // 2) Try React state
+      if (stateObj.latitude != null) {
+        return { latitude: stateObj.latitude, longitude: stateObj.longitude };
+      }
+      return null;
+    };
+
+    let pickupCoords = getCoords(pickupSafeRef, pickup, pickupAddr);
+    let dropoffCoords = getCoords(dropoffSafeRef, dropoff, dropoffAddr);
+
     try {
-      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickup.placeId);
-      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoff.placeId);
+      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickupSafeRef.current.placeId || pickup.placeId);
+      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoffSafeRef.current.placeId || dropoff.placeId);
     } catch {
       toast.error(language === 'fr' ? 'Adresse introuvable. Veuillez reessayer.' : 'Address not found. Please try again.');
       setLoading(false);
@@ -274,27 +298,23 @@ const Home = () => {
     }
   };
 
-  // Merge handler: preserve coordinates from autocomplete if address hasn't genuinely changed
-  const handlePickupChange = (data) => setPickup(prev => {
-    // Autocomplete selection with coords — always accept
-    if (data.latitude != null) return data;
-    // Text-only update: if address is similar to what we had, keep existing coords
-    if (prev.latitude != null && data.address && prev.address) {
-      const prevPrefix = prev.address.substring(0, 15).toLowerCase();
-      const newPrefix = data.address.substring(0, 15).toLowerCase();
-      if (prevPrefix === newPrefix) return prev;
+  // Handlers: write to safe refs when autocomplete provides coords
+  const handlePickupChange = (data) => {
+    if (data.latitude != null) {
+      pickupSafeRef.current = { latitude: data.latitude, longitude: data.longitude, placeId: data.placeId, address: data.address };
+    } else if (data.placeId) {
+      pickupSafeRef.current = { ...pickupSafeRef.current, placeId: data.placeId, address: data.address };
     }
-    return data;
-  });
-  const handleDropoffChange = (data) => setDropoff(prev => {
-    if (data.latitude != null) return data;
-    if (prev.latitude != null && data.address && prev.address) {
-      const prevPrefix = prev.address.substring(0, 15).toLowerCase();
-      const newPrefix = data.address.substring(0, 15).toLowerCase();
-      if (prevPrefix === newPrefix) return prev;
+    setPickup(data);
+  };
+  const handleDropoffChange = (data) => {
+    if (data.latitude != null) {
+      dropoffSafeRef.current = { latitude: data.latitude, longitude: data.longitude, placeId: data.placeId, address: data.address };
+    } else if (data.placeId) {
+      dropoffSafeRef.current = { ...dropoffSafeRef.current, placeId: data.placeId, address: data.address };
     }
-    return data;
-  });
+    setDropoff(data);
+  };
 
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
 

@@ -41,6 +41,10 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
   const langSyncRef = useRef(false);
 
+  // IMMUNE REFS: only autocomplete selection writes here, mobile onChange can NEVER clear them
+  const pickupSafeRef = useRef({ latitude: null, longitude: null, placeId: null, address: '' });
+  const dropoffSafeRef = useRef({ latitude: null, longitude: null, placeId: null, address: '' });
+
   const API = process.env.REACT_APP_BACKEND_URL;
 
   // Auto-detect language from URL on mount
@@ -167,11 +171,26 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
     }
     setLoading(true);
     try {
-      let pickupCoords = pickup.latitude ? { latitude: pickup.latitude, longitude: pickup.longitude } : null;
-      let dropoffCoords = dropoff.latitude ? { latitude: dropoff.latitude, longitude: dropoff.longitude } : null;
+      // Priority: safeRef coords > state coords > geocode
+      const getCoords = (safeRef, stateObj, addr) => {
+        if (safeRef.current.latitude != null) {
+          const refP = safeRef.current.address.substring(0, 12).toLowerCase();
+          const addrP = addr.substring(0, 12).toLowerCase();
+          if (refP === addrP) {
+            return { latitude: safeRef.current.latitude, longitude: safeRef.current.longitude };
+          }
+        }
+        if (stateObj.latitude != null) {
+          return { latitude: stateObj.latitude, longitude: stateObj.longitude };
+        }
+        return null;
+      };
 
-      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickup.placeId);
-      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoff.placeId);
+      let pickupCoords = getCoords(pickupSafeRef, pickup, pickupAddr);
+      let dropoffCoords = getCoords(dropoffSafeRef, dropoff, dropoffAddr);
+
+      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickupSafeRef.current.placeId || pickup.placeId);
+      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoffSafeRef.current.placeId || dropoff.placeId);
 
       const vehicles = await transferService.calculatePreorderPrice(pickupCoords, dropoffCoords);
       setVehicleResults(vehicles);
@@ -192,24 +211,22 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
     }
   };
 
-  const handlePickupChange = (val) => setPickup(prev => {
-    if (val.latitude != null) return val;
-    if (prev.latitude != null && val.address && prev.address) {
-      const prevP = prev.address.substring(0, 15).toLowerCase();
-      const newP = val.address.substring(0, 15).toLowerCase();
-      if (prevP === newP) return prev;
+  const handlePickupChange = (val) => {
+    if (val.latitude != null) {
+      pickupSafeRef.current = { latitude: val.latitude, longitude: val.longitude, placeId: val.placeId, address: val.address };
+    } else if (val.placeId) {
+      pickupSafeRef.current = { ...pickupSafeRef.current, placeId: val.placeId, address: val.address };
     }
-    return val;
-  });
-  const handleDropoffChange = (val) => setDropoff(prev => {
-    if (val.latitude != null) return val;
-    if (prev.latitude != null && val.address && prev.address) {
-      const prevP = prev.address.substring(0, 15).toLowerCase();
-      const newP = val.address.substring(0, 15).toLowerCase();
-      if (prevP === newP) return prev;
+    setPickup(val);
+  };
+  const handleDropoffChange = (val) => {
+    if (val.latitude != null) {
+      dropoffSafeRef.current = { latitude: val.latitude, longitude: val.longitude, placeId: val.placeId, address: val.address };
+    } else if (val.placeId) {
+      dropoffSafeRef.current = { ...dropoffSafeRef.current, placeId: val.placeId, address: val.address };
     }
-    return val;
-  });
+    setDropoff(val);
+  };
 
   const scrollToBooking = (v) => {
     if (v) setSelectedVehicle(v);
