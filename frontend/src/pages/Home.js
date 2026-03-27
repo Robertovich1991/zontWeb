@@ -39,6 +39,7 @@ const homeContent = {
     reviewsTitle: 'What Travelers Say',
     ctaTitle: 'Ready to Book Your Transfer?', ctaBtn: 'Book Now',
     howTitle: 'How It Works',
+    recentTitle: 'Recent Searches', recentEmpty: 'No recent searches',
     s1: 'Book Online', s1d: 'Enter your flight details and destination. Instant price confirmation.',
     s2: 'Meet Your Driver', s2d: 'Driver waits at arrivals with your name sign. Help with luggage included.',
     s3: 'Enjoy the Ride', s3d: 'Comfortable direct transfer in a premium vehicle to your destination.',
@@ -64,6 +65,7 @@ const homeContent = {
     reviewsTitle: 'Ce Que Disent Nos Clients',
     ctaTitle: 'Pret a Reserver Votre Transfert ?', ctaBtn: 'Reserver Maintenant',
     howTitle: 'Comment Ca Marche',
+    recentTitle: 'Recherches Recentes', recentEmpty: 'Aucune recherche recente',
     s1: 'Reservez en Ligne', s1d: 'Entrez les details de votre vol et destination. Confirmation du prix immediate.',
     s2: 'Rencontrez Votre Chauffeur', s2d: 'Chauffeur aux arrivees avec pancarte a votre nom. Aide aux bagages.',
     s3: 'Profitez du Trajet', s3d: 'Transfert direct confortable dans un vehicule premium.',
@@ -89,6 +91,7 @@ const homeContent = {
     reviewsTitle: 'Отзывы Клиентов',
     ctaTitle: 'Готовы Забронировать Трансфер?', ctaBtn: 'Забронировать',
     howTitle: 'Как Это Работает',
+    recentTitle: 'Недавние Поиски', recentEmpty: 'Нет недавних поисков',
     s1: 'Бронируйте Онлайн', s1d: 'Введите данные рейса и адрес назначения.',
     s2: 'Встретьте Водителя', s2d: 'Водитель ждет в зале прилета с табличкой.',
     s3: 'Наслаждайтесь', s3d: 'Комфортная поездка в премиум автомобиле.',
@@ -114,6 +117,7 @@ const homeContent = {
     reviewsTitle: 'Ինչ Ասում Են Ճամորդները',
     ctaTitle: 'Պատրաստ՞ Եք Ամրագրել Տրանսֆերը:', ctaBtn: 'Ամրագրել Հիմա',
     howTitle: 'Ինչպես Է Աշխատում',
+    recentTitle: 'Վերջին Որոնումներ', recentEmpty: 'Վերջին որոնումներ չկան',
     s1: 'Ամրագրեք Առցանց', s1d: 'Մուտքագրեք ձեր թռիչքի տվյալները և ուղղությունը: Գնի ակնթարտ հաստատում:',
     s2: 'Հանդիպեք Վարորդին', s2d: 'Վարորդը սպասում է ժամանման վայրում ձեր անվանական ցուցանակով:',
     s3: 'Վայելեք Ուղևորությունից', s3d: 'Հարմարավետ ուղիղ տրանսֆեր պրեմիում մեքենայով:',
@@ -187,6 +191,14 @@ const Home = () => {
     fetch(`${API}/api/public/trust-blocks`).then(r => r.json()).then(setCmsTrustBlocks).catch(() => {});
     fetch(`${API}/api/public/homepage`).then(r => r.json()).then(setCmsHomepage).catch(() => {});
   }, [API]);
+
+  // Load recent searches from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('recentSearches');
+      if (saved) setRecentSearches(JSON.parse(saved));
+    } catch { /* ignore corrupted data */ }
+  }, []);
 
   const c = homeContent[language] || homeContent.en;
 
@@ -291,6 +303,17 @@ const Home = () => {
         date,
         time,
       });
+
+      // Save to recent searches (max 3, no duplicates)
+      try {
+        const entry = { pickup: pickupAddr, dropoff: dropoffAddr, pickupCoords, dropoffCoords };
+        const prev = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+        const filtered = prev.filter(s => !(s.pickup === pickupAddr && s.dropoff === dropoffAddr));
+        const updated = [entry, ...filtered].slice(0, 3);
+        localStorage.setItem('recentSearches', JSON.stringify(updated));
+        setRecentSearches(updated);
+      } catch { /* localStorage full or unavailable */ }
+
       navigate('/car-selection');
     } catch (error) {
       toast.error(language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.');
@@ -318,6 +341,18 @@ const Home = () => {
   };
 
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+  const handleRecentClick = (search) => {
+    setPickup({ address: search.pickup, latitude: search.pickupCoords?.latitude || null, longitude: search.pickupCoords?.longitude || null });
+    setDropoff({ address: search.dropoff, latitude: search.dropoffCoords?.latitude || null, longitude: search.dropoffCoords?.longitude || null });
+    if (search.pickupCoords?.latitude) {
+      pickupSafeRef.current = { latitude: search.pickupCoords.latitude, longitude: search.pickupCoords.longitude, placeId: null, address: search.pickup };
+    }
+    if (search.dropoffCoords?.latitude) {
+      dropoffSafeRef.current = { latitude: search.dropoffCoords.latitude, longitude: search.dropoffCoords.longitude, placeId: null, address: search.dropoff };
+    }
+    bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const getName = (d) => language === 'fr' ? d.nameFr : language === 'ru' ? d.nameRu : language === 'hy' ? (d.nameHy || d.nameEn) : d.nameEn;
 
@@ -467,6 +502,33 @@ const Home = () => {
                       <span className="text-xs text-gray-400">PayPal</span>
                       <span className="text-xs text-gray-400">Apple Pay</span>
                     </div>
+
+                    {/* Recent Searches */}
+                    {recentSearches.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-gray-100" data-testid="recent-searches-section">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{c.recentTitle}</p>
+                        <div className="space-y-1.5">
+                          {recentSearches.map((s, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => handleRecentClick(s)}
+                              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-[#2ecc71]/10 border border-gray-100 hover:border-[#2ecc71]/30 transition-all text-left group"
+                              data-testid={`recent-search-${i}`}
+                            >
+                              <Clock className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#2ecc71] shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs text-gray-700 truncate">{s.pickup}</p>
+                                <p className="text-xs text-gray-500 truncate flex items-center gap-1">
+                                  <ArrowRight className="w-2.5 h-2.5 shrink-0" />{s.dropoff}
+                                </p>
+                              </div>
+                              <ChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#2ecc71] shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
