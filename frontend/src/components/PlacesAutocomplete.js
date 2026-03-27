@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 // Dynamic Google Maps loader — loads the script only once, on demand
 let googleMapsPromise = null;
@@ -26,39 +26,43 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
   const autocompleteRef = useRef(null);
   const justSelectedRef = useRef(false);
   const lastSelectedAddrRef = useRef('');
-  const hasValidCoordsRef = useRef(false);
 
-  const handlePlaceSelect = useCallback(() => {
-    const place = autocompleteRef.current?.getPlace();
-    if (!place) return;
+  // KEY FIX: Store onChange in a ref so the Google Maps listener never goes stale.
+  // Without this, every parent re-render creates a new onChange reference,
+  // which causes useEffect to remove the place_changed listener and never re-add it
+  // (because autocompleteRef.current is already set).
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
-    justSelectedRef.current = true;
-
-    const address = place.formatted_address || place.name || inputRef.current?.value || '';
-    lastSelectedAddrRef.current = address;
-
-    if (place.geometry) {
-      const lat = place.geometry.location.lat();
-      const lng = place.geometry.location.lng();
-      hasValidCoordsRef.current = true;
-      onChange({ address, latitude: lat, longitude: lng, placeId: place.place_id });
-    } else {
-      hasValidCoordsRef.current = false;
-      onChange({ address, latitude: null, longitude: null, placeId: place.place_id || null });
-    }
-
-    // Extended timeout for slow mobile browsers (keyboard dismiss, dropdown animation)
-    setTimeout(() => { justSelectedRef.current = false; }, 3000);
-  }, [onChange]);
-
+  // Setup Google Autocomplete ONCE — empty deps, uses refs for latest values
   useEffect(() => {
     let cancelled = false;
     loadGoogleMaps().then(() => {
       if (cancelled || !inputRef.current || autocompleteRef.current) return;
+
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
         fields: ['formatted_address', 'geometry', 'name', 'place_id'],
       });
-      autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
+
+      autocompleteRef.current.addListener('place_changed', () => {
+        const place = autocompleteRef.current?.getPlace();
+        if (!place) return;
+
+        justSelectedRef.current = true;
+        const address = place.formatted_address || place.name || inputRef.current?.value || '';
+        lastSelectedAddrRef.current = address;
+
+        if (place.geometry) {
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          onChangeRef.current({ address, latitude: lat, longitude: lng, placeId: place.place_id });
+        } else {
+          // Some predictions lack geometry — pass placeId for geocoding fallback
+          onChangeRef.current({ address, latitude: null, longitude: null, placeId: place.place_id || null });
+        }
+
+        setTimeout(() => { justSelectedRef.current = false; }, 3000);
+      });
     });
 
     return () => {
@@ -67,7 +71,7 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
-  }, [handlePlaceSelect]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync external value changes to the uncontrolled input
   useEffect(() => {
@@ -78,30 +82,21 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
   }, [value]);
 
   const handleInputChange = () => {
-    // Guard 1: Timeout-based flag (blocks onChange within 3s of autocomplete selection)
+    // Block onChange during 3s after autocomplete selection (mobile keyboard dismiss events)
     if (justSelectedRef.current) return;
 
     const currentValue = inputRef.current?.value || '';
 
-    // Guard 2: Fuzzy match — if first 15 chars match the last autocomplete selection,
-    // this is a delayed mobile browser event (keyboard dismiss, auto-formatting), not real typing
+    // If value matches last autocomplete selection, don't clear coords
     if (lastSelectedAddrRef.current && currentValue.length > 5) {
       const selPrefix = lastSelectedAddrRef.current.substring(0, 15).toLowerCase();
       const curPrefix = currentValue.substring(0, 15).toLowerCase();
       if (selPrefix === curPrefix) return;
     }
 
-    // Guard 3: If coords were recently set and user hasn't typed enough to be "different",
-    // don't clear. Only clear if user removed 5+ chars (genuine editing)
-    if (hasValidCoordsRef.current && lastSelectedAddrRef.current) {
-      const lenDiff = Math.abs(currentValue.length - lastSelectedAddrRef.current.length);
-      if (lenDiff < 5) return;
-    }
-
-    // User is genuinely typing something new — clear coordinates
+    // User is genuinely typing something new
     lastSelectedAddrRef.current = '';
-    hasValidCoordsRef.current = false;
-    onChange({ address: currentValue, latitude: null, longitude: null, placeId: null });
+    onChangeRef.current({ address: currentValue, latitude: null, longitude: null, placeId: null });
   };
 
   return (
