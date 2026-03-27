@@ -98,6 +98,9 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
   if (!pickup.address && c.defaultPickup) {
     setPickup({ address: c.defaultPickup, latitude: null, longitude: null, placeId: null });
   }
+  if (!dropoff.address && c.defaultDropoff) {
+    setDropoff({ address: c.defaultDropoff, latitude: null, longitude: null, placeId: null });
+  }
 
   const vehicles = [
     { id: 1, name: c.sedan, desc: c.sedanDesc, passengers: 3, luggage: 3, price: vehiclesPrices?.sedan || 65, img: IMAGES.sedan },

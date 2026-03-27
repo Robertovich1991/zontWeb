@@ -20,6 +20,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 
 ## What's Been Implemented
 
+### Disneyland Paris Transfer Page (March 2026)
+- **New page**: `/transfert-disneyland-paris` with 4-language SEO content (EN/FR/RU/HY), booking form with Disneyland pre-filled as destination
+- **Popular routes**: 6 routes with prices (Paris 59€, CDG 75€, Orly 90€, Beauvais 175€, Gare du Nord 59€, Gare de Lyon 55€)
+- **Added to Home**: Disneyland card in Popular Destinations grid with "dès 49€" pricing
+- **Added to sitemap**: 4 URLs (EN/FR/RU/HY) with hreflang tags
+- **Updated pricing on airport pages (SEO)**: CDG "dès 59€", Orly "dès 39€", Beauvais "dès 99€" - both in code and CMS MongoDB
+
 ### Mobile PageSpeed Optimization (March 2026)
 - **Image compression**: Paris CDG driver photo 660KB PNG → 55KB WebP (92% reduction), stored locally at `/public/images/driver-paris.webp`
 - **Font cleanup**: Removed IBM Plex Mono & IBM Plex Sans from `index.html` and `tailwind.config.js`. Kept only Inter, Manrope, Noto Sans Armenian loaded async
