@@ -100,7 +100,7 @@ export const translations = {
   fr: {
     meta: {
       title: 'Zont - Service de Transport Premium & Transfert Aeroport',
-      description: 'Reservez des chauffeurs professionnels et transferts aeroport dans plus de 120 villes. Suivi en temps reel, prix transparents et support 24/7.',
+      description: 'Reservez des chauffeurs professionnels et transferts aeroport dans plus de 16 villes. Suivi en temps reel, prix transparents et support 24/7.',
       keywords: 'transfert aeroport, service de voiture, chauffeur prive, reservation taxi, covoiturage, service de transport',
     },
     nav: {
@@ -198,7 +198,7 @@ export const translations = {
   ru: {
     meta: {
       title: 'Zont - Премиум Транспорт и Трансфер из Аэропорта',
-      description: 'Закажите профессиональных водителей и трансферы из аэропорта в более чем 120 городах мира. Отслеживание в реальном времени, прозрачные цены и поддержка 24/7.',
+      description: 'Закажите профессиональных водителей и трансферы из аэропорта в более чем 16 городах мира. Отслеживание в реальном времени, прозрачные цены и поддержка 24/7.',
       keywords: 'трансфер из аэропорта, служба такси, частный водитель, заказ такси, транспортные услуги',
     },
     nav: {
