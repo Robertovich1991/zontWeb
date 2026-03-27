@@ -48,6 +48,7 @@ const HotelsDashboard = lazy(() => import("@/pages/admin/HotelsDashboard"));
 const KiosksManager = lazy(() => import("@/pages/admin/KiosksManager"));
 const HotelBookingsManager = lazy(() => import("@/pages/admin/HotelBookingsManager"));
 const HotelPayments = lazy(() => import("@/pages/admin/HotelPayments"));
+const PromoEmails = lazy(() => import("@/pages/admin/PromoEmails"));
 
 // Hotel Admin Portal
 const HotelLogin = lazy(() => import("@/pages/hotel/HotelLogin"));
@@ -278,6 +279,7 @@ function App() {
                     <Route path="hotel-kiosks" element={<KiosksManager />} />
                     <Route path="hotel-bookings" element={<HotelBookingsManager />} />
                     <Route path="hotel-payments" element={<HotelPayments />} />
+                    <Route path="promo-emails" element={<PromoEmails />} />
                   </Route>
                   {/* Driver PWA */}
                   <Route path="/driver/*" element={<DriverApp />} />

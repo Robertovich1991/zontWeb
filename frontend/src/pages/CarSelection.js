@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useAuth } from '@/context/AuthContext';
@@ -9,6 +9,7 @@ import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, Plane, CheckCircle, Loader2 } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
+import { PromoPopup, PromoBanner } from '@/components/PromoPopup';
 
 const labels = {
   en: {
@@ -87,7 +88,34 @@ const CarSelection = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Promo state
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [promoCode, setPromoCode] = useState(null);
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoExpires, setPromoExpires] = useState(null);
+  const [promoExpired, setPromoExpired] = useState(false);
+
   const c = labels[language] || labels.en;
+
+  // Restore promo from localStorage on mount
+  useEffect(() => {
+    const savedCode = localStorage.getItem('promo_code');
+    const savedExpires = localStorage.getItem('promo_expires');
+    const savedDiscount = localStorage.getItem('promo_discount');
+    if (savedCode && savedExpires) {
+      const exp = new Date(savedExpires);
+      if (exp > new Date()) {
+        setPromoCode(savedCode);
+        setPromoDiscount(Number(savedDiscount) || 10);
+        setPromoExpires(savedExpires);
+      } else {
+        // Expired — clean up
+        localStorage.removeItem('promo_code');
+        localStorage.removeItem('promo_expires');
+        localStorage.removeItem('promo_discount');
+      }
+    }
+  }, []);
 
   // Fetch vehicles from C# API if we have search data but no results yet
   useEffect(() => {
@@ -95,6 +123,14 @@ const CarSelection = () => {
       fetchVehicles();
     }
   }, [searchData]);
+
+  // Show promo popup after vehicles load (if no active promo and no email given before)
+  useEffect(() => {
+    if (vehicleResults && vehicleResults.length > 0 && !promoCode && !localStorage.getItem('promo_email')) {
+      const timer = setTimeout(() => setPromoOpen(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [vehicleResults, promoCode]);
 
   const fetchVehicles = async () => {
     if (!searchData?.pickupCoords || !searchData?.dropoffCoords) return;
@@ -113,18 +149,48 @@ const CarSelection = () => {
     }
   };
 
+  const handlePromoApply = useCallback((code, discount, expiresAt) => {
+    setPromoCode(code);
+    setPromoDiscount(discount);
+    setPromoExpires(expiresAt);
+    setPromoExpired(false);
+  }, []);
+
+  const handlePromoExpired = useCallback(() => {
+    setPromoExpired(true);
+    setPromoDiscount(0);
+    localStorage.removeItem('promo_code');
+    localStorage.removeItem('promo_expires');
+    localStorage.removeItem('promo_discount');
+  }, []);
+
+  const activeDiscount = promoCode && !promoExpired ? promoDiscount : 0;
+  const applyDiscount = (price) => activeDiscount > 0 ? Math.round(price * (1 - activeDiscount / 100)) : Math.round(price);
+
   const handleSelectCar = (vehicle) => {
+    const finalPrice = applyDiscount(vehicle.minAmount);
     selectCar({
       tripType: vehicle.tripType,
-      price: vehicle.minAmount,
-      maxPrice: vehicle.maxAmount,
+      price: finalPrice,
+      originalPrice: Math.round(vehicle.minAmount),
+      maxPrice: activeDiscount > 0 ? applyDiscount(vehicle.maxAmount) : Math.round(vehicle.maxAmount),
       duration: vehicle.duration,
       distance: vehicle.distance,
       passenger: vehicle.passenger,
       luggage: vehicle.luggage,
       description: vehicle.description,
       imagePath: vehicle.imagePath,
+      promoCode: promoCode || null,
+      promoDiscount: activeDiscount,
     });
+    // Mark promo as used
+    if (promoCode && activeDiscount > 0) {
+      fetch(`${process.env.REACT_APP_BACKEND_URL}/api/promo/mark-used`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode }),
+      }).catch(() => {});
+    }
     if (isAuthenticated) {
       navigate('/checkout');
     } else {
@@ -236,6 +302,12 @@ const CarSelection = () => {
         <div className="max-w-5xl mx-auto px-4 pt-2 pb-4">
           <h1 className="text-xl sm:text-2xl font-bold text-white" data-testid="car-selection-title">{c.title}</h1>
           <p className="text-gray-500 text-xs mt-1">{c.subtitle}</p>
+          {/* Promo Banner */}
+          {promoCode && (
+            <div className="mt-3">
+              <PromoBanner code={promoCode} expiresAt={promoExpires} discount={promoDiscount} onExpired={handlePromoExpired} />
+            </div>
+          )}
         </div>
 
         {/* Loading State */}
@@ -335,8 +407,13 @@ const CarSelection = () => {
                       {/* Price + CTA */}
                       <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 px-4 pb-4 sm:p-5 sm:pl-0 sm:w-[170px] flex-shrink-0 border-t sm:border-t-0 sm:border-l border-gray-100">
                         <div className="sm:text-right">
-                          <div className="text-3xl font-extrabold text-gray-900">
-                            {Math.round(price)}<span className="text-base font-normal text-gray-400 ml-0.5">&euro;</span>
+                          {activeDiscount > 0 && (
+                            <div className="text-lg font-medium text-gray-400 line-through" data-testid={`original-price-${index}`}>
+                              {Math.round(price)}&euro;
+                            </div>
+                          )}
+                          <div className={`text-3xl font-extrabold ${activeDiscount > 0 ? 'text-emerald-600' : 'text-gray-900'}`} data-testid={`car-price-${index}`}>
+                            {applyDiscount(price)}<span className="text-base font-normal text-gray-400 ml-0.5">&euro;</span>
                           </div>
                           <p className="text-[10px] text-gray-400 mt-0.5">{c.fixedPrice}</p>
                         </div>
@@ -363,6 +440,8 @@ const CarSelection = () => {
       </main>
 
       <Footer />
+
+      <PromoPopup open={promoOpen} onClose={() => setPromoOpen(false)} onApply={handlePromoApply} />
 
       <AuthModal
         isOpen={authModalOpen}

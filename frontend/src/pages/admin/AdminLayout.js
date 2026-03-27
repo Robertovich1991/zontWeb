@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAdminAuth } from './AdminAuthContext';
-import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight, Users, Car, Building2, BarChart3, Monitor, BookOpen, CreditCard } from 'lucide-react';
+import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight, Users, Car, Building2, BarChart3, Monitor, BookOpen, CreditCard, Mail } from 'lucide-react';
 
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { path: '/admin/promo-emails', icon: Mail, label: 'Emails Clients' },
   { path: '/admin/partners', icon: Users, label: 'Partenaires' },
   { path: '/admin/rides', icon: Car, label: 'Courses Partenaires' },
   { type: 'divider', label: 'Hotel Kiosk' },

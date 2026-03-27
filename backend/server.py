@@ -199,6 +199,9 @@ app.include_router(gps_admin_router)
 from routes.flight_tracking import router as flight_tracking_router
 app.include_router(flight_tracking_router)
 
+from routes.promo import router as promo_router
+app.include_router(promo_router)
+
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -265,6 +268,10 @@ async def startup_event():
     # GPS Admin indexes
     await db.gps_admin_users.create_index([("email", 1)], unique=True)
     await db.gps_companies.create_index([("companyId", 1)], unique=True)
+    # Promo codes
+    await db.promo_codes.create_index([("code", 1)], unique=True)
+    await db.promo_codes.create_index([("email", 1)])
+    await db.promo_codes.create_index([("expires_at", 1)])
     logger.info("MongoDB indexes created.")
 
 

@@ -1,0 +1,74 @@
+{
+  "summary": "Tested Welcome promo code popup feature. All backend APIs (generate, validate, mark-used, admin/emails) working correctly. Frontend promo popup appears on car-selection page, email input and apply button work, discounted prices display with original crossed out, countdown banner shows. Admin promo-emails page accessible and shows collected data with stats.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_promo_api.py",
+    "/app/test_reports/pytest/promo_api_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fixed bug in /app/backend/routes/promo.py: admin/emails endpoint was looking for stored token in DB instead of verifying JWT token. Changed to use jwt.decode() with proper admin role verification."
+  ],
+  "updated_files": [
+    "/app/backend/routes/promo.py",
+    "/app/backend/tests/test_promo_api.py"
+  ],
+  "success_rate": {
+    "backend": "100% (13/13 tests passed)",
+    "frontend": "100% (all promo features working)"
+  },
+  "test_credentials": {
+    "admin_login": "admin@zont.cab / admin123",
+    "test_email": "testclient@example.com"
+  },
+  "seed_data_creation": "Created multiple test promo codes during testing",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Promo feature fully tested and working. Backend promo API endpoints all pass. Frontend promo popup appears 800ms after vehicles load on car-selection page. localStorage keys used: promo_code, promo_expires, promo_discount, promo_email. Admin can view collected emails at /admin/promo-emails with JWT auth.",
+  "features_tested": {
+    "backend_api": [
+      "POST /api/promo/generate with email returns code, discount, expires_at - PASSED",
+      "POST /api/promo/generate with same email returns existing active code - PASSED",
+      "POST /api/promo/generate with invalid email returns error - PASSED",
+      "POST /api/promo/generate with empty email returns error - PASSED",
+      "POST /api/promo/validate with valid code returns valid:true - PASSED",
+      "POST /api/promo/validate with invalid code returns valid:false - PASSED",
+      "POST /api/promo/validate case insensitive - PASSED",
+      "POST /api/promo/mark-used marks code as used - PASSED",
+      "POST /api/promo/mark-used nonexistent code returns ok:false - PASSED",
+      "GET /api/promo/admin/emails with valid admin token returns emails list - PASSED",
+      "GET /api/promo/admin/emails without auth returns error - PASSED",
+      "GET /api/promo/admin/emails with invalid token returns error - PASSED",
+      "Full promo flow integration test - PASSED"
+    ],
+    "frontend_ui": [
+      "Home page loads with booking form - PASSED",
+      "Search form fills correctly with Google autocomplete - PASSED",
+      "Navigation to car-selection page works - PASSED",
+      "Promo popup appears after vehicles load - PASSED",
+      "Promo popup has email input (data-testid='promo-email-input') - PASSED",
+      "Promo popup has apply button (data-testid='promo-apply-btn') - PASSED",
+      "After applying promo, popup closes - PASSED",
+      "Promo countdown banner appears (data-testid='promo-active-banner') - PASSED",
+      "Original price shown crossed out (data-testid='original-price-0') - PASSED",
+      "Discounted price shown in green (data-testid='car-price-0') - PASSED",
+      "Admin login works with admin@zont.cab / admin123 - PASSED",
+      "Admin promo-emails page accessible at /admin/promo-emails - PASSED",
+      "Admin page shows email table with stats - PASSED",
+      "Export CSV button present - PASSED"
+    ]
+  },
+  "bug_fixed": {
+    "file": "/app/backend/routes/promo.py",
+    "issue": "Admin emails endpoint was looking for stored token in admin_users collection instead of verifying JWT token",
+    "fix": "Changed to use jwt.decode() with SECRET_KEY and verify admin role from decoded payload"
+  }
+}
