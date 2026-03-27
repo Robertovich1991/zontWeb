@@ -294,7 +294,7 @@ const Home = () => {
 
     // Save to recent searches immediately (before API call)
     try {
-      const entry = { pickup: pickupAddr, dropoff: dropoffAddr, pickupCoords, dropoffCoords };
+      const entry = { pickup: pickupAddr, dropoff: dropoffAddr, pickupCoords, dropoffCoords, date, time };
       const prev = JSON.parse(localStorage.getItem('recentSearches') || '[]');
       const filtered = prev.filter(s => !(s.pickup === pickupAddr && s.dropoff === dropoffAddr));
       const updated = [entry, ...filtered].slice(0, 3);
@@ -341,16 +341,26 @@ const Home = () => {
 
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-  const handleRecentClick = (search) => {
-    setPickup({ address: search.pickup, latitude: search.pickupCoords?.latitude || null, longitude: search.pickupCoords?.longitude || null });
-    setDropoff({ address: search.dropoff, latitude: search.dropoffCoords?.latitude || null, longitude: search.dropoffCoords?.longitude || null });
-    if (search.pickupCoords?.latitude) {
-      pickupSafeRef.current = { latitude: search.pickupCoords.latitude, longitude: search.pickupCoords.longitude, placeId: null, address: search.pickup };
+  const handleRecentClick = async (search) => {
+    if (!search.pickupCoords?.latitude || !search.dropoffCoords?.latitude) return;
+    setLoading(true);
+    try {
+      const vehicles = await transferService.calculatePreorderPrice(search.pickupCoords, search.dropoffCoords);
+      setVehicleResults(vehicles);
+      startBooking({
+        pickup: search.pickup,
+        dropoff: search.dropoff,
+        pickupCoords: search.pickupCoords,
+        dropoffCoords: search.dropoffCoords,
+        date: search.date || '',
+        time: search.time || '',
+      });
+      navigate('/car-selection');
+    } catch {
+      toast.error(language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    if (search.dropoffCoords?.latitude) {
-      dropoffSafeRef.current = { latitude: search.dropoffCoords.latitude, longitude: search.dropoffCoords.longitude, placeId: null, address: search.dropoff };
-    }
-    bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const getName = (d) => language === 'fr' ? d.nameFr : language === 'ru' ? d.nameRu : language === 'hy' ? (d.nameHy || d.nameEn) : d.nameEn;
@@ -525,6 +535,9 @@ const Home = () => {
                                 <p className="text-xs text-[#27ae60] truncate flex items-center gap-1 mt-0.5">
                                   <ArrowRight className="w-3 h-3 shrink-0" />{s.dropoff}
                                 </p>
+                                {(s.date || s.time) && (
+                                  <p className="text-[10px] text-gray-400 mt-0.5">{s.date}{s.date && s.time ? ' · ' : ''}{s.time}</p>
+                                )}
                               </div>
                               <ChevronRight className="w-4 h-4 text-[#2ecc71]/50 group-hover:text-[#2ecc71] shrink-0 transition-colors" />
                             </button>
