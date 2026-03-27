@@ -12,11 +12,10 @@ import { transferService } from '@/services/api';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight } from 'lucide-react';
 
 const IMAGES = {
-  // BACKUP old hero: 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=800&q=70&auto=format',
-  hero: 'https://static.prod-images.emergentagent.com/jobs/3eaa677a-2db2-4490-9e5b-279a76eba5d5/images/b01e1f26f56f15696a14c0eafbc3962bc2c65fb5c365801022b3038cbedcbbdb.png',
-  sedan: 'https://images.unsplash.com/photo-1764090317623-06968349ad23?w=400&q=70&auto=format',
-  interior: 'https://images.unsplash.com/photo-1661220715153-95724e5f3500?w=400&q=70&auto=format',
-  airport: 'https://images.unsplash.com/photo-1689772640958-7c186dbdfe26?w=400&q=70&auto=format',
+  hero: '/images/hero.webp',
+  sedan: '/images/sedan.webp',
+  interior: '/images/interior.webp',
+  airport: '/images/airport.webp',
   cdgDriver: '/images/driver-paris.webp',
 };
 
@@ -499,7 +498,7 @@ const Home = () => {
               {popularDest.map((d, i) => (
                 <Link key={i} to={d.url} className="group bg-[#0f1419] rounded-xl overflow-hidden border border-gray-700 hover:border-[#2ecc71] transition-all" data-testid={`popular-dest-${i}`}>
                   <div className="h-24 md:h-32 overflow-hidden">
-                    <img src={d.url.includes('disneyland') ? 'https://images.unsplash.com/photo-1762357171945-856f4c3e4b15?w=400&q=70&auto=format' : i === 0 ? IMAGES.cdgDriver : i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    <img src={d.url.includes('disneyland') ? '/images/disneyland.webp' : i === 0 ? IMAGES.cdgDriver : i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   </div>
                   <div className="p-3 md:p-4">
                     <h3 className="text-white font-bold text-sm md:text-base group-hover:text-[#2ecc71] transition-colors">{getName(d)}</h3>
