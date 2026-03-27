@@ -44,6 +44,12 @@ export const transferService = {
    */
   getVehicleImageUrl: (imagePath) => {
     if (!imagePath) return null;
+    // Serve optimized local WebP versions (98% lighter than C# PNG originals)
+    const name = imagePath.replace(/\.[^.]+$/, '');
+    const localPath = `/images/vehicles/${name}.webp`;
+    // Check if we have a local optimized version, fallback to C# proxy
+    const knownImages = ['O9Y0TPVqblTXKzP', 'mBppkeHInPY9Jw5', '4WLzcJhcvKnsdC6', 'ZvupzbVQItybUpT'];
+    if (knownImages.includes(name)) return localPath;
     return `${API}/api/proxy/vehicle-image/${imagePath}`;
   },
 
