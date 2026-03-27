@@ -12,7 +12,8 @@ import { transferService } from '@/services/api';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight } from 'lucide-react';
 
 const IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=800&q=70&auto=format',
+  // BACKUP old hero: 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=800&q=70&auto=format',
+  hero: 'https://static.prod-images.emergentagent.com/jobs/3eaa677a-2db2-4490-9e5b-279a76eba5d5/images/b01e1f26f56f15696a14c0eafbc3962bc2c65fb5c365801022b3038cbedcbbdb.png',
   sedan: 'https://images.unsplash.com/photo-1764090317623-06968349ad23?w=400&q=70&auto=format',
   interior: 'https://images.unsplash.com/photo-1661220715153-95724e5f3500?w=400&q=70&auto=format',
   airport: 'https://images.unsplash.com/photo-1689772640958-7c186dbdfe26?w=400&q=70&auto=format',
