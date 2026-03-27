@@ -26,6 +26,7 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
   const autocompleteRef = useRef(null);
   const justSelectedRef = useRef(false);
   const lastSelectedAddrRef = useRef('');
+  const hasValidCoordsRef = useRef(false);
 
   const handlePlaceSelect = useCallback(() => {
     const place = autocompleteRef.current?.getPlace();
@@ -39,14 +40,15 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
     if (place.geometry) {
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
+      hasValidCoordsRef.current = true;
       onChange({ address, latitude: lat, longitude: lng, placeId: place.place_id });
     } else {
-      // Some predictions lack geometry — pass address + placeId for later geocoding
+      hasValidCoordsRef.current = false;
       onChange({ address, latitude: null, longitude: null, placeId: place.place_id || null });
     }
 
     // Extended timeout for slow mobile browsers (keyboard dismiss, dropdown animation)
-    setTimeout(() => { justSelectedRef.current = false; }, 2000);
+    setTimeout(() => { justSelectedRef.current = false; }, 3000);
   }, [onChange]);
 
   useEffect(() => {
@@ -76,17 +78,29 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
   }, [value]);
 
   const handleInputChange = () => {
-    // Guard 1: Timeout-based flag (blocks onChange within 2s of autocomplete selection)
+    // Guard 1: Timeout-based flag (blocks onChange within 3s of autocomplete selection)
     if (justSelectedRef.current) return;
 
     const currentValue = inputRef.current?.value || '';
 
-    // Guard 2: If input value matches the last autocomplete selection, don't clear coords
-    // This catches delayed mobile onChange events that fire after the timeout
-    if (lastSelectedAddrRef.current && currentValue === lastSelectedAddrRef.current) return;
+    // Guard 2: Fuzzy match — if first 15 chars match the last autocomplete selection,
+    // this is a delayed mobile browser event (keyboard dismiss, auto-formatting), not real typing
+    if (lastSelectedAddrRef.current && currentValue.length > 5) {
+      const selPrefix = lastSelectedAddrRef.current.substring(0, 15).toLowerCase();
+      const curPrefix = currentValue.substring(0, 15).toLowerCase();
+      if (selPrefix === curPrefix) return;
+    }
+
+    // Guard 3: If coords were recently set and user hasn't typed enough to be "different",
+    // don't clear. Only clear if user removed 5+ chars (genuine editing)
+    if (hasValidCoordsRef.current && lastSelectedAddrRef.current) {
+      const lenDiff = Math.abs(currentValue.length - lastSelectedAddrRef.current.length);
+      if (lenDiff < 5) return;
+    }
 
     // User is genuinely typing something new — clear coordinates
     lastSelectedAddrRef.current = '';
+    hasValidCoordsRef.current = false;
     onChange({ address: currentValue, latitude: null, longitude: null, placeId: null });
   };
 

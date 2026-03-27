@@ -192,8 +192,24 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
     }
   };
 
-  const handlePickupChange = (val) => setPickup(val);
-  const handleDropoffChange = (val) => setDropoff(val);
+  const handlePickupChange = (val) => setPickup(prev => {
+    if (val.latitude != null) return val;
+    if (prev.latitude != null && val.address && prev.address) {
+      const prevP = prev.address.substring(0, 15).toLowerCase();
+      const newP = val.address.substring(0, 15).toLowerCase();
+      if (prevP === newP) return prev;
+    }
+    return val;
+  });
+  const handleDropoffChange = (val) => setDropoff(prev => {
+    if (val.latitude != null) return val;
+    if (prev.latitude != null && val.address && prev.address) {
+      const prevP = prev.address.substring(0, 15).toLowerCase();
+      const newP = val.address.substring(0, 15).toLowerCase();
+      if (prevP === newP) return prev;
+    }
+    return val;
+  });
 
   const scrollToBooking = (v) => {
     if (v) setSelectedVehicle(v);

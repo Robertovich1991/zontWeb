@@ -274,8 +274,27 @@ const Home = () => {
     }
   };
 
-  const handlePickupChange = (data) => setPickup(data);
-  const handleDropoffChange = (data) => setDropoff(data);
+  // Merge handler: preserve coordinates from autocomplete if address hasn't genuinely changed
+  const handlePickupChange = (data) => setPickup(prev => {
+    // Autocomplete selection with coords — always accept
+    if (data.latitude != null) return data;
+    // Text-only update: if address is similar to what we had, keep existing coords
+    if (prev.latitude != null && data.address && prev.address) {
+      const prevPrefix = prev.address.substring(0, 15).toLowerCase();
+      const newPrefix = data.address.substring(0, 15).toLowerCase();
+      if (prevPrefix === newPrefix) return prev;
+    }
+    return data;
+  });
+  const handleDropoffChange = (data) => setDropoff(prev => {
+    if (data.latitude != null) return data;
+    if (prev.latitude != null && data.address && prev.address) {
+      const prevPrefix = prev.address.substring(0, 15).toLowerCase();
+      const newPrefix = data.address.substring(0, 15).toLowerCase();
+      if (prevPrefix === newPrefix) return prev;
+    }
+    return data;
+  });
 
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
 
