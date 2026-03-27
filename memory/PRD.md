@@ -20,6 +20,15 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 
 ## What's Been Implemented
 
+### Mobile Autocomplete Race Condition Fix (March 2026)
+- **Root cause**: On mobile browsers, delayed `onChange` events fire after the `justSelectedRef` timeout expires, clearing GPS coordinates set by `place_changed`
+- **Fix 1**: Added `lastSelectedAddrRef` guard in `PlacesAutocomplete.js` — compares input value to last selected address text, prevents clearing coords when they match
+- **Fix 2**: Extended `justSelectedRef` timeout from 500ms to 2000ms for slow mobile devices
+- **Fix 3**: Added `placeId`-based geocoding as primary fallback (more reliable than text geocoding)
+- **Fix 4**: Added unclosed parenthesis regex (`/\s*\([^)]*$/`) in geocodeAddress to handle truncated strings like `"(CD"`
+- **Fix 5**: Handle `place_changed` events where `geometry` is undefined (query predictions) — passes placeId for later geocoding
+- Applied to both `Home.js` and `CityTransferPage.js`
+
 ### Disneyland Paris Transfer Page (March 2026)
 - **New page**: `/transfert-disneyland-paris` with 4-language SEO content (EN/FR/RU/HY), booking form with Disneyland pre-filled as destination
 - **Popular routes**: 6 routes with prices (Paris 59€, CDG 75€, Orly 90€, Beauvais 175€, Gare du Nord 59€, Gare de Lyon 55€)
