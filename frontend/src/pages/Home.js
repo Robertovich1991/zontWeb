@@ -292,6 +292,16 @@ const Home = () => {
       return;
     }
 
+    // Save to recent searches immediately (before API call)
+    try {
+      const entry = { pickup: pickupAddr, dropoff: dropoffAddr, pickupCoords, dropoffCoords };
+      const prev = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+      const filtered = prev.filter(s => !(s.pickup === pickupAddr && s.dropoff === dropoffAddr));
+      const updated = [entry, ...filtered].slice(0, 3);
+      localStorage.setItem('recentSearches', JSON.stringify(updated));
+      setRecentSearches(updated);
+    } catch { /* localStorage full or unavailable */ }
+
     try {
       const vehicles = await transferService.calculatePreorderPrice(pickupCoords, dropoffCoords);
       setVehicleResults(vehicles);
@@ -303,17 +313,6 @@ const Home = () => {
         date,
         time,
       });
-
-      // Save to recent searches (max 3, no duplicates)
-      try {
-        const entry = { pickup: pickupAddr, dropoff: dropoffAddr, pickupCoords, dropoffCoords };
-        const prev = JSON.parse(localStorage.getItem('recentSearches') || '[]');
-        const filtered = prev.filter(s => !(s.pickup === pickupAddr && s.dropoff === dropoffAddr));
-        const updated = [entry, ...filtered].slice(0, 3);
-        localStorage.setItem('recentSearches', JSON.stringify(updated));
-        setRecentSearches(updated);
-      } catch { /* localStorage full or unavailable */ }
-
       navigate('/car-selection');
     } catch (error) {
       toast.error(language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.');
