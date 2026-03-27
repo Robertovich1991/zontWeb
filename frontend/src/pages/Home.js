@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import TripAdvisorWidget from '@/components/TripAdvisorWidget';
+import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import { transferService } from '@/services/api';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight } from 'lucide-react';
@@ -368,9 +368,9 @@ const Home = () => {
                 {/* Left */}
                 <div className="text-center lg:text-left">
                   <div className="flex justify-center lg:justify-start mb-4">
-                    <div className="bg-[#2ecc71]/20 text-[#2ecc71] px-4 py-1.5 rounded-full text-sm font-semibold inline-flex items-center" data-testid="home-trust-badge">
+                    <button onClick={() => document.getElementById('tripadvisor-reviews')?.scrollIntoView({ behavior: 'smooth' })} className="bg-[#2ecc71]/20 text-[#2ecc71] px-4 py-1.5 rounded-full text-sm font-semibold inline-flex items-center cursor-pointer hover:bg-[#2ecc71]/30 transition-colors" data-testid="home-trust-badge">
                       <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />4.5/5 Tripadvisor - 29 {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : 'reviews'}
-                    </div>
+                    </button>
                   </div>
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 leading-tight" data-testid="home-hero-title">
                     {(cmsHomepage?.title?.[language]) || c.heroTitle}
@@ -581,12 +581,10 @@ const Home = () => {
         </section>
 
         {/* Reviews - TripAdvisor */}
-        <section className="py-12 md:py-20 px-4 bg-[#1a2332]">
+        <section id="tripadvisor-reviews" className="py-12 md:py-20 px-4 bg-[#1a2332]">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">{c.reviewsTitle}</h2>
-            <div className="flex justify-center">
-              <TripAdvisorWidget />
-            </div>
+            <TripAdvisorReviews />
           </div>
         </section>
 

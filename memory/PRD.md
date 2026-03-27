@@ -20,14 +20,19 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 
 ## What's Been Implemented
 
-### Mobile Autocomplete Race Condition Fix (March 2026)
-- **Root cause**: On mobile browsers, delayed `onChange` events fire after the `justSelectedRef` timeout expires, clearing GPS coordinates set by `place_changed`
-- **Fix 1**: Added `lastSelectedAddrRef` guard in `PlacesAutocomplete.js` — compares input value to last selected address text, prevents clearing coords when they match
-- **Fix 2**: Extended `justSelectedRef` timeout from 500ms to 2000ms for slow mobile devices
-- **Fix 3**: Added `placeId`-based geocoding as primary fallback (more reliable than text geocoding)
-- **Fix 4**: Added unclosed parenthesis regex (`/\s*\([^)]*$/`) in geocodeAddress to handle truncated strings like `"(CD"`
-- **Fix 5**: Handle `place_changed` events where `geometry` is undefined (query predictions) — passes placeId for later geocoding
-- Applied to both `Home.js` and `CityTransferPage.js`
+### Mobile Autocomplete Race Condition Fix V3 (March 2026)
+- **Root cause FOUND**: `useCallback([onChange])` in PlacesAutocomplete caused the `place_changed` listener to be removed on every parent re-render (each keystroke), and never re-added because `autocompleteRef.current` guard prevented it
+- **Fix**: Replaced `useCallback` + `useEffect([handlePlaceSelect])` with `onChangeRef` pattern — listener created ONCE with empty deps, always calls latest `onChange` via ref
+- **Also**: Added `pickupSafeRef`/`dropoffSafeRef` in Home.js and CityTransferPage.js as immune coordinate storage
+- **Also**: Added placeId-based geocoding fallback + unclosed parenthesis regex handling
+- Applied to `PlacesAutocomplete.js`, `Home.js`, and `CityTransferPage.js`
+
+### TripAdvisor Reviews Section (March 2026)
+- Replaced broken TripAdvisor selfserveprop widget with custom `TripAdvisorReviews.js` component
+- Displays 6 real TripAdvisor reviews (scraped from tripadvisor.fr) with proper attribution
+- Badge "4.5/5 Tripadvisor - 29 avis" in hero section is now clickable, scrolls to reviews section
+- Multi-language support (FR/EN/RU)
+- Link "Voir les 29 avis sur TripAdvisor" points to actual TripAdvisor page
 
 ### Disneyland Paris Transfer Page (March 2026)
 - **New page**: `/transfert-disneyland-paris` with 4-language SEO content (EN/FR/RU/HY), booking form with Disneyland pre-filled as destination
