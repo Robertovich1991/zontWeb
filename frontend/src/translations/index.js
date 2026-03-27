@@ -2,7 +2,7 @@ export const translations = {
   en: {
     meta: {
       title: 'Zont - Premium Transportation & Airport Transfer Service',
-      description: 'Book professional drivers and airport transfers in 120+ cities worldwide. Real-time tracking, transparent pricing, and 24/7 customer support. Download the app now!',
+      description: 'Book professional drivers and airport transfers in 16 cities worldwide. Real-time tracking, transparent pricing, and 24/7 customer support. Download the app now!',
       keywords: 'airport transfer, car service, private driver, taxi booking, ride sharing, transportation service',
     },
     nav: {
@@ -84,7 +84,7 @@ export const translations = {
     worldwide: {
       title: 'Your Best Worldwide Option',
       description: 'With a global on-demand network already spanning across',
-      cities: '120+ cities',
+      cities: '16 cities',
       description2: ", we're taking transportation and instant ordering to the next level.",
     },
     footer: {
@@ -182,7 +182,7 @@ export const translations = {
     worldwide: {
       title: 'Votre Meilleure Option Mondiale',
       description: 'Avec un reseau mondial a la demande couvrant deja plus de',
-      cities: '120+ villes',
+      cities: '16 villes',
       description2: ', nous portons le transport a un nouveau niveau.',
     },
     footer: {
@@ -280,7 +280,7 @@ export const translations = {
     worldwide: {
       title: 'Ваш Лучший Вариант по Всему Миру',
       description: 'С глобальной сетью по требованию, охватывающей уже более',
-      cities: '120+ городов',
+      cities: '16 городов',
       description2: ', мы выводим транспорт и мгновенный заказ на новый уровень.',
     },
     footer: {
@@ -296,7 +296,7 @@ export const translations = {
   hy: {
     meta: {
       title: 'Zont - Պրեմիում Տրանսպորտ և Օդանավակայանի Տրանսֆեր',
-      description: 'Ամրագրեք պրոֆեսիոնալ վարորդներ և օդանավակայանի տրանսֆերներ 120+ քաղաքներում: Իրական ժամանակի հետևելում, թաֆանցիկ գներ և 24/7 աջակցություն:',
+      description: 'Ամրագրեք պրոֆեսիոնալ վարորդներ և օդանավակայանի տրանսֆերներ 16 քաղաքներում: Իրական ժամանակի հետևելում, թաֆանցիկ գներ և 24/7 աջակցություն:',
       keywords: 'օդանավակայանի տրանսֆեր, մեքենայի ծառայություն, անձնական վարորդ, տաքսի ամրագրում',
     },
     nav: {
@@ -378,7 +378,7 @@ export const translations = {
     worldwide: {
       title: 'Ձեր Լավագույն Համաշխարհային Ընտրությունը',
       description: 'Համաշխարհային ցանցով արդեն ընդգրկում է',
-      cities: '120+ քաղաքներ',
+      cities: '16 քաղաքներ',
       description2: ', մենք տրանսպորտը տանում ենք նոր մակարդակ:',
     },
     footer: {

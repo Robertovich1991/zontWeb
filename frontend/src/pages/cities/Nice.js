@@ -121,7 +121,7 @@ const content = {
     pickupLabel: 'Վերցնում', dropoffLabel: 'Իջնում',
     dateLabel: 'Ամսաթիվ', timeLabel: 'Ժամ',
     defaultPickup: '',
-    otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
+    otherCitiesTitle: 'Սպասարկում ենք 16 քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
     rating: '4.5/5 Tripadvisor',
   },

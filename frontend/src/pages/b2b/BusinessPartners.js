@@ -10,7 +10,7 @@ const content = {
     ctaPartner: 'Explore Partnership',
     ctaQuote: 'Discuss Opportunities',
     heroStats: [
-      { value: '120+', label: 'Cities Network' },
+      { value: '16', label: 'Cities Network' },
       { value: 'Custom', label: 'Partnership Models' },
       { value: 'Win-Win', label: 'Revenue Sharing' },
       { value: 'API', label: 'Integration Ready' },
@@ -43,7 +43,7 @@ const content = {
     trustTitle: 'A Network Worth Joining',
     trustSub: '',
     trustPoints: [
-      { value: '120+', label: 'Cities in Network' },
+      { value: '16', label: 'Cities in Network' },
       { value: '1000+', label: 'Active Partners' },
       { value: '15+', label: 'Countries' },
       { value: 'EUR 2M+', label: 'Partner Revenue/yr' },
@@ -63,7 +63,7 @@ const content = {
     ctaPartner: 'Explorer le Partenariat',
     ctaQuote: 'Discuter des Opportunites',
     heroStats: [
-      { value: '120+', label: 'Reseau de Villes' },
+      { value: '16', label: 'Reseau de Villes' },
       { value: 'Sur Mesure', label: 'Modeles de Partenariat' },
       { value: 'Win-Win', label: 'Partage de Revenus' },
       { value: 'API', label: 'Integration Prete' },
@@ -94,7 +94,7 @@ const content = {
       { title: 'Croissance Mutuelle', desc: 'Reviews regulieres, optimisation et scaling.' },
     ],
     trustTitle: 'Un Reseau qui Vaut le Coup', trustSub: '',
-    trustPoints: [{ value: '120+', label: 'Villes dans le Reseau' }, { value: '1 000+', label: 'Partenaires Actifs' }, { value: '15+', label: 'Pays' }, { value: '2M EUR+', label: 'Revenus Partenaires/an' }],
+    trustPoints: [{ value: '16', label: 'Villes dans le Reseau' }, { value: '1 000+', label: 'Partenaires Actifs' }, { value: '15+', label: 'Pays' }, { value: '2M EUR+', label: 'Revenus Partenaires/an' }],
     contactTitle: 'Construisons Ensemble',
     contactSub: 'Parlez-nous de votre business et de votre vision du partenariat.',
     formSubmit: 'Demarrer la Discussion', backToPartners: 'Retour aux Solutions Professionnelles',
@@ -106,7 +106,7 @@ const content = {
     heroTitle: 'Возможности Транспортного Бизнес-Партнерства',
     heroSub: 'Больше чем просто поставщик — Zont предлагает стратегические партнерства для долгосрочного роста. Реферальные программы, white-label решения и коллаборации.',
     ctaPartner: 'Изучить Партнерство', ctaQuote: 'Обсудить Возможности',
-    heroStats: [{ value: '120+', label: 'Городов' }, { value: 'Кастом', label: 'Модели' }, { value: 'Win-Win', label: 'Доход' }, { value: 'API', label: 'Интеграция' }],
+    heroStats: [{ value: '16', label: 'Городов' }, { value: 'Кастом', label: 'Модели' }, { value: 'Win-Win', label: 'Доход' }, { value: 'API', label: 'Интеграция' }],
     benefitsTitle: 'Модели Партнерства для Роста', benefitsSub: 'Гибкие структуры под ваш бизнес',
     benefits: [
       { title: 'Реферальная Программа', desc: 'Получайте комиссию за каждое бронирование. Простое отслеживание и ежемесячные выплаты.' },
@@ -130,7 +130,7 @@ const content = {
       { title: 'Совместный Рост', desc: 'Регулярные обзоры и масштабирование.' },
     ],
     trustTitle: 'Сеть, к Которой Стоит Присоединиться', trustSub: '',
-    trustPoints: [{ value: '120+', label: 'Городов' }, { value: '1000+', label: 'Партнеров' }, { value: '15+', label: 'Стран' }, { value: '2М EUR+', label: 'Доход Партнеров/год' }],
+    trustPoints: [{ value: '16', label: 'Городов' }, { value: '1000+', label: 'Партнеров' }, { value: '15+', label: 'Стран' }, { value: '2М EUR+', label: 'Доход Партнеров/год' }],
     contactTitle: 'Давайте Построим Вместе',
     contactSub: 'Расскажите о бизнесе и видении партнерства.',
     formSubmit: 'Начать Обсуждение', backToPartners: 'Назад ко Всем Решениям',
@@ -151,7 +151,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { v: '500+', l: 'Գործընկեր Գործակալություններ' },
-      { v: '120+', l: 'Քաղաքներ' },
+      { v: '16', l: 'Քաղաքներ' },
       { v: '24/7', l: 'Աջակցություն' },
       { v: '98%', l: 'Գոհունակություն' },
     ],

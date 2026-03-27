@@ -50,7 +50,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { value: '50,000+', label: 'Transfers Completed' },
-      { value: '120+', label: 'Cities Covered' },
+      { value: '16', label: 'Cities Covered' },
       { value: '4.5/5', label: 'Client Rating' },
       { value: '24/7', label: 'Support Available' },
     ],
@@ -99,7 +99,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { value: '50 000+', label: 'Transferts Realises' },
-      { value: '120+', label: 'Villes Couvertes' },
+      { value: '16', label: 'Villes Couvertes' },
       { value: '4.5/5', label: 'Note Client' },
       { value: '24/7', label: 'Support Disponible' },
     ],
@@ -148,7 +148,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { value: '50 000+', label: 'Трансферов Выполнено' },
-      { value: '120+', label: 'Городов Охвачено' },
+      { value: '16', label: 'Городов Охвачено' },
       { value: '4.5/5', label: 'Рейтинг Клиентов' },
       { value: '24/7', label: 'Поддержка Доступна' },
     ],
@@ -197,7 +197,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { value: '50,000+', label: 'Տրանսֆերներ Կատարված' },
-      { value: '120+', label: 'Քաղաքներ Ընդգրկված' },
+      { value: '16', label: 'Քաղաքներ Ընդգրկված' },
       { value: '4.5/5', label: 'Հաճախորդի Վարկանիշ' },
       { value: '24/7', label: 'Աջակցություն Հասանելի' },
     ],

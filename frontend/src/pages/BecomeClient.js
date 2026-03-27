@@ -12,11 +12,11 @@ import {
 
 const content = {
   en: {
-    seoTitle: 'Book Premium Airport Transfer | Private Driver 120+ Cities | Zont',
-    seoDesc: 'Book your airport transfer online or via our app. Fixed prices, verified drivers, 24/7 support, free cancellation. Available in 120+ European cities. Web & mobile booking.',
+    seoTitle: 'Book Premium Airport Transfer | Private Driver 16 Cities | Zont',
+    seoDesc: 'Book your airport transfer online or via our app. Fixed prices, verified drivers, 24/7 support, free cancellation. Available in 16 European cities. Web & mobile booking.',
     heroTitle: 'Your Premium Transfer',
     heroAccent: 'Booked in 2 Minutes',
-    heroSub: 'Fixed prices. Verified drivers. 24/7 assistance. Book online or via our app in 120+ European cities.',
+    heroSub: 'Fixed prices. Verified drivers. 24/7 assistance. Book online or via our app in 16 European cities.',
     heroCta: 'Book Now',
     heroCtaApp: 'Download the App',
     stepsTitle: 'Book Your Transfer in 4 Simple Steps',
@@ -48,7 +48,7 @@ const content = {
     statsTitle: 'Zont in Numbers',
     stats: [
       { val: '50,000+', label: 'Completed Trips' },
-      { val: '120+', label: 'European Cities' },
+      { val: '16', label: 'European Cities' },
       { val: '4.5/5', label: 'Average Rating' },
       { val: '24/7', label: 'Customer Support' },
     ],
@@ -71,11 +71,11 @@ const content = {
     ],
   },
   fr: {
-    seoTitle: 'Reserver Transfert Aeroport Premium | Chauffeur Prive 120+ Villes | Zont',
-    seoDesc: 'Reservez votre transfert aeroport en ligne ou via notre appli. Prix fixes, chauffeurs verifies, assistance 24h/24, annulation gratuite. 120+ villes europeennes. Reservation web et mobile.',
+    seoTitle: 'Reserver Transfert Aeroport Premium | Chauffeur Prive 16 Villes | Zont',
+    seoDesc: 'Reservez votre transfert aeroport en ligne ou via notre appli. Prix fixes, chauffeurs verifies, assistance 24h/24, annulation gratuite. 16 villes europeennes. Reservation web et mobile.',
     heroTitle: 'Votre Transfert Premium',
     heroAccent: 'Reserve en 2 Minutes',
-    heroSub: 'Prix fixes garantis. Chauffeurs verifies. Assistance 24h/24. Reservez en ligne ou via notre appli dans 120+ villes europeennes.',
+    heroSub: 'Prix fixes garantis. Chauffeurs verifies. Assistance 24h/24. Reservez en ligne ou via notre appli dans 16 villes europeennes.',
     heroCta: 'Reserver Maintenant',
     heroCtaApp: 'Telecharger l\'Appli',
     stepsTitle: 'Reservez Votre Transfert en 4 Etapes Simples',
@@ -107,7 +107,7 @@ const content = {
     statsTitle: 'Zont en Chiffres',
     stats: [
       { val: '50 000+', label: 'Courses Effectuees' },
-      { val: '120+', label: 'Villes Europeennes' },
+      { val: '16', label: 'Villes Europeennes' },
       { val: '4.5/5', label: 'Note Moyenne' },
       { val: '24/7', label: 'Support Client' },
     ],
@@ -130,11 +130,11 @@ const content = {
     ],
   },
   ru: {
-    seoTitle: 'Забронировать Трансфер из Аэропорта | Частный Водитель 120+ Городов | Zont',
-    seoDesc: 'Забронируйте трансфер из аэропорта онлайн или через приложение. Фиксированные цены, проверенные водители, поддержка 24/7. 120+ городов Европы.',
+    seoTitle: 'Забронировать Трансфер из Аэропорта | Частный Водитель 16 Городов | Zont',
+    seoDesc: 'Забронируйте трансфер из аэропорта онлайн или через приложение. Фиксированные цены, проверенные водители, поддержка 24/7. 16 городов Европы.',
     heroTitle: 'Ваш Премиум Трансфер',
     heroAccent: 'За 2 Минуты',
-    heroSub: 'Фиксированные цены. Проверенные водители. Поддержка 24/7. Бронируйте онлайн или через приложение в 120+ городах Европы.',
+    heroSub: 'Фиксированные цены. Проверенные водители. Поддержка 24/7. Бронируйте онлайн или через приложение в 16 городах Европы.',
     heroCta: 'Забронировать',
     heroCtaApp: 'Скачать Приложение',
     stepsTitle: 'Забронируйте за 4 Простых Шага',
@@ -166,7 +166,7 @@ const content = {
     statsTitle: 'Zont в Цифрах',
     stats: [
       { val: '50 000+', label: 'Поездок' },
-      { val: '120+', label: 'Городов Европы' },
+      { val: '16', label: 'Городов Европы' },
       { val: '4.5/5', label: 'Средний Рейтинг' },
       { val: '24/7', label: 'Поддержка' },
     ],
@@ -189,11 +189,11 @@ const content = {
     ],
   },
   hy: {
-    seoTitle: ' Delays Odunavakayan Transfer Amragrel | Andznayin Varorд 120+ Qaghaqnerum | Zont',
+    seoTitle: ' Delays Odunavakayan Transfer Amragrel | Andznayin Varorд 16 Qaghaqnerum | Zont',
     seoDesc: 'Amragreq dzez odunavakayani transfery online kam havelvatsov. Hastat gner, stugvats varorдner, 24/7 ajaktsut yun.',
     heroTitle: 'Dzez Premium Transfery',
     heroAccent: '2 Ropeum',
-    heroSub: 'Hastat gner. Stugvats varorдner. 24/7 ajaktsut yun. Amragreq online kam havelvatsov 120+ evropakan qaghaqnerum.',
+    heroSub: 'Hastat gner. Stugvats varorдner. 24/7 ajaktsut yun. Amragreq online kam havelvatsov 16 evropakan qaghaqnerum.',
     heroCta: 'Amragrel Hima',
     heroCtaApp: 'Nerbernal Havelvatsy',
     stepsTitle: 'Amragreq 4 Parz Qaylov',
@@ -225,7 +225,7 @@ const content = {
     statsTitle: 'Zont Tverov',
     stats: [
       { val: '50 000+', label: 'Katarvats Ughevorut yunner' },
-      { val: '120+', label: 'Evropakan Qaghaqner' },
+      { val: '16', label: 'Evropakan Qaghaqner' },
       { val: '4.5/5', label: 'Mijin Varkanish' },
       { val: '24/7', label: 'Ajaktsut yun' },
     ],
@@ -293,7 +293,7 @@ const BecomeClient = () => {
         <div className="relative max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-[#2ecc71]/10 text-[#2ecc71] px-4 py-2 rounded-full text-sm font-semibold mb-6">
             <BadgeCheck className="w-4 h-4" />
-            <span>120+ {language === 'fr' ? 'villes europeennes' : language === 'ru' ? 'городов Европы' : 'European cities'}</span>
+            <span>16 {language === 'fr' ? 'villes europeennes' : language === 'ru' ? 'городов Европы' : 'European cities'}</span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 leading-tight" data-testid="client-h1">
             {c.heroTitle}

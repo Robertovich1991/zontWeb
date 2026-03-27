@@ -33,7 +33,7 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: '',
     defaultDropoff: 'Disneyland Paris',
-    otherCitiesTitle: 'We serve 120+ cities across Europe', otherCitiesBtn: 'View All Destinations',
+    otherCitiesTitle: 'We serve 16 cities across Europe', otherCitiesBtn: 'View All Destinations',
     rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
@@ -99,7 +99,7 @@ const content = {
     pickupLabel: '\u041e\u0442\u043a\u0443\u0434\u0430', dropoffLabel: '\u041a\u0443\u0434\u0430', dateLabel: '\u0414\u0430\u0442\u0430', timeLabel: '\u0412\u0440\u0435\u043c\u044f',
     defaultPickup: '',
     defaultDropoff: '\u0414\u0438\u0441\u043d\u0435\u0439\u043b\u0435\u043d\u0434 \u041f\u0430\u0440\u0438\u0436',
-    otherCitiesTitle: '120+ \u0433\u043e\u0440\u043e\u0434\u043e\u0432', otherCitiesBtn: '\u0412\u0441\u0435',
+    otherCitiesTitle: '16 \u0433\u043e\u0440\u043e\u0434\u043e\u0432', otherCitiesBtn: '\u0412\u0441\u0435',
     rating: '4.5/5 Tripadvisor (29)',
   },
   hy: {
@@ -131,7 +131,7 @@ const content = {
     pickupLabel: 'Vertsneloy', dropoffLabel: 'Ijnelov', dateLabel: 'Amsaket', timeLabel: 'Zham',
     defaultPickup: '',
     defaultDropoff: 'Disneyland Paris',
-    otherCitiesTitle: '120+ qaghaqner', otherCitiesBtn: 'Bolory',
+    otherCitiesTitle: '16 qaghaqner', otherCitiesBtn: 'Bolory',
     rating: '4.5/5 Tripadvisor (29)',
   },
 };

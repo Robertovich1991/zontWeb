@@ -30,7 +30,7 @@ const content = {
     bookingForm: 'Book Your Paris Airport Transfer',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: 'Paris CDG Airport',
-    otherCitiesTitle: 'We serve 120+ cities across Europe', otherCitiesBtn: 'View All Destinations',
+    otherCitiesTitle: 'We serve 16 cities across Europe', otherCitiesBtn: 'View All Destinations',
     rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
@@ -92,7 +92,7 @@ const content = {
     bookingForm: 'Забронируйте Трансфер из Аэропорта Парижа',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: 'Аэропорт Париж CDG',
-    otherCitiesTitle: 'Мы обслуживаем 120+ городов Европы', otherCitiesBtn: 'Все Направления',
+    otherCitiesTitle: 'Мы обслуживаем 16 городов Европы', otherCitiesBtn: 'Все Направления',
     rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
@@ -128,7 +128,7 @@ const content = {
     pickupLabel: 'Վերցնում', dropoffLabel: 'Իջնում',
     dateLabel: 'Ամսաթիվ', timeLabel: 'Ժամ',
     defaultPickup: 'Փարիզ CDG օդանավայան',
-    otherCitiesTitle: 'Սպասարկում ենք 120+ քաղաքներ Եվրոպայում',
+    otherCitiesTitle: 'Սպասարկում ենք 16 քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
     rating: '4.5/5 Tripadvisor (29 կարծիք)',
   },
