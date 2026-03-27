@@ -7,7 +7,7 @@ import { transferService } from '@/services/api';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import TripAdvisorWidget from '@/components/TripAdvisorWidget';
+import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
 
@@ -434,7 +434,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
             {mainContent && <p className="text-sm text-gray-400 leading-relaxed mt-4">{mainContent}</p>}
             {c.description3 && <p className="text-sm text-gray-400 leading-relaxed mt-4">{c.description3}</p>}
             <div className="mt-8 flex justify-center">
-              <TripAdvisorWidget />
+              <TripAdvisorReviews />
             </div>
           </div>
         </section>
@@ -504,7 +504,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">{tr.trustTitle}</h2>
             <div className="flex justify-center">
-              <TripAdvisorWidget />
+              <TripAdvisorReviews />
             </div>
           </div>
         </section>

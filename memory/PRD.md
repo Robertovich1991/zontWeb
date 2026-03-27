@@ -20,6 +20,15 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 
 ## What's Been Implemented
 
+### WhatsApp / Phone Contact (March 2026)
+- Added WhatsApp +33 7 83 77 70 27 in Header (desktop nav + mobile) on ALL pages
+- Added Contact section in Footer: WhatsApp (green) + phone number
+- Links open wa.me/33783777027 (WhatsApp) and tel:+33783777027 (phone)
+
+### TripAdvisor Reviews on All Pages (March 2026)
+- Replaced broken TripAdvisorWidget with custom TripAdvisorReviews on ALL city pages (CityTransferPage.js)
+- CDG, Orly, Beauvais, Disneyland, Paris Airport pages now show real reviews
+
 ### Welcome Promo Code System (March 2026)
 - **Pop-up** sur la page de selection de vehicule demandant l'email du client
 - **Code unique** WELCOME-XXXXX genere, valide 1 heure avec compte a rebours
