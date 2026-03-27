@@ -130,8 +130,17 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
       tryGeocode(address)
         .then(resolve)
         .catch(() => {
-          const simplified = address.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
-          tryGeocode(simplified).then(resolve).catch(reject);
+          const noParens = address.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
+          tryGeocode(noParens)
+            .then(resolve)
+            .catch(() => {
+              const firstPart = address.split(',')[0].replace(/\([^)]*\)/g, '').trim();
+              if (firstPart && firstPart !== noParens) {
+                tryGeocode(firstPart).then(resolve).catch(reject);
+              } else {
+                reject('ZERO_RESULTS');
+              }
+            });
         });
     });
   };

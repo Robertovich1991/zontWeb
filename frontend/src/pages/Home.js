@@ -202,12 +202,22 @@ const Home = () => {
           });
         });
       };
-      // Try original address first, then simplified version (remove parentheses, codes)
+      // Strategy: try original → strip parentheses → extract place name only
       tryGeocode(address)
         .then(resolve)
         .catch(() => {
-          const simplified = address.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
-          tryGeocode(simplified).then(resolve).catch(reject);
+          const noParens = address.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
+          tryGeocode(noParens)
+            .then(resolve)
+            .catch(() => {
+              // Last resort: just the first part before the comma
+              const firstPart = address.split(',')[0].replace(/\([^)]*\)/g, '').trim();
+              if (firstPart && firstPart !== noParens) {
+                tryGeocode(firstPart).then(resolve).catch(reject);
+              } else {
+                reject('ZERO_RESULTS');
+              }
+            });
         });
     });
   };

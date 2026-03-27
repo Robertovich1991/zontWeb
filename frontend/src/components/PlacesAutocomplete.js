@@ -24,16 +24,22 @@ export { loadGoogleMaps };
 const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon, ...props }) => {
   const inputRef = useRef(null);
   const autocompleteRef = useRef(null);
+  const justSelectedRef = useRef(false);
 
   const handlePlaceSelect = useCallback(() => {
     const place = autocompleteRef.current?.getPlace();
     if (!place || !place.geometry) return;
+
+    justSelectedRef.current = true;
 
     const lat = place.geometry.location.lat();
     const lng = place.geometry.location.lng();
     const address = place.formatted_address || place.name || '';
 
     onChange({ address, latitude: lat, longitude: lng, placeId: place.place_id });
+
+    // Keep the flag for 500ms to prevent mobile onChange from clearing coordinates
+    setTimeout(() => { justSelectedRef.current = false; }, 500);
   }, [onChange]);
 
   useEffect(() => {
@@ -41,7 +47,6 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
     loadGoogleMaps().then(() => {
       if (cancelled || !inputRef.current || autocompleteRef.current) return;
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-        types: ['establishment', 'geocode'],
         fields: ['formatted_address', 'geometry', 'name', 'place_id'],
       });
       autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
@@ -64,7 +69,8 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
   }, [value]);
 
   const handleInputChange = () => {
-    // When user types manually, clear coordinates
+    // Skip if this change was triggered by autocomplete selection (race condition on mobile)
+    if (justSelectedRef.current) return;
     onChange({ address: inputRef.current?.value || '', latitude: null, longitude: null, placeId: null });
   };
 
