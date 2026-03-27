@@ -20,6 +20,15 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 
 ## What's Been Implemented
 
+### Welcome Promo Code System (March 2026)
+- **Pop-up** sur la page de selection de vehicule demandant l'email du client
+- **Code unique** WELCOME-XXXXX genere, valide 1 heure avec compte a rebours
+- **Prix reduit de -10%** affiche avec ancien prix barre en vert
+- **Prix reduit envoye au C# backend** lors de la reservation
+- **Admin menu "Emails Clients"** : liste des emails collectes, codes, statuts (utilise/actif/expire), export CSV
+- Pop-up reapparait a chaque recherche tant que l'email n'a pas ete donne
+- Fichiers: `promo.py`, `PromoPopup.js`, `CarSelection.js`, `admin/PromoEmails.js`
+
 ### Mobile Autocomplete Race Condition Fix V3 (March 2026)
 - **Root cause FOUND**: `useCallback([onChange])` in PlacesAutocomplete caused the `place_changed` listener to be removed on every parent re-render (each keystroke), and never re-added because `autocompleteRef.current` guard prevented it
 - **Fix**: Replaced `useCallback` + `useEffect([handlePlaceSelect])` with `onChangeRef` pattern — listener created ONCE with empty deps, always calls latest `onChange` via ref
