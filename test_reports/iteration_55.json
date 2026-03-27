@@ -1,0 +1,83 @@
+{
+  "summary": "Tested PlacesAutocomplete bug fix for mobile 'Address not found' error. All critical features working: Home page booking form renders correctly with pickup/dropoff inputs, Google Maps autocomplete loads and shows suggestions on both desktop and mobile viewports, city transfer pages (CDG, Orly, Disneyland) load with correct titles and booking forms, backend proxy API /api/proxy/preorder-distance returns vehicle pricing correctly, navigation between pages works.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_proxy_api.py",
+    "/app/test_reports/pytest/proxy_api_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "PlacesAutocomplete.js fix looks correct: lastSelectedAddrRef guard (line 28, 37, 86) prevents onChange from clearing coords when value matches selected address",
+    "Extended justSelectedRef timeout from 500ms to 2000ms (line 49) handles slow mobile browsers",
+    "PlaceId-based geocoding as first fallback strategy in Home.js (line 204-206) and CityTransferPage.js (line 131-133) is properly implemented",
+    "Unclosed parenthesis handling in geocodeAddress regex (line 215-216 in Home.js, line 142-143 in CityTransferPage.js) correctly strips problematic patterns"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_proxy_api.py"
+  ],
+  "success_rate": {
+    "backend": "100% (10/10 tests passed)",
+    "frontend": "100% (all pages load, autocomplete works, navigation works)"
+  },
+  "test_credentials": "N/A - no auth required for tested features",
+  "seed_data_creation": "Created TEST_playwright_test status check entry",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "PlacesAutocomplete bug fix verified working. Google Maps autocomplete loads dynamically, shows suggestions, and selections work on both desktop and mobile. The fix implements: 1) lastSelectedAddrRef guard to prevent onChange from clearing coords, 2) Extended 2000ms timeout for mobile, 3) PlaceId-based geocoding fallback. All city transfer pages (CDG, Orly, Disneyland) display correct titles with prices.",
+  "features_tested": {
+    "home_page": [
+      "TEST 1: Home page loads with data-testid='home-page' - PASSED",
+      "TEST 1b: Booking form visible - PASSED",
+      "TEST 1c-g: All form fields (pickup, dropoff, date, time, submit) visible - PASSED"
+    ],
+    "city_transfer_pages": [
+      "TEST 2: CDG Transfer page loads - PASSED (title: 'Transfert Aeroport Paris - CDG, Orly et Beauvais')",
+      "TEST 3: Disneyland Transfer page loads - PASSED (title contains '49€')",
+      "TEST 6: Orly Transfer page loads - PASSED (title: 'Transfert Aeroport Orly - Chauffeur Prive des 39€')"
+    ],
+    "google_maps_autocomplete": [
+      "TEST 4a: Autocomplete dropdown appears for pickup on desktop - PASSED",
+      "TEST 4b: Autocomplete selection works on desktop - PASSED",
+      "TEST 5b: Autocomplete dropdown appears on mobile (390px) - PASSED",
+      "TEST 5c: Autocomplete selection works on mobile - PASSED"
+    ],
+    "navigation": [
+      "TEST 7a: Navigate to CDG page from home - PASSED",
+      "TEST 7c: Navigate to Disneyland page from home - PASSED",
+      "TEST 7e: Navigate to countries page - PASSED"
+    ],
+    "backend_api": [
+      "test_api_root - PASSED",
+      "test_preorder_distance_valid_coords (CDG to Paris) - PASSED",
+      "test_preorder_distance_orly_coords - PASSED",
+      "test_preorder_distance_disneyland_coords - PASSED",
+      "test_preorder_distance_invalid_payload - PASSED",
+      "test_trip_types_endpoint - PASSED",
+      "test_trust_blocks - PASSED",
+      "test_homepage_content - PASSED",
+      "test_get_status - PASSED",
+      "test_create_status - PASSED"
+    ],
+    "form_validation": [
+      "TEST 8a: Form does not submit with empty fields (HTML5 validation) - PASSED"
+    ]
+  },
+  "bug_fix_verification": {
+    "original_bug": "Address not found error on mobile when using Google Maps Autocomplete for Dropoff field - coordinates wiped by race condition",
+    "fix_implemented": {
+      "lastSelectedAddrRef_guard": "Prevents onChange from clearing coords when input value matches last selected address",
+      "extended_timeout": "justSelectedRef timeout extended from 500ms to 2000ms for slow mobile browsers",
+      "placeId_geocoding": "PlaceId-based geocoding as first fallback strategy before address text geocoding",
+      "unclosed_paren_handling": "Regex to strip unclosed parentheses from address strings"
+    },
+    "verification_status": "VERIFIED - Autocomplete works correctly on mobile viewport (390x844), selections persist, no 'Address not found' errors observed"
+  }
+}

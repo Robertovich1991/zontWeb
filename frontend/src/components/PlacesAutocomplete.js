@@ -25,21 +25,28 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
   const inputRef = useRef(null);
   const autocompleteRef = useRef(null);
   const justSelectedRef = useRef(false);
+  const lastSelectedAddrRef = useRef('');
 
   const handlePlaceSelect = useCallback(() => {
     const place = autocompleteRef.current?.getPlace();
-    if (!place || !place.geometry) return;
+    if (!place) return;
 
     justSelectedRef.current = true;
 
-    const lat = place.geometry.location.lat();
-    const lng = place.geometry.location.lng();
-    const address = place.formatted_address || place.name || '';
+    const address = place.formatted_address || place.name || inputRef.current?.value || '';
+    lastSelectedAddrRef.current = address;
 
-    onChange({ address, latitude: lat, longitude: lng, placeId: place.place_id });
+    if (place.geometry) {
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      onChange({ address, latitude: lat, longitude: lng, placeId: place.place_id });
+    } else {
+      // Some predictions lack geometry — pass address + placeId for later geocoding
+      onChange({ address, latitude: null, longitude: null, placeId: place.place_id || null });
+    }
 
-    // Keep the flag for 500ms to prevent mobile onChange from clearing coordinates
-    setTimeout(() => { justSelectedRef.current = false; }, 500);
+    // Extended timeout for slow mobile browsers (keyboard dismiss, dropdown animation)
+    setTimeout(() => { justSelectedRef.current = false; }, 2000);
   }, [onChange]);
 
   useEffect(() => {
@@ -69,9 +76,18 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
   }, [value]);
 
   const handleInputChange = () => {
-    // Skip if this change was triggered by autocomplete selection (race condition on mobile)
+    // Guard 1: Timeout-based flag (blocks onChange within 2s of autocomplete selection)
     if (justSelectedRef.current) return;
-    onChange({ address: inputRef.current?.value || '', latitude: null, longitude: null, placeId: null });
+
+    const currentValue = inputRef.current?.value || '';
+
+    // Guard 2: If input value matches the last autocomplete selection, don't clear coords
+    // This catches delayed mobile onChange events that fire after the timeout
+    if (lastSelectedAddrRef.current && currentValue === lastSelectedAddrRef.current) return;
+
+    // User is genuinely typing something new — clear coordinates
+    lastSelectedAddrRef.current = '';
+    onChange({ address: currentValue, latitude: null, longitude: null, placeId: null });
   };
 
   return (

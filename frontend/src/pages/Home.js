@@ -184,42 +184,50 @@ const Home = () => {
 
   const c = homeContent[language] || homeContent.en;
 
-  const geocodeAddress = async (address) => {
+  const geocodeAddress = async (address, placeId) => {
     await loadGoogleMaps();
     return new Promise((resolve, reject) => {
       if (!window.google?.maps?.Geocoder) return reject('No geocoder');
       const geocoder = new window.google.maps.Geocoder();
-      const tryGeocode = (addr) => {
-        return new Promise((res, rej) => {
-          geocoder.geocode({ address: addr }, (results, status) => {
-            if (status === 'OK' && results[0]?.geometry) {
-              res({
-                latitude: results[0].geometry.location.lat(),
-                longitude: results[0].geometry.location.lng(),
-              });
-            } else {
-              rej(status);
-            }
-          });
+      const extract = (results) => ({
+        latitude: results[0].geometry.location.lat(),
+        longitude: results[0].geometry.location.lng(),
+      });
+      const tryGeo = (req) => new Promise((res, rej) => {
+        geocoder.geocode(req, (results, status) => {
+          if (status === 'OK' && results[0]?.geometry) res(extract(results));
+          else rej(status);
         });
-      };
-      // Strategy: try original → strip parentheses → extract place name only
-      tryGeocode(address)
-        .then(resolve)
-        .catch(() => {
-          const noParens = address.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
-          tryGeocode(noParens)
-            .then(resolve)
-            .catch(() => {
-              // Last resort: just the first part before the comma
-              const firstPart = address.split(',')[0].replace(/\([^)]*\)/g, '').trim();
-              if (firstPart && firstPart !== noParens) {
-                tryGeocode(firstPart).then(resolve).catch(reject);
-              } else {
+      });
+
+      // Strategy 1: placeId is most reliable (set by autocomplete selection)
+      const byPlaceId = placeId
+        ? tryGeo({ placeId }).catch(() => null)
+        : Promise.resolve(null);
+
+      byPlaceId.then(result => {
+        if (result) return resolve(result);
+        // Strategy 2: original text
+        return tryGeo({ address })
+          .then(resolve)
+          .catch(() => {
+            // Strategy 3: strip unclosed parens at end + complete parens
+            const cleaned = address
+              .replace(/\s*\([^)]*$/, '')   // unclosed "(CD" at end
+              .replace(/\([^)]*\)/g, '')     // complete "(CDG)"
+              .replace(/\s+/g, ' ').trim();
+            return tryGeo({ address: cleaned })
+              .then(resolve)
+              .catch(() => {
+                // Strategy 4: first part before comma
+                const firstPart = cleaned.split(',')[0].trim();
+                if (firstPart && firstPart !== cleaned) {
+                  return tryGeo({ address: firstPart }).then(resolve).catch(reject);
+                }
                 reject('ZERO_RESULTS');
-              }
-            });
-        });
+              });
+          });
+      });
     });
   };
 
@@ -239,8 +247,8 @@ const Home = () => {
     }
 
     try {
-      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr);
-      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr);
+      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickup.placeId);
+      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoff.placeId);
     } catch {
       toast.error(language === 'fr' ? 'Adresse introuvable. Veuillez reessayer.' : 'Address not found. Please try again.');
       setLoading(false);

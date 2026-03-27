@@ -111,40 +111,49 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
 
   const routes = c.routes || [];
 
-  const geocodeAddress = async (address) => {
+  const geocodeAddress = async (address, placeId) => {
     await loadGoogleMaps();
     return new Promise((resolve, reject) => {
       if (!window.google?.maps?.Geocoder) return reject('No geocoder');
       const geocoder = new window.google.maps.Geocoder();
-      const tryGeocode = (addr) => {
-        return new Promise((res, rej) => {
-          geocoder.geocode({ address: addr }, (results, status) => {
-            if (status === 'OK' && results[0]?.geometry) {
-              res({
-                latitude: results[0].geometry.location.lat(),
-                longitude: results[0].geometry.location.lng(),
-              });
-            } else {
-              rej(status);
-            }
-          });
+      const extract = (results) => ({
+        latitude: results[0].geometry.location.lat(),
+        longitude: results[0].geometry.location.lng(),
+      });
+      const tryGeo = (req) => new Promise((res, rej) => {
+        geocoder.geocode(req, (results, status) => {
+          if (status === 'OK' && results[0]?.geometry) res(extract(results));
+          else rej(status);
         });
-      };
-      tryGeocode(address)
-        .then(resolve)
-        .catch(() => {
-          const noParens = address.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
-          tryGeocode(noParens)
-            .then(resolve)
-            .catch(() => {
-              const firstPart = address.split(',')[0].replace(/\([^)]*\)/g, '').trim();
-              if (firstPart && firstPart !== noParens) {
-                tryGeocode(firstPart).then(resolve).catch(reject);
-              } else {
+      });
+
+      // Strategy 1: placeId is most reliable
+      const byPlaceId = placeId
+        ? tryGeo({ placeId }).catch(() => null)
+        : Promise.resolve(null);
+
+      byPlaceId.then(result => {
+        if (result) return resolve(result);
+        // Strategy 2: original text
+        return tryGeo({ address })
+          .then(resolve)
+          .catch(() => {
+            // Strategy 3: strip unclosed + complete parens
+            const cleaned = address
+              .replace(/\s*\([^)]*$/, '')
+              .replace(/\([^)]*\)/g, '')
+              .replace(/\s+/g, ' ').trim();
+            return tryGeo({ address: cleaned })
+              .then(resolve)
+              .catch(() => {
+                const firstPart = cleaned.split(',')[0].trim();
+                if (firstPart && firstPart !== cleaned) {
+                  return tryGeo({ address: firstPart }).then(resolve).catch(reject);
+                }
                 reject('ZERO_RESULTS');
-              }
-            });
-        });
+              });
+          });
+      });
     });
   };
 
@@ -161,8 +170,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
       let pickupCoords = pickup.latitude ? { latitude: pickup.latitude, longitude: pickup.longitude } : null;
       let dropoffCoords = dropoff.latitude ? { latitude: dropoff.latitude, longitude: dropoff.longitude } : null;
 
-      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr);
-      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr);
+      if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickup.placeId);
+      if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoff.placeId);
 
       const vehicles = await transferService.calculatePreorderPrice(pickupCoords, dropoffCoords);
       setVehicleResults(vehicles);
