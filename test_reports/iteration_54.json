@@ -1,0 +1,65 @@
+{
+  "summary": "Tested Disneyland Paris transfer page (4 languages) and updated pricing on airport pages. Disneyland pages load correctly with '49€' in titles. Home page shows Disneyland card with correct price and navigation. Sitemap contains all 4 Disneyland URLs. However, CDG/Orly/Beauvais pages show OLD titles from CMS instead of updated component titles with prices.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "CMS overriding component titles",
+        "issue": "CDG, Orly, Beauvais pages show CMS H1 titles without prices instead of component-level titles with updated pricing (59€, 39€, 99€). CMS data takes precedence over component content.",
+        "affected_selectors": ["h1"],
+        "priority": "HIGH"
+      },
+      {
+        "flow": "Disneyland dropoff pre-fill",
+        "issue": "CityTransferPage component doesn't use defaultDropoff from content. DisneylandParis.js defines defaultDropoff: 'Disneyland Paris' but it's not being applied to the dropoff input field.",
+        "affected_selectors": ["input[name='dropoff']"],
+        "priority": "LOW"
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_54.json"],
+  "action_items": [
+    "UPDATE CMS pages for CDG, Orly, Beauvais to include prices in H1 titles: 'Transfert Aeroport CDG - Chauffeur Prive des 59€', 'Transfert Aeroport Orly - Chauffeur Prive des 39€', 'Transfert Aeroport Beauvais - Chauffeur Prive des 99€'",
+    "OPTIONAL: Add defaultDropoff handling to CityTransferPage.js component to pre-fill dropoff field for Disneyland page"
+  ],
+  "critical_code_review_comments": [
+    "CMS data overrides component-level content for SEO fields (h1, h2, title). When updating pricing in component files, CMS pages must also be updated.",
+    "CityTransferPage.js line 98-100 handles defaultPickup but not defaultDropoff - inconsistent implementation"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "N/A (frontend only test)",
+    "frontend": "85%"
+  },
+  "test_credentials": "N/A",
+  "seed_data_creation": "N/A",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Disneyland pages work correctly. The issue is CMS data overriding component titles for CDG/Orly/Beauvais. Main agent needs to update CMS pages via admin panel or API to include prices in H1 titles.",
+  "test_results_detail": {
+    "passed": [
+      "Disneyland FR page (/transfert-disneyland-paris) - title contains '49' and 'Disneyland'",
+      "Disneyland EN page (/disneyland-paris-transfer) - title contains '49' and 'Disneyland'",
+      "Disneyland RU page (/transfer-disneylend-parizh) - title contains '49'",
+      "Disneyland HY page (/disneylend-pariz-transfer) - title contains '49'",
+      "Disneyland FR page shows popular routes with prices: 59, 75, 90, 175, 55",
+      "Home page Disneyland card shows price 49€",
+      "Home page CDG card shows price 59€",
+      "Disneyland card links to /transfert-disneyland-paris",
+      "Clicking Disneyland card navigates correctly",
+      "Sitemap.xml contains all 4 Disneyland URLs (EN/FR/RU/HY)"
+    ],
+    "failed": [
+      "CDG page H1 missing '59' - shows CMS title: 'Transfert Aeroport CDG - Charles de Gaulle Voiture Privee'",
+      "Orly page H1 missing '39' - shows CMS title: 'Transfert Aeroport Orly - Voiture Privee'",
+      "Beauvais page H1 missing '99' - shows CMS title: 'Transfert Aeroport Beauvais - Voiture Privee vers Paris'",
+      "Disneyland page dropoff not pre-filled with 'Disneyland Paris' (defaultDropoff not implemented in component)"
+    ]
+  },
+  "rca_of_the_issue": "The CityTransferPage component prioritizes CMS data over component-level content: `const heroTitle = (cmsPage?.seo?.h1?.[language]) || c.title;`. Since CDG, Orly, and Beauvais have CMS pages with old H1 titles (without prices), those are displayed instead of the updated component titles. The Disneyland page works because it has NO CMS data, so the component-level content is used."
+}

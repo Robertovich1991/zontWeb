@@ -117,6 +117,7 @@ const CDGTransfer = lazy(() => import("@/pages/cities/CDG"));
 const OrlyTransfer = lazy(() => import("@/pages/cities/Orly"));
 const BeauvaisTransfer = lazy(() => import("@/pages/cities/Beauvais"));
 const ParisTrainStationTransfer = lazy(() => import("@/pages/cities/ParisTrainStation"));
+const DisneylandTransfer = lazy(() => import("@/pages/cities/DisneylandParis"));
 
 // B2B Pages (lazy)
 const Partners = lazy(() => import("@/pages/Partners"));
@@ -173,6 +174,11 @@ function App() {
                   <Route path="/transfert-gare-paris" element={<ParisTrainStationTransfer />} />
                   <Route path="/transfer-vokzal-parizh" element={<ParisTrainStationTransfer />} />
                   <Route path="/pariz-kayarani-transfer" element={<ParisTrainStationTransfer />} />
+                  {/* Disneyland Paris */}
+                  <Route path="/disneyland-paris-transfer" element={<DisneylandTransfer />} />
+                  <Route path="/transfert-disneyland-paris" element={<DisneylandTransfer />} />
+                  <Route path="/transfer-disneylend-parizh" element={<DisneylandTransfer />} />
+                  <Route path="/disneylend-pariz-transfer" element={<DisneylandTransfer />} />
                   {/* Nice */}
                   <Route path="/nice-airport-transfer" element={<NiceTransfer />} />
                   <Route path="/transfert-aeroport-nice" element={<NiceTransfer />} />

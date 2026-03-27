@@ -3,8 +3,8 @@ import CityTransferPage from '@/components/CityTransferPage';
 
 const content = {
   en: {
-    title: 'Beauvais Airport Transfer - Private Car to Paris',
-    subtitle: 'Professional private driver from Beauvais-Tille Airport to Paris city center, hotels and all destinations',
+    title: 'Beauvais Airport Transfer - Private Driver from 99\u20AC',
+    subtitle: 'Professional private driver from Beauvais-Tille Airport to Paris city center, hotels and all destinations. Fixed prices from 99\u20AC',
     description: 'Beauvais-Tille Airport sits 85 kilometres north of Paris — a distance that surprises many budget travelers who chose a cheap Ryanair or Wizz Air fare without checking the map. The official shuttle bus costs around 17 euros but takes 75 to 90 minutes, drops you only at Porte Maillot, and does not wait if your flight is delayed. A Beauvais taxi to central Paris can exceed 200 euros with no guarantee of comfort. Our private Beauvais airport transfer solves every one of these problems: a fixed price agreed in advance, a professional driver who monitors your landing time, and a direct door-to-door ride in a clean, air-conditioned Mercedes or BMW. No changes, no crowds, no surprises.',
     description2: 'The drive from Beauvais follows the A16 motorway south, merging onto the Peripherique to reach any Paris neighbourhood. To the Marais: about 80 minutes. To Montmartre or Opera: 75 minutes. To the Eiffel Tower: 85 minutes. Traffic on the A16 is typically lighter than the A1 from CDG, meaning journey times are more predictable. Our drivers also know alternative routes through Meru, Chambly, and L\'Isle-Adam that bypass motorway congestion on Friday evenings and holiday weekends. For travelers continuing beyond Paris, we can take you directly to Disneyland Paris (about 100 minutes), Versailles, or even Reims in the Champagne region.',
     description3: 'Beauvais itself is a hidden gem of northern France. Its Saint-Pierre cathedral has the tallest Gothic choir in the world — 48 metres of soaring stone that rivals Notre-Dame de Paris. The medieval town centre and the astronomical clock are worth a visit if your schedule allows a stopover. Many of our passengers flying into Beauvais are heading to events in Paris: concerts at the Stade de France, conferences at the Parc des Expositions, or fashion shows during Paris Fashion Week. Whatever your reason for choosing Beauvais, our transfer ensures the savings on your flight are not wasted on a stressful, expensive journey into the capital. Book now, travel smart.',
@@ -12,7 +12,7 @@ const content = {
     feature1Title: 'Door-to-Door Service', feature1Desc: 'No shuttle to Porte Maillot. Direct to your exact Paris hotel or address.',
     feature2Title: 'Flight Monitoring', feature2Desc: 'We track your Ryanair or Wizz Air flight. Free waiting time for delays.',
     feature3Title: 'Premium Vehicles', feature3Desc: 'Spacious vehicles with room for luggage. Mercedes, BMW or similar.',
-    feature4Title: 'Fixed Price Guarantee', feature4Desc: 'Price locked at booking. No meters, no toll surprises. Much cheaper than a taxi.',
+    feature4Title: 'Fixed Price from 99\u20AC', feature4Desc: 'Price locked at booking. No meters, no toll surprises. Much cheaper than a taxi.',
     sedan: 'Premium Sedan', sedanDesc: 'Comfortable sedan, 1-3 passengers', luxury: 'Luxury Sedan', luxuryDesc: 'Mercedes E-Class or similar',
     minivan: 'Minivan', minivanDesc: 'For families up to 6 passengers', minibus: 'Minibus', minibusDesc: 'For groups up to 8 passengers',
     passengers: 'Passengers', luggage: 'Luggage', bookNow: 'BOOK NOW', allInclusive: 'All inclusive',
@@ -34,8 +34,8 @@ const content = {
     rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
-    title: 'Transfert Aeroport Beauvais - Voiture Privee vers Paris',
-    subtitle: 'Chauffeur prive professionnel depuis l\'aeroport de Beauvais-Tille vers Paris centre, hotels et toutes destinations',
+    title: 'Transfert Aeroport Beauvais - Chauffeur Prive des 99\u20AC',
+    subtitle: 'Chauffeur prive professionnel depuis l\'aeroport de Beauvais-Tille vers Paris centre, hotels et toutes destinations. Prix fixes des 99\u20AC',
     description: 'L\'aeroport de Beauvais-Tille se trouve a 85 kilometres au nord de Paris — une distance qui surprend beaucoup de voyageurs ayant choisi un vol Ryanair ou Wizz Air a bas prix sans consulter la carte. La navette officielle coute environ 17 euros mais met 75 a 90 minutes, vous depose uniquement a la Porte Maillot, et ne vous attend pas en cas de retard de vol. Un taxi Beauvais vers Paris centre peut depasser 200 euros sans garantie de confort. Notre transfert prive depuis Beauvais resout chacun de ces problemes : un prix fixe convenu a l\'avance, un chauffeur professionnel qui suit votre heure d\'atterrissage, et un trajet direct porte-a-porte dans une Mercedes ou BMW propre et climatisee. Pas de changement, pas de foule, pas de mauvaise surprise.',
     description2: 'Le trajet depuis Beauvais emprunte l\'autoroute A16 vers le sud, puis rejoint le Peripherique pour atteindre n\'importe quel quartier parisien. Vers le Marais : environ 80 minutes. Vers Montmartre ou l\'Opera : 75 minutes. Vers la Tour Eiffel : 85 minutes. La circulation sur l\'A16 est generalement plus fluide que sur l\'A1 depuis CDG, ce qui rend les temps de trajet plus previsibles. Nos chauffeurs connaissent aussi les alternatives par Meru, Chambly et L\'Isle-Adam pour eviter les bouchons de l\'autoroute le vendredi soir et les weekends de vacances. Pour ceux qui continuent au-dela de Paris, nous pouvons vous conduire directement a Disneyland Paris (environ 100 minutes), Versailles, ou meme Reims en Champagne.',
     description3: 'Beauvais elle-meme est un joyau cache du nord de la France. Sa cathedrale Saint-Pierre possede le choeur gothique le plus haut du monde — 48 metres de pierre vertigineuse qui rivalise avec Notre-Dame de Paris. Le centre medieval et l\'horloge astronomique meritent une visite si votre emploi du temps le permet. Nombre de nos passagers atterrissant a Beauvais se rendent a des evenements parisiens : concerts au Stade de France, salons au Parc des Expositions, defiles pendant la Fashion Week. Quelle que soit votre raison de choisir Beauvais, notre transfert garantit que les economies sur votre billet d\'avion ne seront pas gaspillees dans un trajet stressant et couteux vers la capitale. Reservez maintenant, voyagez malin.',
@@ -43,7 +43,7 @@ const content = {
     feature1Title: 'Service Porte-a-Porte', feature1Desc: 'Pas de navette jusqu\'a Porte Maillot. Direct a votre hotel ou adresse a Paris.',
     feature2Title: 'Suivi des Vols', feature2Desc: 'Suivi de votre vol Ryanair ou Wizz Air. Attente gratuite en cas de retard.',
     feature3Title: 'Vehicules Premium', feature3Desc: 'Vehicules spacieux avec place pour les bagages. Mercedes, BMW ou similaire.',
-    feature4Title: 'Prix Fixe Garanti', feature4Desc: 'Prix verrouille a la reservation. Pas de compteur. Bien moins cher qu\'un taxi.',
+    feature4Title: 'Prix Fixe des 99\u20AC', feature4Desc: 'Prix verrouille a la reservation. Pas de compteur. Bien moins cher qu\'un taxi.',
     sedan: 'Berline Premium', sedanDesc: 'Berline confortable, 1-3 passagers', luxury: 'Berline de Luxe', luxuryDesc: 'Mercedes Classe E ou similaire',
     minivan: 'Monospace', minivanDesc: 'Pour familles jusqu\'a 6 passagers', minibus: 'Minibus', minibusDesc: 'Pour groupes jusqu\'a 8 passagers',
     passengers: 'Passagers', luggage: 'Bagages', bookNow: 'RESERVER', allInclusive: 'Tout compris',

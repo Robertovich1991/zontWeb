@@ -307,4 +307,19 @@
   <url><loc>https://www.zont.cab/business-partners</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/tour-operators</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
+  <!-- ==================== DISNEYLAND PARIS ==================== -->
+  <url>
+    <loc>https://www.zont.cab/disneyland-paris-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/disneyland-paris-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-disneyland-paris"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/transfer-disneylend-parizh"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/disneylend-pariz-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/disneyland-paris-transfer"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url><loc>https://www.zont.cab/transfert-disneyland-paris</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.zont.cab/transfer-disneylend-parizh</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.zont.cab/disneylend-pariz-transfer</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+
 </urlset>

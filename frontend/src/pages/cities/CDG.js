@@ -3,8 +3,8 @@ import CityTransferPage from '@/components/CityTransferPage';
 
 const content = {
   en: {
-    title: 'CDG Airport Transfer - Charles de Gaulle Private Car',
-    subtitle: 'Premium private driver from Paris Charles de Gaulle Airport to Paris city center, hotels and all destinations',
+    title: 'CDG Airport Transfer - Private Driver from 59\u20AC',
+    subtitle: 'Affordable private driver from Paris Charles de Gaulle Airport to Paris city center, hotels and all destinations. Fixed prices from 59\u20AC',
     description: 'Charles de Gaulle Airport is a city within a city: nine terminals spread across 3,200 hectares, connected by an automated shuttle that can leave even seasoned travelers disoriented. Each year, over 70 million passengers navigate its labyrinthine corridors — and the last thing they need after clearing customs is to figure out which bus stop, which RER platform, or which taxi rank leads to central Paris. That is where our private transfer service transforms your arrival. Your driver monitors your exact flight number, adjusts for any delays, and stands ready at your terminal exit with a clear name board the moment you walk through the arrivals doors.',
     description2: 'Terminal 2 alone has seven sub-terminals (2A through 2G), each with its own arrivals area. Terminal 1 is a futuristic circle that can confuse first-time visitors, and Terminal 3 serves budget airlines with minimal signage. Regardless of where you land, your assigned chauffeur knows the precise pickup point. The drive to central Paris follows the A1 motorway, typically taking 35 minutes to the Opera district, 40 minutes to the Champs-Elysees, and about 50 minutes to the Left Bank — though our drivers also know the back roads through Aubervilliers and Saint-Denis that can shave precious minutes during rush hour.',
     description3: 'CDG is also the departure point for day trips to Chantilly (20 minutes), the royal palace of Versailles (60 minutes via the A86), and even Disneyland Paris (just 35 minutes east). Many of our clients book a round-trip: airport to hotel on arrival, then hotel to airport on departure — locking in the same fixed price both ways. For business travelers heading to the Villepinte exhibition center or Roissy business district, our vehicles double as a mobile office with Wi-Fi, phone chargers, and privacy. Book your CDG transfer now and skip the chaos.',
@@ -12,7 +12,7 @@ const content = {
     feature1Title: 'All CDG Terminals', feature1Desc: 'We cover Terminal 1, 2A-2G, and Terminal 3. Driver meets you right at arrivals with name sign.',
     feature2Title: 'Flight Monitoring', feature2Desc: 'Real-time flight tracking. No extra charge for delays. 60 minutes free waiting time.',
     feature3Title: 'Premium Vehicles', feature3Desc: 'Mercedes E-Class, BMW 5 Series. Clean, air-conditioned, less than 3 years old.',
-    feature4Title: 'Fixed Prices', feature4Desc: 'Price confirmed at booking. No hidden fees, no surge pricing. Tolls and parking included.',
+    feature4Title: 'Fixed Prices from 59\u20AC', feature4Desc: 'Price confirmed at booking. No hidden fees, no surge pricing. Affordable for everyone.',
     sedan: 'Premium Sedan', sedanDesc: 'Mercedes E-Class, 1-3 passengers', luxury: 'Luxury Sedan', luxuryDesc: 'Mercedes S-Class or BMW 7 Series',
     minivan: 'Minivan', minivanDesc: 'Mercedes V-Class, up to 6 passengers', minibus: 'Minibus', minibusDesc: 'For groups up to 8 passengers',
     passengers: 'Passengers', luggage: 'Luggage', bookNow: 'BOOK NOW', allInclusive: 'All inclusive',
@@ -34,8 +34,8 @@ const content = {
     rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
-    title: 'Transfert Aeroport CDG - Charles de Gaulle Voiture Privee',
-    subtitle: 'Chauffeur prive premium depuis l\'aeroport Paris Charles de Gaulle vers Paris centre, hotels et toutes destinations',
+    title: 'Transfert Aeroport CDG - Chauffeur Prive des 59\u20AC',
+    subtitle: 'Chauffeur prive depuis l\'aeroport Paris Charles de Gaulle vers Paris centre, hotels et toutes destinations. Prix fixes des 59\u20AC',
     description: 'L\'aeroport Charles de Gaulle est une ville dans la ville : neuf terminaux repartis sur 3 200 hectares, relies par une navette automatique qui peut desorienter meme les voyageurs les plus experimentes. Chaque annee, plus de 70 millions de passagers arpentent ses couloirs labyrinthiques — et la derniere chose dont ils ont besoin apres la douane, c\'est de chercher quel arret de bus, quel quai de RER ou quelle borne de taxi mene au centre de Paris. C\'est la que notre service de transfert prive change tout. Votre chauffeur surveille votre numero de vol exact, s\'ajuste a tout retard, et vous attend a la sortie de votre terminal avec une pancarte nominative des que vous franchissez les portes des arrivees.',
     description2: 'Le Terminal 2 a lui seul compte sept sous-terminaux (2A a 2G), chacun avec sa propre zone d\'arrivees. Le Terminal 1 est un cercle futuriste qui peut derouter les primo-visiteurs, et le Terminal 3 dessert les compagnies low-cost avec une signaletique minimale. Peu importe ou vous atterrissez, votre chauffeur connait le point de prise en charge exact. Le trajet vers Paris centre emprunte l\'autoroute A1, comptez 35 minutes jusqu\'a l\'Opera, 40 minutes jusqu\'aux Champs-Elysees et environ 50 minutes jusqu\'a la Rive Gauche — nos chauffeurs connaissent aussi les raccourcis par Aubervilliers et Saint-Denis qui font gagner de precieuses minutes aux heures de pointe.',
     description3: 'CDG est aussi le point de depart ideal pour des excursions : Chantilly (20 minutes), le chateau de Versailles (60 minutes par l\'A86), et meme Disneyland Paris (35 minutes a l\'est). Beaucoup de nos clients reservent un aller-retour : aeroport-hotel a l\'arrivee, puis hotel-aeroport au depart — au meme prix fixe garanti dans les deux sens. Pour les voyageurs d\'affaires en direction du parc des expositions de Villepinte ou du quartier d\'affaires de Roissy, nos vehicules se transforment en bureau mobile avec Wi-Fi, chargeurs et confidentialite. Reservez votre transfert CDG maintenant et evitez le chaos.',
@@ -43,7 +43,7 @@ const content = {
     feature1Title: 'Tous les Terminaux CDG', feature1Desc: 'Nous couvrons Terminal 1, 2A-2G et Terminal 3. Chauffeur aux arrivees avec pancarte.',
     feature2Title: 'Suivi des Vols', feature2Desc: 'Suivi en temps reel. Aucun supplement pour retard. 60 minutes d\'attente gratuites.',
     feature3Title: 'Vehicules Premium', feature3Desc: 'Mercedes Classe E, BMW Serie 5. Propres, climatises, moins de 3 ans.',
-    feature4Title: 'Prix Fixes', feature4Desc: 'Prix confirme a la reservation. Pas de frais caches, peages et parking inclus.',
+    feature4Title: 'Prix Fixes des 59\u20AC', feature4Desc: 'Prix confirme a la reservation. Pas de frais caches, pas de majoration. Accessible a tous.',
     sedan: 'Berline Premium', sedanDesc: 'Mercedes Classe E, 1-3 passagers', luxury: 'Berline de Luxe', luxuryDesc: 'Mercedes Classe S ou BMW Serie 7',
     minivan: 'Monospace', minivanDesc: 'Mercedes Classe V, jusqu\'a 6 passagers', minibus: 'Minibus', minibusDesc: 'Pour groupes jusqu\'a 8 passagers',
     passengers: 'Passagers', luggage: 'Bagages', bookNow: 'RESERVER', allInclusive: 'Tout compris',

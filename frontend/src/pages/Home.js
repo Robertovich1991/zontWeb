@@ -123,7 +123,8 @@ const homeContent = {
 };
 
 const popularDest = [
-  { nameEn: 'Paris CDG', nameFr: 'Paris CDG', nameRu: 'Париж CDG', nameHy: 'Փարիզ CDG', price: 65, url: '/transfert-aeroport-paris' },
+  { nameEn: 'Paris CDG', nameFr: 'Paris CDG', nameRu: 'Париж CDG', nameHy: 'Փարիզ CDG', price: 59, url: '/transfert-aeroport-paris' },
+  { nameEn: 'Disneyland', nameFr: 'Disneyland', nameRu: 'Диснейленд', nameHy: 'Disneyland', price: 49, url: '/transfert-disneyland-paris' },
   { nameEn: 'Nice', nameFr: 'Nice', nameRu: 'Ницца', nameHy: 'Նիցա', price: 35, url: '/transfert-aeroport-nice' },
   { nameEn: 'Barcelona', nameFr: 'Barcelone', nameRu: 'Барселона', nameHy: 'Բարսելոնա', price: 39, url: '/transfert-aeroport-barcelone' },
   { nameEn: 'Rome', nameFr: 'Rome', nameRu: 'Рим', nameHy: 'Հռոմ', price: 40, url: '/transfert-aeroport-rome' },
@@ -450,7 +451,7 @@ const Home = () => {
               {popularDest.map((d, i) => (
                 <Link key={i} to={d.url} className="group bg-[#0f1419] rounded-xl overflow-hidden border border-gray-700 hover:border-[#2ecc71] transition-all" data-testid={`popular-dest-${i}`}>
                   <div className="h-24 md:h-32 overflow-hidden">
-                    <img src={i === 0 ? IMAGES.cdgDriver : i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    <img src={d.url.includes('disneyland') ? 'https://images.unsplash.com/photo-1762357171945-856f4c3e4b15?w=400&q=70&auto=format' : i === 0 ? IMAGES.cdgDriver : i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   </div>
                   <div className="p-3 md:p-4">
                     <h3 className="text-white font-bold text-sm md:text-base group-hover:text-[#2ecc71] transition-colors">{getName(d)}</h3>

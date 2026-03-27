@@ -3,8 +3,8 @@ import CityTransferPage from '@/components/CityTransferPage';
 
 const content = {
   en: {
-    title: 'Orly Airport Transfer - Private Car Service',
-    subtitle: 'Premium private driver from Paris Orly Airport to Paris city center, hotels and all destinations',
+    title: 'Orly Airport Transfer - Private Driver from 39\u20AC',
+    subtitle: 'Affordable private driver from Paris Orly Airport to Paris city center, hotels and all destinations. Fixed prices from 39\u20AC',
     description: 'Paris-Orly is the insider\'s airport. Situated just 13 kilometres south of central Paris, it offers the quickest route to the Left Bank, the Latin Quarter, and Montparnasse — neighbourhoods that can take over an hour to reach from CDG. Yet despite its proximity, getting out of Orly without a private car still means decoding the OrlyVal shuttle to Antony, switching to the RER B, and hoping your Navigo pass works. Our Orly airport transfer eliminates every one of those steps. A professional driver waits at your terminal exit with a name board, takes your bags, and delivers you to any Paris address in 20 to 35 minutes via the A6 motorway or the scenic Route Nationale 7.',
     description2: 'Orly has recently completed a major modernization, merging its former Sud and Ouest terminals into four numbered halls (Orly 1 through 4). The redesigned airport is sleeker but still growing, and signage can be inconsistent. Our drivers stay updated on every construction detour, every temporary pickup zone, and every gate change. If you land at Orly 3 — the busiest hall for European flights — your chauffeur is positioned just beyond the sliding doors. If you arrive at Orly 1 on an intercontinental flight, the dedicated pickup lane is equally straightforward. No guessing, no walking in the rain to a distant parking lot.',
     description3: 'Orly is also the gateway to southern Paris attractions that tourists often overlook: the Rungis wholesale market (the largest fresh food market in the world), the charming village of Sceaux with its Le Notre gardens, and the vibrant Vietnamese neighbourhood of Choisy. For business travelers, the Orly-Rungis business park and the Courtaboeuf technology zone are minutes away. Many families flying budget airlines into Orly also use our service to reach Disneyland Paris (about 45 minutes east) — far more comfortable than two metro changes with toddlers and luggage. Reserve your Orly transfer today and start your Parisian adventure the moment you land.',
@@ -12,7 +12,7 @@ const content = {
     feature1Title: 'Orly 1-4 Coverage', feature1Desc: 'Pickup from all four Orly halls. Driver right at your terminal exit with name sign.',
     feature2Title: 'Fastest to Left Bank', feature2Desc: 'Just 20 minutes to Saint-Germain, Latin Quarter, Montparnasse. No RER or shuttle needed.',
     feature3Title: 'Premium Vehicles', feature3Desc: 'Mercedes E-Class, BMW 5 Series. Clean, air-conditioned, less than 3 years old.',
-    feature4Title: 'Fixed Prices', feature4Desc: 'Price confirmed at booking. Tolls included. No surge pricing or hidden fees.',
+    feature4Title: 'Fixed Prices from 39\u20AC', feature4Desc: 'Price confirmed at booking. Tolls included. No surge pricing. Affordable for everyone.',
     sedan: 'Premium Sedan', sedanDesc: 'Mercedes E-Class, 1-3 passengers', luxury: 'Luxury Sedan', luxuryDesc: 'Mercedes S-Class or BMW 7 Series',
     minivan: 'Minivan', minivanDesc: 'Mercedes V-Class, up to 6 passengers', minibus: 'Minibus', minibusDesc: 'For groups up to 8 passengers',
     passengers: 'Passengers', luggage: 'Luggage', bookNow: 'BOOK NOW', allInclusive: 'All inclusive',
@@ -34,8 +34,8 @@ const content = {
     rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
-    title: 'Transfert Aeroport Orly - Voiture Privee avec Chauffeur',
-    subtitle: 'Chauffeur prive premium depuis l\'aeroport Paris-Orly vers Paris centre, hotels et toutes destinations',
+    title: 'Transfert Aeroport Orly - Chauffeur Prive des 39\u20AC',
+    subtitle: 'Chauffeur prive depuis l\'aeroport Paris-Orly vers Paris centre, hotels et toutes destinations. Prix fixes des 39\u20AC',
     description: 'Paris-Orly est l\'aeroport des inities. Situe a seulement 13 kilometres au sud du centre de Paris, il offre l\'acces le plus rapide a la Rive Gauche, au Quartier Latin et a Montparnasse — des quartiers qui peuvent prendre plus d\'une heure depuis CDG. Pourtant, malgre sa proximite, sortir d\'Orly sans voiture privee implique de dechiffrer la navette OrlyVal jusqu\'a Antony, de changer pour le RER B, et d\'esperer que votre passe Navigo fonctionne. Notre transfert aeroport Orly elimine chacune de ces etapes. Un chauffeur professionnel vous attend a la sortie de votre terminal avec une pancarte nominative, prend vos bagages et vous depose a n\'importe quelle adresse parisienne en 20 a 35 minutes par l\'autoroute A6 ou la pittoresque Nationale 7.',
     description2: 'Orly a recemment acheve une modernisation majeure, fusionnant ses anciens terminaux Sud et Ouest en quatre halls numerotes (Orly 1 a 4). L\'aeroport redesigne est plus elegant mais toujours en evolution, et la signaletique peut etre incoherente. Nos chauffeurs restent informes de chaque deviation de chantier, chaque zone de prise en charge temporaire et chaque changement de porte. Si vous atterrissez a Orly 3 — le hall le plus frequente pour les vols europeens — votre chauffeur est positionne juste apres les portes coulissantes. Si vous arrivez a Orly 1 sur un vol intercontinental, le point de prise en charge est tout aussi simple. Pas de doute, pas de marche sous la pluie vers un parking eloigne.',
     description3: 'Orly est aussi la porte d\'entree vers des attractions du sud parisien souvent meconnues des touristes : le marche de Rungis (le plus grand marche de produits frais au monde), le charmant village de Sceaux avec ses jardins de Le Notre, et le quartier vietnamien anime de Choisy. Pour les voyageurs d\'affaires, le parc d\'activites Orly-Rungis et la zone technologique de Courtaboeuf sont a quelques minutes. De nombreuses familles voyageant en low-cost via Orly utilisent aussi notre service pour rejoindre Disneyland Paris (environ 45 minutes a l\'est) — bien plus confortable que deux changements de metro avec des enfants et des valises. Reservez votre transfert Orly aujourd\'hui et commencez votre aventure parisienne des l\'atterrissage.',
@@ -43,7 +43,7 @@ const content = {
     feature1Title: 'Couverture Orly 1-4', feature1Desc: 'Prise en charge depuis les quatre halls. Chauffeur a la sortie avec pancarte.',
     feature2Title: 'Le Plus Rapide vers la Rive Gauche', feature2Desc: '20 minutes vers Saint-Germain, Quartier Latin, Montparnasse. Sans RER ni navette.',
     feature3Title: 'Vehicules Premium', feature3Desc: 'Mercedes Classe E, BMW Serie 5. Propres, climatises, moins de 3 ans.',
-    feature4Title: 'Prix Fixes Garantis', feature4Desc: 'Prix confirme a la reservation. Peages inclus. Sans frais caches.',
+    feature4Title: 'Prix Fixes des 39\u20AC', feature4Desc: 'Prix confirme a la reservation. Peages inclus. Accessible a tous.',
     sedan: 'Berline Premium', sedanDesc: 'Mercedes Classe E, 1-3 passagers', luxury: 'Berline de Luxe', luxuryDesc: 'Mercedes Classe S ou BMW Serie 7',
     minivan: 'Monospace', minivanDesc: 'Mercedes Classe V, jusqu\'a 6 passagers', minibus: 'Minibus', minibusDesc: 'Pour groupes jusqu\'a 8 passagers',
     passengers: 'Passagers', luggage: 'Bagages', bookNow: 'RESERVER', allInclusive: 'Tout compris',
