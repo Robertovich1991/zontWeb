@@ -393,8 +393,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
           {/* ===== SIGN IN ===== */}
           {mode === 'signin' && step === 'form' && (
             <>
-              <GoogleSignInButton onSuccess={handleGoogleSuccess} disabled={loading} />
-              <OrDivider />
+              {/* Google Sign-In temporarily hidden — waiting for active API key */}
               <form onSubmit={handleSignIn} className="space-y-4" data-testid="signin-form">
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Email *</label>
@@ -425,8 +424,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
           {/* ===== SIGN UP ===== */}
           {mode === 'signup' && step === 'form' && (
             <>
-              <GoogleSignInButton onSuccess={handleGoogleSuccess} disabled={loading} />
-              <OrDivider />
+              {/* Google Sign-In temporarily hidden — waiting for active API key */}
               <form onSubmit={handleSignUp} className="space-y-3" data-testid="signup-form">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
