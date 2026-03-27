@@ -148,6 +148,7 @@ const Home = () => {
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
   const [cmsHomepage, setCmsHomepage] = useState(null);
   const langSyncRef = useRef(false);
+  const [recentSearches, setRecentSearches] = useState([]);
 
   // IMMUNE REFS: Coordinates stored here can NEVER be cleared by mobile browser onChange events.
   // Only handlePlaceSelect (autocomplete selection) writes to these refs.
