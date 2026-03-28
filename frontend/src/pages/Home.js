@@ -9,7 +9,7 @@ import SEO from '@/components/SEO';
 import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import { transferService } from '@/services/api';
-import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
+import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight, Sparkles, Loader2, Mic, MicOff } from 'lucide-react';
 
 const IMAGES = {
   hero: '/images/hero.webp',
@@ -41,6 +41,8 @@ const homeContent = {
     howTitle: 'How It Works',
     recentTitle: 'Recent Searches', recentEmpty: 'No recent searches',
     aiTitle: 'Book in 10 seconds with AI', aiPlaceholder: 'Ex: CDG tomorrow 2pm to Hilton Opera 2 passengers', aiBtn: 'AUTO', aiLoading: 'Analyzing your trip...', aiLow: 'Could not understand fully. Please check the fields.',
+    guidedPickup: 'Where are you departing from?', guidedDropoff: 'Where are you going?', guidedDate: 'What date?', guidedTime: 'What time?',
+    guidedSuggestions: { pickup: ['Paris CDG', 'Paris Orly', 'Nice Airport', 'Lyon Airport'], dropoff: ['Paris Center', 'Disneyland', 'Tour Eiffel', 'Hotel'], date: ['Today', 'Tomorrow'], time: ['Morning (9h)', 'Afternoon (14h)', 'Evening (19h)'] },
     s1: 'Book Online', s1d: 'Enter your flight details and destination. Instant price confirmation.',
     s2: 'Meet Your Driver', s2d: 'Driver waits at arrivals with your name sign. Help with luggage included.',
     s3: 'Enjoy the Ride', s3d: 'Comfortable direct transfer in a premium vehicle to your destination.',
@@ -68,6 +70,8 @@ const homeContent = {
     howTitle: 'Comment Ca Marche',
     recentTitle: 'Recherches Recentes', recentEmpty: 'Aucune recherche recente',
     aiTitle: 'Reservez en 10 secondes avec IA', aiPlaceholder: 'Ex: CDG demain 14h vers Hilton Opera 2 personnes', aiBtn: 'AUTO', aiLoading: 'Analyse de votre trajet...', aiLow: 'Pas assez d\'informations. Verifiez les champs.',
+    guidedPickup: 'D\'ou partez-vous ?', guidedDropoff: 'Ou allez-vous ?', guidedDate: 'Quelle date ?', guidedTime: 'A quelle heure ?',
+    guidedSuggestions: { pickup: ['Paris CDG', 'Paris Orly', 'Nice Aeroport', 'Lyon Aeroport'], dropoff: ['Paris Centre', 'Disneyland', 'Tour Eiffel', 'Hotel'], date: ['Aujourd\'hui', 'Demain'], time: ['Matin (9h)', 'Apres-midi (14h)', 'Soir (19h)'] },
     s1: 'Reservez en Ligne', s1d: 'Entrez les details de votre vol et destination. Confirmation du prix immediate.',
     s2: 'Rencontrez Votre Chauffeur', s2d: 'Chauffeur aux arrivees avec pancarte a votre nom. Aide aux bagages.',
     s3: 'Profitez du Trajet', s3d: 'Transfert direct confortable dans un vehicule premium.',
@@ -95,6 +99,8 @@ const homeContent = {
     howTitle: 'Как Это Работает',
     recentTitle: 'Недавние Поиски', recentEmpty: 'Нет недавних поисков',
     aiTitle: 'Бронируйте за 10 секунд с ИИ', aiPlaceholder: 'Пр: CDG завтра 14:00 в Hilton Opera 2 чел', aiBtn: 'АВТО', aiLoading: 'Анализ маршрута...', aiLow: 'Недостаточно данных. Проверьте поля.',
+    guidedPickup: 'Откуда вы едете?', guidedDropoff: 'Куда вы едете?', guidedDate: 'Какая дата?', guidedTime: 'Во сколько?',
+    guidedSuggestions: { pickup: ['Paris CDG', 'Paris Orly', 'Nice Airport', 'Lyon Airport'], dropoff: ['Paris Centre', 'Disneyland', 'Tour Eiffel', 'Hotel'], date: ['Сегодня', 'Завтра'], time: ['Утро (9ч)', 'День (14ч)', 'Вечер (19ч)'] },
     s1: 'Бронируйте Онлайн', s1d: 'Введите данные рейса и адрес назначения.',
     s2: 'Встретьте Водителя', s2d: 'Водитель ждет в зале прилета с табличкой.',
     s3: 'Наслаждайтесь', s3d: 'Комфортная поездка в премиум автомобиле.',
@@ -158,6 +164,10 @@ const Home = () => {
   const [recentSearches, setRecentSearches] = useState([]);
   const [aiText, setAiText] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+  const [guidedStep, setGuidedStep] = useState(null); // null | 'pickup' | 'dropoff' | 'date' | 'time'
+  const [guidedInput, setGuidedInput] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
 
   // IMMUNE REFS: Coordinates stored here can NEVER be cleared by mobile browser onChange events.
   // Only handlePlaceSelect (autocomplete selection) writes to these refs.
@@ -346,38 +356,113 @@ const Home = () => {
 
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-  const handleAIParse = async () => {
-    if (!aiText.trim() || aiLoading) return;
+  const applyAIFields = (d) => {
+    if (d.pickup) setPickup({ address: d.pickup, latitude: null, longitude: null });
+    if (d.dropoff) setDropoff({ address: d.dropoff, latitude: null, longitude: null });
+    if (d.date) setDate(d.date);
+    if (d.time) setTime(d.time);
+  };
+
+  const handleAIParse = async (textOverride) => {
+    const text = textOverride || aiText;
+    if (!text.trim() || aiLoading) return;
     setAiLoading(true);
+    setGuidedStep(null);
     try {
       const resp = await fetch(`${API}/api/booking/ai-parse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: aiText, locale: language }),
+        body: JSON.stringify({ text, locale: language }),
       });
       const result = await resp.json();
-      if (result.success && result.confidence >= 0.8) {
-        const d = result.data;
-        if (d.pickup) setPickup({ address: d.pickup, latitude: null, longitude: null });
-        if (d.dropoff) setDropoff({ address: d.dropoff, latitude: null, longitude: null });
-        if (d.date) setDate(d.date);
-        if (d.time) setTime(d.time);
-        toast.success(language === 'fr' ? 'Formulaire rempli par l\'IA !' : 'Form filled by AI!');
-      } else if (result.success && result.confidence >= 0.5) {
-        const d = result.data;
-        if (d.pickup) setPickup({ address: d.pickup, latitude: null, longitude: null });
-        if (d.dropoff) setDropoff({ address: d.dropoff, latitude: null, longitude: null });
-        if (d.date) setDate(d.date);
-        if (d.time) setTime(d.time);
-        toast.info(c.aiLow);
+      if (result.success) {
+        applyAIFields(result.data);
+        if (result.confidence >= 0.8 && result.missing_fields.length === 0) {
+          toast.success(language === 'fr' ? 'Formulaire rempli par l\'IA !' : 'Form filled by AI!');
+        } else {
+          // Trigger guided mode for missing fields
+          const steps = ['pickup', 'dropoff', 'date', 'time'];
+          const missing = steps.find(s => result.missing_fields.includes(s));
+          if (missing) {
+            setGuidedStep(missing);
+            toast.info(language === 'fr' ? 'Quelques infos manquantes...' : 'A few details needed...');
+          } else {
+            toast.success(language === 'fr' ? 'Formulaire rempli !' : 'Form filled!');
+          }
+        }
       } else {
-        toast.error(language === 'fr' ? 'Impossible d\'analyser le texte. Essayez avec plus de details.' : 'Could not parse text. Try with more details.');
+        // Full guided mode from scratch
+        setGuidedStep('pickup');
+        toast.info(language === 'fr' ? 'Decrivez votre trajet etape par etape' : 'Describe your trip step by step');
       }
     } catch {
       toast.error(language === 'fr' ? 'Erreur de connexion IA.' : 'AI connection error.');
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const guidedQuestions = { pickup: c.guidedPickup, dropoff: c.guidedDropoff, date: c.guidedDate, time: c.guidedTime };
+  const guidedSuggestions = c.guidedSuggestions || {};
+
+  const handleGuidedAnswer = (value) => {
+    const now = new Date();
+    const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+    const fmt = (d) => d.toISOString().split('T')[0];
+
+    if (guidedStep === 'pickup') {
+      setPickup({ address: value, latitude: null, longitude: null });
+      setGuidedStep('dropoff');
+    } else if (guidedStep === 'dropoff') {
+      setDropoff({ address: value, latitude: null, longitude: null });
+      setGuidedStep('date');
+    } else if (guidedStep === 'date') {
+      const lower = value.toLowerCase();
+      if (lower.includes('today') || lower.includes("aujourd")) setDate(fmt(now));
+      else if (lower.includes('tomorrow') || lower.includes('demain') || lower.includes('завтра')) setDate(fmt(tomorrow));
+      else setDate(value);
+      setGuidedStep('time');
+    } else if (guidedStep === 'time') {
+      const lower = value.toLowerCase();
+      if (lower.includes('9') || lower.includes('matin') || lower.includes('morning')) setTime('09:00');
+      else if (lower.includes('14') || lower.includes('apr') || lower.includes('after')) setTime('14:00');
+      else if (lower.includes('19') || lower.includes('soir') || lower.includes('even')) setTime('19:00');
+      else setTime(value);
+      setGuidedStep(null);
+      toast.success(language === 'fr' ? 'Formulaire complet !' : 'Form complete!');
+    }
+    setGuidedInput('');
+  };
+
+  const handleGuidedSubmit = () => {
+    if (guidedInput.trim()) handleGuidedAnswer(guidedInput.trim());
+  };
+
+  // Web Speech API - Voice input
+  const startListening = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { toast.error('Voice not supported in this browser'); return; }
+    const recognition = new SR();
+    recognition.lang = language === 'fr' ? 'fr-FR' : language === 'ru' ? 'ru-RU' : 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setAiText(transcript);
+      setIsListening(false);
+      // Auto-trigger parse after voice
+      setTimeout(() => handleAIParse(transcript), 100);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) recognitionRef.current.stop();
+    setIsListening(false);
   };
 
   const handleRecentClick = async (search) => {
@@ -506,18 +591,29 @@ const Home = () => {
                       <p className="text-white font-semibold text-sm">{c.aiTitle}</p>
                     </div>
                     <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={aiText}
-                        onChange={(e) => setAiText(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAIParse()}
-                        placeholder={c.aiPlaceholder}
-                        className="flex-1 min-w-0 px-3 py-2.5 bg-white/10 text-white placeholder-gray-400 rounded-lg border border-white/15 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-xs outline-none"
-                        data-testid="ai-text-input"
-                      />
+                      <div className="flex-1 min-w-0 relative">
+                        <input
+                          type="text"
+                          value={aiText}
+                          onChange={(e) => setAiText(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAIParse()}
+                          placeholder={c.aiPlaceholder}
+                          className="w-full px-3 py-2.5 pr-10 bg-white/10 text-white placeholder-gray-400 rounded-lg border border-white/15 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-xs outline-none"
+                          data-testid="ai-text-input"
+                        />
+                        <button
+                          type="button"
+                          onClick={isListening ? stopListening : startListening}
+                          className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all ${isListening ? 'bg-red-500/80 text-white animate-pulse' : 'text-gray-400 hover:text-[#2ecc71]'}`}
+                          data-testid="ai-mic-btn"
+                          title="Voice input"
+                        >
+                          {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                        </button>
+                      </div>
                       <button
                         type="button"
-                        onClick={handleAIParse}
+                        onClick={() => handleAIParse()}
                         disabled={aiLoading || !aiText.trim()}
                         className="px-4 py-2.5 bg-[#2ecc71] text-white rounded-lg font-bold text-xs hover:bg-[#27ae60] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 flex items-center gap-1.5"
                         data-testid="ai-auto-btn"
@@ -526,6 +622,47 @@ const Home = () => {
                         {aiLoading ? c.aiLoading.split(' ')[0] : c.aiBtn}
                       </button>
                     </div>
+
+                    {/* Guided Mode - ONE question at a time */}
+                    {guidedStep && (
+                      <div className="mt-3 pt-3 border-t border-white/10 animate-[fadeIn_0.3s_ease-out]" data-testid="guided-mode">
+                        <p className="text-white/90 text-xs font-medium mb-2">{guidedQuestions[guidedStep]}</p>
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {(guidedSuggestions[guidedStep] || []).map((s, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => handleGuidedAnswer(s)}
+                              className="px-3 py-1.5 bg-white/10 text-white text-xs rounded-full border border-white/15 hover:bg-[#2ecc71]/20 hover:border-[#2ecc71]/40 transition-all"
+                              data-testid={`guided-btn-${i}`}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={guidedInput}
+                            onChange={(e) => setGuidedInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleGuidedSubmit()}
+                            placeholder="..."
+                            className="flex-1 min-w-0 px-3 py-2 bg-white/10 text-white placeholder-gray-400 rounded-lg border border-white/15 focus:border-[#2ecc71] text-xs outline-none"
+                            data-testid="guided-input"
+                            autoFocus
+                          />
+                          <button
+                            type="button"
+                            onClick={handleGuidedSubmit}
+                            disabled={!guidedInput.trim()}
+                            className="px-3 py-2 bg-[#2ecc71] text-white rounded-lg text-xs font-bold hover:bg-[#27ae60] disabled:opacity-50 transition-colors"
+                            data-testid="guided-submit"
+                          >
+                            OK
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-white rounded-2xl p-5 md:p-6 shadow-2xl" data-testid="home-booking-card">
