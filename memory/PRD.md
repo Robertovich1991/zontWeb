@@ -47,9 +47,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 - User types natural language (e.g. "CDG demain 14h vers Hilton Opera 2 personnes")
 - Backend `POST /api/booking/ai-parse` uses Gemini Flash for fast parsing (<3s)
 - Extracts: pickup, dropoff, date, time, passengers with confidence score
-- If confidence >= 0.8: auto-fill form + success toast
-- If confidence 0.5-0.8: auto-fill + warning toast
-- If confidence < 0.5: error toast, manual entry
+- If confidence >= 0.8 + no missing fields: auto-fill form + success toast
+- If missing fields: triggers **Guided Mode** - ONE question at a time with quick suggestion buttons
+- Guided flow: pickup → dropoff → date → time (each fills form live)
+- Quick buttons: airports, destinations, today/tomorrow, morning/afternoon/evening
+- Custom text input + OK button at each step for flexibility
+- **Voice Input**: Mic button in AI input (Web Speech API native, no external API)
+- Click mic → speak → speech-to-text → auto-trigger AI parse
 - Multi-language (EN/FR/RU/HY), mobile responsive, Enter key support
 - Files: `ai_booking.py`, `Home.js`
 
