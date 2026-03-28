@@ -356,26 +356,65 @@ const Home = () => {
     setDropoff(data);
   };
 
+  // Notification sound - short chime when AI response or new question
+  const playNotifSound = () => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+    } catch { /* audio not available */ }
+  };
+
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+  // Known vague terms (just city names, no street/landmark)
+  const isVagueAddress = (text) => {
+    const vague = ['paris', 'lyon', 'nice', 'marseille', 'bordeaux', 'lille', 'toulouse', 'nantes', 'strasbourg', 'rome', 'milan', 'barcelona', 'london', 'berlin', 'moscow', 'yerevan'];
+    const lower = text.trim().toLowerCase();
+    return vague.includes(lower) || lower.length < 5;
+  };
 
   // Resolve an AI-filled address via Google Places AutocompleteService
   const resolveAIAddress = async (text, field) => {
     if (!text || text.length < 2) return;
+
+    // If address is too vague (just a city name), ask for exact street
+    if (isVagueAddress(text)) {
+      const question = field === 'pickup' ? 'pickup_exact' : 'dropoff_exact';
+      setGuidedStep(question);
+      playNotifSound();
+      return;
+    }
+
     try {
       await loadGoogleMaps();
       const service = new window.google.maps.places.AutocompleteService();
       const predictions = await new Promise((resolve) => {
         service.getPlacePredictions({ input: text, types: ['establishment', 'geocode'] }, (results) => resolve(results || []));
       });
-      if (predictions.length === 0) return;
+      if (predictions.length === 0) {
+        // No results — ask for more details
+        const question = field === 'pickup' ? 'pickup_exact' : 'dropoff_exact';
+        setGuidedStep(question);
+        playNotifSound();
+        return;
+      }
       if (predictions.length === 1 || predictions[0].description.toLowerCase().includes(text.toLowerCase().split(' ')[0])) {
-        // Auto-select first if strong match
         selectGoogleSuggestion(predictions[0], field);
+        playNotifSound();
       } else {
-        // Show options for user to pick
         const opts = predictions.slice(0, 4).map(p => ({ placeId: p.place_id, description: p.description }));
         if (field === 'pickup') setPickupOptions(opts);
         else setDropoffOptions(opts);
+        playNotifSound();
       }
     } catch { /* Google not loaded or API issue - fallback to geocode on submit */ }
   };
@@ -431,23 +470,37 @@ const Home = () => {
       const result = await resp.json();
       if (result.success) {
         applyAIFields(result.data);
-        if (result.confidence >= 0.8 && result.missing_fields.length === 0) {
+        // Check vague addresses FIRST (higher priority than missing date/time)
+        const d = result.data;
+        const pickupVague = d.pickup && isVagueAddress(d.pickup);
+        const dropoffVague = d.dropoff && isVagueAddress(d.dropoff);
+        if (pickupVague) {
+          setGuidedStep('pickup_exact');
+          toast.info(language === 'fr' ? 'Precisez l\'adresse de depart' : 'Please specify the pickup address');
+          playNotifSound();
+        } else if (dropoffVague) {
+          setGuidedStep('dropoff_exact');
+          toast.info(language === 'fr' ? 'Precisez l\'adresse d\'arrivee' : 'Please specify the drop-off address');
+          playNotifSound();
+        } else if (result.confidence >= 0.8 && result.missing_fields.length === 0) {
           toast.success(language === 'fr' ? 'Formulaire rempli par l\'IA !' : 'Form filled by AI!');
+          playNotifSound();
         } else {
-          // Trigger guided mode for missing fields
           const steps = ['pickup', 'dropoff', 'date', 'time'];
           const missing = steps.find(s => result.missing_fields.includes(s));
           if (missing) {
             setGuidedStep(missing);
             toast.info(language === 'fr' ? 'Quelques infos manquantes...' : 'A few details needed...');
+            playNotifSound();
           } else {
             toast.success(language === 'fr' ? 'Formulaire rempli !' : 'Form filled!');
+            playNotifSound();
           }
         }
       } else {
-        // Full guided mode from scratch
         setGuidedStep('pickup');
         toast.info(language === 'fr' ? 'Decrivez votre trajet etape par etape' : 'Describe your trip step by step');
+        playNotifSound();
       }
     } catch {
       toast.error(language === 'fr' ? 'Erreur de connexion IA.' : 'AI connection error.');
@@ -456,7 +509,11 @@ const Home = () => {
     }
   };
 
-  const guidedQuestions = { pickup: c.guidedPickup, dropoff: c.guidedDropoff, date: c.guidedDate, time: c.guidedTime };
+  const guidedQuestions = {
+    pickup: c.guidedPickup, dropoff: c.guidedDropoff, date: c.guidedDate, time: c.guidedTime,
+    pickup_exact: language === 'fr' ? 'Precisez l\'adresse exacte (rue + numero) :' : 'Enter the exact address (street + number):',
+    dropoff_exact: language === 'fr' ? 'Precisez l\'adresse exacte (rue + numero) :' : 'Enter the exact address (street + number):',
+  };
   const guidedSuggestions = c.guidedSuggestions || {};
 
   const handleGuidedAnswer = (value) => {
@@ -464,14 +521,23 @@ const Home = () => {
     const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
     const fmt = (d) => d.toISOString().split('T')[0];
 
-    if (guidedStep === 'pickup') {
+    playNotifSound();
+
+    if (guidedStep === 'pickup' || guidedStep === 'pickup_exact') {
       setPickup({ address: value, latitude: null, longitude: null });
       resolveAIAddress(value, 'pickup');
-      setGuidedStep('dropoff');
-    } else if (guidedStep === 'dropoff') {
+      // Check if dropoff is also vague
+      if (dropoff.address && isVagueAddress(dropoff.address)) setGuidedStep('dropoff_exact');
+      else if (!dropoff.address) setGuidedStep('dropoff');
+      else if (!date) setGuidedStep('date');
+      else if (!time) setGuidedStep('time');
+      else setGuidedStep(null);
+    } else if (guidedStep === 'dropoff' || guidedStep === 'dropoff_exact') {
       setDropoff({ address: value, latitude: null, longitude: null });
       resolveAIAddress(value, 'dropoff');
-      setGuidedStep('date');
+      if (!date) setGuidedStep('date');
+      else if (!time) setGuidedStep('time');
+      else setGuidedStep(null);
     } else if (guidedStep === 'date') {
       const lower = value.toLowerCase();
       if (lower.includes('today') || lower.includes("aujourd")) setDate(fmt(now));
@@ -486,12 +552,34 @@ const Home = () => {
       else setTime(value);
       setGuidedStep(null);
       toast.success(language === 'fr' ? 'Formulaire complet !' : 'Form complete!');
+      playNotifSound();
     }
     setGuidedInput('');
   };
 
   const handleGuidedSubmit = () => {
     if (guidedInput.trim()) handleGuidedAnswer(guidedInput.trim());
+  };
+
+  // Voice for guided mode
+  const startGuidedListening = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    const recognition = new SR();
+    recognition.lang = language === 'fr' ? 'fr-FR' : language === 'ru' ? 'ru-RU' : 'en-US';
+    recognition.interimResults = false;
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setGuidedInput(transcript);
+      setIsListening(false);
+      // Auto-submit after voice
+      setTimeout(() => handleGuidedAnswer(transcript), 200);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
   };
 
   // Web Speech API - Voice input
@@ -697,16 +785,26 @@ const Home = () => {
                           ))}
                         </div>
                         <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={guidedInput}
-                            onChange={(e) => setGuidedInput(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleGuidedSubmit()}
-                            placeholder="..."
-                            className="flex-1 min-w-0 px-3 py-2 bg-white/10 text-white placeholder-gray-400 rounded-lg border border-white/15 focus:border-[#2ecc71] text-xs outline-none"
-                            data-testid="guided-input"
-                            autoFocus
-                          />
+                          <div className="flex-1 min-w-0 relative">
+                            <input
+                              type="text"
+                              value={guidedInput}
+                              onChange={(e) => setGuidedInput(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleGuidedSubmit()}
+                              placeholder={guidedStep?.includes('exact') ? (language === 'fr' ? '12 Rue de Rivoli, Paris' : '12 Rue de Rivoli, Paris') : '...'}
+                              className="w-full px-3 py-2 pr-9 bg-white/10 text-white placeholder-gray-400 rounded-lg border border-white/15 focus:border-[#2ecc71] text-xs outline-none"
+                              data-testid="guided-input"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={isListening ? stopListening : startGuidedListening}
+                              className={`absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full transition-all ${isListening ? 'bg-red-500/80 text-white animate-pulse' : 'text-gray-400 hover:text-[#2ecc71]'}`}
+                              data-testid="guided-mic-btn"
+                            >
+                              {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
                           <button
                             type="button"
                             onClick={handleGuidedSubmit}
