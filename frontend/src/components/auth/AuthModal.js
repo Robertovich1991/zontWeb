@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { X, Loader2, Mail, CheckCircle, AlertCircle, ArrowLeft, KeyRound } from 'lucide-react';
+import { X, Loader2, Mail, CheckCircle, AlertCircle, ArrowLeft, KeyRound, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { authService } from '@/services/api';
@@ -323,6 +323,69 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     if (errors[name]) setErrors({ ...errors, [name]: null });
   };
 
+  // AI Auto-fill parser for signup
+  const [aiSignupText, setAiSignupText] = useState('');
+  const [aiSignupDone, setAiSignupDone] = useState(false);
+
+  const parseUserInfo = (text) => {
+    const result = { firstName: '', lastName: '', email: '', phone: '' };
+    let remaining = text;
+
+    // Extract email
+    const emailMatch = remaining.match(/[\w.+-]+@[\w.-]+\.\w{2,}/);
+    if (emailMatch) {
+      result.email = emailMatch[0];
+      remaining = remaining.replace(emailMatch[0], ' ');
+    }
+
+    // Extract phone (international formats)
+    const phoneMatch = remaining.match(/(?:\+?\d{1,3}[\s.-]?)?\(?\d{1,4}\)?[\s.-]?\d{2,4}[\s.-]?\d{2,4}[\s.-]?\d{0,4}/);
+    if (phoneMatch) {
+      const cleaned = phoneMatch[0].replace(/[^\d+]/g, '');
+      if (cleaned.length >= 8) {
+        result.phone = cleaned.startsWith('+') ? cleaned.replace(/^\+\d{1,3}/, '') : (cleaned.startsWith('0') ? cleaned : cleaned);
+        remaining = remaining.replace(phoneMatch[0], ' ');
+      }
+    }
+
+    // Remaining = name (trim and split)
+    const nameParts = remaining.replace(/[^a-zA-ZÀ-ÿ\s-]/g, '').trim().split(/\s+/).filter(Boolean);
+    if (nameParts.length >= 2) {
+      result.firstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1).toLowerCase();
+      result.lastName = nameParts.slice(1).map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase()).join(' ');
+    } else if (nameParts.length === 1) {
+      result.firstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1).toLowerCase();
+    }
+
+    // Bonus: extract name from email if missing
+    if (!result.firstName && result.email) {
+      const local = result.email.split('@')[0];
+      const parts = local.split(/[._-]/).filter(Boolean);
+      if (parts.length >= 2) {
+        result.firstName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+        result.lastName = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+      } else if (parts.length === 1) {
+        result.firstName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+      }
+    }
+
+    return result;
+  };
+
+  const handleAISignupFill = () => {
+    if (!aiSignupText.trim()) return;
+    const parsed = parseUserInfo(aiSignupText);
+    setFormData(prev => ({
+      ...prev,
+      firstName: parsed.firstName || prev.firstName,
+      lastName: parsed.lastName || prev.lastName,
+      email: parsed.email || prev.email,
+      phone: parsed.phone || prev.phone,
+    }));
+    setAiSignupDone(true);
+    setTimeout(() => setAiSignupDone(false), 2000);
+  };
+
   if (!isOpen) return null;
 
   const inputCls = (field) => `w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent text-sm ${
@@ -424,6 +487,34 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
           {/* ===== SIGN UP ===== */}
           {mode === 'signup' && step === 'form' && (
             <>
+              {/* AI Auto-fill Block */}
+              <div className="mb-4 bg-[#2ecc71]/5 rounded-xl p-3 border border-[#2ecc71]/20" data-testid="ai-signup-block">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-4 h-4 text-[#2ecc71]" />
+                  <p className="text-white font-semibold text-xs">Remplissez en 5 secondes avec IA</p>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={aiSignupText}
+                    onChange={(e) => setAiSignupText(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAISignupFill()}
+                    placeholder="Ex: Jean Dupont 0612345678 jean@gmail.com"
+                    className="flex-1 min-w-0 px-3 py-2 bg-gray-700/50 text-white placeholder-gray-500 rounded-lg border border-gray-600 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-xs outline-none"
+                    data-testid="ai-signup-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAISignupFill}
+                    disabled={!aiSignupText.trim()}
+                    className={`px-3 py-2 rounded-lg font-bold text-xs transition-all flex items-center gap-1.5 shrink-0 ${aiSignupDone ? 'bg-[#2ecc71] text-white' : 'bg-[#2ecc71] text-white hover:bg-[#27ae60] disabled:opacity-40 disabled:cursor-not-allowed'}`}
+                    data-testid="ai-signup-btn"
+                  >
+                    {aiSignupDone ? <><CheckCircle className="w-3.5 h-3.5" /> OK</> : <><Sparkles className="w-3.5 h-3.5" /> AUTO</>}
+                  </button>
+                </div>
+              </div>
+
               {/* Google Sign-In temporarily hidden — waiting for active API key */}
               <form onSubmit={handleSignUp} className="space-y-3" data-testid="signup-form">
                 <div className="grid grid-cols-2 gap-3">
