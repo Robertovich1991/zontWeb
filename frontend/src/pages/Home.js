@@ -9,7 +9,7 @@ import SEO from '@/components/SEO';
 import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import { transferService } from '@/services/api';
-import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight } from 'lucide-react';
+import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
 
 const IMAGES = {
   hero: '/images/hero.webp',
@@ -40,6 +40,7 @@ const homeContent = {
     ctaTitle: 'Ready to Book Your Transfer?', ctaBtn: 'Book Now',
     howTitle: 'How It Works',
     recentTitle: 'Recent Searches', recentEmpty: 'No recent searches',
+    aiTitle: 'Book in 10 seconds with AI', aiPlaceholder: 'Ex: CDG tomorrow 2pm to Hilton Opera 2 passengers', aiBtn: 'AUTO', aiLoading: 'Analyzing your trip...', aiLow: 'Could not understand fully. Please check the fields.',
     s1: 'Book Online', s1d: 'Enter your flight details and destination. Instant price confirmation.',
     s2: 'Meet Your Driver', s2d: 'Driver waits at arrivals with your name sign. Help with luggage included.',
     s3: 'Enjoy the Ride', s3d: 'Comfortable direct transfer in a premium vehicle to your destination.',
@@ -66,6 +67,7 @@ const homeContent = {
     ctaTitle: 'Pret a Reserver Votre Transfert ?', ctaBtn: 'Reserver Maintenant',
     howTitle: 'Comment Ca Marche',
     recentTitle: 'Recherches Recentes', recentEmpty: 'Aucune recherche recente',
+    aiTitle: 'Reservez en 10 secondes avec IA', aiPlaceholder: 'Ex: CDG demain 14h vers Hilton Opera 2 personnes', aiBtn: 'AUTO', aiLoading: 'Analyse de votre trajet...', aiLow: 'Pas assez d\'informations. Verifiez les champs.',
     s1: 'Reservez en Ligne', s1d: 'Entrez les details de votre vol et destination. Confirmation du prix immediate.',
     s2: 'Rencontrez Votre Chauffeur', s2d: 'Chauffeur aux arrivees avec pancarte a votre nom. Aide aux bagages.',
     s3: 'Profitez du Trajet', s3d: 'Transfert direct confortable dans un vehicule premium.',
@@ -92,6 +94,7 @@ const homeContent = {
     ctaTitle: 'Готовы Забронировать Трансфер?', ctaBtn: 'Забронировать',
     howTitle: 'Как Это Работает',
     recentTitle: 'Недавние Поиски', recentEmpty: 'Нет недавних поисков',
+    aiTitle: 'Бронируйте за 10 секунд с ИИ', aiPlaceholder: 'Пр: CDG завтра 14:00 в Hilton Opera 2 чел', aiBtn: 'АВТО', aiLoading: 'Анализ маршрута...', aiLow: 'Недостаточно данных. Проверьте поля.',
     s1: 'Бронируйте Онлайн', s1d: 'Введите данные рейса и адрес назначения.',
     s2: 'Встретьте Водителя', s2d: 'Водитель ждет в зале прилета с табличкой.',
     s3: 'Наслаждайтесь', s3d: 'Комфортная поездка в премиум автомобиле.',
@@ -153,6 +156,8 @@ const Home = () => {
   const [cmsHomepage, setCmsHomepage] = useState(null);
   const langSyncRef = useRef(false);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [aiText, setAiText] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   // IMMUNE REFS: Coordinates stored here can NEVER be cleared by mobile browser onChange events.
   // Only handlePlaceSelect (autocomplete selection) writes to these refs.
@@ -341,6 +346,40 @@ const Home = () => {
 
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
 
+  const handleAIParse = async () => {
+    if (!aiText.trim() || aiLoading) return;
+    setAiLoading(true);
+    try {
+      const resp = await fetch(`${API}/api/booking/ai-parse`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: aiText, locale: language }),
+      });
+      const result = await resp.json();
+      if (result.success && result.confidence >= 0.8) {
+        const d = result.data;
+        if (d.pickup) setPickup({ address: d.pickup, latitude: null, longitude: null });
+        if (d.dropoff) setDropoff({ address: d.dropoff, latitude: null, longitude: null });
+        if (d.date) setDate(d.date);
+        if (d.time) setTime(d.time);
+        toast.success(language === 'fr' ? 'Formulaire rempli par l\'IA !' : 'Form filled by AI!');
+      } else if (result.success && result.confidence >= 0.5) {
+        const d = result.data;
+        if (d.pickup) setPickup({ address: d.pickup, latitude: null, longitude: null });
+        if (d.dropoff) setDropoff({ address: d.dropoff, latitude: null, longitude: null });
+        if (d.date) setDate(d.date);
+        if (d.time) setTime(d.time);
+        toast.info(c.aiLow);
+      } else {
+        toast.error(language === 'fr' ? 'Impossible d\'analyser le texte. Essayez avec plus de details.' : 'Could not parse text. Try with more details.');
+      }
+    } catch {
+      toast.error(language === 'fr' ? 'Erreur de connexion IA.' : 'AI connection error.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const handleRecentClick = async (search) => {
     if (!search.pickupCoords?.latitude || !search.dropoffCoords?.latitude) return;
     setLoading(true);
@@ -458,6 +497,37 @@ const Home = () => {
 
                 {/* Right: Booking Form */}
                 <div ref={bookingRef} className="w-full max-w-md mx-auto lg:mx-0">
+                  {/* AI Booking Block */}
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 mb-3 border border-white/15" data-testid="ai-booking-block">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-[#2ecc71]/20 flex items-center justify-center shrink-0">
+                        <Sparkles className="w-4 h-4 text-[#2ecc71]" />
+                      </div>
+                      <p className="text-white font-semibold text-sm">{c.aiTitle}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={aiText}
+                        onChange={(e) => setAiText(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAIParse()}
+                        placeholder={c.aiPlaceholder}
+                        className="flex-1 min-w-0 px-3 py-2.5 bg-white/10 text-white placeholder-gray-400 rounded-lg border border-white/15 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-xs outline-none"
+                        data-testid="ai-text-input"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAIParse}
+                        disabled={aiLoading || !aiText.trim()}
+                        className="px-4 py-2.5 bg-[#2ecc71] text-white rounded-lg font-bold text-xs hover:bg-[#27ae60] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 flex items-center gap-1.5"
+                        data-testid="ai-auto-btn"
+                      >
+                        {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                        {aiLoading ? c.aiLoading.split(' ')[0] : c.aiBtn}
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="bg-white rounded-2xl p-5 md:p-6 shadow-2xl" data-testid="home-booking-card">
                     <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-1 text-center">{c.bookingTitle}</h2>
                     <p className="text-xs text-gray-500 text-center mb-4">{c.fixedPrices} - {c.securePay}</p>

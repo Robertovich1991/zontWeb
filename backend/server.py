@@ -202,6 +202,9 @@ app.include_router(flight_tracking_router)
 from routes.promo import router as promo_router
 app.include_router(promo_router)
 
+from routes.ai_booking import router as ai_booking_router
+app.include_router(ai_booking_router)
+
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
