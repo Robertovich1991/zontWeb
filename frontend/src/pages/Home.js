@@ -168,6 +168,8 @@ const Home = () => {
   const [guidedInput, setGuidedInput] = useState('');
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
+  const [pickupOptions, setPickupOptions] = useState([]);
+  const [dropoffOptions, setDropoffOptions] = useState([]);
 
   // IMMUNE REFS: Coordinates stored here can NEVER be cleared by mobile browser onChange events.
   // Only handlePlaceSelect (autocomplete selection) writes to these refs.
@@ -356,9 +358,61 @@ const Home = () => {
 
   const scrollToBooking = () => bookingRef.current?.scrollIntoView({ behavior: 'smooth' });
 
+  // Resolve an AI-filled address via Google Places AutocompleteService
+  const resolveAIAddress = async (text, field) => {
+    if (!text || text.length < 2) return;
+    try {
+      await loadGoogleMaps();
+      const service = new window.google.maps.places.AutocompleteService();
+      const predictions = await new Promise((resolve) => {
+        service.getPlacePredictions({ input: text, types: ['establishment', 'geocode'] }, (results) => resolve(results || []));
+      });
+      if (predictions.length === 0) return;
+      if (predictions.length === 1 || predictions[0].description.toLowerCase().includes(text.toLowerCase().split(' ')[0])) {
+        // Auto-select first if strong match
+        selectGoogleSuggestion(predictions[0], field);
+      } else {
+        // Show options for user to pick
+        const opts = predictions.slice(0, 4).map(p => ({ placeId: p.place_id, description: p.description }));
+        if (field === 'pickup') setPickupOptions(opts);
+        else setDropoffOptions(opts);
+      }
+    } catch { /* Google not loaded or API issue - fallback to geocode on submit */ }
+  };
+
+  const selectGoogleSuggestion = (prediction, field) => {
+    const placeId = prediction.placeId || prediction.place_id;
+    const desc = prediction.description;
+    try {
+      const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+      service.getDetails({ placeId, fields: ['geometry', 'formatted_address'] }, (place) => {
+        if (place?.geometry?.location) {
+          const coords = { address: desc, latitude: place.geometry.location.lat(), longitude: place.geometry.location.lng(), placeId };
+          if (field === 'pickup') {
+            setPickup(coords);
+            pickupSafeRef.current = coords;
+            setPickupOptions([]);
+          } else {
+            setDropoff(coords);
+            dropoffSafeRef.current = coords;
+            setDropoffOptions([]);
+          }
+        }
+      });
+    } catch { /* fallback to geocode on submit */ }
+  };
+
   const applyAIFields = (d) => {
-    if (d.pickup) setPickup({ address: d.pickup, latitude: null, longitude: null });
-    if (d.dropoff) setDropoff({ address: d.dropoff, latitude: null, longitude: null });
+    setPickupOptions([]);
+    setDropoffOptions([]);
+    if (d.pickup) {
+      setPickup({ address: d.pickup, latitude: null, longitude: null });
+      resolveAIAddress(d.pickup, 'pickup');
+    }
+    if (d.dropoff) {
+      setDropoff({ address: d.dropoff, latitude: null, longitude: null });
+      resolveAIAddress(d.dropoff, 'dropoff');
+    }
     if (d.date) setDate(d.date);
     if (d.time) setTime(d.time);
   };
@@ -412,9 +466,11 @@ const Home = () => {
 
     if (guidedStep === 'pickup') {
       setPickup({ address: value, latitude: null, longitude: null });
+      resolveAIAddress(value, 'pickup');
       setGuidedStep('dropoff');
     } else if (guidedStep === 'dropoff') {
       setDropoff({ address: value, latitude: null, longitude: null });
+      resolveAIAddress(value, 'dropoff');
       setGuidedStep('date');
     } else if (guidedStep === 'date') {
       const lower = value.toLowerCase();
@@ -680,6 +736,18 @@ const Home = () => {
                           className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
                           data-testid="home-pickup-input"
                         />
+                        {pickupOptions.length > 0 && (
+                          <div className="mt-1 bg-white rounded-lg border border-[#2ecc71]/30 shadow-lg overflow-hidden animate-[fadeIn_0.2s_ease-out]" data-testid="pickup-suggestions">
+                            <p className="px-3 py-1.5 text-[10px] font-semibold text-[#2ecc71] uppercase tracking-wide bg-[#2ecc71]/5">{language === 'fr' ? 'Choisissez l\'adresse exacte' : 'Choose exact address'}</p>
+                            {pickupOptions.map((opt, i) => (
+                              <button key={i} type="button" onClick={() => selectGoogleSuggestion(opt, 'pickup')}
+                                className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-[#2ecc71]/10 border-t border-gray-50 flex items-center gap-2 transition-colors"
+                                data-testid={`pickup-opt-${i}`}>
+                                <MapPin className="w-3 h-3 text-[#2ecc71] shrink-0" /><span className="truncate">{opt.description}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <label htmlFor="h-dropoff" className="block text-gray-700 font-medium text-sm mb-1">{c.dropoff}</label>
@@ -692,6 +760,18 @@ const Home = () => {
                           className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
                           data-testid="home-dropoff-input"
                         />
+                        {dropoffOptions.length > 0 && (
+                          <div className="mt-1 bg-white rounded-lg border border-[#2ecc71]/30 shadow-lg overflow-hidden animate-[fadeIn_0.2s_ease-out]" data-testid="dropoff-suggestions">
+                            <p className="px-3 py-1.5 text-[10px] font-semibold text-[#2ecc71] uppercase tracking-wide bg-[#2ecc71]/5">{language === 'fr' ? 'Choisissez l\'adresse exacte' : 'Choose exact address'}</p>
+                            {dropoffOptions.map((opt, i) => (
+                              <button key={i} type="button" onClick={() => selectGoogleSuggestion(opt, 'dropoff')}
+                                className="w-full px-3 py-2 text-left text-xs text-gray-700 hover:bg-[#2ecc71]/10 border-t border-gray-50 flex items-center gap-2 transition-colors"
+                                data-testid={`dropoff-opt-${i}`}>
+                                <MapPin className="w-3 h-3 text-red-400 shrink-0" /><span className="truncate">{opt.description}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
