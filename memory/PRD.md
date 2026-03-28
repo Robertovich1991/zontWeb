@@ -42,6 +42,22 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 - Added `pickupSafeRef`/`dropoffSafeRef` as immune coordinate storage
 - Applied to `PlacesAutocomplete.js`, `Home.js`, `CityTransferPage.js`
 
+### AI-Assisted Booking (March 2026)
+- Input block above booking form: "Reservez en 10 secondes avec IA"
+- User types natural language (e.g. "CDG demain 14h vers Hilton Opera 2 personnes")
+- Backend `POST /api/booking/ai-parse` uses Gemini Flash for fast parsing (<3s)
+- Extracts: pickup, dropoff, date, time, passengers with confidence score
+- If confidence >= 0.8: auto-fill form + success toast
+- If confidence 0.5-0.8: auto-fill + warning toast
+- If confidence < 0.5: error toast, manual entry
+- Multi-language (EN/FR/RU/HY), mobile responsive, Enter key support
+- Files: `ai_booking.py`, `Home.js`
+
+### Vehicle Image Optimization (March 2026)
+- 4 vehicle PNG images from C# API converted to local WebP
+- Total reduction: 5024 KB -> 130 KB (98% lighter)
+- Fallback to C# proxy for unknown/new vehicle images
+
 ### TripAdvisor Reviews (March 2026)
 - Custom `TripAdvisorReviews.js` with 6 real scraped reviews
 - Badge "4.5/5 Tripadvisor - 29 avis" clickable, scrolls to reviews
@@ -75,14 +91,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an exter
 ## Prioritized Backlog
 
 ### P0
-- (None currently — Recent Searches completed)
+- (None currently)
 
 ### P1
-- Google Sheets Planning Import (direct API integration)
-- Hotel Kiosk PWA (`/kiosk` route, tablet-optimized)
+- Google Sheets Planning Import
+- Hotel Kiosk PWA
 
 ### P2
-- AI-assisted Booking Creation (paste text -> LLM extracts details)
 - Geofences & GPS Alerts
 - Editable Company Profile Page
 - Partner Ride Cancellation sync (BLOCKED - needs C# API)
