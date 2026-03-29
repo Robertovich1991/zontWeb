@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, Navigate, useLocation } from 'react-router-dom';
 import { useGpsAdmin } from './GpsAdminAuthContext';
-import { Navigation, LayoutDashboard, Router, Building2, Map, LogOut, Menu, X } from 'lucide-react';
+import { Navigation, LayoutDashboard, Router, Building2, Map, LogOut, Menu, X, History } from 'lucide-react';
 
 const navItems = [
   { to: '/gps-admin/dashboard', label: 'Dashboard',  icon: LayoutDashboard },
   { to: '/gps-admin/devices',   label: 'Appareils',   icon: Router },
   { to: '/gps-admin/companies', label: 'Societes',    icon: Building2 },
   { to: '/gps-admin/map',       label: 'Carte globale', icon: Map },
+  { to: '/gps-admin/history',   label: 'Historique',   icon: History },
 ];
 
 const GpsAdminLayout = () => {

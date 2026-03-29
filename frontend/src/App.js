@@ -89,6 +89,7 @@ const GpsAdminDashboard = lazy(() => import("@/pages/gps-admin/GpsAdminDashboard
 const GpsAdminDevices = lazy(() => import("@/pages/gps-admin/GpsAdminDevices"));
 const GpsAdminCompanies = lazy(() => import("@/pages/gps-admin/GpsAdminCompanies"));
 const GpsAdminMap = lazy(() => import("@/pages/gps-admin/GpsAdminMap"));
+const GpsAdminHistory = lazy(() => import("@/pages/gps-admin/GpsAdminHistory"));
 
 const AdminGuard = ({ children }) => {
   const { user, loading } = useAdminAuth();
@@ -316,6 +317,7 @@ function App() {
                     <Route path="devices" element={<GpsAdminDevices />} />
                     <Route path="companies" element={<GpsAdminCompanies />} />
                     <Route path="map" element={<GpsAdminMap />} />
+                    <Route path="history" element={<GpsAdminHistory />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>

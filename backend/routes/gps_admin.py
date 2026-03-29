@@ -461,3 +461,83 @@ async def gps_admin_websocket(websocket: WebSocket):
         logger.error(f"Admin WS error: {e}")
     finally:
         gps_ws_manager.disconnect_admin(websocket)
+
+
+
+# ── Trip History ──────────────────────────────────────────────────────
+
+@router.get("/history/{imei}")
+async def get_device_history(imei: str, request: Request, date: str = "", limit: int = 5000):
+    """Get historical positions for a device, optionally filtered by date (YYYY-MM-DD)."""
+    verify_admin(request)
+    db = get_db(request)
+
+    query = {"imei": imei}
+    if date:
+        try:
+            day_start = datetime.fromisoformat(f"{date}T00:00:00+00:00")
+            day_end = day_start + timedelta(days=1)
+            query["timestamp"] = {"$gte": day_start.isoformat(), "$lt": day_end.isoformat()}
+        except ValueError:
+            pass
+
+    positions = await db.gps_history.find(
+        query, {"_id": 0}
+    ).sort("timestamp", 1).limit(limit).to_list(limit)
+
+    # Also check gps_positions (current positions collection) if history is empty
+    if not positions:
+        positions = await db.gps_positions.find(
+            {"imei": imei}, {"_id": 0}
+        ).sort("timestamp", 1).limit(limit).to_list(limit)
+
+    # Calculate trip stats
+    total_distance = 0
+    max_speed = 0
+    if len(positions) > 1:
+        for i in range(1, len(positions)):
+            p1 = positions[i - 1]
+            p2 = positions[i]
+            max_speed = max(max_speed, p2.get("speed", 0) or 0)
+            # Haversine approximation
+            import math
+            lat1, lon1 = math.radians(p1.get("lat", 0)), math.radians(p1.get("lng", 0))
+            lat2, lon2 = math.radians(p2.get("lat", 0)), math.radians(p2.get("lng", 0))
+            dlat, dlon = lat2 - lat1, lon2 - lon1
+            a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+            total_distance += 6371 * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    elif len(positions) == 1:
+        max_speed = positions[0].get("speed", 0) or 0
+
+    return {
+        "imei": imei,
+        "count": len(positions),
+        "positions": positions,
+        "stats": {
+            "distance_km": round(total_distance, 2),
+            "max_speed": round(max_speed, 1),
+            "points": len(positions),
+            "first": positions[0].get("timestamp") if positions else None,
+            "last": positions[-1].get("timestamp") if positions else None,
+        }
+    }
+
+
+@router.get("/history-dates/{imei}")
+async def get_device_history_dates(imei: str, request: Request):
+    """Get list of dates that have position data for a device."""
+    verify_admin(request)
+    db = get_db(request)
+
+    # Get distinct dates from both collections
+    dates = set()
+    async for doc in db.gps_history.find({"imei": imei}, {"timestamp": 1, "_id": 0}):
+        ts = doc.get("timestamp", "")
+        if ts:
+            dates.add(ts[:10])
+    async for doc in db.gps_positions.find({"imei": imei}, {"timestamp": 1, "_id": 0}):
+        ts = doc.get("timestamp", "")
+        if ts:
+            dates.add(ts[:10])
+
+    return {"imei": imei, "dates": sorted(dates, reverse=True)}
