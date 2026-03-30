@@ -341,6 +341,9 @@ const CarSelection = () => {
                 const imageUrl = transferService.getVehicleImageUrl(vehicle.imagePath);
                 const price = vehicle.minAmount;
                 const tripType = (vehicle.tripType || '').trim();
+                // Override passenger counts until C# API is updated
+                const passengerOverrides = { 'Regular Zont': 3, 'Shuttle private 8 pers.': 8 };
+                const paxCount = passengerOverrides[tripType] || vehicle.passenger;
 
                 return (
                   <div
@@ -382,10 +385,10 @@ const CarSelection = () => {
 
                           {/* Specs */}
                           <div className="flex items-center gap-4 mb-2.5">
-                            {vehicle.passenger > 0 && (
+                            {paxCount > 0 && (
                               <div className="flex items-center gap-1.5 text-sm text-gray-600">
                                 <Users className="w-4 h-4 text-gray-400" />
-                                <span>{c.pax} <b>{vehicle.passenger}</b></span>
+                                <span>{c.pax} <b>{paxCount}</b></span>
                               </div>
                             )}
                             {vehicle.luggage > 0 && (
