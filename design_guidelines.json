@@ -1,83 +1,116 @@
 {
+  "project_name": "Zont - Premium Airport Transfer Booking",
   "theme": "dark",
-  "archetype": "The Performance Pro + Glassmorphism",
+  "ux_analysis_and_recommendations": {
+    "1_optimal_step_order": "Home (Search) -> Car Selection -> Trip Recap (Route Map & Premium Perks) -> Inline Passenger Details (Auth) -> Payment (Stripe) -> Confirmation. This sequence builds value and commitment before introducing friction.",
+    "2_map_recap_before_after_registration": "BEFORE. The 'Commitment and Consistency' principle dictates that users should see the full value (exact route, vehicle, price, premium amenities) to build desire. Asking for registration before the recap causes high bounce rates as users haven't validated their purchase yet.",
+    "3_registration_modal_vs_page": "Neither as a traditional barrier. Registration should be masked as a 'Passenger Details' step within an Inline Split-Pane Checkout or an accordion. On mobile, use a seamless Bottom Sheet. Do not use generic centered modals that block the user's view of what they are booking. The goal is a 'Guest Checkout' feel that registers them seamlessly via the C# API.",
+    "4_presenting_premium_value": "In Car Selection: Use minimalist duotone icons (e.g., Phosphor Icons) for Water, 60min Wait, Meet & Greet with Name Sign on each car card. In the Recap/Checkout: Dedicate a prominent 'Included Benefits' Bento Grid block with a subtle border/glow (The 'Tracing Beam' surface strategy). This reassures the premium price point without adding steps.",
+    "5_combine_registration_and_payment": "YES. Combine them into a single-page 'Accordion' or 'Split-Pane' checkout. Left pane: Step 1 (Contact/Auth), Step 2 (Flight Details), Step 3 (Payment). Right pane: Sticky Order Summary. This prevents the psychological fatigue of multiple page reloads.",
+    "6_mobile_first_recommendations": "1. Use 'Bottom Sheets' (Drawer) for car details and auth instead of full-page navigation. 2. Sticky bottom CTA ('Book for €XX') during the entire checkout scroll. 3. Auto-trigger numeric keypads for phone and Stripe fields. 4. Collapsible/mini-map to preserve vertical space (max-h-[30vh] for map on mobile)."
+  },
   "typography": {
-    "headings": "Manrope",
-    "body": "IBM Plex Sans",
-    "mono": "IBM Plex Mono",
-    "rules": [
-      "NO Inter for headings. Keep the typography technical but high-end.",
-      "Use tracking-tight (letter-spacing: -0.025em) for all headings.",
-      "Use tracking-[0.2em] uppercase for overlines and small labels.",
-      "MANDATORY: Use IBM Plex Mono for all telemetry data (speed, IMEI, coordinates, time)."
-    ],
-    "import_url": "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap"
+    "primary_heading_font": "Playfair Display",
+    "primary_body_font": "Manrope",
+    "heading_rules": "Use Playfair Display for marketing headings, large titles, and luxury positioning. Apply 'tracking-tight' to headings. DO NOT use generic fonts like Inter for headings. Keep it elegant.",
+    "body_rules": "Use Manrope for all UI, form fields, buttons, and data tables. It offers excellent readability for numbers (prices, times, flight numbers).",
+    "font_weights": "Use distinct contrast: 'font-light' for elegant subheadings, 'font-semibold' for primary data and prices."
   },
   "colors": {
-    "background": "#09090B",
-    "surface": "rgba(9, 9, 11, 0.65)",
-    "surfaceHover": "rgba(255, 255, 255, 0.04)",
-    "border": "rgba(255, 255, 255, 0.08)",
-    "primary": "#FAFAFA",
-    "secondary": "#A1A1AA",
-    "accent": "#FFFFFF",
-    "status": {
-      "moving": "#10B981",
-      "stopped": "#F59E0B",
-      "offline": "#52525B"
-    }
+    "background": {
+      "base": "#0A0E17",
+      "surface": "#111827",
+      "surface_elevated": "#1F2937"
+    },
+    "primary_accent": {
+      "emerald": "#10B981",
+      "emerald_hover": "#059669",
+      "emerald_glow": "rgba(16, 185, 129, 0.15)"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#9CA3AF",
+      "muted": "#6B7280"
+    },
+    "borders": {
+      "default": "#374151",
+      "subtle": "#1F2937"
+    },
+    "rules": "Premium Dark Theme (Jewel & Luxury + Performance Pro). Use the Emerald Green ONLY for primary actions (Search, Select, Pay). DO NOT use gradients for backgrounds. Use 'Tinted Grey' (slate/gray) rather than pure black. Never use pure #000000."
   },
-  "visual_enhancers": {
-    "glassmorphism": "bg-zinc-950/65 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]",
-    "bento_grid": "Use high-density grid for telemetry details. grid-cols-2 or grid-cols-3 with gap-0.5 and bg-white/10 to act as 1px borders between cells.",
-    "markers": "Custom HTML map markers (divIcons) with CSS pulse rings for active/moving vehicles. Glow effect using drop-shadow.",
-    "active_state": "Selected vehicle in the list MUST have a subtle 1px left border glowing with the status color (e.g. border-l-emerald-500) and a very subtle linear-gradient background."
-  },
-  "layouts": {
-    "main": "Full screen map (absolute inset-0 z-0). UI layers float on top of the map. DO NOT put the map inside a flex row.",
-    "sidebar": "w-[400px] flex flex-col h-auto max-h-[calc(100vh-2rem)] absolute left-4 top-4 bottom-4 rounded-3xl overflow-hidden z-10",
-    "detail_panel": "w-[400px] flex flex-col h-auto max-h-[calc(100vh-2rem)] absolute right-4 top-4 bottom-4 rounded-3xl overflow-hidden z-10",
-    "mobile": "Map background, floating search top. Details and list act as an expandable bottom sheet (rounded-t-3xl, fixed bottom-0 left-0 right-0)."
+  "spacing_and_layout": {
+    "general_spacing": "Generous Spacing Philosophy. Use p-6, p-8, p-12 to create breathing room, especially in the Car Selection cards and Checkout summary.",
+    "grid_system": "Bento Grid for the Trip Recap. 12-column grid on Desktop. 1-column mobile-first.",
+    "surface_strategies": "Glassmorphism for the Sticky Nav (bg-gray-900/70 backdrop-blur-xl border-b border-white/10). Solid backgrounds with 1px border-gray-800 for Car Cards. Do NOT use heavy box-shadows in dark mode; use borders and subtle inner glows."
   },
   "components": {
-    "vehicle_card": "Minimalist row, group hover. Left: Status indicator dot. Center: Vehicle Name (font-semibold text-white) + Plate (font-mono text-xs text-zinc-400). Right: Speed (font-mono text-emerald-400). Padding: p-4.",
-    "telemetry_widget": "Technical look. Container: flex flex-col p-4 bg-zinc-900/50. Top: Subdued label (tracking-[0.2em] uppercase text-[10px] text-zinc-500). Bottom: Large value (text-2xl font-mono text-white).",
-    "filters": "Pill-shaped toggle buttons, backdrop-blur, subtle active states (bg-white/10 text-white border-white/20).",
-    "add_device_modal": "High-end form. Glassmorphic overlay. Form inputs MUST have solid dark background (bg-zinc-900) to contrast the glass modal, with focus-visible:ring-1 focus-visible:ring-white/50."
+    "forms": "Use Shadcn Form, Input, Select. Customize inputs with h-12 or h-14, rounded-none or rounded-md (slight), border-gray-700, bg-gray-900. Focus state: ring-1 ring-emerald-500.",
+    "car_card": "Vertical or Horizontal layout depending on device. Large WebP image of the car, Playfair Display title, Manrope price (e.g., €85). Minimalist icon row for specs (Luggage x2, Pax x3).",
+    "drawers_and_modals": "Use Shadcn Drawer (Bottom Sheet) for Mobile interactions. Use Dialog for Desktop if necessary, but prefer inline split-panes for Checkout.",
+    "buttons": "Shadcn Button. Primary: bg-emerald-500 text-white hover:bg-emerald-600. Large touch targets (min-h-[48px]). Use 'group' and group-hover for internal icon translation (arrow moving right)."
+  },
+  "visual_enhancers": {
+    "icons": "Phosphor Icons (Duotone weight). Used for amenities (water, wifi, meet and greet, luggage).",
+    "map": "Google Maps with 'Dark/Night' JSON styling to blend seamlessly into the #0A0E17 background. Hide POIs to keep the route clean.",
+    "textures": "Subtle noise/grain texture overlaid on the Hero section to break the 'digital flatness' and feel cinematic."
   },
   "motion": {
-    "hover": "Subtle translate-x-1 on list items, bg-white/5.",
-    "transitions": "transition-all duration-300 ease-out",
-    "markers": "Active vehicles get a pulsing ring animation: animate-ping absolute inset-0 rounded-full opacity-50."
+    "page_transitions": "Framer Motion. Fade and slight slide-up (y: 10) for page entry.",
+    "interactions": "Hover state on Car Cards: slight scale-up of car image, border color shift to emerald-500/50. Hover on buttons: bg-color shift + slight transform.",
+    "list_stagger": "When loading Car Selection, stagger the entry of the car cards."
   },
   "accessibility": {
-    "contrast": "Ensure text over glass meets APCA standards. Use text-shadow if necessary over the map.",
-    "focus": "focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
+    "contrast": "Ensure text over images has a dark gradient overlay. All text must pass WCAG AA (Manrope handles this well in small sizes).",
+    "focus_states": "All form inputs MUST have explicit focus:ring-emerald-500 to guide the user through the checkout flow.",
+    "aria_labels": "Add aria-labels to all icon-only buttons (like map zoom, or edit selection)."
+  },
+  "testing_attributes": {
+    "rules": "All interactive elements MUST include data-testid. Examples: data-testid='search-transfer-btn', data-testid='select-car-regular', data-testid='checkout-submit-btn', data-testid='passenger-email-input'."
+  },
+  "image_urls": {
+    "hero_backgrounds": [
+      {
+        "url": "https://images.pexels.com/photos/15774577/pexels-photo-15774577.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Premium chauffeur opening door for client",
+        "category": "home_hero"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1764089859662-7b4773dff85b?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "description": "Black Mercedes S-Class driving",
+        "category": "car_selection_bg"
+      }
+    ],
+    "ui_elements": [
+      {
+        "url": "https://images.unsplash.com/photo-1761377197584-2eed555e2b0c?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "description": "Premium luggage in hotel lobby",
+        "category": "recap_amenity_visual"
+      }
+    ]
+  },
+  "3d_libraries": {
+    "recommendation": "None for the core booking flow. Performance and conversion are paramount. Use clean 2D UI with Framer Motion for micro-interactions and a highly stylized Google Map API integration for the route visual."
   },
   "instructions_to_main_agent": [
-    "Inject the font import URL into the index.css or main App file.",
-    "Apply fonts in tailwind.config.js: sans: ['IBM Plex Sans'], mono: ['IBM Plex Mono'], heading: ['Manrope'].",
-    "Use react-leaflet with cartodb dark_matter tiles: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'.",
-    "The page is entirely dark mode. Enforce dark mode classes everywhere (e.g. text-white, bg-zinc-950).",
-    "Implement the left sidebar and right panel as floating elements OVER the map (z-10), not adjacent to it. They must use the glassmorphism definition.",
-    "Do NOT use generic shadcn Card components for the main sidebars. Use raw semantic HTML (`aside`, `section`) with glassmorphism classes.",
-    "Data structure in the Detail Panel MUST use a Bento grid (grid-cols-2). Example: `<div class='grid grid-cols-2 gap-[1px] bg-white/10 border-y border-white/10'>` with cells having `bg-zinc-950/80` to create hair-line borders between stats.",
-    "Map Markers MUST be custom HTML DivIcons (Leaflet feature) to show status colors. Example HTML: `<div class=\"relative flex items-center justify-center w-4 h-4\"><div class=\"absolute w-full h-full rounded-full bg-${color}-500 animate-ping opacity-50\"></div><div class=\"relative w-3 h-3 rounded-full bg-${color}-500 border border-black\"></div></div>`.",
-    "Do not use the default Leaflet blue pins.",
-    "Add 'data-testid' to all interactive elements."
+    "1. Restructure the routing to support the new flow: Home -> CarSelection -> Recap -> Checkout (Auth + Payment combined) -> Confirmation.",
+    "2. On CarSelection.js, clicking 'Select' should immediately route to the Recap page, passing the selected car data. DO NOT trigger auth here.",
+    "3. Build a Trip Recap component featuring a stylized dark-mode map, the selected car, price, and premium amenities (Water, 60m Wait, Name Sign) prominently displayed.",
+    "4. Refactor Auth/Checkout: Create a single Split-Pane view. Left side is a multi-step accordion (Step 1: Contact Details, Step 2: Payment). Entering Contact Details should handle the C# API registration/login transparently under the hood.",
+    "5. Ensure Shadcn forms are used with Manrope font for all inputs and data displays.",
+    "6. Apply the Playfair Display font globally for all primary headings.",
+    "7. Implement strict mobile-first bottom-sheets (Drawers) for the car details and mobile checkout steps.",
+    "8. Add data-testid attributes to all buttons, inputs, and major interaction points."
   ],
-  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
-    "You tend to converge toward generic outputs. Avoid this: make creative, distinctive frontends that feel premium.",
-    "DO NOT use dark colors as gradients. Use solid darks with noise/grain or subtle glass effects.",
-    "Create depth through layered design elements with z-index hierarchy.",
-    "Use glass-morphism effects with backdrop filters (12-24px blur).",
-    "You MUST NOT apply universal transition (e.g., transition: all). Add transitions to specific interactive elements.",
-    "You MUST NOT center align the app container. Do not add `.App { text-align: center; }`.",
-    "NEVER use AI assistant Emoji characters for icons. Use Lucide React.",
-    "Every interaction needs micro-animations - hover states, selection states.",
-    "Use 2-3x more spacing than feels comfortable.",
-    "Prioritize using pre-existing components from src/components/ui when applicable.",
-    "Components MUST use named exports, Pages MUST use default exports.",
-    "Use `sonner` for toast notifications."
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Do not converge toward generic outputs. Use the defined typography (Playfair Display + Manrope).",
+    "Never use pure black or pure white; always use the tinted palette provided (#0A0E17 for background).",
+    "Use 2-3x more spacing than feels comfortable. Avoid cramped layouts.",
+    "Do not use generic centered layouts. Use optical alignment and bento grids.",
+    "Create depth with borders (border-white/10) and subtle glows instead of heavy shadows in dark mode.",
+    "Every interaction needs micro-animations (Framer Motion).",
+    "Use 'sonner' for all toasts.",
+    "Components MUST use named exports, pages MUST use default exports.",
+    "NEVER use emojis for icons. Use the specified Phosphor Icons library.",
+    "Do NOT apply universal transitions (transition: all)."
   ]
 }
