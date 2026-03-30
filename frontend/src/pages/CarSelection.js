@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
-import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { transferService } from '@/services/api';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, Plane, CheckCircle, Loader2 } from 'lucide-react';
-import AuthModal from '@/components/auth/AuthModal';
 import { PromoPopup, PromoBanner } from '@/components/PromoPopup';
 
 const labels = {
@@ -81,10 +79,7 @@ const labels = {
 const CarSelection = () => {
   const navigate = useNavigate();
   const { searchData, selectCar, vehicleResults, setVehicleResults } = useBooking();
-  const { isAuthenticated } = useAuth();
   const { language } = useLanguage();
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -191,12 +186,8 @@ const CarSelection = () => {
         body: JSON.stringify({ code: promoCode }),
       }).catch(() => {});
     }
-    if (isAuthenticated) {
-      navigate('/checkout');
-    } else {
-      setAuthMode('signup');
-      setAuthModalOpen(true);
-    }
+    // Navigate to trip recap (handles both auth and non-auth users)
+    navigate('/trip-recap');
   };
 
   // Empty state - no search data
@@ -445,13 +436,6 @@ const CarSelection = () => {
       <Footer />
 
       <PromoPopup open={promoOpen} onClose={() => setPromoOpen(false)} onApply={handlePromoApply} />
-
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        mode={authMode}
-        onSwitchMode={(newMode) => setAuthMode(newMode)}
-      />
     </div>
   );
 };

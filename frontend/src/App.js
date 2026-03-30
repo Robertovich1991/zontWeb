@@ -19,6 +19,7 @@ const BecomeClient = lazy(() => import("@/pages/BecomeClient"));
 const Help = lazy(() => import("@/pages/Help"));
 const Countries = lazy(() => import("@/pages/Countries"));
 const CarSelection = lazy(() => import("@/pages/CarSelection"));
+const TripRecap = lazy(() => import("@/pages/TripRecap"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const MyBookings = lazy(() => import("@/pages/MyBookings"));
 const MyAccount = lazy(() => import("@/pages/MyAccount"));
@@ -233,6 +234,7 @@ function App() {
                   <Route path="/erevan-odanavakayani-transfer" element={<YerevanTransfer />} />
                   {/* General pages */}
                   <Route path="/car-selection" element={<CarSelection />} />
+                  <Route path="/trip-recap" element={<TripRecap />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/my-bookings" element={<MyBookings />} />
                   <Route path="/my-account" element={<MyAccount />} />
