@@ -427,18 +427,6 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
           </div>
         </section>
 
-        {/* SEO Description - Dynamic from CMS */}
-        <section className="py-10 px-4 bg-[#0f1419]">
-          <div className="max-w-4xl mx-auto">
-            <p className="text-base text-gray-300 leading-relaxed">{introText}</p>
-            {mainContent && <p className="text-sm text-gray-400 leading-relaxed mt-4">{mainContent}</p>}
-            {c.description3 && <p className="text-sm text-gray-400 leading-relaxed mt-4">{c.description3}</p>}
-            <div className="mt-8 flex justify-center">
-              <TripAdvisorReviews />
-            </div>
-          </div>
-        </section>
-
         {/* MEET YOUR DRIVER - Photo Section (optional, page-specific) */}
         {c.meetDriverTitle && meetDriverImage && (
           <section className="py-12 md:py-16 px-4 bg-[#1a2332]" data-testid="meet-driver-section">
@@ -474,6 +462,18 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             </div>
           </section>
         )}
+
+        {/* SEO Description - Dynamic from CMS */}
+        <section className="py-10 px-4 bg-[#0f1419]">
+          <div className="max-w-4xl mx-auto">
+            <p className="text-base text-gray-300 leading-relaxed">{introText}</p>
+            {mainContent && <p className="text-sm text-gray-400 leading-relaxed mt-4">{mainContent}</p>}
+            {c.description3 && <p className="text-sm text-gray-400 leading-relaxed mt-4">{c.description3}</p>}
+            <div className="mt-8 flex justify-center">
+              <TripAdvisorReviews />
+            </div>
+          </div>
+        </section>
 
         {/* VEHICLES with Photos */}
         <section className="py-12 md:py-20 px-4 bg-[#1a2332]">
