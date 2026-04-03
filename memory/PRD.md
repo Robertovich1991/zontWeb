@@ -1,91 +1,83 @@
-# PRD - Zont Fleet Management & VTC Platform
+# PRD - Zont.cab Multi-Portal Platform
 
 ## Original Problem Statement
-Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating an external C# backend (`api.zont.cab`) and internal MongoDB. Features include custom Teltonika GPS integration, fleet planning, multi-language SEO pages, and B2B hotel partnerships.
+Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) integrating an external C# backend (`api.zont.cab`) and internal MongoDB. Custom Teltonika GPS integration replacing Wialon. SEO landing pages for airports and train stations.
 
-## User Personas
-- **Client**: Books airport/city transfers online
-- **Fleet Admin**: Manages drivers, vehicles, planning, GPS tracking
-- **Hotel Admin**: Books rides for hotel guests, manages commissions
-- **Super Admin**: Oversees all companies, hotels, GPS devices
-- **Driver**: Receives and manages ride assignments
-- **Hotel Guest**: Uses lobby kiosk to self-book transfers
-
-## Core Requirements
-- Multi-portal authentication (Client, Admin, Hotel, Fleet, Driver, GPS Admin)
-- Real-time GPS tracking with custom Teltonika integration
-- Fleet planning with Google Sheets import capability
-- Multi-language support (FR, EN, RU, HY) with translated URLs
-- SEO optimization with proper canonical, hreflang, sitemap
-- B2B pages for hotel/business partnerships
-- Hotel lobby kiosk for guest self-service booking
+## Core Architecture
+- **Frontend:** React (CRA) + Tailwind + Shadcn/UI
+- **Backend:** FastAPI + MongoDB
+- **External:** C# API (`api.zont.cab`), Custom TCP GPS Gateway (VPS), Google Maps, Stripe, Gemini Flash (Emergent LLM Key)
 
 ## What's Been Implemented
 
-### Hotel Kiosk PWA (April 2026)
-- **Full-screen touch-optimized interface** at `/kiosk/{slug}` (demo: `/kiosk/bristol`)
-- **6 popular destinations** with real-time prices from C# API (CDG T1/T2, Orly, Gare de Lyon, Gare du Nord, Disneyland)
-- **4-step flow**: Destination → Date/Time → Vehicle → Client Info → Confirmation
-- **Booking reference** (ZK-XXXXX) stored in MongoDB `kiosk_bookings`
-- **Auto-reset** after 45 seconds on confirmation page
-- **No auth required** for guests - just name + phone
-- Backend: `/app/backend/routes/kiosk.py`
-- Frontend: `/app/frontend/src/pages/kiosk/KioskPage.js`
-- Testing: 34/34 tests passed (iteration_61)
+### Portals
+- Client booking portal with AI auto-fill (Gemini Flash text/voice)
+- Admin dashboard
+- Hotel portal + Hotel Kiosk PWA (`/kiosk/[hotel_slug]`)
+- Fleet management portal with custom GPS geolocation
+- Driver portal
+- GPS Super Admin portal
 
-### Optimized Booking Flow (March 2026)
-- **New Flow**: Homepage Search -> Car Selection -> Trip Recap -> Checkout (Passenger Details + Payment)
-- **Trip Recap Page** (`/trip-recap`): Google Maps route, vehicle card, 6 premium perks, mobile sticky CTA
-- **Unified Checkout** (`/checkout`): Integrated passenger registration + Stripe payment on same page
-- Testing: 12/12 tests passed (iteration_60)
+### Key Features (Completed)
+- Premium Checkout flow with TripRecap page
+- Inline passenger registration in Checkout
+- Fleet Driver Sync bug fix (401 auto-logout)
+- Custom GPS Webhook + Teltonika TCP decoder (VPS zip)
+- GPS Route History replay
+- Real-time SSE GPS streaming with Leaflet maps (light theme)
 
-### Fleet Auth Fix (April 2026)
-- **C# token expiration**: Backend now propagates 401 (instead of silently returning [])
-- **Frontend auto-redirect**: Detects 401, shows toast "Session expirée", redirects to login
-- Files: `fleet_shared.py`, `FleetAuthContext.js`
+### SEO Landing Pages (Completed)
+- **Airports:** CDG, Orly, Beauvais (with "Meet your driver" photo+text sections, WebP images)
+- **Train Stations:** Gare de Lyon, Gare du Nord, Montparnasse, Saint-Lazare, Austerlitz (with driver photos)
+- **Services:** VTC 7 Places (updated with "Taxi / VTC" SEO + family photo + IDF cities list), VTC 8 Places
+- **Cities:** Paris, Nice, Cannes, Monaco, Rome, Milan, Munich, Berlin, Barcelona, Alicante, Yerevan, Disneyland
 
-### AI-Assisted Booking (March 2026)
-- Gemini Flash text parsing (<3s)
-- Guided Mode with quick suggestions
-- Voice Input (Web Speech API)
-- Client-side regex AI autofill for signup
-
-### GPS Tracking
-- Custom Teltonika webhook (Wialon removed)
-- Light-theme Fleet Geolocation map with real-time SSE
-- GPS Super Admin Portal with Trip History replay
-
-### Other
-- Recent Searches history on Homepage
-- Vehicle image optimization (5MB → 130KB WebP)
-- Welcome promo code system
-- 17 SEO pages in 4 languages
+### Latest Changes (Feb 2026)
+- **VTC 7 Places page:** Added "Taxi" keyword alongside "VTC" in all 4 languages (FR, EN, RU, HY). Added family photo (WebP 111KB) with Île-de-France cities list in meetDriver-style block. CityTransferPage updated with `heroImage` and `description4` support.
 
 ## Prioritized Backlog
 
-### P1
-- Google Sheets Planning Import
-- SMS integration for kiosk (payment link to guest phone)
+### P0 (Critical)
+- None currently
 
-### P2
-- Geofences & GPS Alerts
-- Editable Company Profile Page
-- Partner Ride Cancellation sync (BLOCKED - needs C# API)
+### P1 (High)
+- Google Sheets / CSV Planning Import for fleet reservations
+- AI-assisted Booking Creation (paste text → LLM extracts details)
 
-### P3
-- Hotel Admin Automated Invoicing
-- Super Admin Hotel Leaderboard
-- APK wrapper for kiosk (TWA)
+### P2 (Medium)
+- Geofences & GPS Alerts (zones, speeding)
+- Editable Company Profile Page for fleet companies
+- Trip History & Route Replay enhancements
+- Add "Taxi" keyword to VTC 8 Places page (pending user request)
 
-## Technical Architecture
-- Frontend: React (CRA) with Shadcn/UI
-- Backend: FastAPI + MongoDB
-- External: C# API (`api.zont.cab`), Google Maps, Teltonika GPS, Stripe
-- Deployment: Emergent Platform with custom domain `www.zont.cab`
+### P3 (Low)
+- Hotel Admin - Automated Monthly Invoicing
+- Super Admin - Hotel Leaderboard
 
-## Key Credentials
+### Blocked
+- Partner Ride Cancellation (waiting for C# team API endpoint)
+
+### Refactoring
+- Extract AI booking logic from `Home.js` (~1000 lines) into `<AIBookingWidget />` component
+
+## Key Files
+- `/app/frontend/src/pages/services/VTC7Places.js` - VTC 7 seats SEO page
+- `/app/frontend/src/pages/services/VTC8Places.js` - VTC 8 seats SEO page
+- `/app/frontend/src/components/CityTransferPage.js` - Shared landing page component
+- `/app/frontend/src/pages/kiosk/KioskPage.js` - Hotel Kiosk PWA
+- `/app/backend/routes/kiosk.py` - Kiosk API
+- `/app/backend/routes/fleet_gps.py` - Custom GPS Webhook
+- `/app/backend/routes/gps_admin.py` - GPS Admin endpoints
+
+## Credentials
 - GPS Admin: `gps@zont.cab` / `gpsadmin123`
 - Fleet Admin: `Nandetiri1@gmail.com` / `12345678`
 - Hotel Admin: `admin@bristol.fr` / `hotel123`
 - Super Admin: `admin@zont.cab` / `admin123`
-- Demo Kiosk: `/kiosk/bristol` (no auth needed)
+
+## Critical Notes
+- LANGUAGE: Always respond in French
+- THEME: Light theme (white/emerald/gray) - no dark mode for GPS map
+- IMAGE OPTIMIZATION: Always convert PNGs to WebP before adding
+- Do NOT use BaseHTTPMiddleware in FastAPI
+- TCP Gateway runs on external VPS, NOT on Emergent

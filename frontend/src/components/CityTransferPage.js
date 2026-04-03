@@ -25,7 +25,7 @@ const trustLabels = {
   ru: { trips: 'Выполненных Поездок', available: 'Доступно', fixed: 'Фиксированные Цены', rating: 'Рейтинг', reviews: 'отзывов', trustTitle: 'Доверие тысяч путешественников', paySecure: 'Безопасная Оплата', payDesc: 'Все карты принимаются', verifiedDriver: 'Проверенные Водители', verifiedDesc: 'Лицензированные профессионалы', flightTrack: 'Отслеживание Рейса', flightDesc: 'Мониторинг в реальном времени', freeCancel: 'Бесплатная Отмена', cancelDesc: 'До 24 часов' },
 };
 
-const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks }) => {
+const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { startBooking, setVehicleResults } = useBooking();
@@ -270,7 +270,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         <section className="relative">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
-            <img src={IMAGES.hero} alt={c.title} className="w-full h-full object-cover" loading="eager" />
+            <img src={heroImage || IMAGES.hero} alt={c.title} className="w-full h-full object-cover" loading="eager" />
             <div className="absolute inset-0 bg-gradient-to-b from-[#1a2332]/90 via-[#1a2332]/80 to-[#1a2332]"></div>
           </div>
 
@@ -504,6 +504,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             <p className="text-base text-gray-300 leading-relaxed">{introText}</p>
             {mainContent && <p className="text-sm text-gray-400 leading-relaxed mt-4">{mainContent}</p>}
             {c.description3 && <p className="text-sm text-gray-400 leading-relaxed mt-4">{c.description3}</p>}
+            {c.description4 && <p className="text-sm text-gray-400 leading-relaxed mt-4">{c.description4}</p>}
           </div>
         </section>
 
