@@ -32,8 +32,6 @@ const content = {
     defaultPickup: 'Paris Orly Airport',
     otherCitiesTitle: 'Also available from CDG and Beauvais airports', otherCitiesBtn: 'View All Destinations',
     rating: '4.5/5 Tripadvisor (29 reviews)',
-    meetDriverTitle: 'Where to Meet Your Driver at Paris Orly Airport',
-    meetDriverText: 'After your flight lands, follow the airport signs to the Arrivals / Exit area. As soon as you come out of the arrivals doors, your chauffeur will be there waiting with a sign showing your name. Orly has 4 terminals — your driver knows the exact pick-up point for each one and will help you with your luggage. This meet-and-greet service makes your Orly airport pickup simple, clear, and comfortable.',
   },
   fr: {
     title: 'Transfert Aeroport Orly - Chauffeur Prive des 39\u20AC',
@@ -65,8 +63,6 @@ const content = {
     defaultPickup: 'Aeroport Paris Orly',
     otherCitiesTitle: 'Egalement depuis CDG et Beauvais', otherCitiesBtn: 'Voir Toutes les Destinations',
     rating: '4.5/5 Tripadvisor (29 avis)',
-    meetDriverTitle: 'Ou retrouver votre chauffeur a l\'aeroport d\'Orly',
-    meetDriverText: 'Apres l\'atterrissage, suivez les panneaux vers la zone Arrivees / Sortie. Des que vous franchissez les portes, votre chauffeur vous attend avec une pancarte a votre nom. Orly compte 4 terminaux — votre chauffeur connait le point de prise en charge exact de chacun et vous aide avec vos bagages. Ce service d\'accueil rend votre transfert depuis Orly simple, clair et confortable.',
   },
   ru: {
     title: 'Трансфер из Аэропорта Орли - Частный Автомобиль с Водителем',
@@ -98,8 +94,6 @@ const content = {
     defaultPickup: 'Аэропорт Париж Орли',
     otherCitiesTitle: 'Также из CDG и Бове', otherCitiesBtn: 'Все Направления',
     rating: '4.5/5 Tripadvisor (29 отзывов)',
-    meetDriverTitle: 'Где встретить водителя в аэропорту Орли',
-    meetDriverText: 'После посадки следуйте указателям к зоне Прибытия / Выхода. Ваш водитель ждёт с табличкой с вашим именем. Орли имеет 4 терминала — водитель знает точное место посадки каждого и поможет с багажом.',
   },
   hy: {
     title: 'Տրանսֆեր Orly օդանավայանից',
@@ -130,13 +124,11 @@ const content = {
     otherCitiesTitle: 'Սպասարկում ենք 16 քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
     rating: '4.5/5 Tripadvisor',
-    meetDriverTitle: 'Որdelays delays Orly delays delays',
-    meetDriverText: 'Delays delays delays delays delays delays delays delays delays.',
   },
 };
 
 const vehiclesPrices = { sedan: 45, luxury: 70, minivan: 100, minibus: 160 };
 
 const seoUrls = { en: '/orly-airport-transfer', fr: '/transfert-aeroport-orly', ru: '/taksi-iz-aeroporta-orli', hy: '/orli-odanavakayani-transfer' };
-const OrlyTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/beauvais-driver-meet.webp" />;
+const OrlyTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default OrlyTransfer;

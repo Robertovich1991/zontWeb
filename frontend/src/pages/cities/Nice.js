@@ -32,8 +32,6 @@ const content = {
     defaultPickup: 'Nice Cote d\'Azur Airport (NCE)',
     otherCitiesTitle: 'We also serve other cities in Europe', otherCitiesBtn: 'View All Destinations',
     rating: '4.5/5 Tripadvisor (29 reviews)',
-    meetDriverTitle: 'Where to Meet Your Driver at Nice Airport',
-    meetDriverText: 'After your flight lands, follow the airport signs to the Arrivals / Exit area. Your chauffeur will be waiting outside with a sign showing your name. Nice airport has 2 terminals just minutes from the Promenade des Anglais — your driver knows both perfectly and will assist with your luggage for a smooth start to your Riviera experience.',
   },
   fr: {
     title: 'Transfert Aeroport Nice - Cote d\'Azur',
@@ -65,8 +63,6 @@ const content = {
     defaultPickup: 'Aeroport Nice Cote d\'Azur (NCE)',
     otherCitiesTitle: 'Nous desservons aussi d\'autres villes en Europe', otherCitiesBtn: 'Voir Toutes les Destinations',
     rating: '4.5/5 Tripadvisor (29 avis)',
-    meetDriverTitle: 'Ou retrouver votre chauffeur a l\'aeroport de Nice',
-    meetDriverText: 'Apres l\'atterrissage, suivez les panneaux vers la zone Arrivees / Sortie. Votre chauffeur vous attend dehors avec une pancarte a votre nom. L\'aeroport de Nice a 2 terminaux a quelques minutes de la Promenade des Anglais — votre chauffeur connait les deux parfaitement et vous aide avec vos bagages pour un debut de sejour sur la Riviera en toute serenite.',
   },
   ru: {
     title: 'Трансфер из Аэропорта Ниццы - Лазурный Берег',
@@ -98,8 +94,6 @@ const content = {
     defaultPickup: 'Аэропорт Ницца Лазурный Берег (NCE)',
     otherCitiesTitle: 'Мы также обслуживаем другие города Европы', otherCitiesBtn: 'Все Направления',
     rating: '4.5/5 Tripadvisor (29 отзывов)',
-    meetDriverTitle: 'Где встретить водителя в аэропорту Ниццы',
-    meetDriverText: 'После посадки следуйте указателям к зоне Прибытия / Выхода. Ваш водитель ждёт снаружи с табличкой с вашим именем. Аэропорт Ниццы имеет 2 терминала рядом с Английской набережной — водитель знает оба и поможет с багажом.',
   },
   hy: {
     title: 'Տրանսֆեր Նիսի օդանավայանից',
@@ -130,13 +124,11 @@ const content = {
     otherCitiesTitle: 'Սպասարկում ենք 16 քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
     rating: '4.5/5 Tripadvisor',
-    meetDriverTitle: 'Որdelays delays Nice delays delays',
-    meetDriverText: 'Delays delays delays delays delays delays delays delays.',
   },
 };
 
 const vehiclesPrices = { sedan: 35, luxury: 55, minivan: 85, minibus: 140 };
 
 const seoUrls = { en: '/nice-airport-transfer', fr: '/transfert-aeroport-nice', ru: '/taksi-iz-aeroporta-nitstsa', hy: '/nis-odanavakayani-transfer' };
-const NiceTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/beauvais-driver-meet.webp" />;
+const NiceTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default NiceTransfer;
