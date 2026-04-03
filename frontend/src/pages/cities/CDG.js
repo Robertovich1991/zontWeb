@@ -32,6 +32,8 @@ const content = {
     defaultPickup: 'Paris CDG Airport (Terminal 2)',
     otherCitiesTitle: 'Also available from other Paris airports', otherCitiesBtn: 'View All Destinations',
     rating: '4.5/5 Tripadvisor (29 reviews)',
+    meetDriverTitle: 'Where to Meet Your Driver at Charles de Gaulle Airport',
+    meetDriverText: 'After landing, simply follow the Arrivals / Exit signs inside the terminal. Your chauffeur will be waiting just outside the arrivals area, holding a sign with your name so you can spot him easily. There is no need to search for a taxi rank or call the driver after your flight. The pickup is simple, clear, and designed to make your arrival at Paris Charles de Gaulle Airport smooth, comfortable, and stress-free.',
   },
   fr: {
     title: 'Transfert Aeroport CDG - Chauffeur Prive des 59\u20AC',
@@ -63,6 +65,8 @@ const content = {
     defaultPickup: 'Aeroport Paris CDG (Terminal 2)',
     otherCitiesTitle: 'Egalement disponible depuis les autres aeroports parisiens', otherCitiesBtn: 'Voir Toutes les Destinations',
     rating: '4.5/5 Tripadvisor (29 avis)',
+    meetDriverTitle: 'Ou retrouver votre chauffeur a l\'aeroport Charles de Gaulle',
+    meetDriverText: 'Apres l\'atterrissage, suivez simplement les panneaux Arrivees / Sortie a l\'interieur du terminal. Votre chauffeur vous attend juste a la sortie de la zone des arrivees, avec une pancarte a votre nom pour que vous puissiez le reperer facilement. Pas besoin de chercher une station de taxi ni d\'appeler le chauffeur apres votre vol. La prise en charge est simple, claire et concue pour rendre votre arrivee a l\'aeroport Paris Charles de Gaulle fluide, confortable et sans stress.',
   },
   ru: {
     title: 'Трансфер из Аэропорта CDG - Шарль де Голль Частный Автомобиль',
@@ -94,6 +98,8 @@ const content = {
     defaultPickup: 'Аэропорт Париж CDG (Терминал 2)',
     otherCitiesTitle: 'Также из других парижских аэропортов', otherCitiesBtn: 'Все Направления',
     rating: '4.5/5 Tripadvisor (29 отзывов)',
+    meetDriverTitle: 'Где встретить водителя в аэропорту Шарль-де-Голль',
+    meetDriverText: 'После посадки просто следуйте указателям Прибытие / Выход внутри терминала. Ваш водитель будет ждать прямо у выхода из зоны прибытия с табличкой с вашим именем. Не нужно искать стоянку такси или звонить водителю. Встреча организована просто, понятно и комфортно для вашего прибытия в аэропорт Париж Шарль-де-Голль.',
   },
   hy: {
     title: 'Տրանսֆեր CDG օդանավայանից - Շարլ դը Գոլի',
@@ -124,11 +130,13 @@ const content = {
     otherCitiesTitle: 'Սպասարկում ենք 16 քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
     rating: '4.5/5 Tripadvisor',
+    meetDriverTitle: 'Որtegh handipel varordiin CDG odanavakayanum',
+    meetDriverText: 'Vayrejqic heto hetevek Jamumner / Ely nshannerin. Varorduh spasum e dzez anunov tsucanak jamumneri taraghum.',
   },
 };
 
 const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 130, minibus: 190 };
 
 const seoUrls = { en: '/cdg-airport-transfer', fr: '/transfert-aeroport-cdg', ru: '/taksi-iz-aeroporta-cdg', hy: '/cdg-odanavakayani-transfer' };
-const CDGTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+const CDGTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/cdg-driver-meet.webp" />;
 export default CDGTransfer;
