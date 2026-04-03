@@ -463,6 +463,41 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
           </section>
         )}
 
+        {/* Station Links Grid (for Paris Train Stations page) */}
+        {stationLinks && stationLinks.length > 0 && (
+          <section className="py-12 md:py-16 px-4 bg-[#0f1419]" data-testid="station-links-section">
+            <div className="max-w-5xl mx-auto">
+              <h2 className="text-xl md:text-2xl font-bold text-white text-center mb-8">
+                {language === 'fr' ? 'Toutes les Gares de Paris' : language === 'ru' ? 'Все Вокзалы Парижа' : 'All Paris Train Stations'}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {stationLinks.map((station, i) => (
+                  <Link
+                    key={i}
+                    to={station.url[language] || station.url.en}
+                    className="group bg-white/[0.04] border border-white/10 hover:border-[#2ecc71]/40 rounded-xl overflow-hidden transition-all hover:bg-[#2ecc71]/5"
+                    data-testid={`station-link-${i}`}
+                  >
+                    {station.image && (
+                      <div className="h-36 overflow-hidden">
+                        <img src={station.image} alt={station.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="text-white font-bold text-base group-hover:text-[#2ecc71] transition-colors">{station.name}</h3>
+                      <p className="text-gray-500 text-xs mt-1">{station.desc[language] || station.desc.en}</p>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-[#2ecc71] font-bold text-lg">{c.fromLabel} {station.price}&euro;</span>
+                        <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-[#2ecc71]" />
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* SEO Description - Dynamic from CMS */}
         <section className="py-10 px-4 bg-[#0f1419]">
           <div className="max-w-4xl mx-auto">
@@ -575,41 +610,6 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             </div>
           </div>
         </section>
-
-        {/* Station Links Grid (for Paris Train Stations page) */}
-        {stationLinks && stationLinks.length > 0 && (
-          <section className="py-12 md:py-16 px-4 bg-[#0f1419]" data-testid="station-links-section">
-            <div className="max-w-5xl mx-auto">
-              <h2 className="text-xl md:text-2xl font-bold text-white text-center mb-8">
-                {language === 'fr' ? 'Toutes les Gares de Paris' : language === 'ru' ? 'Все Вокзалы Парижа' : 'All Paris Train Stations'}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {stationLinks.map((station, i) => (
-                  <Link
-                    key={i}
-                    to={station.url[language] || station.url.en}
-                    className="group bg-white/[0.04] border border-white/10 hover:border-[#2ecc71]/40 rounded-xl overflow-hidden transition-all hover:bg-[#2ecc71]/5"
-                    data-testid={`station-link-${i}`}
-                  >
-                    {station.image && (
-                      <div className="h-36 overflow-hidden">
-                        <img src={station.image} alt={station.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <h3 className="text-white font-bold text-base group-hover:text-[#2ecc71] transition-colors">{station.name}</h3>
-                      <p className="text-gray-500 text-xs mt-1">{station.desc[language] || station.desc.en}</p>
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="text-[#2ecc71] font-bold text-lg">{c.fromLabel} {station.price}&euro;</span>
-                        <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-[#2ecc71]" />
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* Other Cities CTA */}
         <section className="py-12 px-4 bg-[#0f1419]">
