@@ -469,9 +469,6 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             <p className="text-base text-gray-300 leading-relaxed">{introText}</p>
             {mainContent && <p className="text-sm text-gray-400 leading-relaxed mt-4">{mainContent}</p>}
             {c.description3 && <p className="text-sm text-gray-400 leading-relaxed mt-4">{c.description3}</p>}
-            <div className="mt-8 flex justify-center">
-              <TripAdvisorReviews />
-            </div>
           </div>
         </section>
 
