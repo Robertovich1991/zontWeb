@@ -25,7 +25,7 @@ const trustLabels = {
   ru: { trips: 'Выполненных Поездок', available: 'Доступно', fixed: 'Фиксированные Цены', rating: 'Рейтинг', reviews: 'отзывов', trustTitle: 'Доверие тысяч путешественников', paySecure: 'Безопасная Оплата', payDesc: 'Все карты принимаются', verifiedDriver: 'Проверенные Водители', verifiedDesc: 'Лицензированные профессионалы', flightTrack: 'Отслеживание Рейса', flightDesc: 'Мониторинг в реальном времени', freeCancel: 'Бесплатная Отмена', cancelDesc: 'До 24 часов' },
 };
 
-const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
+const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { startBooking, setVehicleResults } = useBooking();
@@ -438,6 +438,42 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls }) => {
             </div>
           </div>
         </section>
+
+        {/* MEET YOUR DRIVER - Photo Section (optional, page-specific) */}
+        {c.meetDriverTitle && meetDriverImage && (
+          <section className="py-12 md:py-16 px-4 bg-[#1a2332]" data-testid="meet-driver-section">
+            <div className="max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center">
+                <div className="rounded-2xl overflow-hidden shadow-2xl">
+                  <img
+                    src={meetDriverImage}
+                    alt={c.meetDriverTitle}
+                    className="w-full h-auto object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-white mb-4 leading-tight" data-testid="meet-driver-title">
+                    {c.meetDriverTitle}
+                  </h2>
+                  <p className="text-gray-300 text-sm md:text-base leading-relaxed" data-testid="meet-driver-text">
+                    {c.meetDriverText}
+                  </p>
+                  <div className="flex items-center gap-4 mt-6">
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <CheckCircle className="w-4 h-4 text-[#2ecc71]" />
+                      <span>{tr.verifiedDriver}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <CheckCircle className="w-4 h-4 text-[#2ecc71]" />
+                      <span>{tr.flightTrack}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* VEHICLES with Photos */}
         <section className="py-12 md:py-20 px-4 bg-[#1a2332]">

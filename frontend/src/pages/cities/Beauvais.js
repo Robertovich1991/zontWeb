@@ -32,6 +32,8 @@ const content = {
     defaultPickup: 'Beauvais-Tille Airport',
     otherCitiesTitle: 'Also available from CDG and Orly airports', otherCitiesBtn: 'View All Destinations',
     rating: '4.5/5 Tripadvisor (29 reviews)',
+    meetDriverTitle: 'Where to Meet Your Driver at Beauvais Airport Terminal 1',
+    meetDriverText: 'After your flight lands, follow the airport signs to the Arrivals / Exit area. As soon as you come out of the arrivals doors, your chauffeur will be there waiting with a sign showing your name. He will help you find your vehicle quickly and assist with your luggage if needed. This meet-and-greet service makes your Beauvais airport pickup simple, clear, and comfortable from the very first moment.',
   },
   fr: {
     title: 'Transfert Aeroport Beauvais - Chauffeur Prive des 99\u20AC',
@@ -63,6 +65,8 @@ const content = {
     defaultPickup: 'Aeroport Beauvais-Tille',
     otherCitiesTitle: 'Egalement depuis CDG et Orly', otherCitiesBtn: 'Voir Toutes les Destinations',
     rating: '4.5/5 Tripadvisor (29 avis)',
+    meetDriverTitle: 'Ou retrouver votre chauffeur au Terminal 1 de Beauvais',
+    meetDriverText: 'Apres l\'atterrissage de votre vol, suivez les panneaux de l\'aeroport vers la zone Arrivees / Sortie. Des que vous franchissez les portes des arrivees, votre chauffeur vous attend avec une pancarte a votre nom. Il vous aidera a retrouver rapidement votre vehicule et prendra en charge vos bagages si necessaire. Ce service d\'accueil personnalise rend votre prise en charge a l\'aeroport de Beauvais simple, claire et confortable des le premier instant.',
   },
   ru: {
     title: 'Трансфер из Аэропорта Бове - Частный Автомобиль до Парижа',
@@ -94,6 +98,8 @@ const content = {
     defaultPickup: 'Аэропорт Бове-Тийе',
     otherCitiesTitle: 'Также из CDG и Орли', otherCitiesBtn: 'Все Направления',
     rating: '4.5/5 Tripadvisor (29 отзывов)',
+    meetDriverTitle: 'Где встретить водителя в Терминале 1 аэропорта Бове',
+    meetDriverText: 'После посадки вашего рейса следуйте указателям аэропорта к зоне Прибытия / Выхода. Как только вы выйдете из дверей зоны прибытия, ваш водитель будет ждать вас с табличкой с вашим именем. Он поможет вам быстро найти автомобиль и при необходимости поможет с багажом. Этот персональный сервис встречи делает вашу посадку в аэропорту Бове простой, понятной и комфортной с самого первого момента.',
   },
   hy: {
     title: 'Տրանսֆեր Beauvais օդանավայանից',
@@ -124,11 +130,13 @@ const content = {
     otherCitiesTitle: 'Սպասարկում ենք 16 քաղաքներ Եվրոպայում',
     otherCitiesBtn: 'Բոլոր ուղղությունները',
     rating: '4.5/5 Tripadvisor',
+    meetDriverTitle: 'Որtegh handipel varordiin Beauvais odanavakayanum',
+    meetDriverText: 'Trichqic heto hetevek odanavakayani nshannerin depi Jamumner / Ely taratsq. Varorduh spasum e dzez anunov tsucanak. Na kognvi dzez arag gtnel meqenan ev kogni bagajov.',
   },
 };
 
 const vehiclesPrices = { sedan: 120, luxury: 165, minivan: 200, minibus: 280 };
 
 const seoUrls = { en: '/beauvais-airport-transfer', fr: '/transfert-aeroport-beauvais', ru: '/taksi-iz-aeroporta-bove', hy: '/bove-odanavakayani-transfer' };
-const BeauvaisTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+const BeauvaisTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/beauvais-driver-meet.webp" />;
 export default BeauvaisTransfer;
