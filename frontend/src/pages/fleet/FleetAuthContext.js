@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { toast } from 'sonner';
 
 const FleetAuthContext = createContext(null);
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -36,10 +37,24 @@ export const FleetAuthProvider = ({ children }) => {
   };
 
   const authFetch = useCallback(async (path, options = {}) => {
-    return fetch(`${API}${path}`, {
+    const resp = await fetch(`${API}${path}`, {
       ...options,
       headers: { ...options.headers, Authorization: `Bearer ${token}` },
     });
+
+    // If C# token expired → force re-login
+    if (resp.status === 401) {
+      toast.error('Session expiree. Reconnexion necessaire.');
+      localStorage.removeItem('fleet_token');
+      localStorage.removeItem('fleet_company');
+      setToken(null);
+      setCompany(null);
+      // Small delay to let toast show before redirect
+      setTimeout(() => { window.location.href = '/fleet/login'; }, 1500);
+      return resp;
+    }
+
+    return resp;
   }, [token]);
 
   return (

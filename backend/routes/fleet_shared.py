@@ -89,6 +89,9 @@ async def csharp_get(path: str, token: str, use_cache: bool = True) -> any:
             headers={"Authorization": f"Bearer {token}"},
         )
         elapsed = round((time.perf_counter() - t0) * 1000)
+        if resp.status_code == 401:
+            logger.warning(f"C# {path} -> 401 Unauthorized ({elapsed}ms) - token expired")
+            raise HTTPException(401, "Session expiree. Veuillez vous reconnecter.")
         if resp.status_code != 200:
             logger.debug(f"C# {path} -> {resp.status_code} ({elapsed}ms)")
             return [] if "count" not in path.lower() else 0
@@ -97,6 +100,8 @@ async def csharp_get(path: str, token: str, use_cache: bool = True) -> any:
             cache_set(path, token, data)
         logger.debug(f"C# {path} -> 200 ({elapsed}ms, {len(resp.content)}B)")
         return data
+    except HTTPException:
+        raise
     except httpx.TimeoutException:
         logger.warning(f"C# {path} TIMEOUT after {TIMEOUT}s")
         return [] if "count" not in path.lower() else 0
