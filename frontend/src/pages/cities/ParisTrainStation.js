@@ -129,6 +129,44 @@ const content = {
 
 const vehiclesPrices = { sedan: 25, luxury: 45, minivan: 60, minibus: 90 };
 
+const stationLinks = [
+  {
+    name: 'Gare de Lyon',
+    image: '/images/gare-lyon-driver.webp',
+    price: 25,
+    url: { en: '/gare-de-lyon-transfer', fr: '/transfert-gare-de-lyon', ru: '/transfer-gar-de-lion', hy: '/gar-de-lion-transfer' },
+    desc: { en: 'TGV from Lyon, Marseille, Nice, Riviera', fr: 'TGV de Lyon, Marseille, Nice, Cote d\'Azur', ru: 'TGV из Лиона, Марселя, Ниццы', hy: 'Delays' },
+  },
+  {
+    name: 'Gare du Nord',
+    image: '/images/gare-nord-driver.webp',
+    price: 25,
+    url: { en: '/gare-du-nord-transfer', fr: '/transfert-gare-du-nord', ru: '/transfer-gar-dyu-nor', hy: '/gar-dyu-nor-transfer' },
+    desc: { en: 'Eurostar from London, Thalys from Brussels', fr: 'Eurostar de Londres, Thalys de Bruxelles', ru: 'Eurostar из Лондона, Thalys из Брюсселя', hy: 'Delays' },
+  },
+  {
+    name: 'Gare Montparnasse',
+    image: '/images/gare-montparnasse-driver.webp',
+    price: 25,
+    url: { en: '/gare-montparnasse-transfer', fr: '/transfert-gare-montparnasse', ru: '/transfer-gar-monparnas', hy: '/gar-monparnas-transfer' },
+    desc: { en: 'TGV from Bordeaux, Nantes, Rennes, Brittany', fr: 'TGV de Bordeaux, Nantes, Rennes, Bretagne', ru: 'TGV из Бордо, Нанта, Ренна', hy: 'Delays' },
+  },
+  {
+    name: 'Gare Saint-Lazare',
+    image: '/images/gare-lazare-driver.webp',
+    price: 25,
+    url: { en: '/gare-saint-lazare-transfer', fr: '/transfert-gare-saint-lazare', ru: '/transfer-gar-sen-lazar', hy: '/gar-sen-lazar-transfer' },
+    desc: { en: 'Trains from Normandy, Rouen, Le Havre, Deauville', fr: 'Trains de Normandie, Rouen, Le Havre, Deauville', ru: 'Поезда из Нормандии, Руана, Гавра', hy: 'Delays' },
+  },
+  {
+    name: 'Gare d\'Austerlitz',
+    image: '/images/gare-austerlitz-driver.webp',
+    price: 25,
+    url: { en: '/gare-austerlitz-transfer', fr: '/transfert-gare-austerlitz', ru: '/transfer-gar-osterlits', hy: '/gar-osterlits-transfer' },
+    desc: { en: 'Trains from Orleans, Limoges, Toulouse, Spain', fr: 'Trains d\'Orleans, Limoges, Toulouse, Espagne', ru: 'Поезда из Орлеана, Тулузы, Испании', hy: 'Delays' },
+  },
+];
+
 const seoUrls = { en: '/paris-train-station-transfer', fr: '/transfert-gare-paris', ru: '/transfer-vokzal-parizh', hy: '/pariz-kayarani-transfer' };
-const ParisTrainStationTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+const ParisTrainStationTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} stationLinks={stationLinks} />;
 export default ParisTrainStationTransfer;

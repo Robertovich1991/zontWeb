@@ -123,6 +123,11 @@ const CDGTransfer = lazy(() => import("@/pages/cities/CDG"));
 const OrlyTransfer = lazy(() => import("@/pages/cities/Orly"));
 const BeauvaisTransfer = lazy(() => import("@/pages/cities/Beauvais"));
 const ParisTrainStationTransfer = lazy(() => import("@/pages/cities/ParisTrainStation"));
+const GareDeLyonTransfer = lazy(() => import("@/pages/cities/GareDeLyon"));
+const GareDuNordTransfer = lazy(() => import("@/pages/cities/GareDuNord"));
+const GareMontparnasseTransfer = lazy(() => import("@/pages/cities/GareMontparnasse"));
+const GareSaintLazareTransfer = lazy(() => import("@/pages/cities/GareSaintLazare"));
+const GareAusterlitzTransfer = lazy(() => import("@/pages/cities/GareAusterlitz"));
 const DisneylandTransfer = lazy(() => import("@/pages/cities/DisneylandParis"));
 
 // B2B Pages (lazy)
@@ -180,6 +185,27 @@ function App() {
                   <Route path="/transfert-gare-paris" element={<ParisTrainStationTransfer />} />
                   <Route path="/transfer-vokzal-parizh" element={<ParisTrainStationTransfer />} />
                   <Route path="/pariz-kayarani-transfer" element={<ParisTrainStationTransfer />} />
+                  {/* Individual Train Stations */}
+                  <Route path="/gare-de-lyon-transfer" element={<GareDeLyonTransfer />} />
+                  <Route path="/transfert-gare-de-lyon" element={<GareDeLyonTransfer />} />
+                  <Route path="/transfer-gar-de-lion" element={<GareDeLyonTransfer />} />
+                  <Route path="/gar-de-lion-transfer" element={<GareDeLyonTransfer />} />
+                  <Route path="/gare-du-nord-transfer" element={<GareDuNordTransfer />} />
+                  <Route path="/transfert-gare-du-nord" element={<GareDuNordTransfer />} />
+                  <Route path="/transfer-gar-dyu-nor" element={<GareDuNordTransfer />} />
+                  <Route path="/gar-dyu-nor-transfer" element={<GareDuNordTransfer />} />
+                  <Route path="/gare-montparnasse-transfer" element={<GareMontparnasseTransfer />} />
+                  <Route path="/transfert-gare-montparnasse" element={<GareMontparnasseTransfer />} />
+                  <Route path="/transfer-gar-monparnas" element={<GareMontparnasseTransfer />} />
+                  <Route path="/gar-monparnas-transfer" element={<GareMontparnasseTransfer />} />
+                  <Route path="/gare-saint-lazare-transfer" element={<GareSaintLazareTransfer />} />
+                  <Route path="/transfert-gare-saint-lazare" element={<GareSaintLazareTransfer />} />
+                  <Route path="/transfer-gar-sen-lazar" element={<GareSaintLazareTransfer />} />
+                  <Route path="/gar-sen-lazar-transfer" element={<GareSaintLazareTransfer />} />
+                  <Route path="/gare-austerlitz-transfer" element={<GareAusterlitzTransfer />} />
+                  <Route path="/transfert-gare-austerlitz" element={<GareAusterlitzTransfer />} />
+                  <Route path="/transfer-gar-osterlits" element={<GareAusterlitzTransfer />} />
+                  <Route path="/gar-osterlits-transfer" element={<GareAusterlitzTransfer />} />
                   {/* Disneyland Paris */}
                   <Route path="/disneyland-paris-transfer" element={<DisneylandTransfer />} />
                   <Route path="/transfert-disneyland-paris" element={<DisneylandTransfer />} />
