@@ -1,0 +1,87 @@
+{
+  "summary": "Completed comprehensive testing of Hotel Lobby Kiosk PWA for self-service booking. All 17 backend API tests and 17 frontend UI tests passed (100% success rate). The kiosk flow works correctly: destination selection → date/time → vehicle selection → client info → booking confirmation with ZK-XXXXX reference.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_kiosk_api.py",
+    "/app/test_reports/pytest/kiosk_api_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_kiosk_api.py"
+  ],
+  "success_rate": {
+    "backend": "100% (17/17 tests passed)",
+    "frontend": "100% (17/17 tests passed)"
+  },
+  "test_credentials": {},
+  "seed_data_creation": "Demo hotel 'bristol' auto-seeded on startup with 6 destinations",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Kiosk PWA fully tested. Key endpoints: GET /api/kiosk/{slug}, POST /api/kiosk/{slug}/prices (real C# API), POST /api/kiosk/book, GET /api/kiosk/{slug}/bookings. Frontend route: /kiosk/:slug. data-testids verified: kiosk-page, kiosk-steps, dest-*, kiosk-date, kiosk-time, kiosk-datetime-next, vehicle-*, kiosk-name, kiosk-phone, kiosk-confirm-btn, kiosk-reference, kiosk-new-booking-btn, kiosk-back.",
+  "features_tested": {
+    "backend_api_tests": {
+      "GET /api/kiosk/bristol": "PASSED - Returns hotel info with 6 destinations",
+      "POST /api/kiosk/bristol/prices": "PASSED - Returns real-time prices from C# API for all 6 destinations",
+      "POST /api/kiosk/book": "PASSED - Creates booking with ZK-XXXXX reference format",
+      "GET /api/kiosk/bristol/bookings": "PASSED - Returns recent kiosk bookings sorted by createdAt DESC"
+    },
+    "frontend_ui_tests": {
+      "test_1_kiosk_page_loads": "PASSED - data-testid='kiosk-page' present",
+      "test_2_french_heading": "PASSED - 'Ou souhaitez-vous aller ?' displayed",
+      "test_3_six_destination_cards": "PASSED - All 6 destinations with data-testids found",
+      "test_4_prices_displayed": "PASSED - Real-time prices from C# API shown",
+      "test_5_destination_click": "PASSED - Navigates to date/time step",
+      "test_6_step_indicators": "PASSED - Step indicators (1-4) visible",
+      "test_7_datetime_inputs": "PASSED - Date and time inputs present",
+      "test_8_continue_button": "PASSED - Navigates to vehicle selection",
+      "test_9_vehicle_cards": "PASSED - Vehicle cards with prices displayed",
+      "test_10_vehicle_selection": "PASSED - Navigates to client info step",
+      "test_11_name_phone_inputs": "PASSED - Name and phone inputs present",
+      "test_12_fill_client_info": "PASSED - Form accepts input",
+      "test_13_confirm_button": "PASSED - Creates booking and shows confirmation",
+      "test_14_booking_reference": "PASSED - ZK-XXXXX format reference displayed",
+      "test_15_nouvelle_reservation_btn": "PASSED - Button present",
+      "test_16_reset_kiosk": "PASSED - Resets to step 0",
+      "test_17_back_button": "PASSED - Back navigation works"
+    }
+  },
+  "data_testid_attributes_verified": [
+    "kiosk-page",
+    "kiosk-step-destinations",
+    "kiosk-step-datetime",
+    "kiosk-step-vehicle",
+    "kiosk-step-info",
+    "kiosk-step-confirm",
+    "kiosk-steps",
+    "dest-cdg-terminal-1",
+    "dest-cdg-terminal-2",
+    "dest-orly-aeroport",
+    "dest-gare-de-lyon",
+    "dest-gare-du-nord",
+    "dest-disneyland-paris",
+    "kiosk-date",
+    "kiosk-time",
+    "kiosk-datetime-next",
+    "vehicle-regular-zont",
+    "kiosk-name",
+    "kiosk-phone",
+    "kiosk-confirm-btn",
+    "kiosk-reference",
+    "kiosk-new-booking-btn",
+    "kiosk-back"
+  ],
+  "notes": {
+    "external_api": "C# API (api.zont.cab) provides real-time vehicle pricing - working correctly",
+    "auto_reset": "Confirmation page auto-resets after 45 seconds (not tested due to time constraint)",
+    "no_auth_required": "Kiosk is public-facing, no authentication needed for guests"
+  }
+}

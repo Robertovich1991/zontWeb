@@ -28,6 +28,9 @@ const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 
 // Redirect component for C# API's forgot password link format
 const ForgetPasswordRedirect = lazy(() => import("@/pages/ResetPassword"));
+
+// Kiosk
+const KioskPage = lazy(() => import("@/pages/kiosk/KioskPage"));
 const LookingForPartners = lazy(() => import("@/pages/LookingForPartners"));
 const ParisAirportTransfer = lazy(() => import("@/pages/ParisAirportTransfer"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -239,6 +242,7 @@ function App() {
                   <Route path="/my-bookings" element={<MyBookings />} />
                   <Route path="/my-account" element={<MyAccount />} />
                   <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+                  <Route path="/kiosk/:slug" element={<KioskPage />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/forgetpassword/:token" element={<ResetPassword />} />
                   <Route path="/looking-for-partners" element={<LookingForPartners />} />

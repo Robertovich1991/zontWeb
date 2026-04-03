@@ -205,6 +205,10 @@ app.include_router(promo_router)
 from routes.ai_booking import router as ai_booking_router
 app.include_router(ai_booking_router)
 
+from routes.kiosk import router as kiosk_router, set_db as kiosk_set_db, ensure_demo_hotel
+kiosk_set_db(db)
+app.include_router(kiosk_router)
+
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -275,6 +279,12 @@ async def startup_event():
     await db.promo_codes.create_index([("code", 1)], unique=True)
     await db.promo_codes.create_index([("email", 1)])
     await db.promo_codes.create_index([("expires_at", 1)])
+    # Kiosk indexes
+    await db.kiosk_hotels.create_index([("slug", 1)], unique=True)
+    await db.kiosk_bookings.create_index([("hotelSlug", 1), ("createdAt", -1)])
+    await db.kiosk_bookings.create_index([("reference", 1)], unique=True)
+    # Seed demo hotel
+    await ensure_demo_hotel()
     logger.info("MongoDB indexes created.")
 
 
