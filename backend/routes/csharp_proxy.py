@@ -564,6 +564,7 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
 
     try:
         payload = req.dict(exclude_none=True)
+        logger.info(f"C# addAuction REQUEST: payload={json.dumps(payload)[:500]}")
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
                 f"{CSHARP_API}/api/Auction/addAuction",
@@ -572,10 +573,11 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
                     "Authorization": auth_header,
                     "Content-Type": "application/json",
                     "Origin": "https://zont.cab",
+                    "Referer": "https://zont.cab/",
                 },
             )
             body_text = resp.text
-            logger.info(f"C# addAuction response: status={resp.status_code} body={body_text[:500]}")
+            logger.info(f"C# addAuction RESPONSE: status={resp.status_code} headers={dict(resp.headers)} body={body_text[:1000]}")
 
             try:
                 data = json.loads(body_text) if body_text.strip() else {}
@@ -611,8 +613,8 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
                     "data": data,
                 }
 
-            error_msg = data if isinstance(data, dict) else {"error": str(data) or "Booking failed"}
-            logger.error(f"C# booking REJECTED: status={resp.status_code} body={error_msg}")
+            error_msg = data if isinstance(data, dict) and data else {"error": f"Erreur C# (HTTP {resp.status_code}). Contactez le support."}
+            logger.error(f"C# booking REJECTED: status={resp.status_code} raw_body='{body_text[:500]}' parsed={error_msg}")
             raise HTTPException(status_code=resp.status_code, detail=error_msg)
     except HTTPException:
         raise

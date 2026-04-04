@@ -88,20 +88,35 @@ export const transferService = {
         } else {
           // Extract C# API error message from various formats
           const detail = data?.detail;
-          let errorMsg = 'Booking failed';
-          if (typeof detail === 'string') {
+          let errorMsg = '';
+
+          if (typeof detail === 'string' && detail.trim()) {
             errorMsg = detail;
-          } else if (typeof detail === 'object' && detail !== null) {
+          } else if (typeof detail === 'object' && detail !== null && Object.keys(detail).length > 0) {
             errorMsg = detail?.invalidCard?.[0]
               || detail?.error
               || detail?.message
-              || Object.values(detail).flat().filter(v => typeof v === 'string')[0]
-              || JSON.stringify(detail);
-          } else if (data?.error) {
-            errorMsg = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
-          } else if (data?.message) {
+              || detail?.title
+              || Object.values(detail).flat().filter(v => typeof v === 'string' && v.trim())[0]
+              || '';
+          }
+
+          if (!errorMsg && data?.error && typeof data.error === 'string') {
+            errorMsg = data.error;
+          }
+          if (!errorMsg && data?.message && typeof data.message === 'string') {
             errorMsg = data.message;
           }
+
+          // Fallback: user-friendly message based on HTTP status
+          if (!errorMsg) {
+            if (xhr.status === 400) errorMsg = 'Donnees invalides. Verifiez les informations.';
+            else if (xhr.status === 401) errorMsg = 'Session expiree. Reconnectez-vous.';
+            else if (xhr.status === 402) errorMsg = 'Paiement refuse par la banque.';
+            else if (xhr.status === 502 || xhr.status === 503) errorMsg = 'Serveur temporairement indisponible. Reessayez.';
+            else errorMsg = `Erreur serveur (${xhr.status}). Reessayez ou contactez le support.`;
+          }
+
           console.error('Booking API error:', xhr.status, data);
           reject(new Error(errorMsg));
         }
