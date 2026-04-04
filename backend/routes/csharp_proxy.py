@@ -612,7 +612,7 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
                 }
 
             error_msg = data if isinstance(data, dict) else {"error": str(data) or "Booking failed"}
-            logger.error(f"C# booking error: {resp.status_code} - {error_msg}")
+            logger.error(f"C# booking REJECTED: status={resp.status_code} body={error_msg}")
             raise HTTPException(status_code=resp.status_code, detail=error_msg)
     except HTTPException:
         raise

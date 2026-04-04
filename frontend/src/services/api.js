@@ -86,8 +86,23 @@ export const transferService = {
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve(data);
         } else {
+          // Extract C# API error message from various formats
           const detail = data?.detail;
-          const errorMsg = detail?.invalidCard?.[0] || detail?.error || (typeof detail === 'string' ? detail : null) || data?.error || 'Booking failed';
+          let errorMsg = 'Booking failed';
+          if (typeof detail === 'string') {
+            errorMsg = detail;
+          } else if (typeof detail === 'object' && detail !== null) {
+            errorMsg = detail?.invalidCard?.[0]
+              || detail?.error
+              || detail?.message
+              || Object.values(detail).flat().filter(v => typeof v === 'string')[0]
+              || JSON.stringify(detail);
+          } else if (data?.error) {
+            errorMsg = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+          } else if (data?.message) {
+            errorMsg = data.message;
+          }
+          console.error('Booking API error:', xhr.status, data);
           reject(new Error(errorMsg));
         }
       };

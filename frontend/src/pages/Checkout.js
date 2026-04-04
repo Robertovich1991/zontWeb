@@ -30,6 +30,7 @@ const labels = {
     processing: 'Processing...',
     noData: 'No booking data found', goBack: 'Start a new booking',
     trustItems: ['Secure payment', 'Fixed price guaranteed', 'Free cancellation 24h'],
+    cardNote: 'Your card will only be charged after ride confirmation.',
     step1: 'Vehicle', step2: 'Summary', step3: 'Payment',
     cardError: 'Please check your card details.',
     bookingSuccess: 'Booking confirmed! Your ride has been reserved.',
@@ -55,6 +56,7 @@ const labels = {
     processing: 'Traitement en cours...',
     noData: 'Aucune reservation trouvee', goBack: 'Nouvelle recherche',
     trustItems: ['Paiement securise', 'Prix fixe garanti', 'Annulation gratuite 24h'],
+    cardNote: 'Votre carte sera debitee uniquement apres confirmation de la course.',
     step1: 'Vehicule', step2: 'Resume', step3: 'Paiement',
     cardError: 'Veuillez verifier vos informations de carte.',
     bookingSuccess: 'Reservation confirmee ! Votre course a ete reservee.',
@@ -80,6 +82,7 @@ const labels = {
     processing: 'Обработка...',
     noData: 'Данные не найдены', goBack: 'Новый поиск',
     trustItems: ['Безопасный платеж', 'Фикс. цена', 'Бесплатная отмена 24ч'],
+    cardNote: 'Средства будут списаны только после подтверждения поездки.',
     step1: 'Авто', step2: 'Детали', step3: 'Оплата',
     cardError: 'Проверьте данные карты.',
     bookingSuccess: 'Бронирование подтверждено!',
@@ -290,8 +293,9 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       toast.success(c.bookingSuccess);
       setTimeout(() => navigate('/booking-confirmation'), 1500);
     } catch (err) {
+      console.error('Checkout booking error:', err);
       const msg = err?.response?.data?.detail;
-      if (typeof msg === 'object') {
+      if (typeof msg === 'object' && msg !== null) {
         const apiErrors = {};
         for (const [key, val] of Object.entries(msg)) {
           const v = Array.isArray(val) ? val[0] : val;
@@ -303,7 +307,9 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         setErrors(apiErrors);
         toast.error(Object.values(apiErrors)[0] || c.bookingError);
       } else {
-        toast.error(typeof msg === 'string' ? msg : (err.message || c.bookingError));
+        // Show the actual error message from the C# API
+        const errorText = typeof msg === 'string' ? msg : (err.message || c.bookingError);
+        toast.error(errorText, { duration: 6000 });
       }
     } finally {
       setLoading(false);
@@ -426,6 +432,9 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
           <Shield className="w-3.5 h-3.5" />
           <span>{c.trustItems[0]} - Stripe</span>
         </div>
+        {c.cardNote && (
+          <p className="text-xs text-gray-500 mt-2">{c.cardNote}</p>
+        )}
       </div>
 
       {/* Submit */}
