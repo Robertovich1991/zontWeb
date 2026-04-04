@@ -30,7 +30,7 @@ const labels = {
     processing: 'Payment in progress...',
     noData: 'No booking data found', goBack: 'Start a new booking',
     trustItems: ['Secure payment', 'Fixed price guaranteed', 'Free cancellation 24h'],
-    cardNote: 'Your card will be charged immediately. Secure payment via Stripe.',
+    cardNote: 'Secure payment via Stripe. Your card will be charged immediately.',
     step1: 'Vehicle', step2: 'Summary', step3: 'Payment',
     cardError: 'Please check your card details.',
     bookingSuccess: 'Booking confirmed! Your ride has been reserved.',
@@ -56,7 +56,7 @@ const labels = {
     processing: 'Paiement en cours...',
     noData: 'Aucune reservation trouvee', goBack: 'Nouvelle recherche',
     trustItems: ['Paiement securise', 'Prix fixe garanti', 'Annulation gratuite 24h'],
-    cardNote: 'Votre carte sera debitee immediatement. Paiement securise via Stripe.',
+    cardNote: 'Paiement securise via Stripe. Votre carte sera debitee immediatement.',
     step1: 'Vehicule', step2: 'Resume', step3: 'Paiement',
     cardError: 'Veuillez verifier vos informations de carte.',
     bookingSuccess: 'Reservation confirmee ! Votre course a ete reservee.',
@@ -238,39 +238,36 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         try { await authService.sendVerificationEmail(form.email); } catch {}
       }
 
-      // Step 2: Create PaymentIntent with real amount
+      // Step 2: Get SetupIntent for card verification (via C# API)
       const token = localStorage.getItem('auth_token');
-      const piResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payment/create-intent`, {
+      const setupResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({
-          amount: parseFloat(selectedCar.price),
-          currency: 'eur',
-          description: `Zont.cab - ${searchData.pickup} → ${searchData.dropoff}`,
-        }),
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-      const piData = await piResp.json();
-      if (!piResp.ok || !piData.clientSecret) {
-        toast.error(piData?.detail || c.bookingError);
+      const setupData = await setupResp.json();
+      if (!setupResp.ok || !setupData.clientSecret) {
+        toast.error(setupData?.detail || c.bookingError);
         setLoading(false);
         return;
       }
 
-      // Step 3: Confirm card payment (direct charge)
-      const { error: payError, paymentIntent } = await stripe.confirmCardPayment(
-        piData.clientSecret,
+      // Step 3: Confirm card payment
+      const { error: cardError, setupIntent } = await stripe.confirmCardSetup(
+        setupData.clientSecret,
         { payment_method: { card: elements.getElement(CardElement) } }
       );
-      if (payError) {
-        toast.error(payError.message || c.cardError);
+      if (cardError) {
+        toast.error(cardError.message || c.cardError);
         setLoading(false);
         return;
       }
 
-      // Step 4: Submit booking to C# with payment confirmation
+      // Step 4: Submit booking to C# (payment handled by C# backend)
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
         startPointLongitude: searchData.pickupCoords.longitude,
+        endPointLatitude: searchData.dropoffCoords?.latitude || 0,
+        endPointLongitude: searchData.dropoffCoords?.longitude || 0,
         clientPrice: selectedCar.price,
         startDate: formatDateForApi(searchData.date, searchData.time),
         startAddress: searchData.pickup,
@@ -280,8 +277,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         carType: selectedCar.tripType || '',
         distance: selectedCar.distance ? Math.round(selectedCar.distance) : 0,
         duration: selectedCar.duration ? Math.round(selectedCar.duration) : 0,
-        cardId: paymentIntent.payment_method || '',
-        paymentIntentId: paymentIntent.id || '',
+        cardId: setupIntent.payment_method,
         utcOffset: new Date().getTimezoneOffset() * -1,
       };
 
