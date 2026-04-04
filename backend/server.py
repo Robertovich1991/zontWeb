@@ -209,9 +209,6 @@ from routes.kiosk import router as kiosk_router, set_db as kiosk_set_db, ensure_
 kiosk_set_db(db)
 app.include_router(kiosk_router)
 
-from routes.direct_payment import router as direct_payment_router
-app.include_router(direct_payment_router)
-
 
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useAuth } from '@/context/AuthContext';
@@ -10,27 +10,27 @@ import SEO from '@/components/SEO';
 import PhoneInput from '@/components/PhoneInput';
 import { toast } from 'sonner';
 import {
-  CreditCard, MapPin, Calendar, Clock, Shield, CheckCircle,
-  Loader2, User, Mail, Lock, Phone, ChevronLeft, ArrowRight, Car
+  CreditCard, MapPin, Calendar, Shield, CheckCircle,
+  Loader2, User, Lock, ChevronLeft, Car, Plus, Trash2, X, ArrowRight
 } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 const STRIPE_PK = 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO';
 const stripePromise = loadStripe(STRIPE_PK);
+const API = process.env.REACT_APP_BACKEND_URL;
 
 const labels = {
   en: {
     title: 'Complete Your Booking',
-    summary: 'Trip Summary',
     from: 'Pick-up', to: 'Drop-off',
-    dateTime: 'Date & Time', vehicle: 'Vehicle',
+    dateTime: 'Date & Time',
     total: 'Total', vatNote: 'All prices include VAT, fees and tolls.',
     payment: 'Payment', payBtn: 'Confirm & Pay',
     processing: 'Payment in progress...',
     noData: 'No booking data found', goBack: 'Start a new booking',
     trustItems: ['Secure payment', 'Fixed price guaranteed', 'Free cancellation 24h'],
-    cardNote: 'Secure payment via Stripe. Your card will be charged immediately.',
+    cardNote: 'Your card will be saved securely via Stripe, then charged for this ride.',
     step1: 'Vehicle', step2: 'Summary', step3: 'Payment',
     cardError: 'Please check your card details.',
     bookingSuccess: 'Booking confirmed! Your ride has been reserved.',
@@ -43,20 +43,24 @@ const labels = {
     loggedAs: 'Logged in as',
     alreadyAccount: 'Already have an account?', signIn: 'Sign in',
     noAccount: 'New here?', signUp: 'Create account',
-    loginError: 'Invalid credentials',
-    orSimilar: 'or similar',
+    loginError: 'Invalid credentials', orSimilar: 'or similar',
+    savedCards: 'Saved Cards', addNewCard: 'Add a new card',
+    deleteCard: 'Delete', addCardFirst: 'Add your card to proceed',
+    cardAdded: 'Card added successfully!', expires: 'Exp.',
+    selectedCard: 'Selected', continueBtn: 'Continue',
+    registeringMsg: 'Creating your account...',
+    loggingInMsg: 'Signing in...',
   },
   fr: {
     title: 'Finalisez Votre Reservation',
-    summary: 'Resume du Trajet',
     from: 'Depart', to: 'Arrivee',
-    dateTime: 'Date & Heure', vehicle: 'Vehicule',
+    dateTime: 'Date & Heure',
     total: 'Total', vatNote: 'Tous les prix incluent TVA, frais et peages.',
     payment: 'Paiement', payBtn: 'Confirmer & Payer',
     processing: 'Paiement en cours...',
     noData: 'Aucune reservation trouvee', goBack: 'Nouvelle recherche',
     trustItems: ['Paiement securise', 'Prix fixe garanti', 'Annulation gratuite 24h'],
-    cardNote: 'Paiement securise via Stripe. Votre carte sera debitee immediatement.',
+    cardNote: 'Votre carte sera enregistree via Stripe, puis debitee pour cette course.',
     step1: 'Vehicule', step2: 'Resume', step3: 'Paiement',
     cardError: 'Veuillez verifier vos informations de carte.',
     bookingSuccess: 'Reservation confirmee ! Votre course a ete reservee.',
@@ -69,69 +73,61 @@ const labels = {
     loggedAs: 'Connecte en tant que',
     alreadyAccount: 'Deja un compte ?', signIn: 'Se connecter',
     noAccount: 'Nouveau ?', signUp: 'Creer un compte',
-    loginError: 'Identifiants incorrects',
-    orSimilar: 'ou similaire',
+    loginError: 'Identifiants incorrects', orSimilar: 'ou similaire',
+    savedCards: 'Cartes enregistrees', addNewCard: 'Ajouter une carte',
+    deleteCard: 'Supprimer', addCardFirst: 'Ajoutez votre carte pour continuer',
+    cardAdded: 'Carte ajoutee avec succes !', expires: 'Exp.',
+    selectedCard: 'Selectionnee', continueBtn: 'Continuer',
+    registeringMsg: 'Creation de votre compte...',
+    loggingInMsg: 'Connexion...',
   },
   ru: {
     title: 'Завершите Бронирование',
-    summary: 'Информация о Поездке',
     from: 'Откуда', to: 'Куда',
-    dateTime: 'Дата и Время', vehicle: 'Автомобиль',
+    dateTime: 'Дата и Время',
     total: 'Итого', vatNote: 'Все цены включают НДС и сборы.',
     payment: 'Оплата', payBtn: 'Подтвердить и Оплатить',
     processing: 'Оплата...',
     noData: 'Данные не найдены', goBack: 'Новый поиск',
     trustItems: ['Безопасный платеж', 'Фикс. цена', 'Бесплатная отмена 24ч'],
-    cardNote: 'Карта будет списана немедленно. Безопасная оплата через Stripe.',
+    cardNote: 'Ваша карта будет сохранена через Stripe и списана за поездку.',
     step1: 'Авто', step2: 'Детали', step3: 'Оплата',
-    cardError: 'Проверьте данные карты.',
-    bookingSuccess: 'Бронирование подтверждено!',
-    bookingError: 'Ошибка. Попробуйте снова.',
-    pastDateError: 'Дата прошла.',
-    passengerTitle: 'Данные Пассажира',
-    firstName: 'Имя', lastName: 'Фамилия',
-    email: 'Email', phone: 'Телефон',
-    password: 'Пароль', passwordHint: 'Для управления бронированием',
-    loggedAs: 'Вы вошли как',
+    cardError: 'Проверьте данные карты.', bookingSuccess: 'Бронирование подтверждено!',
+    bookingError: 'Ошибка. Попробуйте снова.', pastDateError: 'Дата прошла.',
+    passengerTitle: 'Данные Пассажира', firstName: 'Имя', lastName: 'Фамилия',
+    email: 'Email', phone: 'Телефон', password: 'Пароль',
+    passwordHint: 'Для управления', loggedAs: 'Вы вошли как',
     alreadyAccount: 'Уже есть аккаунт?', signIn: 'Войти',
     noAccount: 'Новый?', signUp: 'Создать аккаунт',
-    loginError: 'Неверные данные',
-    orSimilar: 'или аналог',
+    loginError: 'Неверные данные', orSimilar: 'или аналог',
+    savedCards: 'Сохраненные карты', addNewCard: 'Добавить карту',
+    deleteCard: 'Удалить', addCardFirst: 'Добавьте карту',
+    cardAdded: 'Карта добавлена!', expires: 'До', selectedCard: 'Выбрано',
+    continueBtn: 'Далее', registeringMsg: 'Создание аккаунта...',
+    loggingInMsg: 'Вход...',
   },
   hy: {
-    title: '\u0531\u0574\u0580\u0561\u0563\u0580\u0578\u0582\u043c',
-    summary: '\u0548\u0582\u0572\u0587\u043e\u0580\u0578\u0582\u0569\u0575\u0578\u0582\u0576',
-    from: '\u054e\u0565\u0580\u0581\u0576\u0578\u043c', to: '\u053b\u057b\u0576\u0578\u043c',
-    dateTime: '\u0531\u043c\u057d\u0561\u0569\u056b\u057e', vehicle: '\u0544\u0565\u0584\u0565\u0576\u0561',
-    total: '\u0538\u0576\u0564\u0561\u043c\u0565\u0576\u0568', vatNote: '\u0533\u0576\u0565\u0580\u0568 \u0576\u0565\u0580\u0561\u057c\u057e\u0561\u0564.',
-    payment: '\u0532\u0561\u0576\u043a\u0561\u0575\u056b\u0576 \u0584\u0561\u0580\u057f', payBtn: '\u0531\u043c\u0580\u0561\u0563\u0580\u0565\u043b',
-    processing: '\u0544\u0577\u0561\u043a\u057e\u0578\u0582\u043c...',
-    noData: '\u054f\u057e\u0575\u0561\u043b\u0576\u0565\u0580 \u0579\u0565\u0576 \u0563\u057f\u0576\u057e\u0565\u043b', goBack: '\u0546\u043e\u0580 \u043e\u0580\u043e\u0576\u0578\u0582\u043c',
-    trustItems: ['\u0531\u043f\u0561\u0570\u043e\u057e \u057e\u0573\u0561\u0580\u0578\u0582\u043c', '\u0556\u056b\u0584\u057d \u0563\u056b\u0576', '\u0531\u0576\u057e\u0573\u0561\u0580 \u0579\u0565\u0572\u0561\u0580\u043a\u0578\u0582\u043c 24\u056a'],
-    cardNote: '\u0554\u0561\u0580\u057f\u0568 \u043a\u043f\u0561\u0570\u057e\u056b. \u0533\u0578\u0582\u043c\u0561\u0580\u0568 \u043a\u0563\u0561\u0576\u0571\u057e\u056b \u057e\u0561\u0580\u043e\u0580\u0564\u056b \u0570\u0561\u057d\u057f\u0561\u057f\u0578\u0582\u043c\u056b\u0581 \u0570\u0565\u057f\u043e.',
-    step1: '\u0544\u0565\u0584\u0565\u0576\u0561', step2: '\u054f\u057e\u0575\u0561\u043b\u0576\u0565\u0580', step3: '\u0554\u0561\u0580\u057f',
-    cardError: 'Delays.',
-    bookingSuccess: 'Delays!',
-    bookingError: 'Delays.',
-    pastDateError: 'Delays.',
-    passengerTitle: 'Delays',
-    firstName: 'Delays', lastName: 'Delays',
-    email: 'Email', phone: 'Delays',
-    password: 'Delays', passwordHint: 'Delays',
-    loggedAs: 'Delays',
-    alreadyAccount: 'Delays?', signIn: 'Delays',
-    noAccount: 'Delays?', signUp: 'Delays',
-    loginError: 'Delays',
-    orSimilar: 'Delays',
+    title: ' Delays', from: 'Delays', to: 'Delays', dateTime: 'Delays',
+    total: 'Delays', vatNote: 'Delays.', payment: 'Delays', payBtn: 'Delays',
+    processing: 'Delays...', noData: 'Delays', goBack: 'Delays',
+    trustItems: ['Delays', 'Delays', 'Delays'], cardNote: 'Delays.',
+    step1: 'Delays', step2: 'Delays', step3: 'Delays', cardError: 'Delays.',
+    bookingSuccess: 'Delays!', bookingError: 'Delays.', pastDateError: 'Delays.',
+    passengerTitle: 'Delays', firstName: 'Delays', lastName: 'Delays',
+    email: 'Email', phone: 'Delays', password: 'Delays', passwordHint: 'Delays',
+    loggedAs: 'Delays', alreadyAccount: 'Delays?', signIn: 'Delays',
+    noAccount: 'Delays?', signUp: 'Delays', loginError: 'Delays', orSimilar: 'Delays',
+    savedCards: 'Delays', addNewCard: 'Delays', deleteCard: 'Delays',
+    addCardFirst: 'Delays', cardAdded: 'Delays!', expires: 'Delays',
+    selectedCard: 'Delays', continueBtn: 'Delays', registeringMsg: 'Delays...',
+    loggingInMsg: 'Delays...',
   },
 };
 
-const cardStyle = {
+const cardElementStyle = {
   style: {
     base: {
-      color: '#ffffff',
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '16px',
+      color: '#ffffff', fontFamily: 'system-ui, sans-serif', fontSize: '16px',
       '::placeholder': { color: '#6b7280' },
     },
     invalid: { color: '#ef4444' },
@@ -151,22 +147,178 @@ const formatPhone = (phone, countryCode) => {
   return countryCode + num;
 };
 
-const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user, onLoginDirect }) => {
-  const navigate = useNavigate();
-  const { completeBooking } = useBooking();
+// XHR wrapper to avoid Stripe.js body stream conflicts
+const xhrReq = (method, url, headers, body) => {
+  return new Promise((resolve, reject) => {
+    const x = new XMLHttpRequest();
+    x.open(method, url);
+    if (headers) Object.entries(headers).forEach(([k, v]) => x.setRequestHeader(k, v));
+    x.onload = () => {
+      let data; try { data = JSON.parse(x.responseText); } catch { data = {}; }
+      resolve({ ok: x.status >= 200 && x.status < 300, status: x.status, data });
+    };
+    x.onerror = () => reject(new Error('Network error'));
+    x.send(body || null);
+  });
+};
+
+const brandIcons = {
+  visa: { label: 'VISA', bg: 'bg-blue-600' },
+  mastercard: { label: 'MC', bg: 'bg-red-600' },
+  amex: { label: 'AMEX', bg: 'bg-gray-600' },
+};
+
+/* ───────────────────── Card Manager ───────────────────── */
+const CardManager = ({ selectedCardId, onSelectCard, onCardsLoaded, c }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const [loading, setLoading] = useState(false);
+  const [cards, setCards] = useState([]);
+  const [loadingCards, setLoadingCards] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addingCard, setAddingCard] = useState(false);
   const [cardComplete, setCardComplete] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
-  // Auth mode: 'signup' or 'signin'
+  const token = localStorage.getItem('auth_token');
+
+  const fetchCards = useCallback(async () => {
+    if (!token) { setLoadingCards(false); return; }
+    try {
+      const res = await xhrReq('GET', `${API}/api/proxy/client/cards`, { Authorization: `Bearer ${token}` });
+      const list = (res.ok && Array.isArray(res.data)) ? res.data : [];
+      setCards(list);
+      onCardsLoaded(list);
+      if (list.length > 0 && !selectedCardId) onSelectCard(list[0].id);
+      // Auto-open add form if no cards
+      if (list.length === 0) setShowAddForm(true);
+    } catch { setCards([]); onCardsLoaded([]); setShowAddForm(true); }
+    finally { setLoadingCards(false); }
+  }, [token]);
+
+  useEffect(() => { fetchCards(); }, [fetchCards]);
+
+  const handleAddCard = async (e) => {
+    e.preventDefault();
+    if (!stripe || !elements || !cardComplete) return;
+    setAddingCard(true);
+    try {
+      const setupRes = await xhrReq('GET', `${API}/api/proxy/client/add-card`, { Authorization: `Bearer ${token}` });
+      if (!setupRes.ok || !setupRes.data?.clientSecret) {
+        toast.error('Erreur SetupIntent. Reessayez.');
+        setAddingCard(false);
+        return;
+      }
+      const { error } = await stripe.confirmCardSetup(setupRes.data.clientSecret, {
+        payment_method: { card: elements.getElement(CardElement) },
+      });
+      if (error) { toast.error(error.message || c.cardError); setAddingCard(false); return; }
+      toast.success(c.cardAdded);
+      setShowAddForm(false);
+      setCardComplete(false);
+      await fetchCards();
+    } catch (err) { toast.error(err.message || c.bookingError); }
+    finally { setAddingCard(false); }
+  };
+
+  const handleDeleteCard = async (cardId) => {
+    if (!window.confirm('Supprimer cette carte ?')) return;
+    setDeletingId(cardId);
+    try {
+      const res = await xhrReq('DELETE', `${API}/api/proxy/client/cards/${cardId}`, { Authorization: `Bearer ${token}` });
+      if (res.ok) {
+        toast.success('Carte supprimee');
+        if (selectedCardId === cardId) onSelectCard(null);
+        await fetchCards();
+      } else toast.error('Impossible de supprimer');
+    } catch { toast.error('Erreur reseau'); }
+    finally { setDeletingId(null); }
+  };
+
+  if (loadingCards) {
+    return <div className="flex items-center justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-[#2ecc71]" /></div>;
+  }
+
+  return (
+    <div className="space-y-3" data-testid="card-manager">
+      {cards.length > 0 && (
+        <div className="space-y-2" data-testid="saved-cards-list">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{c.savedCards}</p>
+          {cards.map((card) => {
+            const brand = brandIcons[card.brand] || { label: card.brand?.toUpperCase() || '?', bg: 'bg-gray-600' };
+            const isSelected = selectedCardId === card.id;
+            return (
+              <div key={card.id} data-testid={`card-${card.last4}`}
+                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${isSelected ? 'border-[#2ecc71] bg-[#2ecc71]/10' : 'border-white/10 bg-[#0f1a28] hover:border-white/20'}`}
+                onClick={() => onSelectCard(card.id)}>
+                <div className={`${brand.bg} px-2 py-1 rounded text-[10px] font-bold text-white`}>{brand.label}</div>
+                <div className="flex-1">
+                  <p className="text-sm text-white font-medium">**** **** **** {card.last4}</p>
+                  <p className="text-xs text-gray-500">{c.expires} {card.exp_month}/{card.exp_year}</p>
+                </div>
+                {isSelected && <span className="text-xs text-[#2ecc71] font-medium flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5" /> {c.selectedCard}</span>}
+                <button type="button" onClick={(e) => { e.stopPropagation(); handleDeleteCard(card.id); }}
+                  disabled={deletingId === card.id} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"
+                  data-testid={`delete-card-${card.last4}`}>
+                  {deletingId === card.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {!showAddForm ? (
+        <button type="button" onClick={() => setShowAddForm(true)}
+          className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-white/20 rounded-lg text-sm text-gray-400 hover:text-[#2ecc71] hover:border-[#2ecc71]/40 transition-all"
+          data-testid="add-new-card-btn">
+          <Plus className="w-4 h-4" /> {c.addNewCard}
+        </button>
+      ) : (
+        <div className="border border-white/10 rounded-lg p-4 bg-[#0f1a28] space-y-3" data-testid="add-card-form">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{c.addNewCard}</p>
+            {cards.length > 0 && (
+              <button type="button" onClick={() => { setShowAddForm(false); setCardComplete(false); }}
+                className="text-gray-500 hover:text-white"><X className="w-4 h-4" /></button>
+            )}
+          </div>
+          <div className="bg-[#1a2332] rounded-lg p-4 border border-white/5">
+            <CardElement options={cardElementStyle} onChange={(e) => setCardComplete(e.complete)} />
+          </div>
+          <p className="text-[11px] text-gray-500">Verification 0 EUR — aucun debit lors de l'ajout</p>
+          <button type="button" onClick={handleAddCard}
+            disabled={addingCard || !cardComplete || !stripe}
+            className="w-full py-2.5 bg-[#2ecc71] text-white rounded-lg text-sm font-semibold hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            data-testid="confirm-add-card-btn">
+            {addingCard ? <><Loader2 className="w-4 h-4 animate-spin" /> Verification...</> : <><CreditCard className="w-4 h-4" /> {c.addNewCard}</>}
+          </button>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 text-gray-500 text-xs">
+        <Shield className="w-3.5 h-3.5" /><span>{c.trustItems[0]} - Stripe</span>
+      </div>
+      {c.cardNote && <p className="text-xs text-gray-500">{c.cardNote}</p>}
+    </div>
+  );
+};
+
+/* ───────────────────── Checkout Form ───────────────────── */
+const CheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user, onLoginDirect }) => {
+  const navigate = useNavigate();
+  const { completeBooking } = useBooking();
+  const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated);
+
   const [authMode, setAuthMode] = useState('signup');
   const [phoneCountry, setPhoneCountry] = useState('+33');
   const [errors, setErrors] = useState({});
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', password: '' });
 
-  const [form, setForm] = useState({
-    firstName: '', lastName: '', email: '', phone: '', password: '',
-  });
+  // Sync auth state
+  useEffect(() => { setIsLoggedIn(isAuthenticated); }, [isAuthenticated]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -175,9 +327,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   };
 
   const inputCls = (field) =>
-    `w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent text-sm ${
-      errors[field] ? 'border-red-500 focus:ring-red-500' : 'border-gray-600 focus:ring-[#2ecc71]'
-    }`;
+    `w-full px-4 py-3 bg-gray-700/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent text-sm ${errors[field] ? 'border-red-500 focus:ring-red-500' : 'border-gray-600 focus:ring-[#2ecc71]'}`;
 
   const validateForm = () => {
     const errs = {};
@@ -189,99 +339,63 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
     if (!form.email.trim()) errs.email = 'Requis';
     else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Email invalide';
     if (!form.password) errs.password = 'Requis';
-    else if (authMode === 'signup' && form.password.length < 6) errs.password = 'Minimum 6 caracteres';
+    else if (authMode === 'signup' && form.password.length < 6) errs.password = 'Min. 6 caracteres';
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  /* ── Step 1: Register / Login ── */
+  const handleAuth = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
+    if (!validateForm()) return;
+    setAuthLoading(true);
+    try {
+      if (authMode === 'signup') {
+        const formatted = formatPhone(form.phone, phoneCountry);
+        await authService.register({
+          firstName: form.firstName, lastName: form.lastName,
+          email: form.email, phoneNumber: formatted,
+          password: form.password, gender: 'male',
+        });
+        const loginResult = await authService.login({ email: form.email, password: form.password });
+        onLoginDirect(loginResult.user);
+        try { await authService.sendVerificationEmail(form.email); } catch {}
+      } else {
+        const loginResult = await authService.login({ email: form.email, password: form.password });
+        onLoginDirect(loginResult.user);
+      }
+      setIsLoggedIn(true);
+    } catch (err) {
+      const msg = err?.response?.data?.detail;
+      if (typeof msg === 'object' && msg !== null) {
+        const apiErrors = {};
+        for (const [key, val] of Object.entries(msg)) {
+          const v = Array.isArray(val) ? val[0] : val;
+          if (key.includes('Email') || key.includes('UserName')) apiErrors.email = v;
+          else if (key.includes('Phone')) apiErrors.phone = v;
+          else if (key.includes('Password')) apiErrors.password = v;
+          else apiErrors.general = v;
+        }
+        setErrors(apiErrors);
+        toast.error(Object.values(apiErrors)[0] || c.loginError);
+      } else {
+        toast.error(typeof msg === 'string' ? msg : (err.message || c.loginError));
+      }
+    } finally { setAuthLoading(false); }
+  };
 
-    // Date validation
+  /* ── Step 2: Submit Booking ── */
+  const handlePay = async (e) => {
+    e.preventDefault();
+    if (!selectedCardId) { toast.error(c.addCardFirst); return; }
+
     if (searchData.date && searchData.time) {
       const bookingDate = new Date(`${searchData.date}T${searchData.time}`);
-      if (bookingDate <= new Date()) {
-        toast.error(c.pastDateError);
-        return;
-      }
-    }
-
-    // If not authenticated, validate and register/login first
-    if (!isAuthenticated) {
-      if (!validateForm()) return;
+      if (bookingDate <= new Date()) { toast.error(c.pastDateError); return; }
     }
 
     setLoading(true);
     try {
-      // Step 1: Register or Login if needed
-      if (!isAuthenticated) {
-        if (authMode === 'signup') {
-          const formatted = formatPhone(form.phone, phoneCountry);
-          await authService.register({
-            firstName: form.firstName,
-            lastName: form.lastName,
-            email: form.email,
-            phoneNumber: formatted,
-            password: form.password,
-            gender: 'male',
-          });
-          // Auto-login after registration
-          const loginResult = await authService.login({ email: form.email, password: form.password });
-          onLoginDirect(loginResult.user);
-        } else {
-          // Sign in mode
-          const loginResult = await authService.login({ email: form.email, password: form.password });
-          onLoginDirect(loginResult.user);
-        }
-        // Send verification email silently
-        try { await authService.sendVerificationEmail(form.email); } catch {}
-      }
-
-      // Step 2: Get SetupIntent for card verification (via C# API)
-      const token = localStorage.getItem('auth_token');
-      const setupResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      let setupData;
-      try {
-        const setupText = await setupResp.text();
-        setupData = setupText ? JSON.parse(setupText) : {};
-      } catch (parseErr) {
-        console.error('Setup intent parse error:', parseErr);
-        toast.error('Erreur de connexion au serveur de paiement. Reessayez.');
-        setLoading(false);
-        return;
-      }
-
-      if (!setupResp.ok || !setupData.clientSecret) {
-        const errDetail = setupData?.detail;
-        let errMsg = c.bookingError;
-        if (setupResp.status === 401 || setupResp.status === 403) {
-          errMsg = 'Session expiree. Veuillez vous reconnecter.';
-        } else if (typeof errDetail === 'string' && errDetail) {
-          errMsg = errDetail;
-        } else if (errDetail?.error) {
-          errMsg = errDetail.error;
-        }
-        toast.error(errMsg);
-        setLoading(false);
-        return;
-      }
-
-      // Step 3: Confirm card payment
-      const { error: cardError, setupIntent } = await stripe.confirmCardSetup(
-        setupData.clientSecret,
-        { payment_method: { card: elements.getElement(CardElement) } }
-      );
-      if (cardError) {
-        toast.error(cardError.message || c.cardError);
-        setLoading(false);
-        return;
-      }
-
-      // Step 4: Submit booking to C# (payment handled by C# backend)
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
         startPointLongitude: searchData.pickupCoords.longitude,
@@ -296,186 +410,166 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         carType: selectedCar.tripType || '',
         distance: selectedCar.distance ? Math.round(selectedCar.distance) : 0,
         duration: selectedCar.duration ? Math.round(selectedCar.duration) : 0,
-        cardId: setupIntent.payment_method,
+        cardId: selectedCardId,
         utcOffset: new Date().getTimezoneOffset() * -1,
       };
 
       const result = await transferService.submitBooking(bookingPayload);
+
+      // Handle 3DS if required by C# backend
+      if (result?.requiresAction && result?.clientSecret) {
+        const stripeInstance = await stripePromise;
+        const { error: confirmErr } = await stripeInstance.confirmCardPayment(result.clientSecret);
+        if (confirmErr) { toast.error(confirmErr.message || 'Erreur 3D Secure'); setLoading(false); return; }
+      }
+
       completeBooking({ ...bookingPayload, result });
 
-      // GTM dataLayer: fire taxi_reservation event on successful booking
+      // GTM dataLayer push
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
-        'event': 'taxi_reservation',
-        'value': parseFloat(selectedCar.price) || 0,
-        'currency': 'EUR',
-        'transaction_id': result?.id || result?.bookingId || `ZNT-${Date.now()}`
+        event: 'taxi_reservation',
+        value: parseFloat(selectedCar.price) || 0,
+        currency: 'EUR',
+        transaction_id: result?.id || result?.data?.id || result?.bookingId || `ZNT-${Date.now()}`
       });
 
       toast.success(c.bookingSuccess);
       setTimeout(() => navigate('/booking-confirmation'), 1500);
     } catch (err) {
-      console.error('Checkout booking error:', err);
-      const msg = err?.response?.data?.detail;
-      if (typeof msg === 'object' && msg !== null) {
-        const apiErrors = {};
-        for (const [key, val] of Object.entries(msg)) {
-          const v = Array.isArray(val) ? val[0] : val;
-          if (key.includes('Email') || key.includes('UserName')) apiErrors.email = v;
-          else if (key.includes('Phone')) apiErrors.phone = v;
-          else if (key.includes('Password')) apiErrors.password = v;
-          else apiErrors.general = v;
-        }
-        setErrors(apiErrors);
-        toast.error(Object.values(apiErrors)[0] || c.bookingError);
-      } else {
-        // Show the actual error message from the C# API
-        const errorText = typeof msg === 'string' ? msg : (err.message || c.bookingError);
-        toast.error(errorText, { duration: 6000 });
-      }
-    } finally {
-      setLoading(false);
-    }
+      console.error('Checkout error:', err);
+      const errorText = err.message || c.bookingError;
+      toast.error(errorText, { duration: 6000 });
+    } finally { setLoading(false); }
   };
 
   const imageUrl = transferService.getVehicleImageUrl(selectedCar.imagePath);
 
   return (
-    <form onSubmit={handleSubmit} data-testid="checkout-form" className="space-y-5">
-      {/* Passenger Details (only if not authenticated) */}
-      {!isAuthenticated && (
-        <div className="bg-[#1e2d3d] border border-white/10 rounded-xl p-5" data-testid="passenger-details-section">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+    <div className="space-y-5">
+      {/* ── Auth Section ── */}
+      {!isLoggedIn ? (
+        <form onSubmit={handleAuth} data-testid="checkout-auth-form" className="space-y-5">
+          <div className="bg-[#1e2d3d] border border-white/10 rounded-xl p-5" data-testid="passenger-details-section">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <User className="w-5 h-5 text-[#2ecc71]" /> {c.passengerTitle}
+              </h2>
+              <button type="button"
+                onClick={() => { setAuthMode(authMode === 'signup' ? 'signin' : 'signup'); setErrors({}); }}
+                className="text-xs text-[#2ecc71] hover:text-[#27ae60] transition-colors" data-testid="toggle-auth-mode">
+                {authMode === 'signup' ? c.alreadyAccount : c.noAccount}
+              </button>
+            </div>
+
+            {authMode === 'signup' ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.firstName} *</label>
+                    <input type="text" name="firstName" value={form.firstName} onChange={handleChange}
+                      placeholder={c.firstName} className={inputCls('firstName')} data-testid="passenger-firstname" />
+                    {errors.firstName && <p className="text-xs text-red-400 mt-1">{errors.firstName}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.lastName} *</label>
+                    <input type="text" name="lastName" value={form.lastName} onChange={handleChange}
+                      placeholder={c.lastName} className={inputCls('lastName')} data-testid="passenger-lastname" />
+                    {errors.lastName && <p className="text-xs text-red-400 mt-1">{errors.lastName}</p>}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.email} *</label>
+                  <input type="email" name="email" value={form.email} onChange={handleChange}
+                    placeholder="email@exemple.com" className={inputCls('email')} data-testid="passenger-email" />
+                  {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.phone} *</label>
+                  <PhoneInput value={form.phone}
+                    onChange={(e) => { setForm(prev => ({ ...prev, phone: e.target.value })); if (errors.phone) setErrors(prev => ({ ...prev, phone: null })); }}
+                    onCountryChange={setPhoneCountry} error={errors.phone} darkMode={true} />
+                  {errors.phone && <p className="text-xs text-red-400 mt-1">{errors.phone}</p>}
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">
+                    {c.password} * <span className="text-gray-500 font-normal normal-case">({c.passwordHint})</span>
+                  </label>
+                  <input type="password" name="password" value={form.password} onChange={handleChange}
+                    placeholder="Minimum 6 caracteres" className={inputCls('password')} data-testid="passenger-password" />
+                  {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password}</p>}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.email} *</label>
+                  <input type="email" name="email" value={form.email} onChange={handleChange}
+                    placeholder="email@exemple.com" className={inputCls('email')} data-testid="signin-email" />
+                  {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.password} *</label>
+                  <input type="password" name="password" value={form.password} onChange={handleChange}
+                    placeholder="Votre mot de passe" className={inputCls('password')} data-testid="signin-password" />
+                  {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password}</p>}
+                </div>
+              </div>
+            )}
+            {errors.general && (
+              <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-400">{errors.general}</div>
+            )}
+          </div>
+
+          <button type="submit" disabled={authLoading}
+            className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-base hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
+            data-testid="checkout-continue-btn">
+            {authLoading ? <><Loader2 className="w-5 h-5 animate-spin" /> {authMode === 'signup' ? c.registeringMsg : c.loggingInMsg}</>
+              : <>{c.continueBtn} <ArrowRight className="w-5 h-5" /></>}
+          </button>
+        </form>
+      ) : (
+        /* ── Authenticated: Card + Pay ── */
+        <div className="space-y-5" data-testid="checkout-payment-section">
+          {/* Logged-in info */}
+          <div className="bg-[#1e2d3d] border border-white/10 rounded-xl p-4 flex items-center gap-3" data-testid="logged-user-info">
+            <div className="w-10 h-10 bg-[#2ecc71]/10 rounded-full flex items-center justify-center flex-shrink-0">
               <User className="w-5 h-5 text-[#2ecc71]" />
-              {c.passengerTitle}
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">{c.loggedAs}</p>
+              <p className="text-sm text-white font-medium">{user?.name || user?.firstName || form.firstName || 'Utilisateur'}</p>
+            </div>
+            <CheckCircle className="w-5 h-5 text-[#2ecc71] ml-auto" />
+          </div>
+
+          {/* Card Management */}
+          <div className="bg-[#1e2d3d] border border-white/10 rounded-xl p-5" data-testid="payment-section">
+            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-[#2ecc71]" /> {c.payment}
             </h2>
-            <button
-              type="button"
-              onClick={() => { setAuthMode(authMode === 'signup' ? 'signin' : 'signup'); setErrors({}); }}
-              className="text-xs text-[#2ecc71] hover:text-[#27ae60] transition-colors"
-              data-testid="toggle-auth-mode"
-            >
-              {authMode === 'signup' ? c.alreadyAccount : c.noAccount}
-            </button>
+            <CardManager
+              selectedCardId={selectedCardId}
+              onSelectCard={setSelectedCardId}
+              onCardsLoaded={() => {}}
+              c={c}
+            />
           </div>
 
-          {authMode === 'signup' ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.firstName} *</label>
-                  <input type="text" name="firstName" value={form.firstName} onChange={handleChange}
-                    placeholder={c.firstName} className={inputCls('firstName')} data-testid="passenger-firstname" />
-                  {errors.firstName && <p className="text-xs text-red-400 mt-1">{errors.firstName}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.lastName} *</label>
-                  <input type="text" name="lastName" value={form.lastName} onChange={handleChange}
-                    placeholder={c.lastName} className={inputCls('lastName')} data-testid="passenger-lastname" />
-                  {errors.lastName && <p className="text-xs text-red-400 mt-1">{errors.lastName}</p>}
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.email} *</label>
-                <input type="email" name="email" value={form.email} onChange={handleChange}
-                  placeholder="email@exemple.com" className={inputCls('email')} data-testid="passenger-email" />
-                {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.phone} *</label>
-                <PhoneInput
-                  value={form.phone}
-                  onChange={(e) => { setForm(prev => ({ ...prev, phone: e.target.value })); if (errors.phone) setErrors(prev => ({ ...prev, phone: null })); }}
-                  onCountryChange={setPhoneCountry}
-                  error={errors.phone}
-                  darkMode={true}
-                />
-                {errors.phone && <p className="text-xs text-red-400 mt-1">{errors.phone}</p>}
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">
-                  {c.password} * <span className="text-gray-500 font-normal normal-case">({c.passwordHint})</span>
-                </label>
-                <input type="password" name="password" value={form.password} onChange={handleChange}
-                  placeholder="Minimum 6 caracteres" className={inputCls('password')} data-testid="passenger-password" />
-                {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password}</p>}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.email} *</label>
-                <input type="email" name="email" value={form.email} onChange={handleChange}
-                  placeholder="email@exemple.com" className={inputCls('email')} data-testid="signin-email" />
-                {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.password} *</label>
-                <input type="password" name="password" value={form.password} onChange={handleChange}
-                  placeholder="Votre mot de passe" className={inputCls('password')} data-testid="signin-password" />
-                {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password}</p>}
-              </div>
-            </div>
-          )}
-
-          {errors.general && (
-            <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-400">
-              {errors.general}
-            </div>
-          )}
+          {/* Pay Button */}
+          <button onClick={handlePay} disabled={loading || !selectedCardId}
+            className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-base hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
+            data-testid="checkout-pay-btn">
+            {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> {c.processing}</>
+              : <>{c.payBtn} - {selectedCar.price}&euro;</>}
+          </button>
         </div>
       )}
-
-      {/* Logged-in user info */}
-      {isAuthenticated && user && (
-        <div className="bg-[#1e2d3d] border border-white/10 rounded-xl p-4 flex items-center gap-3" data-testid="logged-user-info">
-          <div className="w-10 h-10 bg-[#2ecc71]/10 rounded-full flex items-center justify-center flex-shrink-0">
-            <User className="w-5 h-5 text-[#2ecc71]" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-400">{c.loggedAs}</p>
-            <p className="text-sm text-white font-medium">{user.name || user.firstName || 'Utilisateur'}</p>
-          </div>
-          <CheckCircle className="w-5 h-5 text-[#2ecc71] ml-auto" />
-        </div>
-      )}
-
-      {/* Payment */}
-      <div className="bg-[#1e2d3d] border border-white/10 rounded-xl p-5" data-testid="payment-section">
-        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <CreditCard className="w-5 h-5 text-[#2ecc71]" />
-          {c.payment}
-        </h2>
-        <div className="bg-[#0f1a28] rounded-lg p-4 border border-white/5">
-          <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} />
-        </div>
-        <div className="flex items-center gap-2 mt-3 text-gray-400 text-xs">
-          <Shield className="w-3.5 h-3.5" />
-          <span>{c.trustItems[0]} - Stripe</span>
-        </div>
-        {c.cardNote && (
-          <p className="text-xs text-gray-500 mt-2">{c.cardNote}</p>
-        )}
-      </div>
-
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={loading || !stripe || !cardComplete}
-        className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-base hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
-        data-testid="checkout-pay-btn"
-      >
-        {loading ? (
-          <><Loader2 className="w-5 h-5 animate-spin" /> {c.processing}</>
-        ) : (
-          <>{c.payBtn} - {selectedCar.price}&euro;</>
-        )}
-      </button>
-    </form>
+    </div>
   );
 };
 
+/* ───────────────────── Page Wrapper ───────────────────── */
 const Checkout = () => {
   const navigate = useNavigate();
   const { searchData, selectedCar } = useBooking();
@@ -494,9 +588,7 @@ const Checkout = () => {
               <Car className="w-10 h-10 text-[#2ecc71]" />
             </div>
             <p className="text-white text-xl mb-4">{c.noData}</p>
-            <button onClick={() => navigate('/')} className="bg-[#2ecc71] text-white px-6 py-3 rounded-lg hover:bg-[#27ae60]" data-testid="checkout-go-back">
-              {c.goBack}
-            </button>
+            <button onClick={() => navigate('/')} className="bg-[#2ecc71] text-white px-6 py-3 rounded-lg hover:bg-[#27ae60]" data-testid="checkout-go-back">{c.goBack}</button>
           </div>
         </main>
         <Footer />
@@ -511,7 +603,6 @@ const Checkout = () => {
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="checkout-page">
       <SEO title={`${c.title} - Zont`} noindex />
       <Header />
-
       <main className="flex-1 pt-16">
         {/* Steps */}
         <div className="bg-[#0f1419] border-b border-white/10">
@@ -521,9 +612,7 @@ const Checkout = () => {
                 <React.Fragment key={i}>
                   {i > 0 && <div className="w-8 sm:w-12 h-px bg-gray-700" />}
                   <div className={`flex items-center gap-1.5 ${i === 2 ? 'text-[#2ecc71]' : 'text-gray-500'}`}>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                      i < 2 ? 'bg-[#2ecc71]/20 text-[#2ecc71]' : 'bg-[#2ecc71] text-white'
-                    }`}>
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold ${i < 2 ? 'bg-[#2ecc71]/20 text-[#2ecc71]' : 'bg-[#2ecc71] text-white'}`}>
                       {i < 2 ? <CheckCircle className="w-4 h-4" /> : i + 1}
                     </div>
                     <span className="text-xs font-medium hidden sm:inline">{step}</span>
@@ -535,64 +624,42 @@ const Checkout = () => {
         </div>
 
         <div className="max-w-5xl mx-auto px-4 py-6">
-          {/* Back link */}
-          <button
-            onClick={() => navigate('/trip-recap')}
-            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-5"
-            data-testid="checkout-back"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Retour au resume
+          <button onClick={() => navigate('/trip-recap')}
+            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-5" data-testid="checkout-back">
+            <ChevronLeft className="w-4 h-4" /> Retour au resume
           </button>
 
-          <h1 className="text-xl sm:text-2xl font-bold text-white mb-6" data-testid="checkout-title">
-            {c.title}
-          </h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-6" data-testid="checkout-title">{c.title}</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* Left: Trip Summary (sticky on desktop) */}
+            {/* Left: Trip Summary */}
             <div className="lg:col-span-2 space-y-4">
               <div className="lg:sticky lg:top-20">
-                {/* Vehicle mini-card */}
                 <div className="bg-[#1e2d3d] border border-white/10 rounded-xl overflow-hidden mb-4" data-testid="checkout-vehicle-card">
                   <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 flex items-center justify-center p-3">
-                    {imageUrl ? (
-                      <img src={imageUrl} alt={tripType} className="max-w-[200px] h-auto object-contain" loading="eager" />
-                    ) : (
-                      <Car className="w-12 h-12 text-gray-500" />
-                    )}
+                    {imageUrl ? <img src={imageUrl} alt={tripType} className="max-w-[200px] h-auto object-contain" loading="eager" />
+                      : <Car className="w-12 h-12 text-gray-500" />}
                   </div>
                   <div className="p-4 space-y-3">
                     <div>
                       <h3 className="text-base font-bold text-white">{tripType}</h3>
-                      {selectedCar.description && (
-                        <p className="text-xs text-gray-400 mt-0.5">{selectedCar.description} {c.orSimilar}</p>
-                      )}
+                      {selectedCar.description && <p className="text-xs text-gray-400 mt-0.5">{selectedCar.description} {c.orSimilar}</p>}
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-start gap-2.5">
                         <MapPin className="w-4 h-4 text-[#2ecc71] mt-0.5 flex-shrink-0" />
-                        <div>
-                          <p className="text-xs text-gray-500">{c.from}</p>
-                          <p className="text-white text-sm font-medium" data-testid="checkout-pickup">{searchData.pickup}</p>
-                        </div>
+                        <div><p className="text-xs text-gray-500">{c.from}</p><p className="text-white text-sm font-medium" data-testid="checkout-pickup">{searchData.pickup}</p></div>
                       </div>
                       {searchData.dropoff && (
                         <div className="flex items-start gap-2.5">
                           <MapPin className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-xs text-gray-500">{c.to}</p>
-                            <p className="text-white text-sm font-medium" data-testid="checkout-dropoff">{searchData.dropoff}</p>
-                          </div>
+                          <div><p className="text-xs text-gray-500">{c.to}</p><p className="text-white text-sm font-medium" data-testid="checkout-dropoff">{searchData.dropoff}</p></div>
                         </div>
                       )}
                       {searchData.date && (
                         <div className="flex items-start gap-2.5">
                           <Calendar className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-xs text-gray-500">{c.dateTime}</p>
-                            <p className="text-white text-sm font-medium">{searchData.date} - {searchData.time}</p>
-                          </div>
+                          <div><p className="text-xs text-gray-500">{c.dateTime}</p><p className="text-white text-sm font-medium">{searchData.date} - {searchData.time}</p></div>
                         </div>
                       )}
                     </div>
@@ -600,9 +667,7 @@ const Checkout = () => {
                       <div className="flex justify-between items-center">
                         <p className="text-sm font-bold text-white">{c.total}</p>
                         <div className="text-right">
-                          {selectedCar.originalPrice && selectedCar.originalPrice !== selectedCar.price && (
-                            <p className="text-sm text-gray-500 line-through">{selectedCar.originalPrice}&euro;</p>
-                          )}
+                          {selectedCar.originalPrice && selectedCar.originalPrice !== selectedCar.price && <p className="text-sm text-gray-500 line-through">{selectedCar.originalPrice}&euro;</p>}
                           <p className="text-2xl font-extrabold text-[#2ecc71]" data-testid="checkout-price">{selectedCar.price}&euro;</p>
                         </div>
                       </div>
@@ -610,36 +675,26 @@ const Checkout = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Trust items */}
                 <div className="hidden lg:flex flex-col gap-2">
                   {c.trustItems.map((item, i) => (
                     <div key={i} className="flex items-center gap-2 text-gray-400 text-sm">
-                      <CheckCircle className="w-4 h-4 text-[#2ecc71]" />
-                      <span>{item}</span>
+                      <CheckCircle className="w-4 h-4 text-[#2ecc71]" /><span>{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Right: Unified Auth + Payment Form */}
+            {/* Right: Auth → Cards → Pay */}
             <div className="lg:col-span-3">
               <Elements stripe={stripePromise}>
-                <UnifiedCheckoutForm
-                  searchData={searchData}
-                  selectedCar={selectedCar}
-                  c={c}
-                  isAuthenticated={isAuthenticated}
-                  user={user}
-                  onLoginDirect={loginDirect}
-                />
+                <CheckoutForm searchData={searchData} selectedCar={selectedCar} c={c}
+                  isAuthenticated={isAuthenticated} user={user} onLoginDirect={loginDirect} />
               </Elements>
             </div>
           </div>
         </div>
       </main>
-
       <Footer />
     </div>
   );
