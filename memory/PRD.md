@@ -6,7 +6,7 @@ Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) 
 ## Core Architecture
 - **Frontend:** React (CRA) + Tailwind + Shadcn/UI
 - **Backend:** FastAPI + MongoDB
-- **External:** C# API (`api.zont.cab`), Custom TCP GPS Gateway (VPS), Google Maps, Stripe, Gemini Flash (Emergent LLM Key)
+- **External:** C# API (`api.zont.cab`), Custom TCP GPS Gateway (VPS), Google Maps, Stripe (managed by C#), Gemini Flash (Emergent LLM Key)
 
 ## What's Been Implemented
 
@@ -19,24 +19,25 @@ Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) 
 - GPS Super Admin portal
 
 ### Key Features (Completed)
-- Premium Checkout flow with TripRecap page
+- **Checkout flow with card management** (Feb 2026): 2-step flow — register/login first, then add card via C# SetupIntent, select saved card, and submit booking with cardId. Supports add/delete/select multiple cards.
+- Premium TripRecap page before checkout
 - Inline passenger registration in Checkout
 - Fleet Driver Sync bug fix (401 auto-logout)
 - Custom GPS Webhook + Teltonika TCP decoder (VPS zip)
 - GPS Route History replay
 - Real-time SSE GPS streaming with Leaflet maps (light theme)
+- Google Tag Manager (GTM) with dataLayer push for taxi_reservation events
 
 ### SEO Landing Pages (Completed)
-- **Paris Main Page:** Refocused on "Taxi & VTC Paris - Chauffeur Privé, Transfert & Mise à Disposition" with airport links grid (CDG, Orly, Beauvais as clickable cards). CMS MongoDB updated.
-- **Airports:** CDG, Orly, Beauvais (with "Meet your driver" photo+text sections, WebP images)
-- **Train Stations:** Gare de Lyon, Gare du Nord, Montparnasse, Saint-Lazare, Austerlitz (with driver photos)
-- **Services:** VTC 7 Places (updated with "Taxi / VTC" SEO + family photo + IDF cities list), VTC 8 Places
+- **Paris Main Page:** Refocused on "Taxi & VTC Paris - Chauffeur Prive, Transfert & Mise a Disposition"
+- **Airports:** CDG, Orly, Beauvais
+- **Train Stations:** Gare de Lyon, Gare du Nord, Montparnasse, Saint-Lazare, Austerlitz
+- **Services:** VTC 7 Places (with "Taxi / VTC" SEO), VTC 8 Places
 - **Cities:** Nice, Cannes, Monaco, Rome, Milan, Munich, Berlin, Barcelona, Alicante, Yerevan, Disneyland
 
 ### Latest Changes (Feb 2026)
-- **Paris page refonte SEO:** Title changed from "Transfert Aéroport Paris - CDG, Orly et Beauvais" to "Taxi & VTC Paris - Chauffeur Privé, Transfert & Mise à Disposition". Airport names removed from H1, added as clickable link grid (stationLinks). All 4 languages updated. CMS MongoDB synced.
-- **VTC 7 Places page:** Added "Taxi" keyword alongside "VTC" in all 4 languages. Added family photo (WebP 111KB) with IDF cities list in meetDriver block.
-- **CityTransferPage.js:** Added `heroImage`, `description4` support, and configurable `stationLinksTitle`.
+- **Checkout Payment Fix:** Restored SetupIntent flow via C# proxy. Removed broken `direct_payment.py`. Added card management (list/add/delete/select) inside checkout. 2-step UX: auth first, then card+pay.
+- **Code Cleanup:** Removed unused `direct_payment.py` and its server.py import.
 
 ## Prioritized Backlog
 
@@ -51,7 +52,6 @@ Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) 
 - Geofences & GPS Alerts (zones, speeding)
 - Editable Company Profile Page for fleet companies
 - Trip History & Route Replay enhancements
-- Add "Taxi" keyword to VTC 8 Places page (pending user request)
 
 ### P3 (Low)
 - Hotel Admin - Automated Monthly Invoicing
@@ -64,27 +64,30 @@ Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) 
 - Extract AI booking logic from `Home.js` (~1000 lines) into `<AIBookingWidget />` component
 
 ## Key Files
-- `/app/frontend/src/pages/ParisAirportTransfer.js` - Paris main SEO page (refocused)
-- `/app/frontend/src/pages/services/VTC7Places.js` - VTC 7 seats SEO page
-- `/app/frontend/src/pages/services/VTC8Places.js` - VTC 8 seats SEO page
-- `/app/frontend/src/components/CityTransferPage.js` - Shared landing page component
+- `/app/frontend/src/pages/Checkout.js` - 2-step checkout with card management
+- `/app/frontend/src/pages/MyAccount.js` - Account page with card management
+- `/app/backend/routes/csharp_proxy.py` - Proxy to C# backend for payments/bookings
+- `/app/frontend/src/services/api.js` - Frontend API service layer
+- `/app/frontend/src/pages/ParisAirportTransfer.js` - Paris main SEO page
 - `/app/frontend/src/pages/kiosk/KioskPage.js` - Hotel Kiosk PWA
-- `/app/backend/routes/kiosk.py` - Kiosk API
 - `/app/backend/routes/fleet_gps.py` - Custom GPS Webhook
 
 ## Important: CMS Override
-CityTransferPage fetches CMS data from MongoDB (`cms_pages` collection) that overrides static content (title, subtitle, description). When changing page titles, BOTH the React file AND the MongoDB CMS record must be updated.
+CityTransferPage fetches CMS data from MongoDB (`cms_pages` collection) that overrides static content. When changing page titles, BOTH the React file AND the MongoDB CMS record must be updated.
 
 ## Credentials
 - GPS Admin: `gps@zont.cab` / `gpsadmin123`
 - Fleet Admin: `Nandetiri1@gmail.com` / `12345678`
 - Hotel Admin: `admin@bristol.fr` / `hotel123`
 - Super Admin: `admin@zont.cab` / `admin123`
+- Test Client: `testclient@zont.cab` / `test1234`
 
 ## Critical Notes
 - LANGUAGE: Always respond in French
-- THEME: Light theme (white/emerald/gray) - no dark mode for GPS map
+- THEME: Light theme (white/emerald/gray) for GPS map — no dark mode
 - IMAGE OPTIMIZATION: Always convert PNGs to WebP before adding
 - Do NOT use BaseHTTPMiddleware in FastAPI
 - TCP Gateway runs on external VPS, NOT on Emergent
-- CMS in MongoDB can override page content - always check and update both
+- CMS in MongoDB can override page content — always check and update both
+- Stripe is managed by C# backend — do NOT try to create PaymentIntents locally (key is expired)
+- The `direct_payment.py` was removed — all payments go through C# proxy
