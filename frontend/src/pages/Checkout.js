@@ -27,10 +27,10 @@ const labels = {
     dateTime: 'Date & Time', vehicle: 'Vehicle',
     total: 'Total', vatNote: 'All prices include VAT, fees and tolls.',
     payment: 'Payment', payBtn: 'Confirm & Pay',
-    processing: 'Processing...',
+    processing: 'Payment in progress...',
     noData: 'No booking data found', goBack: 'Start a new booking',
     trustItems: ['Secure payment', 'Fixed price guaranteed', 'Free cancellation 24h'],
-    cardNote: 'Your card will only be charged after ride confirmation.',
+    cardNote: 'Your card will be charged immediately. Secure payment via Stripe.',
     step1: 'Vehicle', step2: 'Summary', step3: 'Payment',
     cardError: 'Please check your card details.',
     bookingSuccess: 'Booking confirmed! Your ride has been reserved.',
@@ -53,10 +53,10 @@ const labels = {
     dateTime: 'Date & Heure', vehicle: 'Vehicule',
     total: 'Total', vatNote: 'Tous les prix incluent TVA, frais et peages.',
     payment: 'Paiement', payBtn: 'Confirmer & Payer',
-    processing: 'Traitement en cours...',
+    processing: 'Paiement en cours...',
     noData: 'Aucune reservation trouvee', goBack: 'Nouvelle recherche',
     trustItems: ['Paiement securise', 'Prix fixe garanti', 'Annulation gratuite 24h'],
-    cardNote: 'Votre carte sera debitee uniquement apres confirmation de la course.',
+    cardNote: 'Votre carte sera debitee immediatement. Paiement securise via Stripe.',
     step1: 'Vehicule', step2: 'Resume', step3: 'Paiement',
     cardError: 'Veuillez verifier vos informations de carte.',
     bookingSuccess: 'Reservation confirmee ! Votre course a ete reservee.',
@@ -79,10 +79,10 @@ const labels = {
     dateTime: 'Дата и Время', vehicle: 'Автомобиль',
     total: 'Итого', vatNote: 'Все цены включают НДС и сборы.',
     payment: 'Оплата', payBtn: 'Подтвердить и Оплатить',
-    processing: 'Обработка...',
+    processing: 'Оплата...',
     noData: 'Данные не найдены', goBack: 'Новый поиск',
     trustItems: ['Безопасный платеж', 'Фикс. цена', 'Бесплатная отмена 24ч'],
-    cardNote: 'Средства будут списаны только после подтверждения поездки.',
+    cardNote: 'Карта будет списана немедленно. Безопасная оплата через Stripe.',
     step1: 'Авто', step2: 'Детали', step3: 'Оплата',
     cardError: 'Проверьте данные карты.',
     bookingSuccess: 'Бронирование подтверждено!',
@@ -99,16 +99,17 @@ const labels = {
     orSimilar: 'или аналог',
   },
   hy: {
-    title: ' Delays',
-    summary: 'Delays',
-    from: 'Delays', to: 'Delays',
-    dateTime: 'Delays', vehicle: 'Delays',
-    total: 'Delays', vatNote: 'Delays.',
-    payment: 'Delays', payBtn: 'Delays',
-    processing: 'Delays...',
-    noData: 'Delays', goBack: 'Delays',
-    trustItems: ['Delays', 'Delays', 'Delays'],
-    step1: 'Delays', step2: 'Delays', step3: 'Delays',
+    title: '\u0531\u0574\u0580\u0561\u0563\u0580\u0578\u0582\u043c',
+    summary: '\u0548\u0582\u0572\u0587\u043e\u0580\u0578\u0582\u0569\u0575\u0578\u0582\u0576',
+    from: '\u054e\u0565\u0580\u0581\u0576\u0578\u043c', to: '\u053b\u057b\u0576\u0578\u043c',
+    dateTime: '\u0531\u043c\u057d\u0561\u0569\u056b\u057e', vehicle: '\u0544\u0565\u0584\u0565\u0576\u0561',
+    total: '\u0538\u0576\u0564\u0561\u043c\u0565\u0576\u0568', vatNote: '\u0533\u0576\u0565\u0580\u0568 \u0576\u0565\u0580\u0561\u057c\u057e\u0561\u0564.',
+    payment: '\u0532\u0561\u0576\u043a\u0561\u0575\u056b\u0576 \u0584\u0561\u0580\u057f', payBtn: '\u0531\u043c\u0580\u0561\u0563\u0580\u0565\u043b',
+    processing: '\u0544\u0577\u0561\u043a\u057e\u0578\u0582\u043c...',
+    noData: '\u054f\u057e\u0575\u0561\u043b\u0576\u0565\u0580 \u0579\u0565\u0576 \u0563\u057f\u0576\u057e\u0565\u043b', goBack: '\u0546\u043e\u0580 \u043e\u0580\u043e\u0576\u0578\u0582\u043c',
+    trustItems: ['\u0531\u043f\u0561\u0570\u043e\u057e \u057e\u0573\u0561\u0580\u0578\u0582\u043c', '\u0556\u056b\u0584\u057d \u0563\u056b\u0576', '\u0531\u0576\u057e\u0573\u0561\u0580 \u0579\u0565\u0572\u0561\u0580\u043a\u0578\u0582\u043c 24\u056a'],
+    cardNote: '\u0554\u0561\u0580\u057f\u0568 \u043a\u043f\u0561\u0570\u057e\u056b. \u0533\u0578\u0582\u043c\u0561\u0580\u0568 \u043a\u0563\u0561\u0576\u0571\u057e\u056b \u057e\u0561\u0580\u043e\u0580\u0564\u056b \u0570\u0561\u057d\u057f\u0561\u057f\u0578\u0582\u043c\u056b\u0581 \u0570\u0565\u057f\u043e.',
+    step1: '\u0544\u0565\u0584\u0565\u0576\u0561', step2: '\u054f\u057e\u0575\u0561\u043b\u0576\u0565\u0580', step3: '\u0554\u0561\u0580\u057f',
     cardError: 'Delays.',
     bookingSuccess: 'Delays!',
     bookingError: 'Delays.',
@@ -237,31 +238,36 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         try { await authService.sendVerificationEmail(form.email); } catch {}
       }
 
-      // Step 2: Get SetupIntent for 3DS
+      // Step 2: Create PaymentIntent with real amount
       const token = localStorage.getItem('auth_token');
-      const setupResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`, {
+      const piResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payment/create-intent`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          amount: parseFloat(selectedCar.price),
+          currency: 'eur',
+          description: `Zont.cab - ${searchData.pickup} → ${searchData.dropoff}`,
+        }),
       });
-      const setupData = await setupResp.json();
-      if (!setupResp.ok || !setupData.clientSecret) {
-        toast.error(setupData?.detail || c.bookingError);
+      const piData = await piResp.json();
+      if (!piResp.ok || !piData.clientSecret) {
+        toast.error(piData?.detail || c.bookingError);
         setLoading(false);
         return;
       }
 
-      // Step 3: Confirm card setup with 3DS
-      const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
-        setupData.clientSecret,
+      // Step 3: Confirm card payment (direct charge)
+      const { error: payError, paymentIntent } = await stripe.confirmCardPayment(
+        piData.clientSecret,
         { payment_method: { card: elements.getElement(CardElement) } }
       );
-      if (setupError) {
-        toast.error(setupError.message || c.cardError);
+      if (payError) {
+        toast.error(payError.message || c.cardError);
         setLoading(false);
         return;
       }
 
-      // Step 4: Submit booking
+      // Step 4: Submit booking to C# with payment confirmation
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
         startPointLongitude: searchData.pickupCoords.longitude,
@@ -274,7 +280,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         carType: selectedCar.tripType || '',
         distance: selectedCar.distance ? Math.round(selectedCar.distance) : 0,
         duration: selectedCar.duration ? Math.round(selectedCar.duration) : 0,
-        cardId: setupIntent.payment_method,
+        cardId: paymentIntent.payment_method || '',
+        paymentIntentId: paymentIntent.id || '',
         utcOffset: new Date().getTimezoneOffset() * -1,
       };
 
