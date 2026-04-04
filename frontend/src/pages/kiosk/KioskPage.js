@@ -205,6 +205,16 @@ const KioskPage = () => {
       if (!resp.ok) throw new Error('Booking failed');
       const data = await resp.json();
       setBooking(data);
+
+      // GTM dataLayer: fire taxi_reservation event on successful kiosk booking
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        'event': 'taxi_reservation',
+        'value': parseFloat(selectedVehicle.minAmount) || 0,
+        'currency': 'EUR',
+        'transaction_id': data?.id || data?.bookingId || `KIOSK-${Date.now()}`
+      });
+
       setStep(4);
     } catch {
       setError('Erreur lors de la reservation. Veuillez reessayer.');
