@@ -495,6 +495,7 @@ async def proxy_client_cards(request: Request):
             )
             if resp.status_code == 200:
                 cards_raw = resp.json()
+                logger.info(f"C# cards RAW response: {json.dumps(cards_raw)[:2000]}")
                 return [
                     {
                         "id": c.get("id"),
