@@ -404,8 +404,6 @@ async def proxy_verify_code(code: str):
 class AuctionAddRequest(BaseModel):
     startPointLatitude: float
     startPointLongitude: float
-    endPointLatitude: Optional[float] = None
-    endPointLongitude: Optional[float] = None
     clientPrice: float
     startDate: str
     startAddress: Optional[str] = None
@@ -420,8 +418,9 @@ class AuctionAddRequest(BaseModel):
     cardId: Optional[str] = None
     email: Optional[str] = None
     utcOffset: Optional[int] = None
-    nbOfPassenger: Optional[int] = None
-    flightNumber: Optional[str] = None
+
+    class Config:
+        extra = "ignore"
 
 
 

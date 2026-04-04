@@ -399,8 +399,6 @@ const CheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user, onLog
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
         startPointLongitude: searchData.pickupCoords.longitude,
-        endPointLatitude: searchData.dropoffCoords?.latitude || 0,
-        endPointLongitude: searchData.dropoffCoords?.longitude || 0,
         clientPrice: selectedCar.price,
         startDate: formatDateForApi(searchData.date, searchData.time),
         startAddress: searchData.pickup,
