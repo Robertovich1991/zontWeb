@@ -442,6 +442,7 @@ async def create_setup_intent(request: Request):
                 },
             )
             body_text = resp.text
+            logger.info(f"C# addCard response: status={resp.status_code} body={body_text[:500]}")
             try:
                 data = json.loads(body_text) if body_text.strip() else {}
             except (json.JSONDecodeError, ValueError):

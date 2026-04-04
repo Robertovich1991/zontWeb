@@ -244,9 +244,28 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
       });
-      const setupData = await setupResp.json();
+      let setupData;
+      try {
+        const setupText = await setupResp.text();
+        setupData = setupText ? JSON.parse(setupText) : {};
+      } catch (parseErr) {
+        console.error('Setup intent parse error:', parseErr);
+        toast.error('Erreur de connexion au serveur de paiement. Reessayez.');
+        setLoading(false);
+        return;
+      }
+
       if (!setupResp.ok || !setupData.clientSecret) {
-        toast.error(setupData?.detail || c.bookingError);
+        const errDetail = setupData?.detail;
+        let errMsg = c.bookingError;
+        if (setupResp.status === 401 || setupResp.status === 403) {
+          errMsg = 'Session expiree. Veuillez vous reconnecter.';
+        } else if (typeof errDetail === 'string' && errDetail) {
+          errMsg = errDetail;
+        } else if (errDetail?.error) {
+          errMsg = errDetail.error;
+        }
+        toast.error(errMsg);
         setLoading(false);
         return;
       }
