@@ -352,12 +352,12 @@ const CarSelection = () => {
 
                     <div className="flex flex-col sm:flex-row">
                       {/* Image */}
-                      <div className="w-full sm:w-[280px] md:w-[340px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-2 sm:p-5 h-[144px] sm:min-h-[180px]">
+                      <div className="w-full sm:w-[280px] md:w-[340px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4 py-2 sm:p-5 h-[130px] sm:min-h-[180px]">
                         {imageUrl ? (
                           <img
                             src={imageUrl}
                             alt={tripType}
-                            className="w-[85%] sm:w-full h-auto object-contain"
+                            className="max-w-[90%] max-h-[110px] sm:w-full sm:max-h-none h-auto object-contain"
                             loading="lazy"
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
@@ -367,30 +367,30 @@ const CarSelection = () => {
                       </div>
 
                       {/* Info */}
-                      <div className="flex-1 px-3 py-2 sm:py-4 sm:px-5 flex flex-col justify-between min-w-0">
+                      <div className="flex-1 px-3 py-1.5 sm:py-4 sm:px-5 flex flex-col justify-between min-w-0">
                         <div>
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <h3 className="text-lg font-bold text-gray-900">{tripType}</h3>
+                          <div className="flex items-center gap-2 mb-0">
+                            <h3 className="text-base font-bold text-gray-900">{tripType}</h3>
                           </div>
-                          <p className="text-xs text-gray-400 mb-2.5">{vehicle.description || ''}</p>
+                          <p className="text-xs text-gray-400 mb-1.5 line-clamp-1">{vehicle.description || ''}</p>
 
                           {/* Specs */}
-                          <div className="flex items-center gap-4 mb-2.5">
+                          <div className="flex items-center gap-3 mb-1.5">
                             {paxCount > 0 && (
-                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                <Users className="w-4 h-4 text-gray-400" />
+                              <div className="flex items-center gap-1 text-xs text-gray-600">
+                                <Users className="w-3.5 h-3.5 text-gray-400" />
                                 <span>{c.pax} <b>{paxCount}</b></span>
                               </div>
                             )}
                             {vehicle.luggage > 0 && (
-                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                <Briefcase className="w-4 h-4 text-gray-400" />
+                              <div className="flex items-center gap-1 text-xs text-gray-600">
+                                <Briefcase className="w-3.5 h-3.5 text-gray-400" />
                                 <span>{c.bags} <b>{vehicle.luggage}</b></span>
                               </div>
                             )}
                             {vehicle.duration > 0 && (
-                              <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                <Clock className="w-4 h-4 text-gray-400" />
+                              <div className="flex items-center gap-1 text-xs text-gray-600">
+                                <Clock className="w-3.5 h-3.5 text-gray-400" />
                                 <span>~{vehicle.duration} {c.mins}</span>
                               </div>
                             )}
@@ -399,21 +399,21 @@ const CarSelection = () => {
                       </div>
 
                       {/* Price + CTA */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 px-3 pb-3 sm:p-5 sm:pl-0 sm:w-[170px] flex-shrink-0 border-t sm:border-t-0 sm:border-l border-gray-100">
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1.5 px-3 pb-2 sm:p-5 sm:pl-0 sm:w-[170px] flex-shrink-0 border-t sm:border-t-0 sm:border-l border-gray-100">
                         <div className="sm:text-right">
                           {activeDiscount > 0 && (
-                            <div className="text-lg font-medium text-gray-400 line-through" data-testid={`original-price-${index}`}>
+                            <div className="text-base font-medium text-gray-400 line-through" data-testid={`original-price-${index}`}>
                               {Math.round(price)}&euro;
                             </div>
                           )}
-                          <div className={`text-3xl font-extrabold ${activeDiscount > 0 ? 'text-emerald-600' : 'text-gray-900'}`} data-testid={`car-price-${index}`}>
-                            {applyDiscount(price)}<span className="text-base font-normal text-gray-400 ml-0.5">&euro;</span>
+                          <div className={`text-2xl font-extrabold ${activeDiscount > 0 ? 'text-emerald-600' : 'text-gray-900'}`} data-testid={`car-price-${index}`}>
+                            {applyDiscount(price)}<span className="text-sm font-normal text-gray-400 ml-0.5">&euro;</span>
                           </div>
-                          <p className="text-[10px] text-gray-400 mt-0.5">{c.fixedPrice}</p>
+                          <p className="text-[10px] text-gray-400">{c.fixedPrice}</p>
                         </div>
                         <button
                           onClick={() => handleSelectCar(vehicle)}
-                          className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center gap-1.5 ${
+                          className={`px-4 py-2 rounded-lg font-semibold text-xs transition-all flex items-center gap-1 ${
                             isRecommended
                               ? 'bg-[#2ecc71] text-white hover:bg-[#27ae60] shadow-md shadow-green-500/20'
                               : 'bg-gray-900 text-white hover:bg-gray-800'
@@ -421,7 +421,7 @@ const CarSelection = () => {
                           data-testid={`choose-car-${index}`}
                         >
                           {c.select}
-                          <ChevronRight className="w-4 h-4" />
+                          <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
