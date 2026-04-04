@@ -6,7 +6,9 @@ import httpx
 import logging
 import json
 import os
+import asyncio
 import stripe as stripe_lib
+from routes.email_service import send_booking_confirmation
 
 logger = logging.getLogger(__name__)
 
@@ -620,6 +622,24 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
                 if client_secret:
                     result["clientSecret"] = client_secret
                     result["requiresAction"] = True
+
+                # Send booking confirmation email (fire-and-forget)
+                client_email = payload.get("email") or ""
+                if client_email:
+                    booking_id = data if isinstance(data, (int, str)) else (data.get("id") if isinstance(data, dict) else "")
+                    email_data = {
+                        "bookingId": booking_id,
+                        "clientName": client_email.split("@")[0],
+                        "startAddress": payload.get("startAddress", ""),
+                        "endAddress": payload.get("endAddress", ""),
+                        "startDate": payload.get("startDate", ""),
+                        "clientPrice": payload.get("clientPrice", 0),
+                        "carType": payload.get("carType", ""),
+                        "distance": payload.get("distance", 0),
+                        "duration": payload.get("duration", 0),
+                    }
+                    asyncio.create_task(send_booking_confirmation(client_email, email_data))
+
                 return result
 
             # For non-200 responses that need 3DS

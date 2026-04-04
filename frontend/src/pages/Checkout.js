@@ -283,6 +283,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         utcOffset: new Date().getTimezoneOffset() * -1,
         endPointLatitude: dropoffCoords?.latitude,
         endPointLongitude: dropoffCoords?.longitude,
+        email: formData.email,
       };
 
       const result = await transferService.submitBooking(bookingPayload);
