@@ -185,7 +185,7 @@ const GpsAdminMap = () => {
       try {
         const res = await authFetch('/api/gps-admin/positions');
         if (res.ok) updateVehicles((await res.json()).positions || []);
-      } catch {}
+      } catch (err) { console.error('GPS poll error:', err); }
     }
 
     function startPolling() {
@@ -217,7 +217,7 @@ const GpsAdminMap = () => {
               return;
             }
             handleWsMessage(msg);
-          } catch {}
+          } catch (err) { console.error('WS message parse error:', err); }
         };
         ws.onclose = () => {
           if (closed) return;
@@ -227,7 +227,7 @@ const GpsAdminMap = () => {
           reconnectRef.current = setTimeout(connectWS, 5000);
         };
         ws.onerror = () => ws.close();
-      } catch { startPolling(); }
+      } catch (err) { console.error('WS connect error:', err); startPolling(); }
     }
 
     connectWS();
@@ -264,7 +264,7 @@ const GpsAdminMap = () => {
     try {
       const res = await authFetch('/api/gps-admin/positions');
       if (res.ok) { const d = (await res.json()).positions || []; vehiclesRef.current = d; setVehicles([...d]); }
-    } catch {} finally { setLoading(false); }
+    } catch (err) { console.error('Manual refresh error:', err); } finally { setLoading(false); }
   }, [authFetch]);
 
   return (

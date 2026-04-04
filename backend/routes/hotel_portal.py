@@ -233,7 +233,7 @@ async def download_invoice(invoice_id: str, request: Request):
     output.write("=" * 60 + "\n")
     output.write(f"  FACTURE DE COMMISSION - {invoice['id']}\n")
     output.write("=" * 60 + "\n\n")
-    output.write(f"  Emetteur: Zont.cab\n")
+    output.write("  Emetteur: Zont.cab\n")
     output.write(f"  Date: {invoice['created_at'][:10]}\n")
     output.write(f"  Echeance: {invoice['due_date']}\n")
     output.write(f"  Statut: {'PAYEE' if invoice['status'] == 'paid' else 'EN ATTENTE'}\n\n")

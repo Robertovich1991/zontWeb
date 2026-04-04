@@ -5,7 +5,7 @@ from typing import Optional, List
 from datetime import datetime, timezone
 import httpx
 import logging
-import random
+import secrets
 import string
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ class KioskBookingRequest(BaseModel):
 # ---------- Helpers ----------
 
 def gen_reference():
-    return "ZK-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+    return "ZK-" + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(5))
 
 
 POPULAR_DESTINATIONS = [

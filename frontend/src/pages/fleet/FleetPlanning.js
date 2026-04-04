@@ -180,7 +180,7 @@ const FleetPlanning = () => {
         planningCacheRef.current[`${date}_${view}`] = data;
         return data;
       }
-    } catch {}
+    } catch (err) { console.error('Fetch planning error:', err); }
     return null;
   }, [authFetch, view]);
 
@@ -224,7 +224,7 @@ const FleetPlanning = () => {
   const toggleAlerts = useCallback(() => {
     setAlertsEnabled(prev => {
       const next = !prev;
-      try { localStorage.setItem('fleet_risk_alerts', String(next)); } catch {}
+      try { localStorage.setItem('fleet_risk_alerts', String(next)); } catch (e) { /* localStorage unavailable */ }
       if (next) {
         // Request notification permission
         if ('Notification' in window && Notification.permission === 'default') {
@@ -255,7 +255,7 @@ const FleetPlanning = () => {
         osc.start(ctx.currentTime + i * 0.2);
         osc.stop(ctx.currentTime + i * 0.2 + 0.2);
       });
-    } catch {}
+    } catch (err) { console.error('Audio alert error:', err); }
   }, []);
 
   const checkRiskEscalations = useCallback((newRisks) => {
@@ -297,7 +297,7 @@ const FleetPlanning = () => {
               tag: 'risk-alert',
               requireInteraction: true,
             });
-          } catch {}
+          } catch (err) { console.error('Notification error:', err); }
         });
       }
     }
@@ -328,10 +328,10 @@ const FleetPlanning = () => {
           try {
             const r = await authFetch(`/api/fleet/planning/delay-risk?date=${d}`);
             if (r.ok) { const rd = await r.json(); riskCacheRef.current[d] = rd.risks || {}; }
-          } catch {}
+          } catch (err) { console.error('Pre-fetch risk error:', err); }
         }
       });
-    } catch {}
+    } catch (err) { console.error('Delay risk fetch error:', err); }
   }, [authFetch, currentDate, checkRiskEscalations, getAdjacentDates]);
 
   useEffect(() => {
@@ -679,7 +679,8 @@ const FleetPlanning = () => {
         const err = await res.json().catch(() => ({}));
         toast.error(err.detail || 'Erreur d\'affectation');
       }
-    } catch {
+    } catch (err) {
+      console.error('Reassign error:', err);
       toast.error('Erreur de connexion');
     } finally {
       setAssignLoading(false);

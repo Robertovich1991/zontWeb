@@ -3,7 +3,9 @@ from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional
 from passlib.context import CryptContext
-import uuid, httpx, logging
+import uuid
+import httpx
+import logging
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)

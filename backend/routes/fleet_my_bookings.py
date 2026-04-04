@@ -18,7 +18,8 @@ def get_company_id(request: Request) -> str:
     token = request.headers.get("Authorization", "").replace("Bearer ", "")
     if not token:
         raise HTTPException(401, "Non authentifie")
-    import base64, json
+    import base64
+    import json
     try:
         payload = token.split(".")[1]
         payload += "=" * (4 - len(payload) % 4)
