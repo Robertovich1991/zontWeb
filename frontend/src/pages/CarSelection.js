@@ -352,7 +352,7 @@ const CarSelection = () => {
 
                     <div className="flex flex-col sm:flex-row">
                       {/* Image */}
-                      <div className="w-full sm:w-[280px] md:w-[340px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-2 sm:p-5 min-h-[200px]">
+                      <div className="w-full sm:w-[280px] md:w-[340px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-2 sm:p-5 h-[120px] sm:min-h-[180px]">
                         {imageUrl ? (
                           <img
                             src={imageUrl}
@@ -367,7 +367,7 @@ const CarSelection = () => {
                       </div>
 
                       {/* Info */}
-                      <div className="flex-1 p-4 sm:py-4 sm:px-5 flex flex-col justify-between min-w-0">
+                      <div className="flex-1 px-3 py-2 sm:py-4 sm:px-5 flex flex-col justify-between min-w-0">
                         <div>
                           <div className="flex items-center gap-2 mb-0.5">
                             <h3 className="text-lg font-bold text-gray-900">{tripType}</h3>
@@ -399,7 +399,7 @@ const CarSelection = () => {
                       </div>
 
                       {/* Price + CTA */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 px-4 pb-4 sm:p-5 sm:pl-0 sm:w-[170px] flex-shrink-0 border-t sm:border-t-0 sm:border-l border-gray-100">
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 px-3 pb-3 sm:p-5 sm:pl-0 sm:w-[170px] flex-shrink-0 border-t sm:border-t-0 sm:border-l border-gray-100">
                         <div className="sm:text-right">
                           {activeDiscount > 0 && (
                             <div className="text-lg font-medium text-gray-400 line-through" data-testid={`original-price-${index}`}>
