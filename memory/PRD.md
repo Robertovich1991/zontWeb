@@ -27,13 +27,16 @@ Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) 
 - Real-time SSE GPS streaming with Leaflet maps (light theme)
 
 ### SEO Landing Pages (Completed)
+- **Paris Main Page:** Refocused on "Taxi & VTC Paris - Chauffeur Privé, Transfert & Mise à Disposition" with airport links grid (CDG, Orly, Beauvais as clickable cards). CMS MongoDB updated.
 - **Airports:** CDG, Orly, Beauvais (with "Meet your driver" photo+text sections, WebP images)
 - **Train Stations:** Gare de Lyon, Gare du Nord, Montparnasse, Saint-Lazare, Austerlitz (with driver photos)
 - **Services:** VTC 7 Places (updated with "Taxi / VTC" SEO + family photo + IDF cities list), VTC 8 Places
-- **Cities:** Paris, Nice, Cannes, Monaco, Rome, Milan, Munich, Berlin, Barcelona, Alicante, Yerevan, Disneyland
+- **Cities:** Nice, Cannes, Monaco, Rome, Milan, Munich, Berlin, Barcelona, Alicante, Yerevan, Disneyland
 
 ### Latest Changes (Feb 2026)
-- **VTC 7 Places page:** Added "Taxi" keyword alongside "VTC" in all 4 languages (FR, EN, RU, HY). Added family photo (WebP 111KB) with Île-de-France cities list in meetDriver-style block. CityTransferPage updated with `heroImage` and `description4` support.
+- **Paris page refonte SEO:** Title changed from "Transfert Aéroport Paris - CDG, Orly et Beauvais" to "Taxi & VTC Paris - Chauffeur Privé, Transfert & Mise à Disposition". Airport names removed from H1, added as clickable link grid (stationLinks). All 4 languages updated. CMS MongoDB synced.
+- **VTC 7 Places page:** Added "Taxi" keyword alongside "VTC" in all 4 languages. Added family photo (WebP 111KB) with IDF cities list in meetDriver block.
+- **CityTransferPage.js:** Added `heroImage`, `description4` support, and configurable `stationLinksTitle`.
 
 ## Prioritized Backlog
 
@@ -42,7 +45,7 @@ Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) 
 
 ### P1 (High)
 - Google Sheets / CSV Planning Import for fleet reservations
-- AI-assisted Booking Creation (paste text → LLM extracts details)
+- AI-assisted Booking Creation (paste text -> LLM extracts details)
 
 ### P2 (Medium)
 - Geofences & GPS Alerts (zones, speeding)
@@ -61,13 +64,16 @@ Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) 
 - Extract AI booking logic from `Home.js` (~1000 lines) into `<AIBookingWidget />` component
 
 ## Key Files
+- `/app/frontend/src/pages/ParisAirportTransfer.js` - Paris main SEO page (refocused)
 - `/app/frontend/src/pages/services/VTC7Places.js` - VTC 7 seats SEO page
 - `/app/frontend/src/pages/services/VTC8Places.js` - VTC 8 seats SEO page
 - `/app/frontend/src/components/CityTransferPage.js` - Shared landing page component
 - `/app/frontend/src/pages/kiosk/KioskPage.js` - Hotel Kiosk PWA
 - `/app/backend/routes/kiosk.py` - Kiosk API
 - `/app/backend/routes/fleet_gps.py` - Custom GPS Webhook
-- `/app/backend/routes/gps_admin.py` - GPS Admin endpoints
+
+## Important: CMS Override
+CityTransferPage fetches CMS data from MongoDB (`cms_pages` collection) that overrides static content (title, subtitle, description). When changing page titles, BOTH the React file AND the MongoDB CMS record must be updated.
 
 ## Credentials
 - GPS Admin: `gps@zont.cab` / `gpsadmin123`
@@ -81,3 +87,4 @@ Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) 
 - IMAGE OPTIMIZATION: Always convert PNGs to WebP before adding
 - Do NOT use BaseHTTPMiddleware in FastAPI
 - TCP Gateway runs on external VPS, NOT on Emergent
+- CMS in MongoDB can override page content - always check and update both

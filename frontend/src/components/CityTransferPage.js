@@ -468,7 +468,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
           <section className="py-12 md:py-16 px-4 bg-[#0f1419]" data-testid="station-links-section">
             <div className="max-w-5xl mx-auto">
               <h2 className="text-xl md:text-2xl font-bold text-white text-center mb-8">
-                {language === 'fr' ? 'Toutes les Gares de Paris' : language === 'ru' ? 'Все Вокзалы Парижа' : 'All Paris Train Stations'}
+                {c.stationLinksTitle || (language === 'fr' ? 'Toutes les Gares de Paris' : language === 'ru' ? 'Все Вокзалы Парижа' : 'All Paris Train Stations')}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {stationLinks.map((station, i) => (
