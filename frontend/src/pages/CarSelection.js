@@ -352,7 +352,7 @@ const CarSelection = () => {
 
                     <div className="flex flex-col sm:flex-row">
                       {/* Image */}
-                      <div className="w-full sm:w-[280px] md:w-[340px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-2 sm:p-5 h-[168px] sm:min-h-[180px]">
+                      <div className="w-full sm:w-[280px] md:w-[340px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-2 sm:p-5 h-[163px] sm:min-h-[180px]">
                         {imageUrl ? (
                           <img
                             src={imageUrl}
