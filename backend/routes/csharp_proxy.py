@@ -418,6 +418,8 @@ class AuctionAddRequest(BaseModel):
     cardId: Optional[str] = None
     email: Optional[str] = None
     utcOffset: Optional[int] = None
+    endPointLatitude: Optional[float] = None
+    endPointLongitude: Optional[float] = None
 
     class Config:
         extra = "ignore"
@@ -569,6 +571,17 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
 
     try:
         payload = req.dict(exclude_none=True)
+        # C# expects tripType="distance" (not "Transfer"/"Hourly")
+        if payload.get("tripType") in ("Transfer", "Hourly", "transfer", "hourly"):
+            payload["tripType"] = "distance"
+        # C# expects destination as "lat,lng" coordinates string
+        dest = payload.get("destination", "")
+        end_lat = payload.pop("endPointLatitude", None)
+        end_lng = payload.pop("endPointLongitude", None)
+        if dest and not all(c in "0123456789.,-+ " for c in dest):
+            # destination is an address, not coordinates — use endPoint coords
+            if end_lat and end_lng:
+                payload["destination"] = f"{end_lat},{end_lng}"
         logger.info(f"C# addAuction REQUEST: payload={json.dumps(payload)[:500]}")
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(

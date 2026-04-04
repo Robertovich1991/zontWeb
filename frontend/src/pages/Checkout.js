@@ -262,6 +262,11 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       }
 
       // Step 4: Submit booking
+      // C# expects tripType="distance" and destination as "lat,lng" coordinates
+      const dropoffCoords = searchData.dropoffCoords;
+      const destinationStr = dropoffCoords
+        ? `${dropoffCoords.latitude},${dropoffCoords.longitude}`
+        : searchData.dropoff || '';
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
         startPointLongitude: searchData.pickupCoords.longitude,
@@ -269,13 +274,15 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         startDate: formatDateForApi(searchData.date, searchData.time),
         startAddress: searchData.pickup,
         endAddress: searchData.dropoff || '',
-        destination: searchData.dropoff || '',
-        tripType: searchData.tripType === 'hourly' ? 'Hourly' : 'Transfer',
+        destination: destinationStr,
+        tripType: 'distance',
         carType: selectedCar.tripType || '',
         distance: selectedCar.distance ? Math.round(selectedCar.distance) : 0,
         duration: selectedCar.duration ? Math.round(selectedCar.duration) : 0,
         cardId: setupIntent.payment_method,
         utcOffset: new Date().getTimezoneOffset() * -1,
+        endPointLatitude: dropoffCoords?.latitude,
+        endPointLongitude: dropoffCoords?.longitude,
       };
 
       const result = await transferService.submitBooking(bookingPayload);
