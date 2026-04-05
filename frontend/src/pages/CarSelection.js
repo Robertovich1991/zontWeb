@@ -352,12 +352,12 @@ const CarSelection = () => {
 
                     <div className="flex flex-col sm:flex-row">
                       {/* Image */}
-                      <div className="w-full sm:w-[280px] md:w-[340px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4 py-2 sm:p-5 h-[130px] sm:min-h-[180px]">
+                      <div className="w-full sm:w-[280px] md:w-[340px] flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4 py-3 sm:p-5 h-[160px] sm:min-h-[180px]">
                         {imageUrl ? (
                           <img
                             src={imageUrl}
                             alt={tripType}
-                            className="max-w-[90%] max-h-[110px] sm:w-full sm:max-h-none h-auto object-contain"
+                            className="max-w-[95%] max-h-[140px] sm:w-full sm:max-h-none h-auto object-contain"
                             loading="lazy"
                             onError={(e) => { e.target.style.display = 'none'; }}
                           />
@@ -367,10 +367,10 @@ const CarSelection = () => {
                       </div>
 
                       {/* Info */}
-                      <div className="flex-1 px-3 py-1.5 sm:py-4 sm:px-5 flex flex-col justify-between min-w-0">
+                      <div className="flex-1 px-3 py-2 sm:py-4 sm:px-5 flex flex-col justify-between min-w-0">
                         <div>
-                          <div className="flex items-center gap-2 mb-0">
-                            <h3 className="text-base font-bold text-gray-900">{tripType}</h3>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <h3 className="text-lg font-bold text-gray-900">{tripType}</h3>
                           </div>
                           <p className="text-xs text-gray-400 mb-1.5 line-clamp-1">{vehicle.description || ''}</p>
 
@@ -406,8 +406,8 @@ const CarSelection = () => {
                               {Math.round(price)}&euro;
                             </div>
                           )}
-                          <div className={`text-2xl font-extrabold ${activeDiscount > 0 ? 'text-emerald-600' : 'text-gray-900'}`} data-testid={`car-price-${index}`}>
-                            {applyDiscount(price)}<span className="text-sm font-normal text-gray-400 ml-0.5">&euro;</span>
+                          <div className={`text-3xl font-extrabold ${activeDiscount > 0 ? 'text-emerald-600' : 'text-gray-900'}`} data-testid={`car-price-${index}`}>
+                            {applyDiscount(price)}<span className="text-base font-normal text-gray-400 ml-0.5">&euro;</span>
                           </div>
                           <p className="text-[10px] text-gray-400">{c.fixedPrice}</p>
                         </div>
