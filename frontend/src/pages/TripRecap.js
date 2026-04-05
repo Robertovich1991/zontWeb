@@ -116,52 +116,52 @@ const RouteMap = ({ pickupCoords, dropoffCoords, pickup, dropoff }) => {
         center: { lat: pickupCoords.latitude, lng: pickupCoords.longitude },
         disableDefaultUI: true,
         zoomControl: true,
-        styles: [
-          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-          { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-        ],
+        zoomControlOptions: { position: window.google.maps.ControlPosition.RIGHT_TOP },
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
       });
       mapInstanceRef.current = map;
 
-      // Pickup marker
+      // Pickup marker (green)
       new window.google.maps.Marker({
         position: { lat: pickupCoords.latitude, lng: pickupCoords.longitude },
         map,
         title: pickup,
         icon: {
           path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: '#2ecc71',
+          scale: 10,
+          fillColor: '#22c55e',
           fillOpacity: 1,
-          strokeColor: '#fff',
-          strokeWeight: 2,
+          strokeColor: '#ffffff',
+          strokeWeight: 3,
         },
       });
 
-      // Dropoff marker
+      // Dropoff marker (red)
       new window.google.maps.Marker({
         position: { lat: dropoffCoords.latitude, lng: dropoffCoords.longitude },
         map,
         title: dropoff,
         icon: {
           path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: '#e74c3c',
+          scale: 10,
+          fillColor: '#ef4444',
           fillOpacity: 1,
-          strokeColor: '#fff',
-          strokeWeight: 2,
+          strokeColor: '#ffffff',
+          strokeWeight: 3,
         },
       });
 
-      // Draw route
+      // Draw route with Google blue style
       const directionsService = new window.google.maps.DirectionsService();
       const directionsRenderer = new window.google.maps.DirectionsRenderer({
         map,
         suppressMarkers: true,
         polylineOptions: {
-          strokeColor: '#2ecc71',
-          strokeWeight: 4,
-          strokeOpacity: 0.8,
+          strokeColor: '#4285F4',
+          strokeWeight: 6,
+          strokeOpacity: 0.85,
         },
       });
 
@@ -174,8 +174,16 @@ const RouteMap = ({ pickupCoords, dropoffCoords, pickup, dropoff }) => {
         (result, status) => {
           if (status === 'OK') {
             directionsRenderer.setDirections(result);
+            // Fit bounds to show entire route
+            const bounds = new window.google.maps.LatLngBounds();
+            const route = result.routes[0];
+            if (route && route.overview_path) {
+              route.overview_path.forEach(p => bounds.extend(p));
+            }
+            bounds.extend({ lat: pickupCoords.latitude, lng: pickupCoords.longitude });
+            bounds.extend({ lat: dropoffCoords.latitude, lng: dropoffCoords.longitude });
+            map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
           } else {
-            // Fallback: fit bounds to show both markers
             const bounds = new window.google.maps.LatLngBounds();
             bounds.extend({ lat: pickupCoords.latitude, lng: pickupCoords.longitude });
             bounds.extend({ lat: dropoffCoords.latitude, lng: dropoffCoords.longitude });
@@ -191,11 +199,11 @@ const RouteMap = ({ pickupCoords, dropoffCoords, pickup, dropoff }) => {
   }, [pickupCoords, dropoffCoords, pickup, dropoff]);
 
   return (
-    <div className="relative w-full rounded-xl overflow-hidden border border-white/10" data-testid="trip-recap-map">
-      <div ref={mapRef} className="w-full h-[240px] sm:h-[300px]" />
+    <div className="relative w-full rounded-xl overflow-hidden border border-gray-200 shadow-sm" data-testid="trip-recap-map">
+      <div ref={mapRef} className="w-full h-[280px] sm:h-[340px]" />
       {!mapReady && (
-        <div className="absolute inset-0 bg-[#1a2332] flex items-center justify-center">
-          <div className="w-8 h-8 border-3 border-[#2ecc71] border-t-transparent rounded-full animate-spin" />
+        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+          <div className="w-8 h-8 border-3 border-[#4285F4] border-t-transparent rounded-full animate-spin" />
         </div>
       )}
     </div>
