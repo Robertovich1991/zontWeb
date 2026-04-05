@@ -6,40 +6,40 @@ const API = process.env.REACT_APP_BACKEND_URL;
 
 const labels = {
   fr: {
-    title: 'Bienvenue !',
-    subtitle: 'Obtenez -10% sur votre transfert',
+    title: 'Reservez en 59 min, economisez 10%',
+    subtitle: '',
     placeholder: 'Votre adresse email',
-    cta: 'Appliquer ma reduction',
+    cta: 'Debloquer ma reduction de 10%',
     loading: 'Application...',
     bannerText: 'Code {code} applique',
     bannerExpiry: 'Expire dans',
     expired: 'Code expire',
     error: 'Email invalide',
-    hint: 'Entrez votre email pour recevoir votre code de bienvenue',
+    hint: 'Entrez votre email pour debloquer immediatement votre code de reduction.',
   },
   en: {
-    title: 'Welcome!',
-    subtitle: 'Get -10% on your transfer',
+    title: 'Book in 59 minutes, save 10%',
+    subtitle: '',
     placeholder: 'Your email address',
-    cta: 'Apply my discount',
+    cta: 'Unlock my 10% discount',
     loading: 'Applying...',
     bannerText: 'Code {code} applied',
     bannerExpiry: 'Expires in',
     expired: 'Code expired',
     error: 'Invalid email',
-    hint: 'Enter your email to get your welcome code',
+    hint: 'Enter your email to unlock immediately your discount code.',
   },
   ru: {
-    title: 'Dobro pozhalovat!',
-    subtitle: 'Poluchite -10% na transfer',
+    title: 'Zakazhite za 59 minut, sekonomte 10%',
+    subtitle: '',
     placeholder: 'Vash email',
-    cta: 'Primenit skidku',
+    cta: 'Poluchit skidku 10%',
     loading: 'Primenenie...',
     bannerText: 'Kod {code} primenen',
     bannerExpiry: 'Istekaet cherez',
     expired: 'Kod istek',
     error: 'Nevernyj email',
-    hint: 'Vvedite email dlya polucheniya koda',
+    hint: 'Vvedite email chtoby srazu poluchit kod skidki.',
   },
 };
 
@@ -106,8 +106,7 @@ export const PromoPopup = ({ open, onClose, onApply }) => {
           <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2">
             <Gift className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-0.5">{c.title}</h3>
-          <p className="text-emerald-100 text-base font-semibold">{c.subtitle}</p>
+          <h3 className="text-lg font-bold text-white leading-tight">{c.title}</h3>
         </div>
 
         {/* Form */}

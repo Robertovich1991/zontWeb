@@ -124,7 +124,7 @@ const CarSelection = () => {
   // Show promo popup after vehicles load (if no active promo and no email given before)
   useEffect(() => {
     if (vehicleResults && vehicleResults.length > 0 && !promoCode && !localStorage.getItem('promo_email')) {
-      const timer = setTimeout(() => setPromoOpen(true), 7000);
+      const timer = setTimeout(() => setPromoOpen(true), 11000);
       return () => clearTimeout(timer);
     }
   }, [vehicleResults, promoCode]);
