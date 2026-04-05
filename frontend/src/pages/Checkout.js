@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useAuth } from '@/context/AuthContext';
@@ -506,6 +506,8 @@ const Checkout = () => {
   const { isAuthenticated, user, loginDirect } = useAuth();
   const { language } = useLanguage();
   const c = labels[language] || labels.en;
+
+  useEffect(() => { window.scrollTo(0, 0); }, []);
 
   if (!searchData || !selectedCar) {
     return (

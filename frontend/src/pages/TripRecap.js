@@ -216,6 +216,8 @@ const TripRecap = () => {
   const { language } = useLanguage();
   const c = labels[language] || labels.en;
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   if (!searchData || !selectedCar) {
     return (
       <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="trip-recap-empty">

@@ -92,6 +92,8 @@ const CarSelection = () => {
 
   const c = labels[language] || labels.en;
 
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   // Restore promo from localStorage on mount
   useEffect(() => {
     const savedCode = localStorage.getItem('promo_code');
