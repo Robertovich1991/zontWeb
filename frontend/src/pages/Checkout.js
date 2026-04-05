@@ -26,12 +26,13 @@ const labels = {
     from: 'Pick-up', to: 'Drop-off',
     dateTime: 'Date & Time', vehicle: 'Vehicle',
     total: 'Total', vatNote: 'All prices include VAT, fees and tolls.',
-    payment: 'Card Details', payBtn: 'Book Now',
-    processing: 'Processing...',
+    payment: 'Card Details', payBtn: 'Add your card',
+    processing: 'Verification...',
     noData: 'No booking data found', goBack: 'Start a new booking',
     trustItems: ['Secure payment', 'Fixed price guaranteed', 'Free cancellation 24h'],
     cardNote: 'Your card will only be charged after ride confirmation by the driver.',
-    secureNote: '3D Secure verification will show 0\u20AC — this is normal. It validates your card. The actual amount will be charged after ride confirmation.',
+    secureNote: '3D Secure verification will show 0\u20AC — this is normal. It only validates your card.',
+    cardExplain: 'Once your card is verified, your booking will be automatically confirmed. You will only be charged after the ride.',
     step1: 'Vehicle', step2: 'Summary', step3: 'Booking',
     cardError: 'Please check your card details.',
     bookingSuccess: 'Booking confirmed! Your ride has been reserved.',
@@ -55,12 +56,13 @@ const labels = {
     from: 'Depart', to: 'Arrivee',
     dateTime: 'Date & Heure', vehicle: 'Vehicule',
     total: 'Total', vatNote: 'Tous les prix incluent TVA, frais et peages.',
-    payment: 'Carte bancaire', payBtn: 'Reserver',
-    processing: 'Traitement en cours...',
+    payment: 'Carte bancaire', payBtn: 'Ajouter votre carte',
+    processing: 'Verification en cours...',
     noData: 'Aucune reservation trouvee', goBack: 'Nouvelle recherche',
     trustItems: ['Paiement securise', 'Prix fixe garanti', 'Annulation gratuite 24h'],
     cardNote: 'Votre carte sera debitee uniquement apres confirmation du chauffeur.',
-    secureNote: 'La verification 3D Secure affichera 0\u20AC \u2014 c\'est normal. Elle valide votre carte. Le montant reel sera debite apres confirmation de la course.',
+    secureNote: 'La verification 3D Secure affichera 0\u20AC \u2014 c\'est normal. Elle sert uniquement a valider votre carte.',
+    cardExplain: 'Une fois votre carte verifiee, votre reservation sera automatiquement confirmee. Le debit ne sera effectue qu\'apres la course.',
     step1: 'Vehicule', step2: 'Resume', step3: 'Reservation',
     cardError: 'Veuillez verifier vos informations de carte.',
     bookingSuccess: 'Reservation confirmee ! Votre course a ete reservee.',
@@ -89,7 +91,8 @@ const labels = {
     noData: 'Данные не найдены', goBack: 'Новый поиск',
     trustItems: ['Безопасный платеж', 'Фикс. цена', 'Бесплатная отмена 24ч'],
     cardNote: 'Средства будут списаны только после подтверждения водителем.',
-    secureNote: '3D Secure покажет 0\u20AC \u2014 это нормально. Проверка карты. Реальная сумма будет списана после подтверждения поездки.',
+    secureNote: '3D Secure покажет 0\u20AC \u2014 это нормально. Проверка карты.',
+    cardExplain: 'После проверки карты бронирование будет автоматически подтверждено. Оплата только после поездки.',
     step1: 'Авто', step2: 'Детали', step3: 'Бронирование',
     cardError: 'Проверьте данные карты.',
     bookingSuccess: 'Бронирование подтверждено!',
@@ -119,6 +122,7 @@ const labels = {
     trustItems: ['delays', 'delays', 'delays'],
     cardNote: 'delays.',
     secureNote: 'delays.',
+    cardExplain: 'delays.',
     step1: 'delays', step2: 'delays', step3: 'delays',
     cardError: 'delays.',
     bookingSuccess: 'delays!',
@@ -474,6 +478,11 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         <p className="text-2xl font-extrabold text-[#2ecc71]">{selectedCar.price}&euro;</p>
       </div>
 
+      {/* Explanation text */}
+      <p className="text-xs text-gray-400 text-center leading-relaxed px-2" data-testid="card-explain">
+        {c.cardExplain}
+      </p>
+
       {/* Submit */}
       <button
         type="submit"
@@ -484,7 +493,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         {loading ? (
           <><Loader2 className="w-5 h-5 animate-spin" /> {c.processing}</>
         ) : (
-          <>{c.payBtn} - {selectedCar.price}&euro;</>
+          <><CreditCard className="w-5 h-5" /> {c.payBtn}</>
         )}
       </button>
     </form>
