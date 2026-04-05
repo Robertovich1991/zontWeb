@@ -26,12 +26,13 @@ const labels = {
     from: 'Pick-up', to: 'Drop-off',
     dateTime: 'Date & Time', vehicle: 'Vehicle',
     total: 'Total', vatNote: 'All prices include VAT, fees and tolls.',
-    payment: 'Payment', payBtn: 'Confirm & Pay',
+    payment: 'Card Details', payBtn: 'Book Now',
     processing: 'Processing...',
     noData: 'No booking data found', goBack: 'Start a new booking',
     trustItems: ['Secure payment', 'Fixed price guaranteed', 'Free cancellation 24h'],
-    cardNote: 'Your card will only be charged after ride confirmation.',
-    step1: 'Vehicle', step2: 'Summary', step3: 'Payment',
+    cardNote: 'Your card will only be charged after ride confirmation by the driver.',
+    secureNote: '3D Secure verification will show 0\u20AC — this is normal. It validates your card. The actual amount will be charged after ride confirmation.',
+    step1: 'Vehicle', step2: 'Summary', step3: 'Booking',
     cardError: 'Please check your card details.',
     bookingSuccess: 'Booking confirmed! Your ride has been reserved.',
     bookingError: 'Booking failed. Please try again.',
@@ -45,6 +46,8 @@ const labels = {
     noAccount: 'New here?', signUp: 'Create account',
     loginError: 'Invalid credentials',
     orSimilar: 'or similar',
+    amountCharged: 'Amount to be charged',
+    afterConfirmation: 'after driver confirmation',
   },
   fr: {
     title: 'Finalisez Votre Reservation',
@@ -52,12 +55,13 @@ const labels = {
     from: 'Depart', to: 'Arrivee',
     dateTime: 'Date & Heure', vehicle: 'Vehicule',
     total: 'Total', vatNote: 'Tous les prix incluent TVA, frais et peages.',
-    payment: 'Paiement', payBtn: 'Confirmer & Payer',
+    payment: 'Carte bancaire', payBtn: 'Reserver',
     processing: 'Traitement en cours...',
     noData: 'Aucune reservation trouvee', goBack: 'Nouvelle recherche',
     trustItems: ['Paiement securise', 'Prix fixe garanti', 'Annulation gratuite 24h'],
-    cardNote: 'Votre carte sera debitee uniquement apres confirmation de la course.',
-    step1: 'Vehicule', step2: 'Resume', step3: 'Paiement',
+    cardNote: 'Votre carte sera debitee uniquement apres confirmation du chauffeur.',
+    secureNote: 'La verification 3D Secure affichera 0\u20AC \u2014 c\'est normal. Elle valide votre carte. Le montant reel sera debite apres confirmation de la course.',
+    step1: 'Vehicule', step2: 'Resume', step3: 'Reservation',
     cardError: 'Veuillez verifier vos informations de carte.',
     bookingSuccess: 'Reservation confirmee ! Votre course a ete reservee.',
     bookingError: 'Erreur lors de la reservation. Veuillez reessayer.',
@@ -71,6 +75,8 @@ const labels = {
     noAccount: 'Nouveau ?', signUp: 'Creer un compte',
     loginError: 'Identifiants incorrects',
     orSimilar: 'ou similaire',
+    amountCharged: 'Montant a debiter',
+    afterConfirmation: 'apres confirmation du chauffeur',
   },
   ru: {
     title: 'Завершите Бронирование',
@@ -78,12 +84,13 @@ const labels = {
     from: 'Откуда', to: 'Куда',
     dateTime: 'Дата и Время', vehicle: 'Автомобиль',
     total: 'Итого', vatNote: 'Все цены включают НДС и сборы.',
-    payment: 'Оплата', payBtn: 'Подтвердить и Оплатить',
+    payment: 'Банковская карта', payBtn: 'Забронировать',
     processing: 'Обработка...',
     noData: 'Данные не найдены', goBack: 'Новый поиск',
     trustItems: ['Безопасный платеж', 'Фикс. цена', 'Бесплатная отмена 24ч'],
-    cardNote: 'Средства будут списаны только после подтверждения поездки.',
-    step1: 'Авто', step2: 'Детали', step3: 'Оплата',
+    cardNote: 'Средства будут списаны только после подтверждения водителем.',
+    secureNote: '3D Secure покажет 0\u20AC \u2014 это нормально. Проверка карты. Реальная сумма будет списана после подтверждения поездки.',
+    step1: 'Авто', step2: 'Детали', step3: 'Бронирование',
     cardError: 'Проверьте данные карты.',
     bookingSuccess: 'Бронирование подтверждено!',
     bookingError: 'Ошибка. Попробуйте снова.',
@@ -97,31 +104,37 @@ const labels = {
     noAccount: 'Новый?', signUp: 'Создать аккаунт',
     loginError: 'Неверные данные',
     orSimilar: 'или аналог',
+    amountCharged: 'Сумма к оплате',
+    afterConfirmation: 'после подтверждения водителем',
   },
   hy: {
-    title: ' Delays',
-    summary: 'Delays',
-    from: 'Delays', to: 'Delays',
-    dateTime: 'Delays', vehicle: 'Delays',
-    total: 'Delays', vatNote: 'Delays.',
-    payment: 'Delays', payBtn: 'Delays',
-    processing: 'Delays...',
-    noData: 'Delays', goBack: 'Delays',
-    trustItems: ['Delays', 'Delays', 'Delays'],
-    step1: 'Delays', step2: 'Delays', step3: 'Delays',
-    cardError: 'Delays.',
-    bookingSuccess: 'Delays!',
-    bookingError: 'Delays.',
-    pastDateError: 'Delays.',
-    passengerTitle: 'Delays',
-    firstName: 'Delays', lastName: 'Delays',
-    email: 'Email', phone: 'Delays',
-    password: 'Delays', passwordHint: 'Delays',
-    loggedAs: 'Delays',
-    alreadyAccount: 'Delays?', signIn: 'Delays',
-    noAccount: 'Delays?', signUp: 'Delays',
-    loginError: 'Delays',
-    orSimilar: 'Delays',
+    title: 'Ամրագրdelays',
+    summary: 'delays',
+    from: 'delays', to: 'delays',
+    dateTime: 'delays', vehicle: 'delays',
+    total: 'delays', vatNote: 'delays.',
+    payment: 'delays', payBtn: 'delays',
+    processing: 'delays...',
+    noData: 'delays', goBack: 'delays',
+    trustItems: ['delays', 'delays', 'delays'],
+    cardNote: 'delays.',
+    secureNote: 'delays.',
+    step1: 'delays', step2: 'delays', step3: 'delays',
+    cardError: 'delays.',
+    bookingSuccess: 'delays!',
+    bookingError: 'delays.',
+    pastDateError: 'delays.',
+    passengerTitle: 'delays',
+    firstName: 'delays', lastName: 'delays',
+    email: 'Email', phone: 'delays',
+    password: 'delays', passwordHint: 'delays',
+    loggedAs: 'delays',
+    alreadyAccount: 'delays?', signIn: 'delays',
+    noAccount: 'delays?', signUp: 'delays',
+    loginError: 'delays',
+    orSimilar: 'delays',
+    amountCharged: 'delays',
+    afterConfirmation: 'delays',
   },
 };
 
@@ -440,9 +453,25 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
           <Shield className="w-3.5 h-3.5" />
           <span>{c.trustItems[0]} - Stripe</span>
         </div>
-        {c.cardNote && (
-          <p className="text-xs text-gray-500 mt-2">{c.cardNote}</p>
-        )}
+
+        {/* 3D Secure explanation */}
+        <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg" data-testid="secure-note">
+          <p className="text-xs text-blue-300 leading-relaxed">
+            <Shield className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
+            {c.secureNote}
+          </p>
+        </div>
+
+        <p className="text-xs text-gray-500 mt-2">{c.cardNote}</p>
+      </div>
+
+      {/* Amount to be charged */}
+      <div className="bg-[#1e2d3d] border border-[#2ecc71]/30 rounded-xl p-4 flex items-center justify-between" data-testid="amount-summary">
+        <div>
+          <p className="text-sm text-gray-400">{c.amountCharged}</p>
+          <p className="text-xs text-gray-500">{c.afterConfirmation}</p>
+        </div>
+        <p className="text-2xl font-extrabold text-[#2ecc71]">{selectedCar.price}&euro;</p>
       </div>
 
       {/* Submit */}
