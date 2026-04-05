@@ -102,24 +102,24 @@ export const PromoPopup = ({ open, onClose, onApply }) => {
         </button>
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-8 text-center">
-          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Gift className="w-8 h-8 text-white" />
+        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 py-5 text-center">
+          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2">
+            <Gift className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-1">{c.title}</h3>
-          <p className="text-emerald-100 text-lg font-semibold">{c.subtitle}</p>
+          <h3 className="text-xl font-bold text-white mb-0.5">{c.title}</h3>
+          <p className="text-emerald-100 text-base font-semibold">{c.subtitle}</p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <p className="text-gray-500 text-sm text-center mb-4">{c.hint}</p>
-          <div className="mb-4">
+        <form onSubmit={handleSubmit} className="p-5">
+          <p className="text-gray-500 text-xs text-center mb-3">{c.hint}</p>
+          <div className="mb-3">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={c.placeholder}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none transition-colors text-base"
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:outline-none transition-colors text-sm"
               data-testid="promo-email-input"
               autoFocus
             />
@@ -128,7 +128,7 @@ export const PromoPopup = ({ open, onClose, onApply }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 text-white font-bold py-3.5 rounded-xl transition-colors text-base flex items-center justify-center gap-2"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 text-white font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
             data-testid="promo-apply-btn"
           >
             {loading ? (
