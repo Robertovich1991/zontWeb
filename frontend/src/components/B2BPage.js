@@ -57,10 +57,14 @@ const B2BPage = ({ content, seoUrls, relatedPages }) => {
         ] : undefined}
         jsonLd={{
           "@context": "https://schema.org",
-          "@type": "Service",
+          "@type": "LocalBusiness",
           "name": c.seoTitle,
           "description": c.seoDesc,
-          "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" },
+          "url": "https://www.zont.cab",
+          "image": "https://www.zont.cab/logo512.png",
+          "telephone": "+33600000000",
+          "address": { "@type": "PostalAddress", "addressLocality": "Paris", "addressCountry": "FR" },
+          "priceRange": "$$",
           "serviceType": "B2B Airport Transfer & Chauffeur Service",
           "areaServed": ["Paris", "France", "Monaco", "Europe"],
         }}

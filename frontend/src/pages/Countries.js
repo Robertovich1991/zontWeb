@@ -155,7 +155,7 @@ const Countries = () => {
           "description": t.seoDesc,
           "url": "https://www.zont.cab/countries",
           "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" },
-          "about": { "@type": "Service", "serviceType": "Airport Transfer", "areaServed": "Europe" }
+          "about": { "@type": "LocalBusiness", "name": "Zont", "serviceType": "Airport Transfer", "areaServed": "Europe" }
         }}
       />
       <Header />

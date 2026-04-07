@@ -265,7 +265,7 @@ const Partners = () => {
           { lang: 'ru', href: 'https://www.zont.cab/partners' },
         ]}
         jsonLd={[
-          { "@context": "https://schema.org", "@type": "Service", "name": c.seoTitle, "description": c.seoDesc, "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" }, "serviceType": "B2B Airport Transfer & Chauffeur Service", "areaServed": ["Paris","France","Monaco","Europe"] },
+          { "@context": "https://schema.org", "@type": "LocalBusiness", "name": c.seoTitle, "description": c.seoDesc, "url": "https://www.zont.cab", "image": "https://www.zont.cab/logo512.png", "telephone": "+33600000000", "address": { "@type": "PostalAddress", "addressLocality": "Paris", "addressCountry": "FR" }, "priceRange": "$$", "serviceType": "B2B Airport Transfer & Chauffeur Service", "areaServed": ["Paris","France","Monaco","Europe"] },
           { "@context": "https://schema.org", "@type": "WebPage", "name": c.seoTitle, "url": "https://www.zont.cab/partners", "description": c.seoDesc }
         ]}
       />
