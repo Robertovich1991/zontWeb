@@ -25,7 +25,7 @@ const trustLabels = {
   ru: { trips: 'Выполненных Поездок', available: 'Доступно', fixed: 'Фиксированные Цены', rating: 'Рейтинг', reviews: 'отзывов', trustTitle: 'Доверие тысяч путешественников', paySecure: 'Безопасная Оплата', payDesc: 'Все карты принимаются', verifiedDriver: 'Проверенные Водители', verifiedDesc: 'Лицензированные профессионалы', flightTrack: 'Отслеживание Рейса', flightDesc: 'Мониторинг в реальном времени', freeCancel: 'Бесплатная Отмена', cancelDesc: 'До 24 часов' },
 };
 
-const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage }) => {
+const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage, pageId }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { startBooking, setVehicleResults } = useBooking();
@@ -39,6 +39,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   const [time, setTime] = useState('');
   const [cmsPage, setCmsPage] = useState(null);
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
+  const [pageReviews, setPageReviews] = useState([]);
+  const [reviewSchema, setReviewSchema] = useState(null);
   const langSyncRef = useRef(false);
 
   // IMMUNE REFS: only autocomplete selection writes here, mobile onChange can NEVER clear them
@@ -86,6 +88,11 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
     }
     // Fetch CMS trust blocks
     fetch(`${API}/api/public/trust-blocks`).then(r => r.json()).then(setCmsTrustBlocks).catch(() => {});
+    // Fetch page reviews
+    if (pageId) {
+      fetch(`${API}/api/reviews/public/${pageId}?lang=${language}`).then(r => r.json()).then(setPageReviews).catch(() => {});
+      fetch(`${API}/api/reviews/public/schema/${pageId}`).then(r => r.json()).then(setReviewSchema).catch(() => {});
+    }
   }, [API, language, seoUrls]);
 
   const c = content[language] || content.en;
@@ -248,10 +255,14 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         ] : undefined}
         jsonLd={{
           "@context": "https://schema.org",
-          "@type": "Service",
-          "name": c.title,
+          "@type": "LocalBusiness",
+          "name": "Zont - " + c.title,
           "description": c.description,
-          "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" },
+          "url": "https://www.zont.cab",
+          "image": "https://www.zont.cab/logo512.png",
+          "telephone": "+33600000000",
+          "address": { "@type": "PostalAddress", "addressLocality": "Paris", "addressCountry": "FR" },
+          "priceRange": "$$",
           "serviceType": "Airport Transfer",
           "areaServed": { "@type": "Place", "name": c.title.split(' - ')[0] },
           "offers": vehiclesPrices ? {
@@ -260,7 +271,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             "lowPrice": Math.min(...Object.values(vehiclesPrices)),
             "highPrice": Math.max(...Object.values(vehiclesPrices)),
           } : undefined,
-          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "10000", "bestRating": "5" }
+          ...(reviewSchema?.aggregateRating ? { "aggregateRating": reviewSchema.aggregateRating } : {}),
+          ...(reviewSchema?.reviews?.length ? { "review": reviewSchema.reviews } : {}),
         }}
       />
       <Header />
@@ -562,6 +574,50 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                       <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-[#2ecc71]" aria-hidden="true" />
                     </div>
                   </button>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* CLIENT REVIEWS - Real verified reviews */}
+        {pageReviews.length > 0 && (
+          <section className="py-12 md:py-20 px-4 bg-[#0f1419]" data-testid="client-reviews-section">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                  {language === 'fr' ? 'Avis de nos clients' : language === 'ru' ? 'Отзывы клиентов' : 'Customer Reviews'}
+                </h2>
+                {reviewSchema?.aggregateRating && (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="flex gap-0.5">
+                      {[1,2,3,4,5].map(i => (
+                        <Star key={i} className={`w-5 h-5 ${i <= Math.round(parseFloat(reviewSchema.aggregateRating.ratingValue)) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} />
+                      ))}
+                    </div>
+                    <span className="text-white font-semibold">{reviewSchema.aggregateRating.ratingValue}/5</span>
+                    <span className="text-gray-400 text-sm">({reviewSchema.aggregateRating.reviewCount} {tr.reviews})</span>
+                  </div>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pageReviews.slice(0, 6).map((review, i) => (
+                  <div key={i} className="bg-[#1a2332] border border-white/10 rounded-xl p-5" data-testid={`review-card-${i}`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-[#2ecc71] rounded-full flex items-center justify-center text-white text-sm font-bold">
+                        {review.author_name?.charAt(0)?.toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold text-sm">{review.author_name}</p>
+                        <div className="flex gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} className={`w-3 h-3 ${s <= review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-gray-300 text-sm leading-relaxed">{review.comment_translated || review.comment}</p>
+                  </div>
                 ))}
               </div>
             </div>

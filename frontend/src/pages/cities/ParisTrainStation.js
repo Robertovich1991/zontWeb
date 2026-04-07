@@ -168,5 +168,5 @@ const stationLinks = [
 ];
 
 const seoUrls = { en: '/paris-train-station-transfer', fr: '/transfert-gare-paris', ru: '/transfer-vokzal-parizh', hy: '/pariz-kayarani-transfer' };
-const ParisTrainStationTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} stationLinks={stationLinks} />;
+const ParisTrainStationTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} stationLinks={stationLinks} pageId="paris-train" />;
 export default ParisTrainStationTransfer;

@@ -209,6 +209,10 @@ from routes.kiosk import router as kiosk_router, set_db as kiosk_set_db, ensure_
 kiosk_set_db(db)
 app.include_router(kiosk_router)
 
+from routes.reviews import router as reviews_router
+app.include_router(reviews_router)
+
+
 
 # Serve uploaded files
 UPLOAD_DIR = ROOT_DIR / "uploads"
