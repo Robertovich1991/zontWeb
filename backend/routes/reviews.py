@@ -48,7 +48,7 @@ class ReviewCreate(BaseModel):
     rating: int  # 1-5
     comment: str
     language: str = "fr"  # original language
-    page_ids: List[str] = []  # assigned pages
+    page_id: str = ""  # single page assignment
     trip_id: Optional[int] = None
 
 
@@ -56,7 +56,7 @@ class ReviewUpdate(BaseModel):
     author_name: Optional[str] = None
     rating: Optional[int] = None
     comment: Optional[str] = None
-    page_ids: Optional[List[str]] = None
+    page_id: Optional[str] = None  # single page
     status: Optional[str] = None  # pending, approved, rejected
 
 
@@ -115,11 +115,10 @@ async def get_available_pages():
 async def get_public_reviews(page_id: str, lang: str = "fr"):
     """Get approved reviews for a specific page (public, no auth)."""
     cursor = reviews_col.find(
-        {"page_ids": page_id, "status": "approved"},
+        {"page_id": page_id, "status": "approved"},
         {"_id": 0}
     ).sort("created_at", -1).limit(20)
     reviews = await cursor.to_list(length=20)
-    # Return translated version if available
     for r in reviews:
         translations = r.get("translations", {})
         if lang in translations:
@@ -133,7 +132,7 @@ async def get_public_reviews(page_id: str, lang: str = "fr"):
 async def get_reviews_schema(page_id: str):
     """Get approved reviews formatted for Schema.org JSON-LD."""
     cursor = reviews_col.find(
-        {"page_ids": page_id, "status": "approved"},
+        {"page_id": page_id, "status": "approved"},
         {"_id": 0}
     ).sort("created_at", -1).limit(50)
     reviews = await cursor.to_list(length=50)
@@ -177,7 +176,7 @@ async def get_all_reviews(
     if status:
         query["status"] = status
     if page_id:
-        query["page_ids"] = page_id
+        query["page_id"] = page_id
 
     cursor = reviews_col.find(query, {"_id": 0}).sort("created_at", -1)
     return await cursor.to_list(length=200)
@@ -198,7 +197,7 @@ async def create_review(review: ReviewCreate):
         "comment": review.comment,
         "language": review.language,
         "translations": translations,
-        "page_ids": review.page_ids,
+        "page_id": review.page_id,
         "trip_id": review.trip_id,
         "status": "approved",
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -219,8 +218,8 @@ async def update_review(review_id: str, update: ReviewUpdate):
         updates["rating"] = max(1, min(5, update.rating))
     if update.comment is not None:
         updates["comment"] = update.comment
-    if update.page_ids is not None:
-        updates["page_ids"] = update.page_ids
+    if update.page_id is not None:
+        updates["page_id"] = update.page_id
     if update.status is not None:
         updates["status"] = update.status
 

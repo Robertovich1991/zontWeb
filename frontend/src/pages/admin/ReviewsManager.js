@@ -26,7 +26,7 @@ const ReviewsManager = () => {
   const [translating, setTranslating] = useState(null);
 
   // Create form
-  const [form, setForm] = useState({ author_name: '', rating: 5, comment: '', language: 'fr', page_ids: [] });
+  const [form, setForm] = useState({ author_name: '', rating: 5, comment: '', language: 'fr', page_id: '' });
 
   const fetchData = useCallback(async () => {
     try {
@@ -60,7 +60,7 @@ const ReviewsManager = () => {
       });
       if (res.ok) {
         setShowCreate(false);
-        setForm({ author_name: '', rating: 5, comment: '', language: 'fr', page_ids: [] });
+        setForm({ author_name: '', rating: 5, comment: '', language: 'fr', page_id: '' });
         fetchData();
       }
     } catch (e) { console.error(e); }
@@ -74,10 +74,10 @@ const ReviewsManager = () => {
     fetchData();
   };
 
-  const updatePages = async (reviewId, pageIds) => {
+  const updatePage = async (reviewId, pageId) => {
     await fetch(`${API}/api/reviews/admin/${reviewId}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ page_ids: pageIds }),
+      body: JSON.stringify({ page_id: pageId }),
     });
     fetchData();
   };
@@ -96,20 +96,7 @@ const ReviewsManager = () => {
   };
 
   const togglePage = (pageId) => {
-    setForm(prev => ({
-      ...prev,
-      page_ids: prev.page_ids.includes(pageId)
-        ? prev.page_ids.filter(p => p !== pageId)
-        : [...prev.page_ids, pageId]
-    }));
-  };
-
-  const toggleReviewPage = (review, pageId) => {
-    const current = review.page_ids || [];
-    const updated = current.includes(pageId)
-      ? current.filter(p => p !== pageId)
-      : [...current, pageId];
-    updatePages(review.review_id, updated);
+    setForm(prev => ({ ...prev, page_id: pageId }));
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full"></div></div>;
@@ -223,20 +210,17 @@ const ReviewsManager = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Pages assignees</label>
-            <div className="flex flex-wrap gap-2">
-              {pages.map(p => (
-                <button
-                  key={p.id} type="button"
-                  onClick={() => togglePage(p.id)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                    form.page_ids.includes(p.id) ? 'bg-emerald-100 border-emerald-400 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-600'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Page assignee</label>
+            <select
+              value={form.page_id}
+              onChange={e => setForm({ ...form, page_id: e.target.value })}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
+              required
+              data-testid="review-page-select"
+            >
+              <option value="">-- Choisir une page --</option>
+              {pages.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
+            </select>
           </div>
           <div className="flex gap-2">
             <button type="submit" className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700" data-testid="submit-review-btn">
@@ -286,19 +270,17 @@ const ReviewsManager = () => {
                   </div>
                 )}
 
-                {/* Page assignments */}
-                <div className="flex flex-wrap gap-1.5">
-                  {pages.map(p => (
-                    <button
-                      key={p.id}
-                      onClick={() => toggleReviewPage(review, p.id)}
-                      className={`px-2 py-0.5 rounded text-xs font-medium border transition-colors ${
-                        (review.page_ids || []).includes(p.id) ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100'
-                      }`}
-                    >
-                      {p.label}
-                    </button>
-                  ))}
+                {/* Page assignment */}
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-gray-500">Page:</span>
+                  <select
+                    value={review.page_id || ''}
+                    onChange={e => updatePage(review.review_id, e.target.value)}
+                    className="border rounded px-2 py-0.5 text-xs"
+                  >
+                    <option value="">-- Aucune --</option>
+                    {pages.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
+                  </select>
                 </div>
               </div>
 
