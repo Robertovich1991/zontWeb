@@ -75,9 +75,9 @@
                 function loadAnalytics(){
                     if(loaded) return;
                     loaded = true;
-                    // Google Analytics
+                    // Google Analytics + Google Ads
                     var ga = document.createElement('script');
-                    ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-MNN6VJZYDP';
+                    ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-LWM17GPD3P';
                     ga.async = true;
                     document.head.appendChild(ga);
                     ga.onload = function(){
@@ -85,7 +85,8 @@
                         function gtag(){dataLayer.push(arguments);}
                         window.gtag = gtag;
                         gtag('js', new Date());
-                        gtag('config', 'G-MNN6VJZYDP');
+                        gtag('config', 'G-LWM17GPD3P');
+                        gtag('config', 'AW-1014783804');
                     };
                     // Yandex Metrika
                     (function(m,e,t,r,i,k,a){

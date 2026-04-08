@@ -315,6 +315,16 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         'transaction_id': result?.id || result?.bookingId || `ZNT-${Date.now()}`
       };
       window.dataLayer.push(conversionData);
+
+      // Google Ads Conversion tracking (direct)
+      if (window.gtag) {
+        window.gtag('event', 'conversion', {
+          'send_to': 'AW-1014783804/enucCIu7xZUcELy-8eMD',
+          'value': parseFloat(selectedCar.price) || 0,
+          'currency': 'EUR',
+          'transaction_id': result?.id || result?.bookingId || `ZNT-${Date.now()}`
+        });
+      }
       console.log('[ZONT] Conversion fired:', JSON.stringify(conversionData));
 
       toast.success(c.bookingSuccess);
