@@ -25,6 +25,8 @@ const labels = {
     error: 'Unable to fetch vehicles. Please try again.',
     retry: 'Retry', fixedPrice: 'Fixed price',
     mins: 'min', km: 'km', orSimilar: 'or similar',
+    androidApp: 'Download our app',
+    androidAppSub: 'Book and track your ride in real time',
   },
   fr: {
     seoTitle: 'Choisir Votre Vehicule - Zont Transfert Aeroport',
@@ -41,6 +43,8 @@ const labels = {
     error: 'Impossible de charger les vehicules. Veuillez reessayer.',
     retry: 'Reessayer', fixedPrice: 'Prix fixe',
     mins: 'min', km: 'km', orSimilar: 'ou similaire',
+    androidApp: 'Telecharger notre application',
+    androidAppSub: 'Reservez et suivez votre course en temps reel',
   },
   ru: {
     seoTitle: '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0410\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u044c - Zont \u0422\u0440\u0430\u043d\u0441\u0444\u0435\u0440',
@@ -57,6 +61,8 @@ const labels = {
     error: '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0441\u043d\u043e\u0432\u0430.',
     retry: '\u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u044c', fixedPrice: '\u0424\u0438\u043a\u0441. \u0446\u0435\u043d\u0430',
     mins: '\u043c\u0438\u043d', km: '\u043a\u043c', orSimilar: '\u0438\u043b\u0438 \u0430\u043d\u0430\u043b\u043e\u0433',
+    androidApp: '\u0421\u043a\u0430\u0447\u0430\u0442\u044c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435',
+    androidAppSub: '\u0411\u0440\u043e\u043d\u0438\u0440\u0443\u0439\u0442\u0435 \u0438 \u043e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u0439\u0442\u0435 \u043f\u043e\u0435\u0437\u0434\u043a\u0443',
   },
   hy: {
     seoTitle: '\u0538\u0576\u057f\u0580\u0565\u0584 \u0544\u0565\u0584\u0565\u0576\u0561 - Zont \u054f\u0580\u0561\u0576\u057d\u0586\u0565\u0580',
@@ -73,6 +79,8 @@ const labels = {
     error: '\u0540\u0576\u0561\u0580\u0561\u057e\u0578\u0580 \u0579\u0567 \u0563\u057f\u0576\u0565\u056c \u0574\u0565\u0584\u0565\u0576\u0561\u0576\u0565\u0580. \u0553\u0578\u0580\u0571\u0565\u0584 \u056f\u0580\u056f\u056b\u0576.',
     retry: '\u053f\u0580\u056f\u0576\u0565\u056c', fixedPrice: '\u0540\u0561\u057d\u057f\u0561\u057f \u0563\u056b\u0576',
     mins: '\u0580\u0578\u057a', km: '\u056f\u0574', orSimilar: '\u056f\u0561\u0574 \u0576\u0574\u0561\u0576',
+    androidApp: '\u0532\u0565\u057c\u0576\u0565\u056c \u0570\u0561\u057e\u0565\u056c\u057e\u0561\u056e\u0568',
+    androidAppSub: '\u0531\u0574\u0580\u0561\u0563\u0580\u0565\u0584 \u0587 \u0570\u0565\u057f\u0587\u0565\u0584 \u0571\u0565\u0580 \u0578\u0582\u0572\u0587\u0578\u0580\u0578\u0582\u0569\u0575\u0578\u0582\u0576\u0568',
   },
 };
 
@@ -89,6 +97,8 @@ const CarSelection = () => {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoExpires, setPromoExpires] = useState(null);
   const [promoExpired, setPromoExpired] = useState(false);
+
+  const isAndroid = /android/i.test(navigator.userAgent);
 
   const c = labels[language] || labels.en;
 
@@ -431,6 +441,21 @@ const CarSelection = () => {
                 );
               })}
             </div>
+
+          {isAndroid && (
+            <div className="mt-6 mb-4 mx-auto max-w-2xl">
+              <a href="https://play.google.com/store/apps/details?id=com.zont.rider&hl=fr" target="_blank" rel="noopener noreferrer" data-testid="android-download-btn" className="flex items-center gap-4 w-full px-5 py-4 rounded-2xl transition-all hover:scale-[1.01] active:scale-[0.99]" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', border: '1px solid #2ecc7133' }}>
+                <div className="w-12 h-12 rounded-xl bg-[#2ecc71]/15 flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734c0-.382.218-.72.61-.92z" fill="#4285F4"/><path d="M17.556 8.237l-3.764 3.764 3.764 3.763 4.242-2.393c.478-.27.478-.94 0-1.21l-4.242-2.393-.001.469z" fill="#FBBC04"/><path d="M3.609 1.814L13.792 12l3.764-3.763L6.148.582a1.173 1.173 0 00-1.157.037l-1.382.78v.415z" fill="#34A853"/><path d="M13.792 12L3.609 22.186l1.382.78a1.173 1.173 0 001.157.037l11.408-6.655L13.792 12z" fill="#EA4335"/></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold text-sm">{c.androidApp}</p>
+                  <p className="text-gray-400 text-xs mt-0.5">{c.androidAppSub}</p>
+                </div>
+                <div className="shrink-0"><div className="px-3 py-1.5 rounded-lg bg-[#2ecc71] text-white text-xs font-bold">Google Play</div></div>
+              </a>
+            </div>
+          )}
           </div>
         )}
       </main>
