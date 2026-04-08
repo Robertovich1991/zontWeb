@@ -195,6 +195,8 @@ from routes.fleet_gps import router as fleet_gps_router
 app.include_router(fleet_gps_router)
 from routes.gps_admin import router as gps_admin_router
 app.include_router(gps_admin_router)
+from routes.driver_portal import router as driver_portal_router
+app.include_router(driver_portal_router)
 
 from routes.flight_tracking import router as flight_tracking_router
 app.include_router(flight_tracking_router)
