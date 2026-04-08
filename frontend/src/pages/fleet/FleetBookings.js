@@ -146,7 +146,7 @@ const FleetBookings = () => {
                     <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
                       <Clock className="w-3 h-3" /> {b.startDate}
                     </div>
-                    <p className="text-gray-900 font-semibold">{b.totalAmount?.toFixed(2)} EUR</p>
+                    <p className="text-emerald-700 font-semibold">{(b.currentPrice || b.totalAmount)?.toFixed(2)} EUR</p>
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400 mt-1 ml-auto" /> : <ChevronDown className="w-4 h-4 text-gray-400 mt-1 ml-auto" />}
                   </div>
                 </div>
@@ -170,6 +170,14 @@ const FleetBookings = () => {
                       <div>
                         <span className="text-gray-400 text-xs block">Type de course</span>
                         <span className="text-gray-900">{b.tripType || '-'}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400 text-xs block">Prix offre</span>
+                        <span className="text-emerald-700 font-semibold">{(b.currentPrice || 0).toFixed(2)} EUR</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400 text-xs block">Montant total client</span>
+                        <span className="text-gray-500">{(b.totalAmount || 0).toFixed(2)} EUR</span>
                       </div>
                     </div>
                     {b.additionalComments && (
