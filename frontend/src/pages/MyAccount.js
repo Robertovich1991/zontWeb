@@ -84,40 +84,40 @@ const AddCardInline = ({ token, onDone, onCancel }) => {
   );
 };
 
+const parseCSharpDate = (dateStr) => {
+  if (!dateStr) return null;
+  // C# API returns DD/MM/YYYY HH:mm:ss — must parse explicitly (JS Date assumes MM/DD/YYYY)
+  const match = dateStr.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (match) {
+    const [, day, month, year, h, m] = match;
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(h || 0), parseInt(m || 0));
+  }
+  // Fallback: ISO format YYYY-MM-DD
+  const iso = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);
+  if (iso) {
+    const [, year, month, day, h, m] = iso;
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(h || 0), parseInt(m || 0));
+  }
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
+};
+
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) {
-      // Try parsing "DD/MM/YYYY" or "DD-MM-YYYY" formats
-      const parts = dateStr.split(/[\/\-\.]/);
-      if (parts.length === 3) {
-        const parsed = new Date(parts[2], parts[1] - 1, parts[0]);
-        if (!isNaN(parsed.getTime())) {
-          return parsed.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
-        }
-      }
-      return dateStr;
-    }
-    return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  } catch { return dateStr; }
+  const d = parseCSharpDate(dateStr);
+  if (!d) return dateStr;
+  return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
 const formatDateShort = (dateStr) => {
   if (!dateStr) return { day: '--', month: '--', time: '' };
-  try {
-    let d = new Date(dateStr);
-    if (isNaN(d.getTime())) {
-      const parts = dateStr.split(/[\/\-\.]/);
-      if (parts.length === 3) d = new Date(parts[2], parts[1] - 1, parts[0]);
-    }
-    if (isNaN(d.getTime())) return { day: '--', month: '--', time: '' };
-    return {
-      day: d.getDate().toString().padStart(2, '0'),
-      month: d.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase(),
-      time: d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-    };
-  } catch { return { day: '--', month: '--', time: '' }; }
+  const d = parseCSharpDate(dateStr);
+  if (!d) return { day: '--', month: '--', time: '' };
+  return {
+    day: d.getDate().toString().padStart(2, '0'),
+    month: d.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase(),
+    time: d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+  };
 };
 
 const statusLabels = {
