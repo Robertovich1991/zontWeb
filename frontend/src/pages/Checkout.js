@@ -308,12 +308,14 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
 
       // GTM dataLayer: fire taxi_reservation event on successful booking
       window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
+      const conversionData = {
         'event': 'taxi_reservation',
         'value': parseFloat(selectedCar.price) || 0,
         'currency': 'EUR',
         'transaction_id': result?.id || result?.bookingId || `ZNT-${Date.now()}`
-      });
+      };
+      window.dataLayer.push(conversionData);
+      console.log('[ZONT] Conversion fired:', JSON.stringify(conversionData));
 
       toast.success(c.bookingSuccess);
       setTimeout(() => navigate('/booking-confirmation'), 1500);
