@@ -46,6 +46,7 @@ Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) 
 
 ### Recent Fix (Apr 2026)
 - Fleet Bookings page now shows `currentPrice` (offer/company price) instead of `totalAmount` (client price) to match driver Android app behavior
+- Fleet Bookings filtered to only show company-relevant statuses (ApprovedByAdmin, Took, Confirmed, Started, Completed) — hides internal "New" reservations
 
 ### P1 (High)
 - Google Sheets / CSV Planning Import for fleet reservations

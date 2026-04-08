@@ -346,6 +346,12 @@ async def fleet_assign_driver_to_vehicle(data: AssignDriverToVehicleRequest, req
 # ─── Bookings (Auctions) ───
 
 
+COMPANY_VISIBLE_STATUSES = {
+    "ApprovedByAdmin", "Took", "Confirmed", "Started",
+    "Completed", "CancelledByDriver", "CancelledByClient",
+}
+
+
 @router.get("/bookings")
 async def fleet_bookings(request: Request, count: int = 20, pageNumber: int = 1, type: str = ""):
     token = get_token(request)
@@ -354,14 +360,41 @@ async def fleet_bookings(request: Request, count: int = 20, pageNumber: int = 1,
     if type:
         params += f"&type={type}"
     data = await csharp_get(f"/api/Auction/company/auctions?{params}", token)
-    results = [format_auction(a) for a in (data if isinstance(data, list) else [])]
+    all_auctions = data if isinstance(data, list) else []
+    # Build known IDs from ALL auctions (for scan range), but only format visible ones
+    all_ids = {a.get("id") for a in all_auctions if a.get("id")}
+    results = [format_auction(a) for a in all_auctions if a.get("status") in COMPANY_VISIBLE_STATUSES]
     seen_ids = {r["id"] for r in results}
 
-    # Scan for hidden auctions (centralized, cached, reduced range)
+    # Scan for hidden auctions using wider range (C# list hides approved/completed ones)
     if pageNumber == 1:
-        extra = await scan_auctions(token, company_id, seen_ids)
-        for item in extra:
-            if item.get("id") not in seen_ids:
+        max_id = max(all_ids) if all_ids else 0
+        min_id = min(all_ids) if all_ids else 0
+        # Scan from 1 to max_id+35 to catch all approved/completed auctions
+        scan_start = max(1, min_id - 10) if min_id > 0 else 1
+        scan_end = max_id + 35 if max_id > 0 else 35
+
+        async def check_auction(aid):
+            if aid in all_ids or aid in seen_ids:
+                return None
+            try:
+                detail = await csharp_get(
+                    f"/api/Auction/company/auctions/{aid}", token, use_cache=True
+                )
+                if isinstance(detail, dict) and detail.get("id"):
+                    auction_company = detail.get("company") or {}
+                    if auction_company.get("id") == company_id or not auction_company.get("id"):
+                        if detail.get("status") in COMPANY_VISIBLE_STATUSES:
+                            return detail
+            except Exception:
+                pass
+            return None
+
+        import asyncio
+        tasks = [check_auction(i) for i in range(scan_start, scan_end + 1)]
+        scan_results = await asyncio.gather(*tasks)
+        for item in scan_results:
+            if item and item.get("id") not in seen_ids:
                 results.append(format_auction(item))
                 seen_ids.add(item["id"])
         results.sort(key=lambda x: x.get("id", 0), reverse=True)
