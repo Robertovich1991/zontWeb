@@ -145,7 +145,7 @@ const ReviewsManager = () => {
         <select
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm"
+          className="border rounded-lg px-3 py-2 text-sm text-gray-900"
           data-testid="filter-status"
         >
           <option value="">Tous les statuts</option>
@@ -157,7 +157,7 @@ const ReviewsManager = () => {
         <select
           value={filterPage}
           onChange={e => setFilterPage(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm"
+          className="border rounded-lg px-3 py-2 text-sm text-gray-900"
           data-testid="filter-page"
         >
           <option value="">Toutes les pages</option>
@@ -177,7 +177,7 @@ const ReviewsManager = () => {
               <input
                 type="text" required value={form.author_name}
                 onChange={e => setForm({ ...form, author_name: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
                 placeholder="Marie D."
                 data-testid="review-author-input"
               />
@@ -186,7 +186,7 @@ const ReviewsManager = () => {
               <label className="block text-xs font-medium text-gray-600 mb-1">Langue originale</label>
               <select
                 value={form.language} onChange={e => setForm({ ...form, language: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
+                className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
               >
                 <option value="fr">Francais</option>
                 <option value="en">English</option>
@@ -204,7 +204,7 @@ const ReviewsManager = () => {
             <textarea
               required value={form.comment}
               onChange={e => setForm({ ...form, comment: e.target.value })}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
+              className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
               rows={3} placeholder="Service excellent..."
               data-testid="review-comment-input"
             />
@@ -214,7 +214,7 @@ const ReviewsManager = () => {
             <select
               value={form.page_id}
               onChange={e => setForm({ ...form, page_id: e.target.value })}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
+              className="w-full border rounded-lg px-3 py-2 text-sm text-gray-900"
               required
               data-testid="review-page-select"
             >
