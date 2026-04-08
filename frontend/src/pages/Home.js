@@ -209,7 +209,7 @@ const Home = () => {
     fetch(`${API}/api/public/trust-blocks`).then(r => r.json()).then(setCmsTrustBlocks).catch(() => {});
     fetch(`${API}/api/public/homepage`).then(r => r.json()).then(setCmsHomepage).catch(() => {});
     fetch(`${API}/api/reviews/public/home?lang=${language}`).then(r => r.json()).then(setHomeReviews).catch(() => {});
-  }, [API]);
+  }, [API, language]);
 
   // Load recent searches from localStorage on mount
   useEffect(() => {
