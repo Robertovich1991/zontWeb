@@ -1,97 +1,81 @@
 # PRD - Zont.cab Multi-Portal Platform
 
 ## Original Problem Statement
-Multi-portal VTC/taxi platform (Client, Admin, Hotel, Fleet, Driver, GPS Admin) integrating an external C# backend (`api.zont.cab`) and internal MongoDB. Custom Teltonika GPS integration replacing Wialon. SEO landing pages for airports and train stations.
+Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external C# backend (api.zont.cab) and internal MongoDB.
 
-## Core Architecture
-- **Frontend:** React (CRA) + Tailwind + Shadcn/UI
-- **Backend:** FastAPI + MongoDB
-- **External:** C# API (`api.zont.cab`), Custom TCP GPS Gateway (VPS), Google Maps, Stripe (managed by C#), Gemini Flash (Emergent LLM Key)
+## Core Portals
+- **Client Portal** — Booking, checkout, payment (Stripe)
+- **Admin Portal** — Super admin for managing pages, hotels, rides, reviews
+- **Hotel Portal** — Hotel-specific dashboard, bookings, revenue
+- **Fleet Portal** — Company management: drivers, vehicles, bookings, planning, GPS
+- **Driver Portal** — Chauffeur app: Zont offers + company missions (NEW)
+
+## Architecture
+- React Frontend + FastAPI Backend + MongoDB
+- C# Backend proxy (api.zont.cab) for core business logic
+- Custom GPS system (Teltonika TCP decoder on VPS → webhook)
+
+## Key Technical Decisions
+- DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+- Fleet bookings filtered to show only ApprovedByAdmin with future dates
+- Fleet bookings display currentPrice (offer price) not totalAmount (client price)
+- Reviews: 1-to-1 page mapping for SEO, LocalBusiness JSON-LD
+- Google tracking: hardcoded GA4 + Google Ads (bypasses broken GTM)
 
 ## What's Been Implemented
 
-### Portals
-- Client booking portal with AI auto-fill (Gemini Flash text/voice)
-- Admin dashboard
-- Hotel portal + Hotel Kiosk PWA (`/kiosk/[hotel_slug]`)
-- Fleet management portal with custom GPS geolocation
-- Driver portal
-- GPS Super Admin portal
+### Session Apr 8, 2026
+- **Fleet Bookings Price Fix**: Shows currentPrice (47€ offer) instead of totalAmount (57€ client price)
+- **Fleet Bookings Filter**: Only ApprovedByAdmin + future date visible to companies (no "New" internal reservations)
+- **Driver Portal (Zont Driver)**: Complete new portal with:
+  - Dual authentication: C# drivers (api.zont.cab) + local MongoDB drivers
+  - Missions page: Zont offers (with price, accept button) + company missions (no price, "Assignée" badge)
+  - History page: completed/cancelled missions
+  - Profile page: driver info, company, rating, type badge
+  - Dark theme matching Android Zont Cab app (#0F1117 bg, #10B981 accent)
+  - Bottom navigation: Missions | Historique | Profil
+  - Testing: 100% pass (8/8 backend, all frontend)
 
-### Key Features (Completed)
-- **Checkout flow with card management** (Feb 2026): 2-step flow — register/login first, then add card via C# SetupIntent, select saved card, and submit booking with cardId. Supports add/delete/select multiple cards.
-- Premium TripRecap page before checkout
-- Inline passenger registration in Checkout
-- Fleet Driver Sync bug fix (401 auto-logout)
-- Custom GPS Webhook + Teltonika TCP decoder (VPS zip)
-- GPS Route History replay
-- Real-time SSE GPS streaming with Leaflet maps (light theme)
-- Google Tag Manager (GTM) with dataLayer push for taxi_reservation events
-
-### SEO Landing Pages (Completed)
-- **Paris Main Page:** Refocused on "Taxi & VTC Paris - Chauffeur Prive, Transfert & Mise a Disposition"
-- **Airports:** CDG, Orly, Beauvais
-- **Train Stations:** Gare de Lyon, Gare du Nord, Montparnasse, Saint-Lazare, Austerlitz
-- **Services:** VTC 7 Places (with "Taxi / VTC" SEO), VTC 8 Places
-- **Cities:** Nice, Cannes, Monaco, Rome, Milan, Munich, Berlin, Barcelona, Alicante, Yerevan, Disneyland
-
-### Latest Changes (Feb 2026)
-- **Checkout Payment Fix:** Restored SetupIntent flow via C# proxy. Removed broken `direct_payment.py`. Added card management (list/add/delete/select) inside checkout. 2-step UX: auth first, then card+pay.
-- **Code Cleanup:** Removed unused `direct_payment.py` and its server.py import.
+### Previous Sessions
+- Complete Wialon removal + Custom GPS webhook system
+- Reviews system with LLM auto-translation (FR, EN, RU, HY)
+- Google Ads/GA4 hardcoded tracking
+- Car selection UI optimization
+- Date parsing fixes
+- Node.js Teltonika TCP decoder for VPS
 
 ## Prioritized Backlog
 
 ### P0 (Critical)
 - None currently
 
-### Recent Fix (Apr 2026)
-- Fleet Bookings page now shows `currentPrice` (offer/company price) instead of `totalAmount` (client price) to match driver Android app behavior
-- Fleet Bookings filtered to only show company-relevant statuses (ApprovedByAdmin, Took, Confirmed, Started, Completed) — hides internal "New" reservations
-
 ### P1 (High)
-- Google Sheets / CSV Planning Import for fleet reservations
-- AI-assisted Booking Creation (paste text -> LLM extracts details)
+- Google Sheets/CSV Planning Import
+- Hotel Kiosk App (Web-view for tablets)
+- AI-assisted Booking Creation (LLM text parsing)
 
 ### P2 (Medium)
-- Geofences & GPS Alerts (zones, speeding)
-- Editable Company Profile Page for fleet companies
-- Trip History & Route Replay enhancements
+- Geofences & GPS Alerts
+- Editable Company Profile Page
+- Trip History & Route Replay
 
 ### P3 (Low)
-- Hotel Admin - Automated Monthly Invoicing
-- Super Admin - Hotel Leaderboard
+- Hotel Admin Automated Invoicing
+- Super Admin Hotel Leaderboard
 
 ### Blocked
-- Partner Ride Cancellation (waiting for C# team API endpoint)
-
-### Refactoring
-- Extract AI booking logic from `Home.js` (~1000 lines) into `<AIBookingWidget />` component
-
-## Key Files
-- `/app/frontend/src/pages/Checkout.js` - 2-step checkout with card management
-- `/app/frontend/src/pages/MyAccount.js` - Account page with card management
-- `/app/backend/routes/csharp_proxy.py` - Proxy to C# backend for payments/bookings
-- `/app/frontend/src/services/api.js` - Frontend API service layer
-- `/app/frontend/src/pages/ParisAirportTransfer.js` - Paris main SEO page
-- `/app/frontend/src/pages/kiosk/KioskPage.js` - Hotel Kiosk PWA
-- `/app/backend/routes/fleet_gps.py` - Custom GPS Webhook
-
-## Important: CMS Override
-CityTransferPage fetches CMS data from MongoDB (`cms_pages` collection) that overrides static content. When changing page titles, BOTH the React file AND the MongoDB CMS record must be updated.
+- Partner Ride Cancellation (waiting for C# team endpoint)
 
 ## Credentials
-- GPS Admin: `gps@zont.cab` / `gpsadmin123`
-- Fleet Admin: `Nandetiri1@gmail.com` / `12345678`
-- Hotel Admin: `admin@bristol.fr` / `hotel123`
-- Super Admin: `admin@zont.cab` / `admin123`
-- Test Client: `testclient@zont.cab` / `test1234`
+- C# Driver: nandetiri1@gmail.com / 12345678
+- Fleet Admin: Nandetiri1@gmail.com / 12345678
+- Hotel Admin: admin@bristol.fr / hotel123
+- Super Admin: admin@zont.cab / admin123
+- Test Client: garikgalstyan@gmail.com / 12345678
 
-## Critical Notes
-- LANGUAGE: Always respond in French
-- THEME: Light theme (white/emerald/gray) for GPS map — no dark mode
-- IMAGE OPTIMIZATION: Always convert PNGs to WebP before adding
-- Do NOT use BaseHTTPMiddleware in FastAPI
-- TCP Gateway runs on external VPS, NOT on Emergent
-- CMS in MongoDB can override page content — always check and update both
-- Stripe is managed by C# backend — do NOT try to create PaymentIntents locally (key is expired)
-- The `direct_payment.py` was removed — all payments go through C# proxy
+## Key Files
+- `/app/backend/routes/driver_portal.py` — Driver portal backend
+- `/app/frontend/src/pages/driver/*` — Driver portal frontend
+- `/app/backend/routes/fleet_portal.py` — Fleet portal with booking filters
+- `/app/backend/routes/fleet_shared.py` — Shared C# proxy logic
+- `/app/backend/routes/csharp_proxy.py` — C# API proxy
