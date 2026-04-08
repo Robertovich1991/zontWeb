@@ -104,5 +104,5 @@ const content = {
 
 const vehiclesPrices = { sedan: 25, luxury: 45, minivan: 60, minibus: 90 };
 const seoUrls = { en: '/gare-du-nord-transfer', fr: '/transfert-gare-du-nord', ru: '/transfer-gar-dyu-nor', hy: '/gar-dyu-nor-transfer' };
-const GareDuNordTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-nord-driver.webp" />;
+const GareDuNordTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-nord-driver.webp" pageId="gare-du-nord" />;
 export default GareDuNordTransfer;

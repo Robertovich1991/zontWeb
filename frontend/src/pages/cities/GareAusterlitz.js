@@ -81,5 +81,5 @@ const content = {
 
 const vehiclesPrices = { sedan: 25, luxury: 45, minivan: 60, minibus: 90 };
 const seoUrls = { en: '/gare-austerlitz-transfer', fr: '/transfert-gare-austerlitz', ru: '/transfer-gar-osterlits', hy: '/gar-osterlits-transfer' };
-const GareAusterlitzTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-austerlitz-driver.webp" />;
+const GareAusterlitzTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-austerlitz-driver.webp" pageId="gare-est" />;
 export default GareAusterlitzTransfer;

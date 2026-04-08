@@ -80,5 +80,5 @@ const content = {
 
 const vehiclesPrices = { sedan: 25, luxury: 45, minivan: 60, minibus: 90 };
 const seoUrls = { en: '/gare-saint-lazare-transfer', fr: '/transfert-gare-saint-lazare', ru: '/transfer-gar-sen-lazar', hy: '/gar-sen-lazar-transfer' };
-const GareSaintLazareTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-lazare-driver.webp" />;
+const GareSaintLazareTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-lazare-driver.webp" pageId="gare-saint-lazare" />;
 export default GareSaintLazareTransfer;

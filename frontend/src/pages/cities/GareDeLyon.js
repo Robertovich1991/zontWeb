@@ -118,5 +118,5 @@ const content = {
 
 const vehiclesPrices = { sedan: 25, luxury: 45, minivan: 60, minibus: 90 };
 const seoUrls = { en: '/gare-de-lyon-transfer', fr: '/transfert-gare-de-lyon', ru: '/transfer-gar-de-lion', hy: '/gar-de-lion-transfer' };
-const GareDeLyonTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-lyon-driver.webp" />;
+const GareDeLyonTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-lyon-driver.webp" pageId="gare-de-lyon" />;
 export default GareDeLyonTransfer;

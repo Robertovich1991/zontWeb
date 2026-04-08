@@ -94,5 +94,5 @@ const content = {
 
 const vehiclesPrices = { sedan: 25, luxury: 45, minivan: 60, minibus: 90 };
 const seoUrls = { en: '/gare-montparnasse-transfer', fr: '/transfert-gare-montparnasse', ru: '/transfer-gar-monparnas', hy: '/gar-monparnas-transfer' };
-const GareMontparnasseTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-montparnasse-driver.webp" />;
+const GareMontparnasseTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/gare-montparnasse-driver.webp" pageId="gare-montparnasse" />;
 export default GareMontparnasseTransfer;
