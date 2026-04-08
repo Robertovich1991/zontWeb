@@ -7,8 +7,9 @@ import logging
 from routes.fleet_shared import (
     get_token, get_company_id, get_db,
     csharp_get, csharp_post, get_shared_client,
-    scan_auctions, format_auction, CSHARP_API, TIMEOUT,
+    scan_auctions, format_auction, parse_csharp_date, CSHARP_API, TIMEOUT,
 )
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -346,31 +347,37 @@ async def fleet_assign_driver_to_vehicle(data: AssignDriverToVehicleRequest, req
 # ─── Bookings (Auctions) ───
 
 
-COMPANY_VISIBLE_STATUSES = {
-    "ApprovedByAdmin", "Took", "Confirmed", "Started",
-    "Completed", "CancelledByDriver", "CancelledByClient",
-}
+COMPANY_PENDING_STATUSES = {"ApprovedByAdmin"}
 
 
 @router.get("/bookings")
 async def fleet_bookings(request: Request, count: int = 20, pageNumber: int = 1, type: str = ""):
+    """Only show auctions sent by admin, pending driver assignment, with future dates."""
     token = get_token(request)
     company_id = get_company_id(request)
+    now = datetime.now()
+
     params = f"count={count}&pageNumber={pageNumber}&isDescending=true"
     if type:
         params += f"&type={type}"
     data = await csharp_get(f"/api/Auction/company/auctions?{params}", token)
     all_auctions = data if isinstance(data, list) else []
-    # Build known IDs from ALL auctions (for scan range), but only format visible ones
     all_ids = {a.get("id") for a in all_auctions if a.get("id")}
-    results = [format_auction(a) for a in all_auctions if a.get("status") in COMPANY_VISIBLE_STATUSES]
+
+    def is_future(auction):
+        dt = parse_csharp_date(auction.get("startDate", ""))
+        return dt and dt > now
+
+    results = [
+        format_auction(a) for a in all_auctions
+        if a.get("status") in COMPANY_PENDING_STATUSES and is_future(a)
+    ]
     seen_ids = {r["id"] for r in results}
 
-    # Scan for hidden auctions using wider range (C# list hides approved/completed ones)
+    # Scan for hidden pending auctions (C# list hides ApprovedByAdmin)
     if pageNumber == 1:
         max_id = max(all_ids) if all_ids else 0
         min_id = min(all_ids) if all_ids else 0
-        # Scan from 1 to max_id+35 to catch all approved/completed auctions
         scan_start = max(1, min_id - 10) if min_id > 0 else 1
         scan_end = max_id + 35 if max_id > 0 else 35
 
@@ -384,7 +391,7 @@ async def fleet_bookings(request: Request, count: int = 20, pageNumber: int = 1,
                 if isinstance(detail, dict) and detail.get("id"):
                     auction_company = detail.get("company") or {}
                     if auction_company.get("id") == company_id or not auction_company.get("id"):
-                        if detail.get("status") in COMPANY_VISIBLE_STATUSES:
+                        if detail.get("status") in COMPANY_PENDING_STATUSES and is_future(detail):
                             return detail
             except Exception:
                 pass
