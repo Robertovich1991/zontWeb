@@ -215,6 +215,8 @@ from routes.gps_admin import router as gps_admin_router
 app.include_router(gps_admin_router)
 from routes.driver_portal import router as driver_portal_router
 app.include_router(driver_portal_router)
+from routes.admin_reservations import router as admin_reservations_router
+app.include_router(admin_reservations_router)
 
 from routes.flight_tracking import router as flight_tracking_router
 app.include_router(flight_tracking_router)

@@ -24,7 +24,11 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## What's Been Implemented
 
-### Session Apr 8, 2026
+### Session Apr 9, 2026
+- **Leads B2B Manager**: Created `/admin/leads` page with search, status management (Nouveau/Contacté/Converti/Perdu), detail panel with clickable email/phone
+- **Reservations C# Manager**: Created `/admin/reservations` page showing ALL C# bookings (app + web) with full client info (name, phone, email), status badges, route details, pricing breakdown
+- **PhoneInput Translation**: Country names now translated in 4 languages (FR/EN/RU/HY) based on active language
+- **Android Download Button**: Google Play Store button for Zont Rider app, visible only on Android devices, on CarSelection page
 - **Fleet Bookings Price Fix**: Shows currentPrice (47€ offer) instead of totalAmount (57€ client price)
 - **Fleet Bookings Filter**: Only ApprovedByAdmin + future date visible to companies (no "New" internal reservations)
 - **Driver Portal (Zont Driver)**: Complete new portal with:
