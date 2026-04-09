@@ -8,12 +8,12 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - **Admin Portal** — Super admin for managing pages, hotels, rides, reviews
 - **Hotel Portal** — Hotel-specific dashboard, bookings, revenue
 - **Fleet Portal** — Company management: drivers, vehicles, bookings, planning, GPS
-- **Driver Portal** — Chauffeur app: Zont offers + company missions (NEW)
+- **Driver Portal** — Chauffeur app: Zont offers + company missions
 
 ## Architecture
 - React Frontend + FastAPI Backend + MongoDB
 - C# Backend proxy (api.zont.cab) for core business logic
-- Custom GPS system (Teltonika TCP decoder on VPS → webhook)
+- Custom GPS system (Teltonika TCP decoder on VPS -> webhook)
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
@@ -24,28 +24,21 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## What's Been Implemented
 
-### Session Apr 9, 2026
-- **Leads B2B Manager**: Created `/admin/leads` page with search, status management (Nouveau/Contacté/Converti/Perdu), detail panel with clickable email/phone
-- **Reservations C# Manager**: Created `/admin/reservations` page showing ALL C# bookings (app + web) with full client info (name, phone, email), status badges, route details, pricing breakdown
-- **PhoneInput Translation**: Country names now translated in 4 languages (FR/EN/RU/HY) based on active language
-- **Android Download Button**: Google Play Store button for Zont Rider app, visible only on Android devices, on CarSelection page
-- **Fleet Bookings Price Fix**: Shows currentPrice (47€ offer) instead of totalAmount (57€ client price)
-- **Fleet Bookings Filter**: Only ApprovedByAdmin + future date visible to companies (no "New" internal reservations)
-- **Driver Portal (Zont Driver)**: Complete new portal with:
-  - Dual authentication: C# drivers (api.zont.cab) + local MongoDB drivers
-  - Missions page: Zont offers (with price, accept button) + company missions (no price, "Assignée" badge)
-  - History page: completed/cancelled missions
-  - Profile page: driver info, company, rating, type badge
-  - Dark theme matching Android Zont Cab app (#0F1117 bg, #10B981 accent)
-  - Bottom navigation: Missions | Historique | Profil
-  - Testing: 100% pass (8/8 backend, all frontend)
+### Session Apr 9, 2026 (Latest)
+- **PhoneInput 149 Countries + Auto-detect**: Expanded country list from 55 to 149 countries with IP-based auto-detection via `api.country.is`. Country names dynamically translated in 4 languages (FR/EN/RU/HY). Search by name, code, or ISO. Validated and tested.
+- **Leads B2B Manager**: `/admin/leads` page with search, status management
+- **Reservations C# Manager**: `/admin/reservations` page showing ALL C# bookings
+- **Android Download Button**: Google Play Store button on CarSelection, Android-only
+- **Fleet Bookings Price Fix**: Shows currentPrice instead of totalAmount
+- **Fleet Bookings Filter**: Only ApprovedByAdmin + future date visible
+- **Driver Portal (Zont Driver)**: Complete portal with dual auth, missions, history, profile
 
 ### Previous Sessions
 - Complete Wialon removal + Custom GPS webhook system
+- GPS Super Admin Portal (/gps-admin/*) for managing 1000+ companies
 - Reviews system with LLM auto-translation (FR, EN, RU, HY)
 - Google Ads/GA4 hardcoded tracking
 - Car selection UI optimization
-- Date parsing fixes
 - Node.js Teltonika TCP decoder for VPS
 
 ## Prioritized Backlog
@@ -71,6 +64,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Partner Ride Cancellation (waiting for C# team endpoint)
 
 ## Credentials
+- GPS Admin: gps@zont.cab / gpsadmin123
 - C# Driver: nandetiri1@gmail.com / 12345678
 - Fleet Admin: Nandetiri1@gmail.com / 12345678
 - Hotel Admin: admin@bristol.fr / hotel123
@@ -78,8 +72,10 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Test Client: garikgalstyan@gmail.com / 12345678
 
 ## Key Files
+- `/app/frontend/src/components/PhoneInput.js` — 149 countries + IP auto-detect
 - `/app/backend/routes/driver_portal.py` — Driver portal backend
 - `/app/frontend/src/pages/driver/*` — Driver portal frontend
 - `/app/backend/routes/fleet_portal.py` — Fleet portal with booking filters
 - `/app/backend/routes/fleet_shared.py` — Shared C# proxy logic
-- `/app/backend/routes/csharp_proxy.py` — C# API proxy
+- `/app/backend/routes/gps_admin.py` — GPS Super Admin backend
+- `/app/frontend/src/pages/gps-admin/*` — GPS Super Admin frontend
