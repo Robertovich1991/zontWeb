@@ -40,11 +40,11 @@ const Dashboard = () => {
         <StatCard icon={HelpCircle} label="FAQ" value={stats.faqs} color="bg-purple-50 text-purple-600" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+        <a href="/admin/leads" className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:border-amber-300 transition-all group cursor-pointer block">
           <h3 className="text-gray-900 font-medium mb-3 flex items-center gap-2"><Users className="w-4 h-4 text-amber-500" />Leads B2B</h3>
           <p className="text-3xl font-bold text-gray-900">{stats.leads}</p>
-          <p className="text-gray-500 text-sm mt-1">demandes recues</p>
-        </div>
+          <p className="text-gray-500 text-sm mt-1">demandes recues <span className="text-amber-500 group-hover:underline">— voir details</span></p>
+        </a>
         <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
           <h3 className="text-gray-900 font-medium mb-3 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-emerald-500" />Actions rapides</h3>
           <div className="space-y-2">

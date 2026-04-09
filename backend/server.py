@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, Request
+from fastapi import FastAPI, APIRouter, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import Response
 from dotenv import load_dotenv
@@ -151,6 +151,24 @@ async def get_leads():
         if isinstance(lead.get('timestamp'), str):
             lead['timestamp'] = datetime.fromisoformat(lead['timestamp'])
     return leads
+
+class LeadStatusUpdate(BaseModel):
+    status: str
+
+@api_router.put("/admin/leads/{lead_id}/status")
+async def update_lead_status(lead_id: str, data: LeadStatusUpdate):
+    result = await db.leads.update_one({"id": lead_id}, {"$set": {"status": data.status}})
+    if result.matched_count == 0:
+        raise HTTPException(404, "Lead introuvable")
+    return {"success": True}
+
+@api_router.delete("/admin/leads/{lead_id}")
+async def delete_lead(lead_id: str):
+    result = await db.leads.delete_one({"id": lead_id})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Lead introuvable")
+    return {"success": True}
+
 
 # Include the router in the main app
 app.include_router(api_router)

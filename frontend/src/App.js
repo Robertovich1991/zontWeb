@@ -54,6 +54,7 @@ const HotelBookingsManager = lazy(() => import("@/pages/admin/HotelBookingsManag
 const HotelPayments = lazy(() => import("@/pages/admin/HotelPayments"));
 const PromoEmails = lazy(() => import("@/pages/admin/PromoEmails"));
 const ReviewsManager = lazy(() => import("@/pages/admin/ReviewsManager"));
+const LeadsManager = lazy(() => import("@/pages/admin/LeadsManager"));
 
 // Hotel Admin Portal
 const HotelLogin = lazy(() => import("@/pages/hotel/HotelLogin"));
@@ -315,6 +316,7 @@ function App() {
                     <Route path="hotel-payments" element={<HotelPayments />} />
                     <Route path="promo-emails" element={<PromoEmails />} />
                     <Route path="reviews" element={<ReviewsManager />} />
+                    <Route path="leads" element={<LeadsManager />} />
                   </Route>
                   {/* Driver PWA */}
                   <Route path="/driver/*" element={<DriverApp />} />
