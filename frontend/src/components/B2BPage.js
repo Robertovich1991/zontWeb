@@ -36,7 +36,7 @@ const B2BPage = ({ content, seoUrls, relatedPages }) => {
       setSubmitted(true);
       setFormState({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {
-      setError(language === 'fr' ? 'Erreur. Veuillez reessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : language === 'hy' ? 'Սխալ: Խնդրում ենք կրկին փորձեք:' : 'Error. Please try again.');
+      setError(language === 'fr' ? 'Erreur. Veuillez réessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : language === 'hy' ? 'Սխալ: Խնդրում ենք կրկին փորձեք:' : 'Error. Please try again.');
     } finally {
       setSubmitting(false);
     }

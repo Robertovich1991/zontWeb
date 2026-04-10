@@ -9,15 +9,15 @@ const GOOGLE_CLIENT_ID = '71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.goog
 
 // Map C# API error keys to French messages
 const errorTranslations = {
-  DuplicateUserName: 'Cet email est deja utilise',
-  DuplicateEmail: 'Cet email est deja utilise',
-  PhoneNumber: 'Numero de telephone invalide (ex: +33612345678)',
-  PasswordTooShort: 'Le mot de passe doit contenir au moins 6 caracteres',
+  DuplicateUserName: 'Cet email est déjà utilisé',
+  DuplicateEmail: 'Cet email est déjà utilisé',
+  PhoneNumber: 'Numéro de téléphone invalide (ex: +33612345678)',
+  PasswordTooShort: 'Le mot de passe doit contenir au moins 6 caractères',
   PasswordRequiresDigit: 'Le mot de passe doit contenir un chiffre',
   PasswordRequiresUpper: 'Le mot de passe doit contenir une majuscule',
   PasswordRequiresLower: 'Le mot de passe doit contenir une minuscule',
-  PasswordRequiresNonAlphanumeric: 'Le mot de passe doit contenir un caractere special',
-  FirstName: 'Le prenom est obligatoire',
+  PasswordRequiresNonAlphanumeric: 'Le mot de passe doit contenir un caractère spécial',
+  FirstName: 'Le prénom est obligatoire',
   LastName: 'Le nom est obligatoire',
   Password: 'Le mot de passe est obligatoire',
   Email: 'L\'email est invalide',
@@ -158,14 +158,14 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
       if (result.user) {
         loginDirect(result.user);
       }
-      toast.success('Connexion Google reussie !');
+      toast.success('Connexion Google réussie !');
       handleClose();
     } catch (error) {
       const apiErrors = parseApiErrors(error);
       if (Object.keys(apiErrors).length > 0) {
         setErrors({ general: Object.values(apiErrors)[0] || 'Erreur de connexion Google' });
       } else {
-        setErrors({ general: 'Erreur de connexion Google. Reessayez.' });
+        setErrors({ general: 'Erreur de connexion Google. Réessayez.' });
       }
       toast.error('Erreur de connexion Google');
     } finally {
@@ -176,17 +176,17 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
   // Client-side validation
   const validateSignUp = () => {
     const newErrors = {};
-    if (!formData.firstName.trim()) newErrors.firstName = 'Le prenom est obligatoire';
+    if (!formData.firstName.trim()) newErrors.firstName = 'Le prénom est obligatoire';
     if (!formData.lastName.trim()) newErrors.lastName = 'Le nom est obligatoire';
     if (!formData.email.trim()) newErrors.email = 'L\'email est obligatoire';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'L\'email est invalide';
-    if (!formData.phone.trim()) newErrors.phone = 'Le telephone est obligatoire';
+    if (!formData.phone.trim()) newErrors.phone = 'Le téléphone est obligatoire';
     else {
       const formatted = formatPhone(formData.phone);
-      if (formatted.length < 10) newErrors.phone = 'Numero de telephone invalide (ex: +33612345678)';
+      if (formatted.length < 10) newErrors.phone = 'Numéro de téléphone invalide (ex: +33612345678)';
     }
     if (!formData.password) newErrors.password = 'Le mot de passe est obligatoire';
-    else if (formData.password.length < 6) newErrors.password = 'Minimum 6 caracteres';
+    else if (formData.password.length < 6) newErrors.password = 'Minimum 6 caractères';
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Confirmez le mot de passe';
     else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
     if (!formData.agreeTerms) newErrors.agreeTerms = 'Veuillez accepter les conditions';
@@ -212,7 +212,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
       try { await authService.sendVerificationEmail(formData.email); } catch {}
       setRegisteredEmail(formData.email);
       try { await login({ email: formData.email, password: formData.password }); } catch {}
-      toast.success('Inscription reussie ! Verifiez votre email.');
+      toast.success('Inscription réussie ! Vérifiez votre email.');
       setStep('verify');
     } catch (error) {
       const apiErrors = parseApiErrors(error);
@@ -232,7 +232,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
   const handleVerify = async (e) => {
     e.preventDefault();
     if (!verifyCode.trim()) {
-      setErrors({ code: 'Entrez le code recu par email' });
+      setErrors({ code: 'Entrez le code reçu par email' });
       return;
     }
     setLoading(true);
@@ -244,10 +244,10 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
         localStorage.setItem('user', JSON.stringify({ token: result.accessToken }));
       }
       setStep('verified');
-      toast.success('Email verifie ! Votre compte est actif.');
+      toast.success('Email vérifié ! Votre compte est actif.');
       setTimeout(handleClose, 2000);
     } catch {
-      setErrors({ code: 'Code invalide. Verifiez votre email et reessayez.' });
+      setErrors({ code: 'Code invalide. Vérifiez votre email et réessayez.' });
       toast.error('Code de verification invalide');
     } finally {
       setLoading(false);
@@ -258,7 +258,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     setLoading(true);
     try {
       await authService.sendVerificationEmail(registeredEmail);
-      toast.success('Email de verification renvoye !');
+      toast.success('Email de vérification renvoyé !');
     } catch {
       toast.error('Impossible de renvoyer l\'email');
     } finally {
@@ -284,7 +284,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
       toast.success('Email de reinitialisation envoye !');
       setStep('forgot-sent');
     } catch {
-      setErrors({ forgotEmail: 'Impossible d\'envoyer l\'email. Verifiez l\'adresse.' });
+      setErrors({ forgotEmail: 'Impossible d\'envoyer l\'email. Vérifiez l\'adresse.' });
       toast.error('Erreur lors de l\'envoi de l\'email');
     } finally {
       setLoading(false);
@@ -302,7 +302,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     setErrors({});
     try {
       await login({ email: formData.email, password: formData.password });
-      toast.success('Connexion reussie !');
+      toast.success('Connexion réussie !');
       handleClose();
     } catch (error) {
       const apiErrors = parseApiErrors(error);
@@ -410,6 +410,8 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
     </div>
   );
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-testid="auth-modal">
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose} />
@@ -432,11 +434,11 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
               <button onClick={() => { setStep('form'); setErrors({}); setForgotEmail(''); }} className="text-gray-400 hover:text-white transition-colors" data-testid="back-to-signin">
                 <ArrowLeft size={20} />
               </button>
-              <h3 className="text-lg font-medium text-white">Mot de passe oublie</h3>
+              <h3 className="text-lg font-medium text-white">Mot de passe oublié</h3>
             </div>
           ) : (
             <h3 className="text-lg font-medium text-white">
-              {step === 'verify' ? 'Verification email' : step === 'verified' ? 'Compte active' : ''}
+              {step === 'verify' ? 'Vérification email' : step === 'verified' ? 'Compte activé' : ''}
             </h3>
           )}
           <button onClick={handleClose} className="text-gray-400 hover:text-white transition-colors" data-testid="close-auth-modal">
@@ -447,9 +449,9 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
         <div className="px-6 py-5">
           {/* General error banner */}
           {errors.general && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2" data-testid="error-general">
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-              <p className="text-sm text-red-400">{errors.general}</p>
+            <div className="mb-4 p-3.5 bg-red-500/15 border border-red-500/40 rounded-lg flex items-start gap-2.5 animate-[shake_0.3s_ease-in-out]" data-testid="error-general">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-300 font-medium">{errors.general}</p>
             </div>
           )}
 

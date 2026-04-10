@@ -69,31 +69,31 @@ const content = {
     whoTitle: 'Nos Partenaires',
     whoSub: 'Des solutions de transport adaptees a chaque besoin professionnel',
     servicesTitle: 'Services pour Professionnels',
-    servicesSub: 'Des solutions de transport completes concues pour les partenaires commerciaux',
+    servicesSub: 'Des solutions de transport complètes conçues pour les partenaires commerciaux',
     services: [
-      { title: 'Transferts Aeroport', desc: 'Prises en charge et depositions fiables dans tous les grands aeroports. Suivi de vol, accueil personnalise.' },
+      { title: 'Transferts Aéroport', desc: 'Prises en charge et dépositions fiables dans tous les grands aéroports. Suivi de vol, accueil personnalisé.' },
       { title: 'Transferts Gare', desc: 'Transferts professionnels depuis toutes les grandes gares. Service ponctuel et rapide.' },
-      { title: 'Chauffeur a Disposition', desc: 'Chauffeur dedie disponible a l\'heure ou a la journee. Ideal pour evenements et reunions.' },
-      { title: 'Transferts Interurbains', desc: 'Transferts longue distance entre villes. Vehicules confortables pour les trajets interurbains.' },
-      { title: 'Transport de Groupes', desc: 'Minivans et minibus pour groupes jusqu\'a 16 passagers. Parfait pour delegations et groupes touristiques.' },
-      { title: 'Service VIP & Luxe', desc: 'Vehicules premium, chauffeurs discrets. Service de premiere classe pour vos clients les plus exigeants.' },
+      { title: 'Chauffeur à Disposition', desc: 'Chauffeur dédié disponible à l\'heure ou à la journée. Idéal pour évènements et réunions.' },
+      { title: 'Transferts Interurbains', desc: 'Transferts longue distance entre villes. Véhicules confortables pour les trajets interurbains.' },
+      { title: 'Transport de Groupes', desc: 'Minivans et minibus pour groupes jusqu\'à 16 passagers. Parfait pour délégations et groupes touristiques.' },
+      { title: 'Service VIP & Luxe', desc: 'Véhicules premium, chauffeurs discrets. Service de première classe pour vos clients les plus exigeants.' },
     ],
     whyTitle: 'Pourquoi Choisir ZONT',
-    whySub: 'Un partenariat fonde sur la fiabilite, la qualite et la croissance mutuelle',
+    whySub: 'Un partenariat fondé sur la fiabilité, la qualité et la croissance mutuelle',
     whyPoints: [
-      { icon: 'shield', title: 'Tarifs Fixes & Transparents', desc: 'Pas de frais caches, pas de surcharge. Des couts previsibles.' },
-      { icon: 'users', title: 'Chauffeurs Professionnels', desc: 'Chauffeurs verifies, licencies, multilingues. Formes au transport VIP.' },
-      { icon: 'plane', title: 'Suivi des Vols en Temps Reel', desc: 'Suivi automatique de tous les vols. Ajustements sans frais supplementaires.' },
-      { icon: 'star', title: 'Service d\'Accueil', desc: 'Le chauffeur attend aux arrivees avec un panneau nominatif.' },
-      { icon: 'clock', title: 'Disponibilite 24/7', desc: 'Reservez des transferts jour et nuit. Support dedie en permanence.' },
-      { icon: 'headphones', title: 'Support Partenaire Dedie', desc: 'Acces prioritaire a un gestionnaire de compte dedie.' },
+      { icon: 'shield', title: 'Tarifs Fixes & Transparents', desc: 'Pas de frais cachés, pas de surcharge. Des coûts prévisibles.' },
+      { icon: 'users', title: 'Chauffeurs Professionnels', desc: 'Chauffeurs vérifiés, licenciés, multilingues. Formés au transport VIP.' },
+      { icon: 'plane', title: 'Suivi des Vols en Temps Réel', desc: 'Suivi automatique de tous les vols. Ajustements sans frais supplémentaires.' },
+      { icon: 'star', title: 'Service d\'Accueil', desc: 'Le chauffeur attend aux arrivées avec un panneau nominatif.' },
+      { icon: 'clock', title: 'Disponibilité 24/7', desc: 'Réservez des transferts jour et nuit. Support dédié en permanence.' },
+      { icon: 'headphones', title: 'Support Partenaire Dédié', desc: 'Accès prioritaire à un gestionnaire de compte dédié.' },
     ],
-    howTitle: 'Comment Ca Marche',
+    howTitle: 'Comment Ça Marche',
     howSteps: [
-      { title: 'Envoyez Votre Demande', desc: 'Parlez-nous de votre activite, volume et besoins.' },
-      { title: 'Recevez un Devis', desc: 'Nous repondons sous 24h avec des tarifs personnalises.' },
-      { title: 'Nous Organisons le Transport', desc: 'Reservez facilement via portail, email ou telephone.' },
-      { title: 'Experience Premium', desc: 'Vos clients profitent de transferts de premiere classe.' },
+      { title: 'Envoyez Votre Demande', desc: 'Parlez-nous de votre activité, volume et besoins.' },
+      { title: 'Recevez un Devis', desc: 'Nous répondons sous 24h avec des tarifs personnalisés.' },
+      { title: 'Nous Organisons le Transport', desc: 'Réservez facilement via portail, email ou téléphone.' },
+      { title: 'Expérience Premium', desc: 'Vos clients profitent de transferts de première classe.' },
     ],
     trustTitle: 'La Confiance des Professionnels en Europe',
     trustSub: '',
@@ -245,7 +245,7 @@ const Partners = () => {
       setSubmitted(true);
       setFormState({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {
-      setError(language === 'fr' ? 'Erreur. Veuillez reessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : language === 'hy' ? 'Սխալ: Խնդրում ենք կրկին փորձեք:' : 'Error. Please try again.');
+      setError(language === 'fr' ? 'Erreur. Veuillez réessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : language === 'hy' ? 'Սխալ: Խնդրում ենք կրկին փորձեք:' : 'Error. Please try again.');
     } finally {
       setSubmitting(false);
     }

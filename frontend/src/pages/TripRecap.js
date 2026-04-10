@@ -35,24 +35,24 @@ const labels = {
     orSimilar: 'or similar',
   },
   fr: {
-    seoTitle: 'Resume du Trajet - Zont',
-    title: 'Resume de Votre Trajet',
-    subtitle: 'Verifiez les details avant de continuer',
-    from: 'Depart', to: 'Arrivee',
-    dateTime: 'Date & Heure', vehicle: 'Vehicule Selectionne',
-    duration: 'Temps estime', distance: 'Distance',
+    seoTitle: 'Résumé du Trajet - Zont',
+    title: 'Résumé de Votre Trajet',
+    subtitle: 'Vérifiez les détails avant de continuer',
+    from: 'Départ', to: 'Arrivée',
+    dateTime: 'Date & Heure', vehicle: 'Véhicule Sélectionné',
+    duration: 'Temps estimé', distance: 'Distance',
     mins: 'min', km: 'km',
     perksTitle: 'Inclus dans Votre Transfert',
-    perk1: 'Attente gratuite', perk1d: '60 min aeroports, 15 min ailleurs',
-    perk2: 'Pancarte nominative', perk2d: 'Accueil personnalise a votre nom',
-    perk3: 'Eau offerte', perk3d: 'Bouteille d\'eau a bord',
-    perk4: 'Suivi de vol', perk4d: 'Surveillance en temps reel',
-    perk5: 'Prix fixe garanti', perk5d: 'Pas de frais caches, peages inclus',
+    perk1: 'Attente gratuite', perk1d: '60 min aéroports, 15 min ailleurs',
+    perk2: 'Pancarte nominative', perk2d: 'Accueil personnalisé à votre nom',
+    perk3: 'Eau offerte', perk3d: 'Bouteille d\'eau à bord',
+    perk4: 'Suivi de vol', perk4d: 'Surveillance en temps réel',
+    perk5: 'Prix fixe garanti', perk5d: 'Pas de frais cachés, péages inclus',
     perk6: 'Annulation gratuite 24h', perk6d: 'Changement de plan ? Aucun frais',
     continueBtn: 'Continuer vers le Paiement',
-    changeVehicle: 'Changer de Vehicule',
+    changeVehicle: 'Changer de Véhicule',
     fixedPrice: 'Prix fixe',
-    step1: 'Vehicule', step2: 'Resume', step3: 'Paiement',
+    step1: 'Véhicule', step2: 'Résumé', step3: 'Paiement',
     orSimilar: 'ou similaire',
   },
   ru: {
@@ -415,7 +415,7 @@ const TripRecap = () => {
                 <p className="text-3xl font-extrabold text-white" data-testid="recap-price">
                   {selectedCar.price}<span className="text-base font-normal text-gray-400 ml-1">&euro;</span>
                 </p>
-                <p className="text-[10px] text-gray-500 mt-1">TVA, peages et frais inclus</p>
+                <p className="text-[10px] text-gray-500 mt-1">TVA, péages et frais inclus</p>
               </div>
 
               {/* CTA Button */}

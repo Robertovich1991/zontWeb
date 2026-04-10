@@ -52,31 +52,31 @@ const homeContent = {
   fr: {
     heroTitle: 'Transfert Aeroport Premium',
     heroAccent: 'Partout en Europe',
-    heroSub: 'Chauffeurs prives professionnels dans 16 villes. Prix fixes, suivi de vol, accueil personnalise.',
-    bookingTitle: 'Reservez Votre Transfert',
-    pickup: 'Adresse de depart', dropoff: 'Adresse d\'arrivee', date: 'Date', time: 'Heure',
-    pickupPh: 'Aeroport, hotel, adresse...', dropoffPh: 'Hotel, centre-ville, adresse...',
+    heroSub: 'Chauffeurs privés professionnels dans 16 villes. Prix fixes, suivi de vol, accueil personnalisé.',
+    bookingTitle: 'Réservez Votre Transfert',
+    pickup: 'Adresse de départ', dropoff: 'Adresse d\'arrivée', date: 'Date', time: 'Heure',
+    pickupPh: 'Aéroport, hôtel, adresse...', dropoffPh: 'Hôtel, centre-ville, adresse...',
     bookNow: 'RECHERCHER UN TRANSFERT', searching: 'RECHERCHE...',
-    fixedPrices: 'Prix Fixes', securePay: 'Paiement Securise',
-    stats: { trips: '50K+', tripsLabel: 'Courses Effectuees', cities: '16', citiesLabel: 'Villes', available: '24/7', availableLabel: 'Service', rating: '4.5/5', ratingLabel: 'Note' },
-    trustTitle: 'Pourquoi les Voyageurs Font Confiance a Zont',
-    f1Title: 'Accueil Personnalise', f1Desc: 'Votre chauffeur vous attend aux arrivees avec une pancarte a votre nom. 60 min d\'attente gratuites.',
-    f2Title: 'Suivi des Vols', f2Desc: 'Surveillance en temps reel de votre vol. Aucun supplement en cas de retard.',
-    f3Title: 'Vehicules Premium', f3Desc: 'Mercedes, BMW. Propres, climatises, moins de 3 ans.',
-    f4Title: 'Prix Fixes Garantis', f4Desc: 'Prix confirme a la reservation. Pas de frais caches, peages inclus.',
+    fixedPrices: 'Prix Fixes', securePay: 'Paiement Sécurisé',
+    stats: { trips: '50K+', tripsLabel: 'Courses Effectuées', cities: '16', citiesLabel: 'Villes', available: '24/7', availableLabel: 'Service', rating: '4.5/5', ratingLabel: 'Note' },
+    trustTitle: 'Pourquoi les Voyageurs Font Confiance à Zont',
+    f1Title: 'Accueil Personnalisé', f1Desc: 'Votre chauffeur vous attend aux arrivées avec une pancarte à votre nom. 60 min d\'attente gratuites.',
+    f2Title: 'Suivi des Vols', f2Desc: 'Surveillance en temps réel de votre vol. Aucun supplément en cas de retard.',
+    f3Title: 'Véhicules Premium', f3Desc: 'Mercedes, BMW. Propres, climatisés, moins de 3 ans.',
+    f4Title: 'Prix Fixes Garantis', f4Desc: 'Prix confirmé à la réservation. Pas de frais cachés, péages inclus.',
     popularTitle: 'Destinations Populaires',
     reviewsTitle: 'Ce Que Disent Nos Clients',
-    ctaTitle: 'Pret a Reserver Votre Transfert ?', ctaBtn: 'Reserver Maintenant',
-    howTitle: 'Comment Ca Marche',
-    recentTitle: 'Recherches Recentes', recentEmpty: 'Aucune recherche recente',
-    aiTitle: 'Reservez en 10 secondes avec IA', aiPlaceholder: 'Ex: CDG demain 14h vers Hilton Opera 2 personnes', aiBtn: 'AUTO', aiLoading: 'Analyse de votre trajet...', aiLow: 'Pas assez d\'informations. Verifiez les champs.',
-    guidedPickup: 'D\'ou partez-vous ?', guidedDropoff: 'Ou allez-vous ?', guidedDate: 'Quelle date ?', guidedTime: 'A quelle heure ?',
-    guidedSuggestions: { pickup: ['Paris CDG', 'Paris Orly', 'Nice Aeroport', 'Lyon Aeroport'], dropoff: ['Paris Centre', 'Disneyland', 'Tour Eiffel', 'Hotel'], date: ['Aujourd\'hui', 'Demain'], time: ['Matin (9h)', 'Apres-midi (14h)', 'Soir (19h)'] },
-    s1: 'Reservez en Ligne', s1d: 'Entrez les details de votre vol et destination. Confirmation du prix immediate.',
-    s2: 'Rencontrez Votre Chauffeur', s2d: 'Chauffeur aux arrivees avec pancarte a votre nom. Aide aux bagages.',
-    s3: 'Profitez du Trajet', s3d: 'Transfert direct confortable dans un vehicule premium.',
-    seoTitle: 'Zont - Transfert Aeroport Premium en Europe | Chauffeur Prive',
-    seoDesc: 'Service de chauffeur prive premium dans 16 villes europeennes. Prix fixes, suivi de vol. Reservez en ligne.',
+    ctaTitle: 'Prêt à Réserver Votre Transfert ?', ctaBtn: 'Réserver Maintenant',
+    howTitle: 'Comment Ça Marche',
+    recentTitle: 'Recherches Récentes', recentEmpty: 'Aucune recherche récente',
+    aiTitle: 'Réservez en 10 secondes avec IA', aiPlaceholder: 'Ex: CDG demain 14h vers Hilton Opéra 2 personnes', aiBtn: 'AUTO', aiLoading: 'Analyse de votre trajet...', aiLow: 'Pas assez d\'informations. Vérifiez les champs.',
+    guidedPickup: 'D\'où partez-vous ?', guidedDropoff: 'Où allez-vous ?', guidedDate: 'Quelle date ?', guidedTime: 'À quelle heure ?',
+    guidedSuggestions: { pickup: ['Paris CDG', 'Paris Orly', 'Nice Aéroport', 'Lyon Aéroport'], dropoff: ['Paris Centre', 'Disneyland', 'Tour Eiffel', 'Hôtel'], date: ['Aujourd\'hui', 'Demain'], time: ['Matin (9h)', 'Après-midi (14h)', 'Soir (19h)'] },
+    s1: 'Réservez en Ligne', s1d: 'Entrez les détails de votre vol et destination. Confirmation du prix immédiate.',
+    s2: 'Rencontrez Votre Chauffeur', s2d: 'Chauffeur aux arrivées avec pancarte à votre nom. Aide aux bagages.',
+    s3: 'Profitez du Trajet', s3d: 'Transfert direct confortable dans un véhicule premium.',
+    seoTitle: 'Zont - Transfert Aéroport Premium en Europe | Chauffeur Privé',
+    seoDesc: 'Service de chauffeur privé premium dans 16 villes européennes. Prix fixes, suivi de vol. Réservez en ligne.',
   },
   ru: {
     heroTitle: 'Премиум Трансфер из Аэропорта',
@@ -306,7 +306,7 @@ const Home = () => {
       if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickupSafeRef.current.placeId || pickup.placeId);
       if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoffSafeRef.current.placeId || dropoff.placeId);
     } catch {
-      toast.error(language === 'fr' ? 'Adresse introuvable. Veuillez reessayer.' : 'Address not found. Please try again.');
+      toast.error(language === 'fr' ? 'Adresse introuvable. Veuillez réessayer.' : 'Address not found. Please try again.');
       setLoading(false);
       return;
     }
@@ -478,11 +478,11 @@ const Home = () => {
         const dropoffVague = d.dropoff && isVagueAddress(d.dropoff);
         if (pickupVague) {
           setGuidedStep('pickup_exact');
-          toast.info(language === 'fr' ? 'Precisez l\'adresse de depart' : 'Please specify the pickup address');
+          toast.info(language === 'fr' ? 'Précisez l\'adresse de départ' : 'Please specify the pickup address');
           playNotifSound();
         } else if (dropoffVague) {
           setGuidedStep('dropoff_exact');
-          toast.info(language === 'fr' ? 'Precisez l\'adresse d\'arrivee' : 'Please specify the drop-off address');
+          toast.info(language === 'fr' ? 'Précisez l\'adresse d\'arrivée' : 'Please specify the drop-off address');
           playNotifSound();
         } else if (result.confidence >= 0.8 && result.missing_fields.length === 0) {
           toast.success(language === 'fr' ? 'Formulaire rempli par l\'IA !' : 'Form filled by AI!');
@@ -513,8 +513,8 @@ const Home = () => {
 
   const guidedQuestions = {
     pickup: c.guidedPickup, dropoff: c.guidedDropoff, date: c.guidedDate, time: c.guidedTime,
-    pickup_exact: language === 'fr' ? 'Precisez l\'adresse exacte (rue + numero) :' : 'Enter the exact address (street + number):',
-    dropoff_exact: language === 'fr' ? 'Precisez l\'adresse exacte (rue + numero) :' : 'Enter the exact address (street + number):',
+    pickup_exact: language === 'fr' ? 'Précisez l\'adresse exacte (rue + numéro) :' : 'Enter the exact address (street + number):',
+    dropoff_exact: language === 'fr' ? 'Précisez l\'adresse exacte (rue + numéro) :' : 'Enter the exact address (street + number):',
   };
   const guidedSuggestions = c.guidedSuggestions || {};
 

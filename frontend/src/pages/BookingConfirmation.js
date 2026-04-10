@@ -42,7 +42,7 @@ const labels = {
       'Les details du chauffeur seront envoyes 3h avant le depart',
       'Suivez votre chauffeur en temps reel',
     ],
-    newBooking: 'Reserver une autre course',
+    newBooking: 'Réserver une autre course',
     home: 'Retour a l\'accueil',
     hourly: 'Location horaire',
     noBooking: 'Aucune reservation trouvee',
