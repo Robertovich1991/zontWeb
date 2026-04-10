@@ -42,6 +42,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   const [pageReviews, setPageReviews] = useState([]);
   const [reviewSchema, setReviewSchema] = useState(null);
   const langSyncRef = useRef(false);
+  const pickupInitRef = useRef(false);
+  const dropoffInitRef = useRef(false);
 
   // IMMUNE REFS: only autocomplete selection writes here, mobile onChange can NEVER clear them
   const pickupSafeRef = useRef({ latitude: null, longitude: null, placeId: null, address: '' });
@@ -106,10 +108,12 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   const introText = (cmsPage?.intro?.[language]) || c.description;
   const mainContent = (cmsPage?.main_content?.[language]) || c.description2;
 
-  if (!pickup.address && c.defaultPickup) {
+  if (!pickupInitRef.current && !pickup.address && c.defaultPickup) {
+    pickupInitRef.current = true;
     setPickup({ address: c.defaultPickup, latitude: null, longitude: null, placeId: null });
   }
-  if (!dropoff.address && c.defaultDropoff) {
+  if (!dropoffInitRef.current && !dropoff.address && c.defaultDropoff) {
+    dropoffInitRef.current = true;
     setDropoff({ address: c.defaultDropoff, latitude: null, longitude: null, placeId: null });
   }
 
