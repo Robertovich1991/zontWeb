@@ -16,7 +16,7 @@ const cityImages = {
   nice: 'https://images.unsplash.com/photo-1584464743211-134b56a08510?w=600&q=75&auto=format',
   cannes: 'https://images.unsplash.com/photo-1594041966249-ebee737fb001?w=600&q=75&auto=format',
   cotedazur: 'https://images.unsplash.com/photo-1584464743211-134b56a08510?w=600&q=75&auto=format',
-  monaco: 'https://images.unsplash.com/photo-1658988856200-056dfdb42025?w=600&q=75&auto=format',
+  monaco: '/images/monaco-driver-service.jpg',
   berlin: 'https://images.unsplash.com/photo-1659413084271-ca1345764e15?w=600&q=75&auto=format',
   munich: 'https://images.unsplash.com/photo-1659413084271-ca1345764e15?w=600&q=75&auto=format',
   rome: 'https://images.unsplash.com/photo-1668882565110-317edcfa0ee0?w=600&q=75&auto=format',
