@@ -43,6 +43,14 @@ AVAILABLE_PAGES = [
 ]
 
 
+class ReviewSubmit(BaseModel):
+    author_name: str
+    rating: int  # 1-5
+    comment: str
+    language: str = "fr"
+    trip_ref: Optional[str] = None
+
+
 class ReviewCreate(BaseModel):
     author_name: str
     rating: int  # 1-5
@@ -163,6 +171,41 @@ async def get_reviews_schema(page_id: str):
             "worstRating": 1
         }
     }
+
+
+# ── Public review submission ────────────────────────────────────────
+@router.post("/submit")
+async def submit_review(review: ReviewSubmit):
+    """Public endpoint: clients submit reviews. Status = pending (admin must approve)."""
+    if not review.author_name.strip():
+        raise HTTPException(status_code=400, detail="Name is required")
+    if not review.comment.strip():
+        raise HTTPException(status_code=400, detail="Comment is required")
+    if review.rating < 1 or review.rating > 5:
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+
+    review_id = f"rev-{uuid.uuid4().hex[:12]}"
+
+    # Auto-translate
+    translations = await auto_translate_review(review.comment.strip(), review.language)
+
+    doc = {
+        "review_id": review_id,
+        "author_name": review.author_name.strip(),
+        "rating": review.rating,
+        "comment": review.comment.strip(),
+        "language": review.language,
+        "translations": translations,
+        "page_id": "",
+        "trip_ref": review.trip_ref or "",
+        "source": "client_link",
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await reviews_col.insert_one(doc)
+    doc.pop("_id", None)
+    return {"status": "submitted", "review_id": review_id}
 
 
 # ── Admin endpoints ─────────────────────────────────────────────────
