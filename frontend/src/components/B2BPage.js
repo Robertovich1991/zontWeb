@@ -62,7 +62,7 @@ const B2BPage = ({ content, seoUrls, relatedPages }) => {
           "description": c.seoDesc,
           "url": "https://www.zont.cab",
           "image": "https://www.zont.cab/logo512.png",
-          "telephone": "+33600000000",
+          "telephone": "+33783777027",
           "address": { "@type": "PostalAddress", "addressLocality": "Paris", "addressCountry": "FR" },
           "priceRange": "$$",
           "serviceType": "B2B Airport Transfer & Chauffeur Service",

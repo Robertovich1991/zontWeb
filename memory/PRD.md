@@ -21,11 +21,19 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Fleet bookings display currentPrice (offer price) not totalAmount (client price)
 - Reviews: 1-to-1 page mapping for SEO, LocalBusiness JSON-LD
 - Google tracking: hardcoded GA4 + Google Ads (bypasses broken GTM)
+- Schema.org reviews use `Product` type (not `LocalBusiness`) to comply with Google self-review policy
 
 ## What's Been Implemented
 
-### Session Apr 9, 2026 (Latest)
-- **PhoneInput 149 Countries + Auto-detect**: Expanded country list from 55 to 149 countries with IP-based auto-detection via `api.country.is`. Country names dynamically translated in 4 languages (FR/EN/RU/HY). Search by name, code, or ISO. Validated and tested.
+### Session Apr 10, 2026 (Latest)
+- **Google Structured Data Audit & Fix**: 
+  - Split JSON-LD into 2 blocks: `LocalBusiness` (business info only) + `Product` (with reviews/aggregateRating)
+  - Fixed self-review policy violation (LocalBusiness with own reviews = no stars in Google)
+  - Converted all schema values from strings to proper numbers (ratingValue, reviewCount, bestRating)
+  - Replaced placeholder phone (+33600000000) with real number (+33783777027) across all pages
+- **PhoneInput 149 Countries + Auto-detect**: Validated - 149 countries, IP auto-detection via api.country.is, dynamic translation in 4 languages
+
+### Session Apr 9, 2026
 - **Leads B2B Manager**: `/admin/leads` page with search, status management
 - **Reservations C# Manager**: `/admin/reservations` page showing ALL C# bookings
 - **Android Download Button**: Google Play Store button on CarSelection, Android-only
@@ -73,9 +81,10 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Files
 - `/app/frontend/src/components/PhoneInput.js` — 149 countries + IP auto-detect
+- `/app/frontend/src/components/CityTransferPage.js` — City pages with dual JSON-LD (LocalBusiness + Product)
+- `/app/frontend/src/components/SEO.js` — SEO component with JSON-LD injection
+- `/app/backend/routes/reviews.py` — Reviews API with schema.org formatting
 - `/app/backend/routes/driver_portal.py` — Driver portal backend
 - `/app/frontend/src/pages/driver/*` — Driver portal frontend
 - `/app/backend/routes/fleet_portal.py` — Fleet portal with booking filters
-- `/app/backend/routes/fleet_shared.py` — Shared C# proxy logic
 - `/app/backend/routes/gps_admin.py` — GPS Super Admin backend
-- `/app/frontend/src/pages/gps-admin/*` — GPS Super Admin frontend

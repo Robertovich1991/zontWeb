@@ -148,7 +148,7 @@ async def get_reviews_schema(page_id: str):
         schema_reviews.append({
             "@type": "Review",
             "author": {"@type": "Person", "name": r.get("author_name", "Client")},
-            "reviewRating": {"@type": "Rating", "ratingValue": str(r.get("rating", 5)), "bestRating": "5"},
+            "reviewRating": {"@type": "Rating", "ratingValue": r.get("rating", 5), "bestRating": 5},
             "reviewBody": r.get("comment", ""),
             "datePublished": r.get("created_at", "")[:10] if r.get("created_at") else ""
         })
@@ -157,10 +157,10 @@ async def get_reviews_schema(page_id: str):
         "reviews": schema_reviews,
         "aggregateRating": {
             "@type": "AggregateRating",
-            "ratingValue": str(avg_rating),
-            "reviewCount": str(len(reviews)),
-            "bestRating": "5",
-            "worstRating": "1"
+            "ratingValue": avg_rating,
+            "reviewCount": len(reviews),
+            "bestRating": 5,
+            "worstRating": 1
         }
     }
 

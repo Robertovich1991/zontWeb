@@ -253,27 +253,37 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
           { lang: 'ru', href: `https://www.zont.cab${seoUrls.ru}` },
           { lang: 'hy', href: `https://www.zont.cab${seoUrls.hy || seoUrls.en}` },
         ] : undefined}
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "LocalBusiness",
-          "name": "Zont - " + c.title,
-          "description": c.description,
-          "url": "https://www.zont.cab",
-          "image": "https://www.zont.cab/logo512.png",
-          "telephone": "+33600000000",
-          "address": { "@type": "PostalAddress", "addressLocality": "Paris", "addressCountry": "FR" },
-          "priceRange": "$$",
-          "serviceType": "Airport Transfer",
-          "areaServed": { "@type": "Place", "name": c.title.split(' - ')[0] },
-          "offers": vehiclesPrices ? {
-            "@type": "AggregateOffer",
-            "priceCurrency": "EUR",
-            "lowPrice": Math.min(...Object.values(vehiclesPrices)),
-            "highPrice": Math.max(...Object.values(vehiclesPrices)),
-          } : undefined,
-          ...(reviewSchema?.aggregateRating ? { "aggregateRating": reviewSchema.aggregateRating } : {}),
-          ...(reviewSchema?.reviews?.length ? { "review": reviewSchema.reviews } : {}),
-        }}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Zont - " + c.title,
+            "description": c.description,
+            "url": "https://www.zont.cab",
+            "image": "https://www.zont.cab/logo512.png",
+            "telephone": "+33783777027",
+            "address": { "@type": "PostalAddress", "addressLocality": "Paris", "addressCountry": "FR" },
+            "priceRange": "$$",
+            "serviceType": "Airport Transfer",
+            "areaServed": { "@type": "Place", "name": c.title.split(' - ')[0] },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": c.title,
+            "description": c.description,
+            "image": "https://www.zont.cab/logo512.png",
+            "brand": { "@type": "Brand", "name": "Zont" },
+            ...(vehiclesPrices ? { "offers": {
+              "@type": "AggregateOffer",
+              "priceCurrency": "EUR",
+              "lowPrice": Math.min(...Object.values(vehiclesPrices)),
+              "highPrice": Math.max(...Object.values(vehiclesPrices)),
+            }} : {}),
+            ...(reviewSchema?.aggregateRating ? { "aggregateRating": reviewSchema.aggregateRating } : {}),
+            ...(reviewSchema?.reviews?.length ? { "review": reviewSchema.reviews } : {}),
+          }
+        ]}
       />
       <Header />
       <main className="flex-1 pt-16">

@@ -656,7 +656,7 @@ const Home = () => {
             "url": "https://www.zont.cab",
             "logo": "https://www.zont.cab/logo.png",
             "description": c.seoDesc,
-            "contactPoint": { "@type": "ContactPoint", "telephone": "+33-1-23-45-67-89", "contactType": "customer service", "availableLanguage": ["French", "English", "Russian", "Armenian"] },
+            "contactPoint": { "@type": "ContactPoint", "telephone": "+33783777027", "contactType": "customer service", "availableLanguage": ["French", "English", "Russian", "Armenian"] },
             "sameAs": ["https://apps.apple.com/am/app/zont-cab/id1468482270", "https://play.google.com/store/apps/details?id=com.zont.rider"]
           },
           {
