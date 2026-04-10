@@ -49,7 +49,16 @@ const PlacesAutocomplete = ({ value, onChange, placeholder, className, id, icon,
         if (!place) return;
 
         justSelectedRef.current = true;
-        const address = place.formatted_address || place.name || inputRef.current?.value || '';
+        // Build display address: prefer recognizable name for places like airports, hotels, stations
+        const name = place.name || '';
+        const formatted = place.formatted_address || '';
+        let address;
+        if (name && formatted && !formatted.toLowerCase().includes(name.toLowerCase().substring(0, Math.min(name.length, 10)))) {
+          // Name is different from formatted address — show both (e.g. "Aéroport CDG, 95700 Roissy-en-France")
+          address = `${name}, ${formatted}`;
+        } else {
+          address = formatted || name || inputRef.current?.value || '';
+        }
         lastSelectedAddrRef.current = address;
 
         if (place.geometry) {

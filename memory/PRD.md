@@ -19,9 +19,10 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
 - Fleet bookings filtered to show only ApprovedByAdmin with future dates
 - Fleet bookings display currentPrice (offer price) not totalAmount (client price)
-- Reviews: 1-to-1 page mapping for SEO, LocalBusiness JSON-LD
+- Reviews: 1-to-1 page mapping for SEO, Product JSON-LD (not LocalBusiness for reviews)
 - Google tracking: hardcoded GA4 + Google Ads (bypasses broken GTM)
 - Schema.org reviews use `Product` type (not `LocalBusiness`) to comply with Google self-review policy
+- PlacesAutocomplete shows place name + address (not just postal address) for clarity
 
 ## What's Been Implemented
 
@@ -31,23 +32,26 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
   - Fixed self-review policy violation (LocalBusiness with own reviews = no stars in Google)
   - Converted all schema values from strings to proper numbers (ratingValue, reviewCount, bestRating)
   - Replaced placeholder phone (+33600000000) with real number (+33783777027) across all pages
-- **PhoneInput 149 Countries + Auto-detect**: Validated - 149 countries, IP auto-detection via api.country.is, dynamic translation in 4 languages
+- **Client Review Collection System**:
+  - Public form at `/review` (EN) and `/avis` (FR) — 4 languages supported
+  - Backend `POST /api/reviews/submit` — status "pending", admin must approve
+  - Auto-translation of reviews via LLM
+  - Source tracking (`source: "client_link"`) to distinguish client-submitted vs admin-created
+  - Admin can approve, assign to pages, moderate
+- **PlacesAutocomplete UX Fix**:
+  - Fixed "Roissy-en-France" confusion — now shows "Paris Charles de Gaulle Airport, 95700 Roissy-en-France"
+  - Applies to all named places (airports, hotels, stations) across the entire site
+- **PhoneInput 149 Countries + Auto-detect**: Validated — 149 countries, IP auto-detection via api.country.is
 
 ### Session Apr 9, 2026
-- **Leads B2B Manager**: `/admin/leads` page with search, status management
-- **Reservations C# Manager**: `/admin/reservations` page showing ALL C# bookings
-- **Android Download Button**: Google Play Store button on CarSelection, Android-only
-- **Fleet Bookings Price Fix**: Shows currentPrice instead of totalAmount
-- **Fleet Bookings Filter**: Only ApprovedByAdmin + future date visible
-- **Driver Portal (Zont Driver)**: Complete portal with dual auth, missions, history, profile
+- Leads B2B Manager, Reservations C# Manager, Android Download Button
+- Fleet Bookings Price Fix, Fleet Bookings Filter
+- Driver Portal (Zont Driver)
 
 ### Previous Sessions
 - Complete Wialon removal + Custom GPS webhook system
-- GPS Super Admin Portal (/gps-admin/*) for managing 1000+ companies
-- Reviews system with LLM auto-translation (FR, EN, RU, HY)
-- Google Ads/GA4 hardcoded tracking
-- Car selection UI optimization
-- Node.js Teltonika TCP decoder for VPS
+- GPS Super Admin Portal, Reviews system with LLM auto-translation
+- Google Ads/GA4 hardcoded tracking, Car selection UI optimization
 
 ## Prioritized Backlog
 
@@ -73,18 +77,16 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Credentials
 - GPS Admin: gps@zont.cab / gpsadmin123
-- C# Driver: nandetiri1@gmail.com / 12345678
 - Fleet Admin: Nandetiri1@gmail.com / 12345678
 - Hotel Admin: admin@bristol.fr / hotel123
 - Super Admin: admin@zont.cab / admin123
 - Test Client: garikgalstyan@gmail.com / 12345678
 
 ## Key Files
+- `/app/frontend/src/components/PlacesAutocomplete.js` — Google Places with name+address display
 - `/app/frontend/src/components/PhoneInput.js` — 149 countries + IP auto-detect
-- `/app/frontend/src/components/CityTransferPage.js` — City pages with dual JSON-LD (LocalBusiness + Product)
-- `/app/frontend/src/components/SEO.js` — SEO component with JSON-LD injection
-- `/app/backend/routes/reviews.py` — Reviews API with schema.org formatting
+- `/app/frontend/src/components/CityTransferPage.js` — City pages with dual JSON-LD
+- `/app/frontend/src/pages/ReviewForm.js` — Public review collection form
+- `/app/backend/routes/reviews.py` — Reviews API with schema.org + public submit
 - `/app/backend/routes/driver_portal.py` — Driver portal backend
-- `/app/frontend/src/pages/driver/*` — Driver portal frontend
 - `/app/backend/routes/fleet_portal.py` — Fleet portal with booking filters
-- `/app/backend/routes/gps_admin.py` — GPS Super Admin backend
