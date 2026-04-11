@@ -27,6 +27,7 @@ const labels = {
     dateTime: 'Date & Time', vehicle: 'Vehicle',
     total: 'Total', vatNote: 'All prices include VAT, fees and tolls.',
     payment: 'Card Details', payBtn: 'Add your card',
+    payBtnSaved: 'Pay the reservation',
     processing: 'Verification...',
     noData: 'No booking data found', goBack: 'Start a new booking',
     trustItems: ['Secure payment', 'Fixed price guaranteed', 'Free cancellation 24h'],
@@ -63,6 +64,7 @@ const labels = {
     dateTime: 'Date & Heure', vehicle: 'Véhicule',
     total: 'Total', vatNote: 'Tous les prix incluent TVA, frais et péages.',
     payment: 'Carte bancaire', payBtn: 'Ajouter votre carte',
+    payBtnSaved: 'Payer la réservation',
     processing: 'Vérification en cours...',
     noData: 'Aucune réservation trouvée', goBack: 'Nouvelle recherche',
     trustItems: ['Paiement sécurisé', 'Prix fixe garanti', 'Annulation gratuite 24h'],
@@ -99,6 +101,7 @@ const labels = {
     dateTime: 'Дата и Время', vehicle: 'Автомобиль',
     total: 'Итого', vatNote: 'Все цены включают НДС и сборы.',
     payment: 'Банковская карта', payBtn: 'Забронировать',
+    payBtnSaved: 'Оплатить бронирование',
     processing: 'Обработка...',
     noData: 'Данные не найдены', goBack: 'Новый поиск',
     trustItems: ['Безопасный платеж', 'Фикс. цена', 'Бесплатная отмена 24ч'],
@@ -135,6 +138,7 @@ const labels = {
     dateTime: 'delays', vehicle: 'delays',
     total: 'delays', vatNote: 'delays.',
     payment: 'delays', payBtn: 'delays',
+    payBtnSaved: 'delays',
     processing: 'delays...',
     noData: 'delays', goBack: 'delays',
     trustItems: ['delays', 'delays', 'delays'],
@@ -646,7 +650,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         {loading ? (
           <><Loader2 className="w-5 h-5 animate-spin" /> {c.processing}</>
         ) : (
-          <><CreditCard className="w-5 h-5" /> {c.payBtn}</>
+          <><CreditCard className="w-5 h-5" /> {selectedSavedCard && !useNewCard ? c.payBtnSaved : c.payBtn}</>
         )}
       </button>
     </form>
