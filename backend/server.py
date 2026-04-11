@@ -137,11 +137,26 @@ async def get_status_checks():
     return status_checks
 
 @api_router.post("/leads", response_model=Lead)
-async def create_lead(input: LeadCreate):
+async def create_lead(input: LeadCreate, request: Request):
     lead = Lead(**input.model_dump())
     doc = lead.model_dump()
     doc['timestamp'] = doc['timestamp'].isoformat()
     await db.leads.insert_one(doc)
+
+    # Facebook Conversions API: Lead event
+    from routes.fb_conversions import fire_and_forget as fb_fire, build_user_data as fb_user_data
+    fb_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "")
+    if fb_ip and "," in fb_ip:
+        fb_ip = fb_ip.split(",")[0].strip()
+    fb_ua = request.headers.get("user-agent", "")
+    fb_ud = fb_user_data(email=input.email, phone=input.phone or "", ip=fb_ip, user_agent=fb_ua)
+    fb_fire(
+        event_name="Lead",
+        user_data=fb_ud,
+        custom_data={"content_name": input.source_page or "B2B Form", "content_category": "Lead"},
+        event_source_url="https://www.zont.cab/b2b",
+    )
+
     return lead
 
 @api_router.get("/leads", response_model=List[Lead])
@@ -233,6 +248,9 @@ app.include_router(kiosk_router)
 
 from routes.reviews import router as reviews_router
 app.include_router(reviews_router)
+
+from routes.fb_conversions import router as fb_router
+app.include_router(fb_router)
 
 
 

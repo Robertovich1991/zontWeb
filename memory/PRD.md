@@ -23,15 +23,27 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## What's Been Implemented
 
-### Session Apr 10, 2026 (Latest)
+### Session Apr 11, 2026 (Latest)
+- **Facebook Conversions API (Server-Side)**: Complete backend integration using Meta Graph API v21.0
+  - `fb_conversions.py` module with SHA256 PII hashing, async fire-and-forget sends
+  - `POST /api/fb/track` endpoint for frontend→server event mirroring
+  - Auto Purchase tracking on successful booking (in `proxy_create_booking`)
+  - Auto Lead tracking on B2B lead creation
+  - Frontend `fbPixel.js` updated with event_id deduplication + fbp/fbc cookie extraction
+  - 6 events tracked: PageView, Search, ViewContent, InitiateCheckout, Purchase, Lead
+  - All events verified as received by Facebook (`events_received: 1`)
+
+### Session Apr 10, 2026
 - **Google Structured Data Fix**: Split LocalBusiness/Product, string→number, real phone
 - **Client Review Collection**: Public form `/review` + `/avis`, 4 languages, auto-translate, pending status
 - **PlacesAutocomplete UX Fix**: Shows "CDG Airport, 95700 Roissy" instead of just postal code
 - **Prefilled Field Fix**: Default pickup/dropoff no longer locks user - can clear and retype
 - **AuthModal Fix**: Added `if (!isOpen) return null;` guard
 - **Error Message Enhancement**: Login error banner more prominent
-- **French Accents Overhaul**: 200+ accent corrections across 12 files (Home, Checkout, CarSelection, TripRecap, AuthModal, CityTransferPage, BecomeClient, Countries, Partners, BookingConfirmation, B2BPage)
+- **French Accents Overhaul**: 200+ accent corrections across 12 files
 - **PhoneInput Validation**: 149 countries + IP auto-detect confirmed working
+- **Facebook Pixel (Frontend)**: Meta Pixel installed with React event tracking
+- **Saved Credit Cards**: Selection + pay on Checkout page
 
 ### Previous Sessions
 - Fleet Admin pricing fix, Driver Portal, Leads Manager, Reservations Manager

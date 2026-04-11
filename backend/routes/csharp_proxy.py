@@ -9,6 +9,7 @@ import os
 import asyncio
 import stripe as stripe_lib
 from routes.email_service import send_booking_confirmation
+from routes.fb_conversions import fire_and_forget as fb_fire, build_user_data as fb_user_data
 
 logger = logging.getLogger(__name__)
 
@@ -639,6 +640,26 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
                         "duration": payload.get("duration", 0),
                     }
                     asyncio.create_task(send_booking_confirmation(client_email, email_data))
+
+                # Facebook Conversions API: Purchase event (fire-and-forget)
+                fb_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "")
+                if fb_ip and "," in fb_ip:
+                    fb_ip = fb_ip.split(",")[0].strip()
+                fb_ua = request.headers.get("user-agent", "")
+                fb_ud = fb_user_data(email=client_email, ip=fb_ip, user_agent=fb_ua)
+                booking_id = data if isinstance(data, (int, str)) else (data.get("id") if isinstance(data, dict) else "")
+                fb_fire(
+                    event_name="Purchase",
+                    user_data=fb_ud,
+                    custom_data={
+                        "value": float(payload.get("clientPrice", 0)),
+                        "currency": "EUR",
+                        "content_name": payload.get("carType", "Airport Transfer"),
+                        "content_type": "product",
+                        "order_id": str(booking_id),
+                    },
+                    event_source_url="https://www.zont.cab/booking-confirmation",
+                )
 
                 return result
 
