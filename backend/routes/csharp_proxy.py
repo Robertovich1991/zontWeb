@@ -641,25 +641,40 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
                     }
                     asyncio.create_task(send_booking_confirmation(client_email, email_data))
 
-                # Facebook Conversions API: Purchase event (fire-and-forget)
+                # Facebook Conversions API (fire-and-forget)
                 fb_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "")
                 if fb_ip and "," in fb_ip:
                     fb_ip = fb_ip.split(",")[0].strip()
                 fb_ua = request.headers.get("user-agent", "")
                 fb_ud = fb_user_data(email=client_email, ip=fb_ip, user_agent=fb_ua)
                 booking_id = data if isinstance(data, (int, str)) else (data.get("id") if isinstance(data, dict) else "")
-                fb_fire(
-                    event_name="Purchase",
-                    user_data=fb_ud,
-                    custom_data={
-                        "value": float(payload.get("clientPrice", 0)),
-                        "currency": "EUR",
-                        "content_name": payload.get("carType", "Airport Transfer"),
-                        "content_type": "product",
-                        "order_id": str(booking_id),
-                    },
-                    event_source_url="https://www.zont.cab/booking-confirmation",
-                )
+                if client_secret or requires_action:
+                    # 3DS pending — payment NOT yet confirmed → Lead
+                    fb_fire(
+                        event_name="Lead",
+                        user_data=fb_ud,
+                        custom_data={
+                            "value": float(payload.get("clientPrice", 0)),
+                            "currency": "EUR",
+                            "content_name": payload.get("carType", "Airport Transfer"),
+                            "content_category": "Booking_3DS_Pending",
+                        },
+                        event_source_url="https://www.zont.cab/checkout",
+                    )
+                else:
+                    # Payment confirmed immediately → Purchase
+                    fb_fire(
+                        event_name="Purchase",
+                        user_data=fb_ud,
+                        custom_data={
+                            "value": float(payload.get("clientPrice", 0)),
+                            "currency": "EUR",
+                            "content_name": payload.get("carType", "Airport Transfer"),
+                            "content_type": "product",
+                            "order_id": str(booking_id),
+                        },
+                        event_source_url="https://www.zont.cab/booking-confirmation",
+                    )
 
                 return result
 
