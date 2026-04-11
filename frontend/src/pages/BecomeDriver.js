@@ -5,6 +5,7 @@ import SEO from '@/components/SEO';
 import { useLanguage } from '@/context/LanguageContext';
 import { Car, Clock, DollarSign, Users, CheckCircle, Star, ArrowRight, Eye, EyeOff, Building2 } from 'lucide-react';
 import PhoneInput from '@/components/PhoneInput';
+import { trackCompleteRegistration } from '@/utils/fbPixel';
 
 const t = {
   en: {
@@ -186,6 +187,7 @@ const BecomeDriver = () => {
         return;
       }
       setSuccess(true);
+      trackCompleteRegistration({ type: 'Driver' });
     } catch {
       setError('Network error');
     } finally {

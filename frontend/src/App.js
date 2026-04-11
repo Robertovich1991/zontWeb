@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { trackPageView } from "@/utils/fbPixel";
 import { AuthProvider } from "@/context/AuthContext";
 import { BookingProvider } from "@/context/BookingContext";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -151,6 +152,13 @@ const Loading = () => (
   </div>
 );
 
+// Track FB Pixel PageView on route changes
+function FbPageViewTracker() {
+  const location = useLocation();
+  React.useEffect(() => { trackPageView(); }, [location.pathname]);
+  return null;
+}
+
 function App() {
   return (
     <LanguageProvider>
@@ -158,6 +166,7 @@ function App() {
         <BookingProvider>
           <div className="App">
             <BrowserRouter>
+              <FbPageViewTracker />
               <Suspense fallback={<Loading />}>
                 <Routes>
                   <Route path="/" element={<Home />} />

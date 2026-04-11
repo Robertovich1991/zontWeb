@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { useLanguage } from '@/context/LanguageContext';
 import { CheckCircle, ArrowRight, Phone, Mail, Building2, Briefcase, Hotel, Star, Users, Plane, ChevronRight, Shield, Clock, Globe, Headphones } from 'lucide-react';
+import { trackLead } from '@/utils/fbPixel';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -243,6 +244,7 @@ const Partners = () => {
       });
       if (!res.ok) throw new Error('Failed');
       setSubmitted(true);
+      trackLead({ source: 'Partners' });
       setFormState({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {
       setError(language === 'fr' ? 'Erreur. Veuillez réessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : language === 'hy' ? 'Սխալ: Խնդրում ենք կրկին փորձեք:' : 'Error. Please try again.');

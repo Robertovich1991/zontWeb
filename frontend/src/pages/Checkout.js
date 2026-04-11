@@ -9,6 +9,7 @@ import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import PhoneInput from '@/components/PhoneInput';
 import { toast } from 'sonner';
+import { trackInitiateCheckout } from '@/utils/fbPixel';
 import {
   CreditCard, MapPin, Calendar, Clock, Shield, CheckCircle,
   Loader2, User, Mail, Lock, Phone, ChevronLeft, ArrowRight, Car, Trash2
@@ -664,7 +665,10 @@ const Checkout = () => {
   const { language } = useLanguage();
   const c = labels[language] || labels.en;
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (searchData?.price) trackInitiateCheckout({ price: searchData.price, vehicle: searchData.vehicleName });
+  }, []);
 
   if (!searchData || !selectedCar) {
     return (

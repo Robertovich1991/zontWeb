@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { CheckCircle, Calendar, MapPin, ArrowRight } from 'lucide-react';
+import { trackPurchase } from '@/utils/fbPixel';
 
 const labels = {
   en: {
@@ -100,6 +101,13 @@ const BookingConfirmation = () => {
     resetBooking();
     navigate('/');
   };
+
+  // Track Purchase on mount
+  React.useEffect(() => {
+    if (bookingDetails && searchData?.price) {
+      trackPurchase({ price: searchData.price, bookingId: bookingDetails.id || bookingDetails.bookingId });
+    }
+  }, []);
 
   if (!bookingDetails) {
     return (

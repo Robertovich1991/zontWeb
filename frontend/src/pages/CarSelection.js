@@ -8,6 +8,7 @@ import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, Plane, CheckCircle, Loader2 } from 'lucide-react';
 import { PromoPopup, PromoBanner } from '@/components/PromoPopup';
+import { trackViewContent } from '@/utils/fbPixel';
 
 const labels = {
   en: {
@@ -199,6 +200,7 @@ const CarSelection = () => {
       }).catch(() => {});
     }
     // Navigate to trip recap (handles both auth and non-auth users)
+    trackViewContent({ vehicle: vehicle.name, price: vehicle.price });
     navigate('/trip-recap');
   };
 

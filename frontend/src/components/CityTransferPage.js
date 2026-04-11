@@ -9,6 +9,7 @@ import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
+import { trackSearch } from '@/utils/fbPixel';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
 
 const IMAGES = {
@@ -215,6 +216,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         selectedVehicle,
       });
       navigate('/car-selection');
+      trackSearch({ pickup: pickup.address, dropoff: dropoff.address, date });
     } catch (error) {
       toast.error(language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.');
     } finally {

@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
-import { useLanguage } from '@/context/LanguageContext';
+import { trackSearch } from '@/utils/fbPixel';
 import { toast } from 'sonner';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import TripAdvisorReviews from '@/components/TripAdvisorReviews';
+import { useLanguage } from '@/context/LanguageContext';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import { transferService } from '@/services/api';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight, Sparkles, Loader2, Mic, MicOff } from 'lucide-react';
@@ -333,8 +334,9 @@ const Home = () => {
         time,
       });
       navigate('/car-selection');
+      trackSearch({ pickup: pickup.address, dropoff: dropoff.address, date });
     } catch (error) {
-      toast.error(language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.');
+      toast.error(language === 'fr' ? 'Impossible de calculer le prix. Réessayez.' : 'Could not calculate price. Please try again.');
     } finally {
       setLoading(false);
     }
