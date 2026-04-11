@@ -11,7 +11,7 @@ import PhoneInput from '@/components/PhoneInput';
 import { toast } from 'sonner';
 import {
   CreditCard, MapPin, Calendar, Clock, Shield, CheckCircle,
-  Loader2, User, Mail, Lock, Phone, ChevronLeft, ArrowRight, Car
+  Loader2, User, Mail, Lock, Phone, ChevronLeft, ArrowRight, Car, Trash2
 } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -38,6 +38,12 @@ const labels = {
     bookingSuccess: 'Booking confirmed! Your ride has been reserved.',
     bookingError: 'Booking failed. Please try again.',
     pastDateError: 'The booking date has passed. Please choose a future date.',
+    savedCards: 'Your saved cards',
+    useThisCard: 'Use this card',
+    addNewCard: 'Use a new card',
+    expires: 'Exp',
+    selectedCard: 'Selected',
+    deleteCard: 'Delete',
     passengerTitle: 'Passenger Details',
     firstName: 'First Name', lastName: 'Last Name',
     email: 'Email', phone: 'Phone',
@@ -68,6 +74,12 @@ const labels = {
     bookingSuccess: 'Réservation confirmée ! Votre course a été réservée.',
     bookingError: 'Erreur lors de la réservation. Veuillez réessayer.',
     pastDateError: 'La date de réservation est passée. Veuillez choisir une date future.',
+    savedCards: 'Vos cartes enregistrées',
+    useThisCard: 'Utiliser cette carte',
+    addNewCard: 'Utiliser une nouvelle carte',
+    expires: 'Exp',
+    selectedCard: 'Sélectionnée',
+    deleteCard: 'Supprimer',
     passengerTitle: 'Informations Passager',
     firstName: 'Prénom', lastName: 'Nom',
     email: 'Email', phone: 'Téléphone',
@@ -98,6 +110,12 @@ const labels = {
     bookingSuccess: 'Бронирование подтверждено!',
     bookingError: 'Ошибка. Попробуйте снова.',
     pastDateError: 'Дата прошла.',
+    savedCards: 'Сохранённые карты',
+    useThisCard: 'Использовать',
+    addNewCard: 'Новая карта',
+    expires: 'До',
+    selectedCard: 'Выбрана',
+    deleteCard: 'Удалить',
     passengerTitle: 'Данные Пассажира',
     firstName: 'Имя', lastName: 'Фамилия',
     email: 'Email', phone: 'Телефон',
@@ -174,6 +192,59 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [cardComplete, setCardComplete] = useState(false);
+  const [savedCards, setSavedCards] = useState([]);
+  const [selectedSavedCard, setSelectedSavedCard] = useState(null);
+  const [useNewCard, setUseNewCard] = useState(false);
+  const [deletingCard, setDeletingCard] = useState(null);
+
+  // Fetch saved cards when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/client/cards`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+          .then(r => r.ok ? r.json() : Promise.reject())
+          .then(data => {
+            const cards = Array.isArray(data) ? data : (data?.data || []);
+            setSavedCards(cards);
+            if (cards.length > 0) {
+              setSelectedSavedCard(cards[0].id);
+              setUseNewCard(false);
+            } else {
+              setUseNewCard(true);
+            }
+          })
+          .catch(() => setUseNewCard(true));
+      }
+    }
+  }, [isAuthenticated]);
+
+  const handleDeleteCard = async (cardId) => {
+    setDeletingCard(cardId);
+    try {
+      const token = localStorage.getItem('auth_token');
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/client/cards/${cardId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setSavedCards(prev => prev.filter(c2 => c2.id !== cardId));
+        if (selectedSavedCard === cardId) {
+          const remaining = savedCards.filter(c2 => c2.id !== cardId);
+          if (remaining.length > 0) {
+            setSelectedSavedCard(remaining[0].id);
+          } else {
+            setSelectedSavedCard(null);
+            setUseNewCard(true);
+          }
+        }
+        toast.success(c.deleteCard + ' OK');
+      }
+    } catch {}
+    setDeletingCard(null);
+  };
 
   // Auth mode: 'signup' or 'signin'
   const [authMode, setAuthMode] = useState('signup');
@@ -254,28 +325,36 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         try { await authService.sendVerificationEmail(form.email); } catch {}
       }
 
-      // Step 2: Get SetupIntent for 3DS
-      const token = localStorage.getItem('auth_token');
-      const setupResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      const setupData = await setupResp.json();
-      if (!setupResp.ok || !setupData.clientSecret) {
-        toast.error(setupData?.detail || c.bookingError);
-        setLoading(false);
-        return;
-      }
+      // Step 2: Get cardId — either from saved card or new SetupIntent
+      let cardId;
+      if (selectedSavedCard && !useNewCard) {
+        // Use saved card directly
+        cardId = selectedSavedCard;
+      } else {
+        // Create SetupIntent for new card + 3DS verification
+        const token = localStorage.getItem('auth_token');
+        const setupResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const setupData = await setupResp.json();
+        if (!setupResp.ok || !setupData.clientSecret) {
+          toast.error(setupData?.detail || c.bookingError);
+          setLoading(false);
+          return;
+        }
 
-      // Step 3: Confirm card setup with 3DS
-      const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
-        setupData.clientSecret,
-        { payment_method: { card: elements.getElement(CardElement) } }
-      );
-      if (setupError) {
-        toast.error(setupError.message || c.cardError);
-        setLoading(false);
-        return;
+        // Confirm card setup with 3DS
+        const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
+          setupData.clientSecret,
+          { payment_method: { card: elements.getElement(CardElement) } }
+        );
+        if (setupError) {
+          toast.error(setupError.message || c.cardError);
+          setLoading(false);
+          return;
+        }
+        cardId = setupIntent.payment_method;
       }
 
       // Step 4: Submit booking
@@ -296,7 +375,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         carType: selectedCar.tripType || '',
         distance: selectedCar.distance ? Math.round(selectedCar.distance) : 0,
         duration: selectedCar.duration ? Math.round(selectedCar.duration) : 0,
-        cardId: setupIntent.payment_method,
+        cardId: cardId,
         utcOffset: new Date().getTimezoneOffset() * -1,
         endPointLatitude: dropoffCoords?.latitude,
         endPointLongitude: dropoffCoords?.longitude,
@@ -462,23 +541,85 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
           <CreditCard className="w-5 h-5 text-[#2ecc71]" />
           {c.payment}
         </h2>
-        <div className="bg-[#0f1a28] rounded-lg p-4 border border-white/5">
-          <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} />
-        </div>
-        <div className="flex items-center gap-2 mt-3 text-gray-400 text-xs">
-          <Shield className="w-3.5 h-3.5" />
-          <span>{c.trustItems[0]} - Stripe</span>
-        </div>
 
-        {/* 3D Secure explanation */}
-        <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg" data-testid="secure-note">
-          <p className="text-xs text-blue-300 leading-relaxed">
-            <Shield className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
-            {c.secureNote}
-          </p>
-        </div>
+        {/* Saved Cards */}
+        {savedCards.length > 0 && (
+          <div className="space-y-2.5 mb-4" data-testid="saved-cards-section">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{c.savedCards}</p>
+            {savedCards.map((card) => (
+              <div
+                key={card.id}
+                onClick={() => { setSelectedSavedCard(card.id); setUseNewCard(false); }}
+                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
+                  selectedSavedCard === card.id && !useNewCard
+                    ? 'border-[#2ecc71] bg-[#2ecc71]/10'
+                    : 'border-white/10 hover:border-white/20'
+                }`}
+                data-testid={`saved-card-${card.id}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center ${
+                    selectedSavedCard === card.id && !useNewCard ? 'border-[#2ecc71]' : 'border-gray-500'
+                  }`}>
+                    {selectedSavedCard === card.id && !useNewCard && (
+                      <div className="w-2 h-2 rounded-full bg-[#2ecc71]" />
+                    )}
+                  </div>
+                  <span className="text-white text-sm font-medium">
+                    {card.brand?.toUpperCase()} **** {card.last4}
+                  </span>
+                  <span className="text-gray-500 text-xs">
+                    {c.expires} {card.exp_month}/{card.exp_year}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleDeleteCard(card.id); }}
+                  disabled={deletingCard === card.id}
+                  className="text-gray-500 hover:text-red-400 transition p-1"
+                  data-testid={`delete-card-${card.id}`}
+                >
+                  {deletingCard === card.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                </button>
+              </div>
+            ))}
+            {/* Add new card option */}
+            <div
+              onClick={() => { setUseNewCard(true); setSelectedSavedCard(null); }}
+              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                useNewCard ? 'border-[#2ecc71] bg-[#2ecc71]/10' : 'border-white/10 hover:border-white/20'
+              }`}
+              data-testid="use-new-card-btn"
+            >
+              <div className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center ${
+                useNewCard ? 'border-[#2ecc71]' : 'border-gray-500'
+              }`}>
+                {useNewCard && <div className="w-2 h-2 rounded-full bg-[#2ecc71]" />}
+              </div>
+              <span className="text-gray-300 text-sm">+ {c.addNewCard}</span>
+            </div>
+          </div>
+        )}
 
-        <p className="text-xs text-gray-500 mt-2">{c.cardNote}</p>
+        {/* New Card form (always shown if no saved cards, or when "new card" selected) */}
+        {(useNewCard || savedCards.length === 0) && (
+          <>
+            <div className="bg-[#0f1a28] rounded-lg p-4 border border-white/5">
+              <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} />
+            </div>
+            <div className="flex items-center gap-2 mt-3 text-gray-400 text-xs">
+              <Shield className="w-3.5 h-3.5" />
+              <span>{c.trustItems[0]} - Stripe</span>
+            </div>
+            <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg" data-testid="secure-note">
+              <p className="text-xs text-blue-300 leading-relaxed">
+                <Shield className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
+                {c.secureNote}
+              </p>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">{c.cardNote}</p>
+          </>
+        )}
       </div>
 
       {/* Amount to be charged */}
@@ -498,7 +639,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading || !stripe || !cardComplete}
+        disabled={loading || !stripe || (useNewCard && !cardComplete) || (!useNewCard && !selectedSavedCard)}
         className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-base hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
         data-testid="checkout-pay-btn"
       >
