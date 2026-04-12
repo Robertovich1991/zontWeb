@@ -6,7 +6,7 @@ import { transferService } from '@/services/api';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, Plane, CheckCircle, Loader2 } from 'lucide-react';
+import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, Plane, CheckCircle, Loader2, Star } from 'lucide-react';
 import { PromoPopup, PromoBanner } from '@/components/PromoPopup';
 import { trackViewContent } from '@/utils/fbPixel';
 
@@ -28,6 +28,7 @@ const labels = {
     mins: 'min', km: 'km', orSimilar: 'or similar',
     androidApp: 'Download our app',
     androidAppSub: 'Book and track your ride in real time',
+    reviewsBadge: 'reviews',
   },
   fr: {
     seoTitle: 'Choisir Votre Véhicule - Zont Transfert Aéroport',
@@ -46,6 +47,7 @@ const labels = {
     mins: 'min', km: 'km', orSimilar: 'ou similaire',
     androidApp: 'Télécharger notre application',
     androidAppSub: 'Réservez et suivez votre course en temps réel',
+    reviewsBadge: 'avis',
   },
   ru: {
     seoTitle: '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0410\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u044c - Zont \u0422\u0440\u0430\u043d\u0441\u0444\u0435\u0440',
@@ -64,6 +66,7 @@ const labels = {
     mins: '\u043c\u0438\u043d', km: '\u043a\u043c', orSimilar: '\u0438\u043b\u0438 \u0430\u043d\u0430\u043b\u043e\u0433',
     androidApp: '\u0421\u043a\u0430\u0447\u0430\u0442\u044c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435',
     androidAppSub: '\u0411\u0440\u043e\u043d\u0438\u0440\u0443\u0439\u0442\u0435 \u0438 \u043e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u0439\u0442\u0435 \u043f\u043e\u0435\u0437\u0434\u043a\u0443',
+    reviewsBadge: '\u043e\u0442\u0437\u044b\u0432\u043e\u0432',
   },
   hy: {
     seoTitle: '\u0538\u0576\u057f\u0580\u0565\u0584 \u0544\u0565\u0584\u0565\u0576\u0561 - Zont \u054f\u0580\u0561\u0576\u057d\u0586\u0565\u0580',
@@ -82,6 +85,7 @@ const labels = {
     mins: '\u0580\u0578\u057a', km: '\u056f\u0574', orSimilar: '\u056f\u0561\u0574 \u0576\u0574\u0561\u0576',
     androidApp: '\u0532\u0565\u057c\u0576\u0565\u056c \u0570\u0561\u057e\u0565\u056c\u057e\u0561\u056e\u0568',
     androidAppSub: '\u0531\u0574\u0580\u0561\u0563\u0580\u0565\u0584 \u0587 \u0570\u0565\u057f\u0587\u0565\u0584 \u0571\u0565\u0580 \u0578\u0582\u0572\u0587\u0578\u0580\u0578\u0582\u0569\u0575\u0578\u0582\u0576\u0568',
+    reviewsBadge: '\u056f\u0561\u0580\u056e\u056b\u0584',
   },
 };
 
@@ -99,11 +103,22 @@ const CarSelection = () => {
   const [promoExpires, setPromoExpires] = useState(null);
   const [promoExpired, setPromoExpired] = useState(false);
 
+  // Reviews aggregate
+  const [reviewData, setReviewData] = useState(null);
+
   const isAndroid = /android/i.test(navigator.userAgent);
 
   const c = labels[language] || labels.en;
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
+
+  // Fetch aggregate review data
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/reviews/public/schema/home`)
+      .then(r => r.json())
+      .then(d => { if (d.aggregateRating) setReviewData(d.aggregateRating); })
+      .catch(() => {});
+  }, []);
 
   // Restore promo from localStorage on mount
   useEffect(() => {
@@ -307,6 +322,21 @@ const CarSelection = () => {
         <div className="max-w-5xl mx-auto px-4 pt-2 pb-4">
           <h1 className="text-xl sm:text-2xl font-bold text-white" data-testid="car-selection-title">{c.title}</h1>
           <p className="text-gray-500 text-xs mt-1">{c.subtitle}</p>
+          {/* Reviews badge */}
+          {reviewData && (
+            <div className="flex items-center gap-1.5 mt-2" data-testid="reviews-badge">
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <Star
+                    key={i}
+                    className={`w-3.5 h-3.5 ${i <= Math.round(reviewData.ratingValue) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`}
+                  />
+                ))}
+              </div>
+              <span className="text-sm font-semibold text-white">{reviewData.ratingValue}</span>
+              <span className="text-xs text-gray-400">({reviewData.reviewCount} {c.reviewsBadge})</span>
+            </div>
+          )}
           {/* Promo Banner */}
           {promoCode && (
             <div className="mt-3">
