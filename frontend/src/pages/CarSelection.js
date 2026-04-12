@@ -6,7 +6,7 @@ import { transferService } from '@/services/api';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, Plane, CheckCircle, Loader2, Star } from 'lucide-react';
+import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, CheckCircle, Loader2, Star } from 'lucide-react';
 import { PromoPopup, PromoBanner } from '@/components/PromoPopup';
 import { trackViewContent } from '@/utils/fbPixel';
 
@@ -16,12 +16,12 @@ const labels = {
     title: 'Select your vehicle',
     subtitle: 'All prices are fixed and include VAT, tolls and meet & greet',
     step1: 'Vehicle', step2: 'Details', step3: 'Payment',
-    pax: 'Max', bags: 'Bags', select: 'Book now',
+    pax: 'Max', bags: 'Bags',
+    selectPrefix: 'Book now', allIncluded: 'all included',
     noData: 'No search data found', goBack: 'Start a New Search',
     from: 'Pick-up', to: 'Drop-off',
     estTime: 'Est. travel time', estDist: 'Distance',
     recommended: 'Recommended',
-    trustItems: ['Free cancellation 24h', 'Fixed price guaranteed', 'Meet & greet included', 'Flight tracking'],
     loading: 'Searching available vehicles...',
     error: 'Unable to fetch vehicles. Please try again.',
     retry: 'Retry', fixedPrice: 'Fixed price',
@@ -29,37 +29,51 @@ const labels = {
     androidApp: 'Download our app',
     androidAppSub: 'Book and track your ride in real time',
     reviewsBadge: 'reviews',
+    trustDriver: 'Professional driver',
+    trustWaiting: '60 min free waiting',
+    trustCancel: 'Free cancellation',
+    trustNoFees: 'No hidden fees',
+    urgency: 'High demand',
+    urgencySuffix: 'cars available today',
+    reviewsTitle: 'What our clients say',
   },
   fr: {
     seoTitle: 'Choisir Votre Véhicule - Zont Transfert Aéroport',
     title: 'Sélectionnez votre véhicule',
     subtitle: 'Tous les prix sont fixes et incluent TVA, péages et accueil personnalisé',
     step1: 'Véhicule', step2: 'Détails', step3: 'Paiement',
-    pax: 'Max', bags: 'Bagages', select: 'Réserver maintenant',
+    pax: 'Max', bags: 'Bagages',
+    selectPrefix: 'Réserver maintenant', allIncluded: 'tout compris',
     noData: 'Aucune recherche trouvée', goBack: 'Nouvelle Recherche',
     from: 'Départ', to: 'Arrivée',
     estTime: 'Temps estimé', estDist: 'Distance',
     recommended: 'Recommandé',
-    trustItems: ['Annulation gratuite 24h', 'Prix fixe garanti', 'Accueil personnalisé', 'Suivi de vol'],
     loading: 'Recherche des véhicules disponibles...',
     error: 'Impossible de charger les véhicules. Veuillez réessayer.',
     retry: 'Réessayer', fixedPrice: 'Prix fixe',
     mins: 'min', km: 'km', orSimilar: 'ou similaire',
     androidApp: 'Télécharger notre application',
     androidAppSub: 'Réservez et suivez votre course en temps réel',
-    reviewsBadge: 'avis',
+    reviewsBadge: 'avis clients',
+    trustDriver: 'Chauffeur professionnel',
+    trustWaiting: 'Attente gratuite 60 min',
+    trustCancel: 'Annulation gratuite',
+    trustNoFees: 'Aucun frais caché',
+    urgency: 'Très demandé',
+    urgencySuffix: 'véhicules disponibles aujourd\'hui',
+    reviewsTitle: 'Ce que disent nos clients',
   },
   ru: {
     seoTitle: '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0410\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u044c - Zont \u0422\u0440\u0430\u043d\u0441\u0444\u0435\u0440',
     title: '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0430\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u044c',
     subtitle: '\u0412\u0441\u0435 \u0446\u0435\u043d\u044b \u0444\u0438\u043a\u0441\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u044b\u0435, \u0432\u043a\u043b\u044e\u0447\u0430\u044e\u0442 \u041d\u0414\u0421, \u0434\u043e\u0440\u043e\u0436\u043d\u044b\u0435 \u0441\u0431\u043e\u0440\u044b \u0438 \u0432\u0441\u0442\u0440\u0435\u0447\u0443',
     step1: '\u0410\u0432\u0442\u043e', step2: '\u0414\u0435\u0442\u0430\u043b\u0438', step3: '\u041e\u043f\u043b\u0430\u0442\u0430',
-    pax: '\u041c\u0430\u043a\u0441', bags: '\u0411\u0430\u0433\u0430\u0436', select: '\u0417\u0430\u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u0442\u044c',
+    pax: '\u041c\u0430\u043a\u0441', bags: '\u0411\u0430\u0433\u0430\u0436',
+    selectPrefix: '\u0417\u0430\u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u0442\u044c', allIncluded: '\u0432\u0441\u0451 \u0432\u043a\u043b\u044e\u0447\u0435\u043d\u043e',
     noData: '\u0414\u0430\u043d\u043d\u044b\u0435 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u044b', goBack: '\u041d\u043e\u0432\u044b\u0439 \u041f\u043e\u0438\u0441\u043a',
     from: '\u041e\u0442\u043a\u0443\u0434\u0430', to: '\u041a\u0443\u0434\u0430',
     estTime: '\u0412\u0440\u0435\u043c\u044f \u0432 \u043f\u0443\u0442\u0438', estDist: '\u0420\u0430\u0441\u0441\u0442\u043e\u044f\u043d\u0438\u0435',
     recommended: '\u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0443\u0435\u043c',
-    trustItems: ['\u0411\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u0430\u044f \u043e\u0442\u043c\u0435\u043d\u0430 24\u0447', '\u0424\u0438\u043a\u0441. \u0446\u0435\u043d\u0430', '\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432\u043a\u043b\u044e\u0447\u0435\u043d\u0430', '\u041e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u043d\u0438\u0435 \u0440\u0435\u0439\u0441\u0430'],
     loading: '\u041f\u043e\u0438\u0441\u043a \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b\u0445 \u0430\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u0435\u0439...',
     error: '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0441\u043d\u043e\u0432\u0430.',
     retry: '\u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u044c', fixedPrice: '\u0424\u0438\u043a\u0441. \u0446\u0435\u043d\u0430',
@@ -67,18 +81,25 @@ const labels = {
     androidApp: '\u0421\u043a\u0430\u0447\u0430\u0442\u044c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435',
     androidAppSub: '\u0411\u0440\u043e\u043d\u0438\u0440\u0443\u0439\u0442\u0435 \u0438 \u043e\u0442\u0441\u043b\u0435\u0436\u0438\u0432\u0430\u0439\u0442\u0435 \u043f\u043e\u0435\u0437\u0434\u043a\u0443',
     reviewsBadge: '\u043e\u0442\u0437\u044b\u0432\u043e\u0432',
+    trustDriver: '\u041f\u0440\u043e\u0444\u0435\u0441\u0441\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u044b\u0439 \u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044c',
+    trustWaiting: '60 \u043c\u0438\u043d \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e\u0435 \u043e\u0436\u0438\u0434\u0430\u043d\u0438\u0435',
+    trustCancel: '\u0411\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u0430\u044f \u043e\u0442\u043c\u0435\u043d\u0430',
+    trustNoFees: '\u0411\u0435\u0437 \u0441\u043a\u0440\u044b\u0442\u044b\u0445 \u043f\u043b\u0430\u0442\u0435\u0436\u0435\u0439',
+    urgency: '\u0412\u044b\u0441\u043e\u043a\u0438\u0439 \u0441\u043f\u0440\u043e\u0441',
+    urgencySuffix: '\u0430\u0432\u0442\u043e \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e \u0441\u0435\u0433\u043e\u0434\u043d\u044f',
+    reviewsTitle: '\u041e\u0442\u0437\u044b\u0432\u044b \u043a\u043b\u0438\u0435\u043d\u0442\u043e\u0432',
   },
   hy: {
     seoTitle: '\u0538\u0576\u057f\u0580\u0565\u0584 \u0544\u0565\u0584\u0565\u0576\u0561 - Zont \u054f\u0580\u0561\u0576\u057d\u0586\u0565\u0580',
     title: '\u0538\u0576\u057f\u0580\u0565\u0584 \u0571\u0565\u0580 \u0574\u0565\u0584\u0565\u0576\u0561\u0576',
     subtitle: '\u0532\u0578\u056c\u0578\u0580 \u0563\u0576\u0565\u0580\u0568 \u0570\u0561\u057d\u057f\u0561\u057f \u0565\u0576 \u0587 \u0576\u0565\u0580\u0561\u057c\u0578\u0582\u0574 \u0565\u0576 \u0531\u0531\u054f, \u0573\u0561\u0576\u0561\u057a\u0561\u0580\u0570\u0561\u0575\u056b\u0576 \u057e\u0573\u0561\u0580\u0576\u0565\u0580 \u0587 \u0564\u056b\u0574\u0561\u057e\u0578\u0580\u0578\u0582\u0574',
     step1: '\u0544\u0565\u0584\u0565\u0576\u0561', step2: '\u054f\u057e\u0575\u0561\u056c\u0576\u0565\u0580', step3: '\u054e\u0573\u0561\u0580\u0578\u0582\u0574',
-    pax: '\u0531\u057c\u0561\u057e', bags: '\u054a\u0561\u0575\u0578\u0582\u057d\u0561\u056f', select: '\u0531\u0574\u0580\u0561\u0563\u0580\u0565\u056c \u0570\u056b\u0574\u0561',
+    pax: '\u0531\u057c\u0561\u057e', bags: '\u054a\u0561\u0575\u0578\u0582\u057d\u0561\u056f',
+    selectPrefix: '\u0531\u0574\u0580\u0561\u0563\u0580\u0565\u056c \u0570\u056b\u0574\u0561', allIncluded: '\u0561\u0574\u0565\u0576 \u056b\u0576\u0579 \u0576\u0565\u0580\u0561\u057c\u057e\u0561\u056e',
     noData: '\u0548\u0580\u0578\u0576\u0574\u0561\u0576 \u057f\u057e\u0575\u0561\u056c\u0576\u0565\u0580 \u0579\u0565\u0576 \u0563\u057f\u0576\u057e\u0565\u056c', goBack: '\u0546\u0578\u0580 \u0578\u0580\u0578\u0576\u0578\u0582\u0574',
     from: '\u054f\u0565\u0572\u056b\u0581', to: '\u0534\u0565\u057a\u056b',
     estTime: '\u0544\u0578\u057f. \u056a\u0561\u0574\u0561\u0576\u0561\u056f', estDist: '\u0540\u0565\u057c\u0561\u057e\u0578\u0580\u0578\u0582\u0569',
     recommended: '\u0540\u0561\u0576\u0580\u0561\u056f\u057e\u0561\u056e',
-    trustItems: ['\u0531\u0576\u057e\u0573\u0561\u0580 \u0579\u0565\u0572\u0561\u0580\u056f\u0578\u0582\u0574 24\u056a', '\u0540\u0561\u057d\u057f\u0561\u057f \u0563\u056b\u0576', '\u0534\u056b\u0574\u0561\u057e\u0578\u0580\u0578\u0582\u0574 \u0576\u0565\u0580\u0561\u057c\u057e\u0561\u056e', '\u0539\u057c\u056b\u0579\u0584\u056b \u0570\u0565\u057f\u0587\u0578\u0582\u0574'],
     loading: '\u0540\u0561\u057d\u0561\u0576\u0565\u056c\u056b \u0574\u0565\u0584\u0565\u0576\u0561\u0576\u0565\u0580\u056b \u0578\u0580\u0578\u0576\u0578\u0582\u0574...',
     error: '\u0540\u0576\u0561\u0580\u0561\u057e\u0578\u0580 \u0579\u0567 \u0563\u057f\u0576\u0565\u056c \u0574\u0565\u0584\u0565\u0576\u0561\u0576\u0565\u0580. \u0553\u0578\u0580\u0571\u0565\u0584 \u056f\u0580\u056f\u056b\u0576.',
     retry: '\u053f\u0580\u056f\u0576\u0565\u056c', fixedPrice: '\u0540\u0561\u057d\u057f\u0561\u057f \u0563\u056b\u0576',
@@ -86,6 +107,13 @@ const labels = {
     androidApp: '\u0532\u0565\u057c\u0576\u0565\u056c \u0570\u0561\u057e\u0565\u056c\u057e\u0561\u056e\u0568',
     androidAppSub: '\u0531\u0574\u0580\u0561\u0563\u0580\u0565\u0584 \u0587 \u0570\u0565\u057f\u0587\u0565\u0584 \u0571\u0565\u0580 \u0578\u0582\u0572\u0587\u0578\u0580\u0578\u0582\u0569\u0575\u0578\u0582\u0576\u0568',
     reviewsBadge: '\u056f\u0561\u0580\u056e\u056b\u0584',
+    trustDriver: '\u054a\u0580\u0578\u0586\u0565\u057d\u056b\u0578\u0576\u0561\u056c \u057e\u0561\u0580\u0578\u0580\u0564',
+    trustWaiting: '60 \u0580\u0578\u057a\u0565 \u0561\u0576\u057e\u0573\u0561\u0580 \u057d\u057a\u0561\u057d\u0565\u056c\u0578\u0582',
+    trustCancel: '\u0531\u0576\u057e\u0573\u0561\u0580 \u0579\u0565\u0572\u0561\u0580\u056f\u0578\u0582\u0574',
+    trustNoFees: '\u0531\u057c\u0561\u0576\u0581 \u0569\u0561\u0584\u0576\u057e\u0561\u056e \u057e\u0573\u0561\u0580\u0576\u0565\u0580\u056b',
+    urgency: '\u0544\u0565\u056e \u057a\u0561\u0570\u0561\u0576\u056b\u0561\u0580\u056f',
+    urgencySuffix: '\u0574\u0565\u0584\u0565\u0576\u0561 \u0570\u0561\u057d\u0561\u0576\u0565\u056c\u056b \u0561\u0575\u057d\u0585\u0580',
+    reviewsTitle: '\u053b\u0576\u0579 \u0561\u057d\u0578\u0582\u0574 \u0565\u0576 \u0574\u0565\u0580 \u0570\u0561\u0573\u0561\u056d\u043e\u0580\u0564\u0576\u0565\u0580\u0568',
   },
 };
 
@@ -105,6 +133,8 @@ const CarSelection = () => {
 
   // Reviews aggregate
   const [reviewData, setReviewData] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [urgencyCount] = useState(() => Math.floor(Math.random() * 3) + 2); // 2-4
 
   const isAndroid = /android/i.test(navigator.userAgent);
 
@@ -112,11 +142,14 @@ const CarSelection = () => {
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  // Fetch aggregate review data
+  // Fetch aggregate review data + actual reviews
   useEffect(() => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/reviews/public/schema/home`)
       .then(r => r.json())
-      .then(d => { if (d.aggregateRating) setReviewData(d.aggregateRating); })
+      .then(d => {
+        if (d.aggregateRating) setReviewData(d.aggregateRating);
+        if (d.reviews) setReviews(d.reviews.slice(0, 3));
+      })
       .catch(() => {});
   }, []);
 
@@ -306,37 +339,55 @@ const CarSelection = () => {
           </div>
         </div>
 
-        {/* Trust Bar */}
+        {/* Trust Block */}
         <div className="max-w-5xl mx-auto px-4 py-3">
-          <div className="flex flex-wrap gap-x-5 gap-y-1 justify-center">
-            {c.trustItems.map((item, i) => (
-              <div key={i} className="flex items-center gap-1.5 text-[11px] text-gray-400">
-                {[<Shield className="w-3 h-3 text-[#2ecc71]" />, <CheckCircle className="w-3 h-3 text-[#2ecc71]" />, <Plane className="w-3 h-3 text-[#2ecc71]" />, <Clock className="w-3 h-3 text-[#2ecc71]" />][i]}
-                {item}
-              </div>
-            ))}
+          <div className="bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3" data-testid="trust-block">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center">
+              {/* Rating badge */}
+              {reviewData && (
+                <div className="flex items-center gap-1.5" data-testid="reviews-badge">
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <Star key={i} className={`w-3.5 h-3.5 ${i <= Math.round(reviewData.ratingValue) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} />
+                    ))}
+                  </div>
+                  <span className="text-sm font-bold text-white">{reviewData.ratingValue}/5</span>
+                  <span className="text-xs text-gray-400">&ndash; {reviewData.reviewCount}+ {c.reviewsBadge}</span>
+                </div>
+              )}
+              {/* Trust items */}
+              {[
+                { icon: <Users className="w-3 h-3 text-[#2ecc71]" />, text: c.trustDriver },
+                { icon: <Clock className="w-3 h-3 text-[#2ecc71]" />, text: c.trustWaiting },
+                { icon: <Shield className="w-3 h-3 text-[#2ecc71]" />, text: c.trustCancel },
+                { icon: <CheckCircle className="w-3 h-3 text-[#2ecc71]" />, text: c.trustNoFees },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-1.5 text-[11px] text-gray-300">
+                  {item.icon}
+                  {item.text}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* Urgency banner */}
+        {!loading && vehicles.length > 0 && (
+          <div className="max-w-5xl mx-auto px-4 pb-2">
+            <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-lg px-3 py-2" data-testid="urgency-banner">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+              </span>
+              <span className="text-xs font-semibold text-orange-300">{c.urgency} &ndash; {urgencyCount} {c.urgencySuffix}</span>
+            </div>
+          </div>
+        )}
 
         {/* Title */}
         <div className="max-w-5xl mx-auto px-4 pt-2 pb-4">
           <h1 className="text-xl sm:text-2xl font-bold text-white" data-testid="car-selection-title">{c.title}</h1>
           <p className="text-gray-500 text-xs mt-1">{c.subtitle}</p>
-          {/* Reviews badge */}
-          {reviewData && (
-            <div className="flex items-center gap-1.5 mt-2" data-testid="reviews-badge">
-              <div className="flex items-center gap-0.5">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <Star
-                    key={i}
-                    className={`w-3.5 h-3.5 ${i <= Math.round(reviewData.ratingValue) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`}
-                  />
-                ))}
-              </div>
-              <span className="text-sm font-semibold text-white">{reviewData.ratingValue}</span>
-              <span className="text-xs text-gray-400">({reviewData.reviewCount} {c.reviewsBadge})</span>
-            </div>
-          )}
           {/* Promo Banner */}
           {promoCode && (
             <div className="mt-3">
@@ -457,14 +508,14 @@ const CarSelection = () => {
                         </div>
                         <button
                           onClick={() => handleSelectCar(vehicle)}
-                          className={`px-4 py-2 rounded-lg font-semibold text-xs transition-all flex items-center gap-1 ${
+                          className={`px-4 py-2.5 rounded-lg font-semibold text-xs transition-all flex items-center gap-1 whitespace-nowrap ${
                             isRecommended
                               ? 'bg-[#2ecc71] text-white hover:bg-[#27ae60] shadow-md shadow-green-500/20'
                               : 'bg-gray-900 text-white hover:bg-gray-800'
                           }`}
                           data-testid={`choose-car-${index}`}
                         >
-                          {c.select}
+                          {c.selectPrefix} &ndash; {applyDiscount(price)}&euro; {c.allIncluded}
                           <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -473,6 +524,26 @@ const CarSelection = () => {
                 );
               })}
             </div>
+
+          {/* Client Reviews */}
+          {reviews.length > 0 && (
+            <div className="mt-6 mb-4" data-testid="client-reviews-section">
+              <h3 className="text-sm font-semibold text-gray-400 mb-3">{c.reviewsTitle}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {reviews.map((rev, i) => (
+                  <div key={i} className="bg-white/[0.04] border border-white/10 rounded-xl p-3" data-testid={`review-card-${i}`}>
+                    <div className="flex items-center gap-0.5 mb-1.5">
+                      {[1, 2, 3, 4, 5].map(s => (
+                        <Star key={s} className={`w-3 h-3 ${s <= (rev.reviewRating?.ratingValue || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} />
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-300 line-clamp-3 leading-relaxed">&ldquo;{rev.reviewBody}&rdquo;</p>
+                    <p className="text-[10px] text-gray-500 mt-2 font-medium">&mdash; {rev.author?.name || 'Client'}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {isAndroid && (
             <div className="mt-6 mb-4 mx-auto max-w-2xl">
