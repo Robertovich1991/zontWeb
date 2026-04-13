@@ -200,13 +200,13 @@ const CarSelection = () => {
     }
   }, [searchData]);
 
-  // Show promo popup after vehicles load (if no active promo and no email given before)
-  useEffect(() => {
-    if (vehicleResults && vehicleResults.length > 0 && !promoCode && !localStorage.getItem('promo_email')) {
-      const timer = setTimeout(() => setPromoOpen(true), 11000);
-      return () => clearTimeout(timer);
-    }
-  }, [vehicleResults, promoCode]);
+  // Show promo popup after vehicles load — DISABLED for now
+  // useEffect(() => {
+  //   if (vehicleResults && vehicleResults.length > 0 && !promoCode && !localStorage.getItem('promo_email')) {
+  //     const timer = setTimeout(() => setPromoOpen(true), 11000);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [vehicleResults, promoCode]);
 
   const fetchVehicles = async () => {
     if (!searchData?.pickupCoords || !searchData?.dropoffCoords) return;
