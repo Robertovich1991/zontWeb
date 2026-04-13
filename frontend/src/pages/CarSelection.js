@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '@/context/BookingContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -36,6 +36,8 @@ const labels = {
     urgency: 'High demand',
     urgencySuffix: 'cars available today',
     reviewsTitle: 'What our clients say',
+    bookedToday: 'Booked {n} times today',
+    lastBooking: 'Last booking: {n} min ago',
   },
   fr: {
     seoTitle: 'Choisir Votre Véhicule - Zont Transfert Aéroport',
@@ -62,6 +64,8 @@ const labels = {
     urgency: 'Très demandé',
     urgencySuffix: 'véhicules disponibles aujourd\'hui',
     reviewsTitle: 'Ce que disent nos clients',
+    bookedToday: 'Réservé {n} fois aujourd\'hui',
+    lastBooking: 'Dernière réservation : il y a {n} min',
   },
   ru: {
     seoTitle: '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0410\u0432\u0442\u043e\u043c\u043e\u0431\u0438\u043b\u044c - Zont \u0422\u0440\u0430\u043d\u0441\u0444\u0435\u0440',
@@ -88,6 +92,8 @@ const labels = {
     urgency: '\u0412\u044b\u0441\u043e\u043a\u0438\u0439 \u0441\u043f\u0440\u043e\u0441',
     urgencySuffix: '\u0430\u0432\u0442\u043e \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e \u0441\u0435\u0433\u043e\u0434\u043d\u044f',
     reviewsTitle: '\u041e\u0442\u0437\u044b\u0432\u044b \u043a\u043b\u0438\u0435\u043d\u0442\u043e\u0432',
+    bookedToday: '\u0417\u0430\u0431\u0440\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u043e {n} \u0440\u0430\u0437 \u0441\u0435\u0433\u043e\u0434\u043d\u044f',
+    lastBooking: '\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u044f\u044f \u0431\u0440\u043e\u043d\u044c: {n} \u043c\u0438\u043d \u043d\u0430\u0437\u0430\u0434',
   },
   hy: {
     seoTitle: '\u0538\u0576\u057f\u0580\u0565\u0584 \u0544\u0565\u0584\u0565\u0576\u0561 - Zont \u054f\u0580\u0561\u0576\u057d\u0586\u0565\u0580',
@@ -114,6 +120,8 @@ const labels = {
     urgency: '\u0544\u0565\u056e \u057a\u0561\u0570\u0561\u0576\u056b\u0561\u0580\u056f',
     urgencySuffix: '\u0574\u0565\u0584\u0565\u0576\u0561 \u0570\u0561\u057d\u0561\u0576\u0565\u056c\u056b \u0561\u0575\u057d\u0585\u0580',
     reviewsTitle: '\u053b\u0576\u0579 \u0561\u057d\u0578\u0582\u0574 \u0565\u0576 \u0574\u0565\u0580 \u0570\u0561\u0573\u0561\u056d\u043e\u0580\u0564\u0576\u0565\u0580\u0568',
+    bookedToday: '\u0531\u0575\u057d\u0585\u0580 \u0561\u0574\u0580\u0561\u0563\u0580\u057e\u0565\u056c \u0567 {n} \u0561\u0576\u0563\u0561\u0574',
+    lastBooking: '\u054e\u0565\u0580\u057b\u056b\u0576 \u0561\u0574\u0580\u0561\u0563\u0580\u0578\u0582\u0574\u0568\u055d {n} \u0580\u0578\u057a\u0565 \u0561\u057c\u0561\u057b',
   },
 };
 
@@ -137,6 +145,18 @@ const CarSelection = () => {
   const [urgencyCount] = useState(() => Math.floor(Math.random() * 3) + 2); // 2-4
 
   const isAndroid = /android/i.test(navigator.userAgent);
+
+  // Social proof: random but stable per session per vehicle index
+  const socialProof = useMemo(() => {
+    return Array.from({ length: 10 }, (_, i) => {
+      const showBookedToday = (i % 2 === 0);
+      return {
+        bookedCount: 8 + Math.floor(Math.random() * 28), // 8–35
+        lastMinutes: 5 + Math.floor(Math.random() * 41), // 5–45
+        showBookedToday,
+      };
+    });
+  }, []);
 
   const c = labels[language] || labels.en;
 
@@ -490,6 +510,20 @@ const CarSelection = () => {
                               </div>
                             )}
                           </div>
+                        </div>
+                        {/* Social proof */}
+                        <div className="flex items-center gap-1.5 text-[11px] text-orange-500/80 mt-1" data-testid={`social-proof-${index}`}>
+                          {socialProof[index]?.showBookedToday ? (
+                            <>
+                              <span className="w-3 h-3 flex items-center justify-center text-[10px]">&#128293;</span>
+                              <span>{c.bookedToday.replace('{n}', socialProof[index].bookedCount)}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Clock className="w-3 h-3" />
+                              <span>{c.lastBooking.replace('{n}', socialProof[index].lastMinutes)}</span>
+                            </>
+                          )}
                         </div>
                       </div>
 
