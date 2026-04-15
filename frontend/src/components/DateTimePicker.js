@@ -1,51 +1,38 @@
-import React, { useRef } from 'react';
+import React from 'react';
 
 /**
- * Formats a date string YYYY-MM-DD according to site language.
- * FR/RU/HY → dd/mm/yyyy, EN → mm/dd/yyyy
- */
-const formatDate = (iso, lang) => {
-  if (!iso) return '';
-  const [y, m, d] = iso.split('-');
-  if (lang === 'en') return `${m}/${d}/${y}`;
-  return `${d}/${m}/${y}`;
-};
-
-const datePlaceholder = (lang) => {
-  if (lang === 'en') return 'mm/dd/yyyy';
-  return 'jj/mm/aaaa';
-};
-
-/**
- * LocaleDateInput — Shows date in the site's language format (not the browser's).
- * Native date picker opens on click. Value stays YYYY-MM-DD.
+ * LocaleDateInput — Native date input that works normally,
+ * but displays the date in the site's language format.
  */
 export const LocaleDateInput = ({ value, onChange, label, language = 'fr', className = '', testId = 'date-input' }) => {
-  const hiddenRef = useRef(null);
+  const formatDisplay = (iso) => {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    if (language === 'en') return `${m}/${d}/${y}`;
+    return `${d}/${m}/${y}`;
+  };
+
+  const placeholder = language === 'en' ? 'mm/dd/yyyy' : 'jj/mm/aaaa';
 
   return (
     <div className={className}>
       {label && <label className="block text-gray-700 font-medium text-sm mb-1">{label}</label>}
       <div className="relative">
-        {/* Visible formatted display */}
-        <div
-          onClick={() => hiddenRef.current?.showPicker?.() || hiddenRef.current?.click()}
-          className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus-within:border-[#2ecc71] focus-within:ring-1 focus-within:ring-[#2ecc71] text-sm cursor-pointer select-none"
-          data-testid={testId}
-        >
-          <span className={value ? 'text-gray-900' : 'text-gray-400'}>
-            {value ? formatDate(value, language) : datePlaceholder(language)}
+        {/* Formatted display overlay — does NOT block clicks (pointer-events: none) */}
+        <div className="absolute inset-0 flex items-center px-3 pointer-events-none z-10">
+          <span className={`text-sm ${value ? 'text-gray-900' : 'text-gray-400'}`}>
+            {value ? formatDisplay(value) : placeholder}
           </span>
         </div>
-        {/* Hidden native date input */}
+        {/* Real native input — text invisible, but fully functional */}
         <input
-          ref={hiddenRef}
           type="date"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           required
-          className="absolute inset-0 opacity-0 cursor-pointer"
-          tabIndex={-1}
+          data-testid={testId}
+          className="w-full px-3 py-3 bg-gray-50 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
+          style={{ color: 'transparent', caretColor: 'transparent' }}
         />
       </div>
     </div>
@@ -53,35 +40,29 @@ export const LocaleDateInput = ({ value, onChange, label, language = 'fr', class
 };
 
 /**
- * LocaleTimeInput — Shows time always in 24h format.
- * Native time picker opens on click. Value stays HH:MM.
+ * LocaleTimeInput — Native time input that works normally,
+ * but always displays time in 24h format.
  */
 export const LocaleTimeInput = ({ value, onChange, label, className = '', testId = 'time-input' }) => {
-  const hiddenRef = useRef(null);
-
   return (
     <div className={className}>
       {label && <label className="block text-gray-700 font-medium text-sm mb-1">{label}</label>}
       <div className="relative">
-        {/* Visible 24h display */}
-        <div
-          onClick={() => hiddenRef.current?.showPicker?.() || hiddenRef.current?.click()}
-          className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus-within:border-[#2ecc71] focus-within:ring-1 focus-within:ring-[#2ecc71] text-sm cursor-pointer select-none"
-          data-testid={testId}
-        >
-          <span className={value ? 'text-gray-900' : 'text-gray-400'}>
+        {/* Formatted 24h display overlay */}
+        <div className="absolute inset-0 flex items-center px-3 pointer-events-none z-10">
+          <span className={`text-sm ${value ? 'text-gray-900' : 'text-gray-400'}`}>
             {value || 'HH:MM'}
           </span>
         </div>
-        {/* Hidden native time input */}
+        {/* Real native input — text invisible, but fully functional */}
         <input
-          ref={hiddenRef}
           type="time"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           required
-          className="absolute inset-0 opacity-0 cursor-pointer"
-          tabIndex={-1}
+          data-testid={testId}
+          className="w-full px-3 py-3 bg-gray-50 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
+          style={{ color: 'transparent', caretColor: 'transparent' }}
         />
       </div>
     </div>
