@@ -393,7 +393,18 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
           xhr.open('POST', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`);
           xhr.setRequestHeader('Authorization', `Bearer ${token}`);
           xhr.onload = () => {
-            try { resolve(JSON.parse(xhr.responseText)); }
+            try {
+              const parsed = JSON.parse(xhr.responseText);
+              if (xhr.status === 401) {
+                // Token expired — force re-login
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user');
+                window.location.reload();
+                reject(new Error('Session expired'));
+                return;
+              }
+              resolve(parsed);
+            }
             catch { reject(new Error('Invalid setup-intent response')); }
           };
           xhr.onerror = () => reject(new Error('Network error'));
@@ -401,8 +412,13 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         });
         if (!setupData.clientSecret) {
           const detail = setupData?.detail;
-          const errMsg = typeof detail === 'string' ? detail : (typeof detail === 'object' && detail ? (detail.message || detail.error || JSON.stringify(detail)) : c.bookingError);
-          toast.error(errMsg || c.bookingError);
+          let errMsg = c.bookingError;
+          if (typeof detail === 'string' && detail.trim()) {
+            errMsg = detail;
+          } else if (typeof detail === 'object' && detail) {
+            errMsg = detail.message || detail.error || detail.title || c.bookingError;
+          }
+          toast.error(errMsg);
           setLoading(false);
           return;
         }

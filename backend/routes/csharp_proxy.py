@@ -454,7 +454,9 @@ async def create_setup_intent(request: Request):
 
             if resp.status_code == 200 and data.get("client_secret"):
                 return {"clientSecret": data["client_secret"]}
-            raise HTTPException(status_code=resp.status_code, detail=data)
+            if resp.status_code == 401:
+                raise HTTPException(status_code=401, detail="Session expiree. Veuillez vous reconnecter.")
+            raise HTTPException(status_code=resp.status_code, detail=data if data else "Erreur SetupIntent")
     except HTTPException:
         raise
     except Exception as e:
