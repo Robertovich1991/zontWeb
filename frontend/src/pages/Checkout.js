@@ -612,9 +612,15 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
             <div className="bg-[#0f1a28] rounded-lg p-4 border border-white/5">
               <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} />
             </div>
-            <div className="flex items-center gap-2 mt-2 text-gray-400 text-xs">
-              <Shield className="w-3.5 h-3.5" />
-              <span>{c.trustItems[0]} - Stripe</span>
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center gap-2 text-gray-400 text-xs">
+                <Shield className="w-3.5 h-3.5" />
+                <span>{c.trustItems[0]} - Stripe</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <svg viewBox="0 0 48 32" className="h-5 w-auto"><rect width="48" height="32" rx="4" fill="#1A1F71"/><path d="M19.5 21.5h-3.2l2-12.3h3.2l-2 12.3zm13.1-12-3 8.4-.4-1.8-1.1-5.7s-.1-.9-1.3-.9h-5l-.1.3s1.4.3 3 1.3l2.5 9.7h3.3l5.1-11.3h-3zm-6.3 12.3L24 13.5s-.2-.9-1.3-.9h-5l-.1.3s2.2.5 4.3 2.4l3.4 6.5zm-14.4-4.6l1.6-4.5.9 4.5h-2.5zm3.5 4.6h3l-2.6-12.3h-2.6c-1 0-1.2.8-1.2.8l-4.5 11.5h3.1l.6-1.7h3.8l.4 1.7z" fill="#fff"/></svg>
+                <svg viewBox="0 0 48 32" className="h-5 w-auto"><rect width="48" height="32" rx="4" fill="#252525"/><circle cx="19" cy="16" r="9" fill="#EB001B"/><circle cx="29" cy="16" r="9" fill="#F79E1B"/><path d="M24 9.3a9 9 0 013 6.7 9 9 0 01-3 6.7 9 9 0 01-3-6.7 9 9 0 013-6.7z" fill="#FF5F00"/></svg>
+              </div>
             </div>
             <p className="text-[11px] text-blue-300/70 mt-1.5">
               <Shield className="w-3 h-3 inline mr-1 -mt-0.5" />
