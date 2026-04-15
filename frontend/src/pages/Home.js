@@ -9,7 +9,6 @@ import SEO from '@/components/SEO';
 import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import { useLanguage } from '@/context/LanguageContext';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
-import { LocaleDateInput, LocaleTimeInput } from '@/components/DateTimePicker';
 import { transferService } from '@/services/api';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight, Sparkles, Loader2, Mic, MicOff } from 'lucide-react';
 
@@ -883,8 +882,16 @@ const Home = () => {
                         )}
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <LocaleDateInput value={date} onChange={setDate} label={c.date} language={language} testId="home-date-input" />
-                        <LocaleTimeInput value={time} onChange={setTime} label={c.time} testId="home-time-input" />
+                        <div>
+                          <label htmlFor="h-date" className="block text-gray-700 font-medium text-sm mb-1">{c.date}</label>
+                          <input type="date" id="h-date" name="date" value={date} onChange={(e) => setDate(e.target.value)} required
+                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-date-input" />
+                        </div>
+                        <div>
+                          <label htmlFor="h-time" className="block text-gray-700 font-medium text-sm mb-1">{c.time}</label>
+                          <input type="time" id="h-time" name="time" value={time} onChange={(e) => setTime(e.target.value)} required
+                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-time-input" />
+                        </div>
                       </div>
                       <button type="submit" disabled={loading}
                         className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#27ae60] transition-colors uppercase tracking-wide shadow-lg shadow-[#2ecc71]/30"
