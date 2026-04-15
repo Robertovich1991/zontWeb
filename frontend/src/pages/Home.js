@@ -878,12 +878,12 @@ const Home = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label htmlFor="h-date" className="block text-gray-700 font-medium text-sm mb-1">{c.date}</label>
-                          <input type="date" id="h-date" name="date" value={date} onChange={(e) => setDate(e.target.value)} required
+                          <input type="date" id="h-date" name="date" value={date} onChange={(e) => setDate(e.target.value)} required lang="fr"
                             className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-date-input" />
                         </div>
                         <div>
                           <label htmlFor="h-time" className="block text-gray-700 font-medium text-sm mb-1">{c.time}</label>
-                          <input type="time" id="h-time" name="time" value={time} onChange={(e) => setTime(e.target.value)} required
+                          <input type="time" id="h-time" name="time" value={time} onChange={(e) => setTime(e.target.value)} required lang="fr"
                             className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-time-input" />
                         </div>
                       </div>

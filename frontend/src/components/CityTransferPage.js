@@ -402,12 +402,12 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label htmlFor="date" className="block text-gray-700 font-medium text-sm mb-1">{c.dateLabel}</label>
-                          <input type="date" id="date" name="date" value={date} onChange={e => setDate(e.target.value)} required
+                          <input type="date" id="date" name="date" value={date} onChange={e => setDate(e.target.value)} required lang="fr"
                             className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="date-input" aria-label={c.dateLabel} />
                         </div>
                         <div>
                           <label htmlFor="time" className="block text-gray-700 font-medium text-sm mb-1">{c.timeLabel}</label>
-                          <input type="time" id="time" name="time" value={time} onChange={e => setTime(e.target.value)} required
+                          <input type="time" id="time" name="time" value={time} onChange={e => setTime(e.target.value)} required lang="fr"
                             className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="time-input" aria-label={c.timeLabel} />
                         </div>
                       </div>

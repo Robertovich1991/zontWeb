@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useRef, useCallback } from 'react';
 
 const BookingContext = createContext();
 const STORAGE_KEY = 'zont_booking';
@@ -29,43 +29,47 @@ export const BookingProvider = ({ children }) => {
   const [bookingDetails, setBookingDetails] = useState(cached.bookingDetails || null);
   const [vehicleResults, setVehicleResults] = useState(cached.vehicleResults || null);
 
-  const persist = (patch) => {
-    const next = {
-      searchData: patch.searchData !== undefined ? patch.searchData : searchData,
-      selectedCar: patch.selectedCar !== undefined ? patch.selectedCar : selectedCar,
-      bookingDetails: patch.bookingDetails !== undefined ? patch.bookingDetails : bookingDetails,
-      vehicleResults: patch.vehicleResults !== undefined ? patch.vehicleResults : vehicleResults,
-    };
-    save(next);
-  };
+  // Use refs to avoid stale closures in persist
+  const ref = useRef({ searchData, selectedCar, bookingDetails, vehicleResults });
+  ref.current = { searchData, selectedCar, bookingDetails, vehicleResults };
 
-  const startBooking = (data) => {
+  const persist = useCallback((patch) => {
+    const cur = ref.current;
+    save({
+      searchData: patch.searchData !== undefined ? patch.searchData : cur.searchData,
+      selectedCar: patch.selectedCar !== undefined ? patch.selectedCar : cur.selectedCar,
+      bookingDetails: patch.bookingDetails !== undefined ? patch.bookingDetails : cur.bookingDetails,
+      vehicleResults: patch.vehicleResults !== undefined ? patch.vehicleResults : cur.vehicleResults,
+    });
+  }, []);
+
+  const startBooking = useCallback((data) => {
     setSearchData(data);
     persist({ searchData: data });
-  };
+  }, [persist]);
 
-  const selectCar = (car) => {
+  const selectCar = useCallback((car) => {
     setSelectedCar(car);
     persist({ selectedCar: car });
-  };
+  }, [persist]);
 
-  const completeBooking = (details) => {
+  const completeBooking = useCallback((details) => {
     setBookingDetails(details);
     persist({ bookingDetails: details });
-  };
+  }, [persist]);
 
-  const setVehicleResultsWrapped = (results) => {
+  const setVehicleResultsWrapped = useCallback((results) => {
     setVehicleResults(results);
     persist({ vehicleResults: results });
-  };
+  }, [persist]);
 
-  const resetBooking = () => {
+  const resetBooking = useCallback(() => {
     setSearchData(null);
     setSelectedCar(null);
     setBookingDetails(null);
     setVehicleResults(null);
     try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
-  };
+  }, []);
 
   const value = {
     searchData,

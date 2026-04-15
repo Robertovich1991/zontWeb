@@ -178,9 +178,41 @@ const cardStyle = {
 };
 
 const formatDateForApi = (date, time) => {
-  if (!date || !time) return '';
-  const [year, month, day] = date.split('-');
-  return `${day}/${month}/${year} ${time}:00`;
+  if (!date || !time) {
+    console.warn('[ZONT] formatDateForApi: missing date or time', { date, time });
+    return '';
+  }
+  // date is always YYYY-MM-DD from <input type="date">
+  // time is always HH:MM from <input type="time">
+  let year, month, day;
+  if (date.includes('-')) {
+    [year, month, day] = date.split('-');
+  } else if (date.includes('/')) {
+    // Fallback: DD/MM/YYYY or MM/DD/YYYY
+    const parts = date.split('/');
+    if (parts[2] && parts[2].length === 4) {
+      day = parts[0]; month = parts[1]; year = parts[2];
+    } else {
+      day = parts[1]; month = parts[0]; year = parts[2];
+    }
+  } else {
+    console.warn('[ZONT] formatDateForApi: unknown date format', date);
+    return '';
+  }
+  // Ensure 24h time format (strip any AM/PM just in case)
+  let cleanTime = time.replace(/\s*(AM|PM)\s*/i, '').trim();
+  if (time.toUpperCase().includes('PM')) {
+    const [h, m] = cleanTime.split(':');
+    const hNum = parseInt(h, 10);
+    cleanTime = `${hNum < 12 ? hNum + 12 : hNum}:${m}`;
+  } else if (time.toUpperCase().includes('AM')) {
+    const [h, m] = cleanTime.split(':');
+    const hNum = parseInt(h, 10);
+    cleanTime = `${hNum === 12 ? 0 : hNum}:${m}`;
+  }
+  const result = `${day}/${month}/${year} ${cleanTime}:00`;
+  console.log('[ZONT] formatDateForApi:', { date, time, result });
+  return result;
 };
 
 const formatPhone = (phone, countryCode) => {
