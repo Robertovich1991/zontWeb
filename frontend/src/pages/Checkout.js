@@ -235,50 +235,67 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const [deletingCard, setDeletingCard] = useState(null);
 
   // Fetch saved cards when authenticated
+  // Uses XHR instead of fetch to avoid Stripe.js intercepting the body stream
   useEffect(() => {
     if (isAuthenticated) {
       const token = localStorage.getItem('auth_token');
       if (token) {
-        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/client/cards`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-          .then(r => r.ok ? r.json() : Promise.reject())
-          .then(data => {
-            const cards = Array.isArray(data) ? data : (data?.data || []);
-            setSavedCards(cards);
-            if (cards.length > 0) {
-              setSelectedSavedCard(cards[0].id);
-              setUseNewCard(false);
-            } else {
-              setUseNewCard(true);
-            }
-          })
-          .catch(() => setUseNewCard(true));
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/client/cards`);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              const cards = Array.isArray(data) ? data : (data?.data || []);
+              setSavedCards(cards);
+              if (cards.length > 0) {
+                setSelectedSavedCard(cards[0].id);
+                setUseNewCard(false);
+              } else {
+                setUseNewCard(true);
+              }
+            } catch { setUseNewCard(true); }
+          } else {
+            setUseNewCard(true);
+          }
+        };
+        xhr.onerror = () => setUseNewCard(true);
+        xhr.send();
       }
     }
   }, [isAuthenticated]);
 
+  // Uses XHR instead of fetch to avoid Stripe.js body stream interception
   const handleDeleteCard = async (cardId) => {
     setDeletingCard(cardId);
     try {
       const token = localStorage.getItem('auth_token');
-      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/client/cards/${cardId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setSavedCards(prev => prev.filter(c2 => c2.id !== cardId));
-        if (selectedSavedCard === cardId) {
-          const remaining = savedCards.filter(c2 => c2.id !== cardId);
-          if (remaining.length > 0) {
-            setSelectedSavedCard(remaining[0].id);
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('DELETE', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/client/cards/${cardId}`);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setSavedCards(prev => prev.filter(c2 => c2.id !== cardId));
+            if (selectedSavedCard === cardId) {
+              const remaining = savedCards.filter(c2 => c2.id !== cardId);
+              if (remaining.length > 0) {
+                setSelectedSavedCard(remaining[0].id);
+              } else {
+                setSelectedSavedCard(null);
+                setUseNewCard(true);
+              }
+            }
+            toast.success(c.deleteCard + ' OK');
+            resolve();
           } else {
-            setSelectedSavedCard(null);
-            setUseNewCard(true);
+            reject();
           }
-        }
-        toast.success(c.deleteCard + ' OK');
-      }
+        };
+        xhr.onerror = () => reject();
+        xhr.send();
+      });
     } catch {}
     setDeletingCard(null);
   };
@@ -369,13 +386,20 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         cardId = selectedSavedCard;
       } else {
         // Create SetupIntent for new card + 3DS verification
+        // Uses XHR instead of fetch to avoid Stripe.js body stream interception
         const token = localStorage.getItem('auth_token');
-        const setupResp = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
+        const setupData = await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`);
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+          xhr.onload = () => {
+            try { resolve(JSON.parse(xhr.responseText)); }
+            catch { reject(new Error('Invalid setup-intent response')); }
+          };
+          xhr.onerror = () => reject(new Error('Network error'));
+          xhr.send();
         });
-        const setupData = await setupResp.json();
-        if (!setupResp.ok || !setupData.clientSecret) {
+        if (!setupData.clientSecret) {
           toast.error(setupData?.detail || c.bookingError);
           setLoading(false);
           return;

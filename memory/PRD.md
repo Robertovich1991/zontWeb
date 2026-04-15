@@ -23,7 +23,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## What's Been Implemented
 
-### Session Apr 11, 2026 (Latest)
+### Session Apr 15, 2026 (Latest)
+- **Checkout "body stream already read" Bug Fix (P0)**: Fixed JS error blocking card addition for existing users
+  - Root cause: Stripe.js intercepts native `fetch()` and consumes the Response body stream before application code reads it
+  - Fix: Converted all `fetch()` calls in `Checkout.js` to `XMLHttpRequest` (not intercepted by Stripe.js), matching the established pattern in `api.js` `submitBooking`
+  - Affected: setup-intent (card creation), saved cards fetch, card deletion
+
+### Session Apr 11, 2026
 - **Facebook Conversions API (Server-Side)**: Complete backend integration using Meta Graph API v21.0
   - `fb_conversions.py` module with SHA256 PII hashing, async fire-and-forget sends
   - `POST /api/fb/track` endpoint for frontend→server event mirroring
@@ -69,6 +75,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ### Blocked
 - Partner Ride Cancellation (waiting for C# team endpoint)
+- SEO Redirections for old URLs (waiting for user confirmation on approach)
 
 ## Credentials
 - Super Admin: admin@zont.cab / admin123
