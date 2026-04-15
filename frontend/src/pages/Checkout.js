@@ -644,7 +644,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading || !stripe || (useNewCard && !cardComplete) || (!useNewCard && !selectedSavedCard)}
+        disabled={loading || !stripe || ((useNewCard || savedCards.length === 0) && !cardComplete) || (savedCards.length > 0 && !useNewCard && !selectedSavedCard)}
         className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-base hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
         data-testid="checkout-pay-btn"
       >
