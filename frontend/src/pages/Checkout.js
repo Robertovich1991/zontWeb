@@ -400,7 +400,9 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
           xhr.send();
         });
         if (!setupData.clientSecret) {
-          toast.error(setupData?.detail || c.bookingError);
+          const detail = setupData?.detail;
+          const errMsg = typeof detail === 'string' ? detail : (typeof detail === 'object' && detail ? (detail.message || detail.error || JSON.stringify(detail)) : c.bookingError);
+          toast.error(errMsg || c.bookingError);
           setLoading(false);
           return;
         }
@@ -475,14 +477,15 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       if (typeof msg === 'object' && msg !== null) {
         const apiErrors = {};
         for (const [key, val] of Object.entries(msg)) {
-          const v = Array.isArray(val) ? val[0] : val;
+          const v = Array.isArray(val) ? val[0] : (typeof val === 'string' ? val : JSON.stringify(val));
           if (key.includes('Email') || key.includes('UserName')) apiErrors.email = v;
           else if (key.includes('Phone')) apiErrors.phone = v;
           else if (key.includes('Password')) apiErrors.password = v;
           else apiErrors.general = v;
         }
         setErrors(apiErrors);
-        toast.error(Object.values(apiErrors)[0] || c.bookingError);
+        const firstErr = Object.values(apiErrors)[0];
+        toast.error(typeof firstErr === 'string' ? firstErr : c.bookingError);
       } else {
         // Show the actual error message from the C# API
         const errorText = typeof msg === 'string' ? msg : (err.message || c.bookingError);
