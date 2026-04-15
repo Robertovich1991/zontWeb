@@ -23,6 +23,13 @@ def set_db(database):
 
 # ---------- Models ----------
 
+class KioskCustomPriceRequest(BaseModel):
+    destinationLat: float
+    destinationLng: float
+    destinationAddress: str
+    destinationName: str
+
+
 class KioskBookingRequest(BaseModel):
     hotelSlug: str
     clientName: str
@@ -132,6 +139,56 @@ async def get_kiosk_prices(slug: str):
                 results.append({**dest, "vehicles": [], "cheapest": 0})
 
     return {"hotel": hotel, "destinations": results}
+
+
+@router.post("/{slug}/custom-price")
+async def get_kiosk_custom_price(slug: str, req: KioskCustomPriceRequest):
+    """Fetch real-time prices for a custom destination entered via Google Places."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    hotel = await db.kiosk_hotels.find_one({"slug": slug}, {"_id": 0})
+    if not hotel:
+        raise HTTPException(404, "Hotel not found")
+
+    hotel_coords = {"latitude": hotel["lat"], "longitude": hotel["lng"]}
+    dest_coords = {"latitude": req.destinationLat, "longitude": req.destinationLng}
+
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/PreorderDistance/driverTypesTwo",
+                json=[hotel_coords, dest_coords],
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                vehicles = []
+                if isinstance(data, list):
+                    for v in data:
+                        vehicles.append({
+                            "tripType": (v.get("tripType") or "").strip(),
+                            "minAmount": round(v.get("minAmount", 0)),
+                            "maxAmount": round(v.get("maxAmount", 0)),
+                            "duration": round(v.get("duration", 0)),
+                            "distance": round(v.get("distance", 0)),
+                            "passenger": v.get("passenger", 0),
+                            "luggage": v.get("luggage", 0),
+                            "imagePath": v.get("imagePath", ""),
+                            "description": v.get("description", ""),
+                        })
+                return {
+                    "name": req.destinationName,
+                    "address": req.destinationAddress,
+                    "lat": req.destinationLat,
+                    "lng": req.destinationLng,
+                    "vehicles": vehicles,
+                    "cheapest": min((v["minAmount"] for v in vehicles), default=0),
+                }
+            raise HTTPException(502, "Pricing service unavailable")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Custom kiosk pricing error: {e}")
+        raise HTTPException(502, "Failed to get pricing")
 
 
 @router.post("/book")
