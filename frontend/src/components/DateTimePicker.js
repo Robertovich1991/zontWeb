@@ -1,109 +1,89 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 /**
- * DatePicker — three selects (day/month/year) always in European format.
- * Stores value as YYYY-MM-DD (compatible with existing code).
+ * Formats a date string YYYY-MM-DD according to site language.
+ * FR/RU/HY → dd/mm/yyyy, EN → mm/dd/yyyy
  */
-export const DatePicker = ({ value, onChange, label, className = '', testId = 'date-picker' }) => {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const years = [currentYear, currentYear + 1];
-  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+const formatDate = (iso, lang) => {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  if (lang === 'en') return `${m}/${d}/${y}`;
+  return `${d}/${m}/${y}`;
+};
 
-  const [y, m, d] = value ? value.split('-') : ['', '', ''];
+const datePlaceholder = (lang) => {
+  if (lang === 'en') return 'mm/dd/yyyy';
+  return 'jj/mm/aaaa';
+};
 
-  const daysInMonth = (month, year) => {
-    if (!month || !year) return 31;
-    return new Date(parseInt(year), parseInt(month), 0).getDate();
-  };
-  const maxDays = daysInMonth(m || 1, y || currentYear);
-  const days = Array.from({ length: maxDays }, (_, i) => i + 1);
-
-  const update = (newD, newM, newY) => {
-    if (newD && newM && newY) {
-      onChange(`${newY}-${String(newM).padStart(2, '0')}-${String(newD).padStart(2, '0')}`);
-    } else {
-      onChange('');
-    }
-  };
-
-  const selectClass = "bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm py-3 px-2 appearance-none text-center";
-
-  const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+/**
+ * LocaleDateInput — Shows date in the site's language format (not the browser's).
+ * Native date picker opens on click. Value stays YYYY-MM-DD.
+ */
+export const LocaleDateInput = ({ value, onChange, label, language = 'fr', className = '', testId = 'date-input' }) => {
+  const hiddenRef = useRef(null);
 
   return (
     <div className={className}>
       {label && <label className="block text-gray-700 font-medium text-sm mb-1">{label}</label>}
-      <div className="grid grid-cols-3 gap-1.5" data-testid={testId}>
-        <select
-          value={d ? parseInt(d) : ''}
-          onChange={(e) => update(e.target.value, m ? parseInt(m) : '', y || '')}
-          className={selectClass}
-          data-testid={`${testId}-day`}
+      <div className="relative">
+        {/* Visible formatted display */}
+        <div
+          onClick={() => hiddenRef.current?.showPicker?.() || hiddenRef.current?.click()}
+          className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus-within:border-[#2ecc71] focus-within:ring-1 focus-within:ring-[#2ecc71] text-sm cursor-pointer select-none"
+          data-testid={testId}
         >
-          <option value="">Jour</option>
-          {days.map(day => (
-            <option key={day} value={day}>{String(day).padStart(2, '0')}</option>
-          ))}
-        </select>
-        <select
-          value={m ? parseInt(m) : ''}
-          onChange={(e) => {
-            const newM = e.target.value;
-            const maxD = daysInMonth(newM, y || currentYear);
-            const safeD = d && parseInt(d) > maxD ? maxD : (d ? parseInt(d) : '');
-            update(safeD, newM, y || '');
-          }}
-          className={selectClass}
-          data-testid={`${testId}-month`}
-        >
-          <option value="">Mois</option>
-          {months.map(month => (
-            <option key={month} value={month}>{monthNames[month - 1]}</option>
-          ))}
-        </select>
-        <select
-          value={y || ''}
-          onChange={(e) => update(d ? parseInt(d) : '', m ? parseInt(m) : '', e.target.value)}
-          className={selectClass}
-          data-testid={`${testId}-year`}
-        >
-          <option value="">Année</option>
-          {years.map(year => (
-            <option key={year} value={year}>{year}</option>
-          ))}
-        </select>
+          <span className={value ? 'text-gray-900' : 'text-gray-400'}>
+            {value ? formatDate(value, language) : datePlaceholder(language)}
+          </span>
+        </div>
+        {/* Hidden native date input */}
+        <input
+          ref={hiddenRef}
+          type="date"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required
+          className="absolute inset-0 opacity-0 cursor-pointer"
+          tabIndex={-1}
+        />
       </div>
     </div>
   );
 };
 
 /**
- * TimePicker — select with 24h time slots every 15 min.
- * Stores value as HH:MM (compatible with existing code).
+ * LocaleTimeInput — Shows time always in 24h format.
+ * Native time picker opens on click. Value stays HH:MM.
  */
-export const TimePicker = ({ value, onChange, label, className = '', testId = 'time-picker' }) => {
-  const slots = [];
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-    }
-  }
+export const LocaleTimeInput = ({ value, onChange, label, className = '', testId = 'time-input' }) => {
+  const hiddenRef = useRef(null);
 
   return (
     <div className={className}>
       {label && <label className="block text-gray-700 font-medium text-sm mb-1">{label}</label>}
-      <select
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm py-3 px-3 appearance-none"
-        data-testid={testId}
-      >
-        <option value="">HH:MM</option>
-        {slots.map(slot => (
-          <option key={slot} value={slot}>{slot}</option>
-        ))}
-      </select>
+      <div className="relative">
+        {/* Visible 24h display */}
+        <div
+          onClick={() => hiddenRef.current?.showPicker?.() || hiddenRef.current?.click()}
+          className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus-within:border-[#2ecc71] focus-within:ring-1 focus-within:ring-[#2ecc71] text-sm cursor-pointer select-none"
+          data-testid={testId}
+        >
+          <span className={value ? 'text-gray-900' : 'text-gray-400'}>
+            {value || 'HH:MM'}
+          </span>
+        </div>
+        {/* Hidden native time input */}
+        <input
+          ref={hiddenRef}
+          type="time"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required
+          className="absolute inset-0 opacity-0 cursor-pointer"
+          tabIndex={-1}
+        />
+      </div>
     </div>
   );
 };

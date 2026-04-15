@@ -9,6 +9,7 @@ import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
+import { LocaleDateInput, LocaleTimeInput } from '@/components/DateTimePicker';
 import { trackSearch } from '@/utils/fbPixel';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
 
@@ -400,16 +401,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label htmlFor="date" className="block text-gray-700 font-medium text-sm mb-1">{c.dateLabel}</label>
-                          <input type="date" id="date" name="date" value={date} onChange={e => setDate(e.target.value)} required
-                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="date-input" aria-label={c.dateLabel} />
-                        </div>
-                        <div>
-                          <label htmlFor="time" className="block text-gray-700 font-medium text-sm mb-1">{c.timeLabel}</label>
-                          <input type="time" id="time" name="time" value={time} onChange={e => setTime(e.target.value)} required
-                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="time-input" aria-label={c.timeLabel} />
-                        </div>
+                        <LocaleDateInput value={date} onChange={setDate} label={c.dateLabel} language={language} testId="date-input" />
+                        <LocaleTimeInput value={time} onChange={setTime} label={c.timeLabel} testId="time-input" />
                       </div>
                       <button type="submit" disabled={loading}
                         className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#27ae60] transition-colors uppercase tracking-wide shadow-lg shadow-[#2ecc71]/30"
