@@ -440,7 +440,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const imageUrl = transferService.getVehicleImageUrl(selectedCar.imagePath);
 
   return (
-    <form onSubmit={handleSubmit} data-testid="checkout-form" className="space-y-5">
+    <form onSubmit={handleSubmit} data-testid="checkout-form" className="space-y-4">
       {/* Passenger Details (only if not authenticated) */}
       {!isAuthenticated && (
         <div className="bg-[#1e2d3d] border border-white/10 rounded-xl p-5" data-testid="passenger-details-section">
@@ -612,32 +612,29 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
             <div className="bg-[#0f1a28] rounded-lg p-4 border border-white/5">
               <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} />
             </div>
-            <div className="flex items-center gap-2 mt-3 text-gray-400 text-xs">
+            <div className="flex items-center gap-2 mt-2 text-gray-400 text-xs">
               <Shield className="w-3.5 h-3.5" />
               <span>{c.trustItems[0]} - Stripe</span>
             </div>
-            <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg" data-testid="secure-note">
-              <p className="text-xs text-blue-300 leading-relaxed">
-                <Shield className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
-                {c.secureNote}
-              </p>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">{c.cardNote}</p>
+            <p className="text-[11px] text-blue-300/70 mt-1.5">
+              <Shield className="w-3 h-3 inline mr-1 -mt-0.5" />
+              {c.secureNote}
+            </p>
+            <p className="text-[11px] text-gray-500 mt-1">{c.cardNote}</p>
           </>
         )}
       </div>
 
-      {/* Amount to be charged */}
-      <div className="bg-[#1e2d3d] border border-[#2ecc71]/30 rounded-xl p-4 flex items-center justify-between" data-testid="amount-summary">
+      {/* Amount + Submit — compact on mobile */}
+      <div className="bg-[#1e2d3d] border border-[#2ecc71]/30 rounded-xl p-3 flex items-center justify-between" data-testid="amount-summary">
         <div>
           <p className="text-sm text-gray-400">{c.amountCharged}</p>
-          <p className="text-xs text-gray-500">{c.afterConfirmation}</p>
+          <p className="text-[11px] text-gray-500">{c.afterConfirmation}</p>
         </div>
         <p className="text-2xl font-extrabold text-[#2ecc71]">{selectedCar.price}&euro;</p>
       </div>
 
-      {/* Explanation text */}
-      <p className="text-xs text-gray-400 text-center leading-relaxed px-2" data-testid="card-explain">
+      <p className="text-[11px] text-gray-400 text-center leading-relaxed px-2" data-testid="card-explain">
         {c.cardExplain}
       </p>
 
