@@ -1,0 +1,92 @@
+{
+  "summary": "Completed testing of XHR conversion fix for Stripe.js fetch() interception bug. All 14 backend API tests passed (100%). Frontend UI tests passed - login flow works with XHR-based authService, kiosk page loads with attract screen and Google Places search.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_xhr_conversion.py",
+    "/app/test_reports/pytest/xhr_conversion_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "VERIFIED: All authService functions in api.js use xhrRequest helper (XHR) - NO fetch() calls",
+    "VERIFIED: Checkout.js has NO fetch() calls - setup-intent, saved cards, delete card all use XHR",
+    "VERIFIED: AuthContext.js uses XMLHttpRequest for token validation on load",
+    "VERIFIED: transferService.submitBooking uses XMLHttpRequest",
+    "NOTE: transferService.calculatePrice, calculatePreorderPrice, getTripTypes still use fetch() - this is OK because they run on Home/CarSelection pages where Stripe.js is NOT loaded"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_xhr_conversion.py"
+  ],
+  "success_rate": {
+    "backend": "100% (14/14 tests passed)",
+    "frontend": "100% (all UI tests passed)"
+  },
+  "test_credentials": {
+    "test_client": {
+      "email": "garikgalstyan@gmail.com",
+      "password": "12345678"
+    }
+  },
+  "seed_data_creation": "No seed data created - using existing C# API data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "XHR conversion fix verified. All fetch() calls on Checkout page converted to XMLHttpRequest to avoid Stripe.js body stream interception. Login flow works, kiosk page works with attract screen and Google Places search. Session expiry detection in AuthContext returns 401 and shows 'Session expirée' toast.",
+  "features_tested": {
+    "xhr_conversion_verification": {
+      "authService.login": "PASSED - Uses xhrRequest helper (XHR)",
+      "authService.register": "PASSED - Uses xhrRequest helper (XHR)",
+      "authService.forgotPassword": "PASSED - Uses xhrRequest helper (XHR)",
+      "authService.resetPassword": "PASSED - Uses xhrRequest helper (XHR)",
+      "authService.googleLogin": "PASSED - Uses xhrRequest helper (XHR)",
+      "Checkout.js setup-intent": "PASSED - Uses XMLHttpRequest directly",
+      "Checkout.js saved cards": "PASSED - Uses XMLHttpRequest directly",
+      "Checkout.js delete card": "PASSED - Uses XMLHttpRequest directly",
+      "AuthContext.js token validation": "PASSED - Uses XMLHttpRequest directly",
+      "transferService.submitBooking": "PASSED - Uses XMLHttpRequest directly"
+    },
+    "backend_api_tests": {
+      "POST /api/proxy/auth/login (valid)": "PASSED - Returns accessToken, firstName",
+      "POST /api/proxy/auth/login (invalid)": "PASSED - Returns 400/401",
+      "POST /api/proxy/auth/forgot-password": "PASSED - Endpoint responds",
+      "POST /api/proxy/booking/setup-intent (no auth)": "PASSED - Returns 401",
+      "POST /api/proxy/booking/setup-intent (with auth)": "PASSED - Returns clientSecret",
+      "GET /api/proxy/client/cards (no auth)": "PASSED - Returns 401",
+      "GET /api/proxy/client/cards (with auth)": "PASSED - Returns card list",
+      "GET /api/proxy/client/profile (no auth)": "PASSED - Returns 401",
+      "GET /api/proxy/client/profile (with auth)": "PASSED - Returns profile data",
+      "GET /api/kiosk/bristol": "PASSED - Returns hotel data",
+      "POST /api/kiosk/bristol/prices": "PASSED - Returns 6 destinations with pricing",
+      "POST /api/kiosk/bristol/custom-price": "PASSED - Returns vehicle pricing",
+      "POST /api/proxy/booking/create (no auth)": "PASSED - Returns 401",
+      "POST /api/proxy/booking/create (validation)": "PASSED - Validates payload"
+    },
+    "frontend_ui_tests": {
+      "homepage_load": "PASSED - Homepage loads correctly",
+      "login_flow": "PASSED - Login with garikgalstyan@gmail.com works, shows 'Hello, Garik' and 'Connexion réussie!' toast",
+      "kiosk_attract_screen": "PASSED - Shows animated attract screen with 'Zont Transfer', 'Hotel Le Bristol Paris', 'TOUCHEZ POUR RESERVER'",
+      "kiosk_destinations": "PASSED - Shows 6 destination cards (CDG T1/T2, Orly, Gare de Lyon/Nord, Disneyland) with prices",
+      "kiosk_google_places_search": "PASSED - Search bar visible: 'Rechercher une autre destination...'",
+      "checkout_page": "PASSED - Loads correctly, shows 'No booking data found' when no booking context"
+    }
+  },
+  "code_verification": {
+    "fetch_calls_in_authService": "NONE - All use xhrRequest helper",
+    "fetch_calls_in_Checkout": "NONE - All use XMLHttpRequest",
+    "fetch_calls_in_transferService": "3 (calculatePrice, calculatePreorderPrice, getTripTypes) - OK because these run on pages without Stripe.js",
+    "xhr_in_submitBooking": "YES - Uses XMLHttpRequest",
+    "xhr_in_AuthContext": "YES - Uses XMLHttpRequest for token validation"
+  },
+  "notes": {
+    "stripe_fix": "The core fix converts all fetch() to XMLHttpRequest on Checkout page because Stripe.js monkey-patches window.fetch() for fraud detection, which corrupts the Response body stream",
+    "external_api": "C# API (api.zont.cab) handles authentication, booking, and pricing - all working correctly",
+    "kiosk_api": "Kiosk API fetches real-time prices from C# backend for 6 popular destinations",
+    "no_mocked_apis": "All APIs are real - no mocking"
+  }
+}
