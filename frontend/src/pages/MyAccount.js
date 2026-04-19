@@ -133,7 +133,7 @@ const statusLabels = {
 };
 
 const MyAccount = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [bookings, setBookings] = useState([]);
@@ -203,6 +203,7 @@ const MyAccount = () => {
   };
 
   useEffect(() => {
+    if (authLoading) return; // Wait for auth check to finish
     if (!isAuthenticated) { navigate('/'); return; }
     const h = { Authorization: `Bearer ${token}` };
     Promise.all([
@@ -214,7 +215,7 @@ const MyAccount = () => {
       setBookings(bkRes.ok && Array.isArray(bkRes.data) ? bkRes.data : []);
       setCards(cdsRes.ok && Array.isArray(cdsRes.data) ? cdsRes.data : []);
     }).catch(() => {}).finally(() => setLoading(false));
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleDeleteCard = async (cardId) => {
     if (!window.confirm('Supprimer cette carte ?')) return;

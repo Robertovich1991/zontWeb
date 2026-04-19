@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/layout/Header';
-import { MapPin, Calendar, Car, Clock, ChevronRight, Loader2, AlertCircle, Navigation } from 'lucide-react';
+import { MapPin, Calendar, Car, Clock, Loader2, AlertCircle, Navigation, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -19,37 +20,68 @@ const statusLabels = {
 };
 
 const MyBookings = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
+    if (authLoading) return; // Wait for auth check to finish
     if (!isAuthenticated) {
       navigate('/');
       return;
     }
-    const fetchBookings = async () => {
-      try {
-        const token = localStorage.getItem('auth_token');
-        const res = await fetch(`${API}/api/proxy/booking/upcoming`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setBookings(Array.isArray(data) ? data : []);
+    const fetchBookings = () => {
+      const token = localStorage.getItem('auth_token');
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', `${API}/api/proxy/booking/upcoming`);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            setBookings(Array.isArray(data) ? data : []);
+          } catch { setBookings([]); }
+        } else if (xhr.status === 401) {
+          setError('Session expirée. Veuillez vous reconnecter.');
         } else {
           setError('Impossible de charger vos reservations');
         }
-      } catch {
-        setError('Erreur de connexion');
-      } finally {
         setLoading(false);
-      }
+      };
+      xhr.onerror = () => { setError('Erreur de connexion'); setLoading(false); };
+      xhr.send();
     };
     fetchBookings();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
+
+  const handleCancelBooking = (bookingId) => {
+    if (!bookingId) return;
+    if (!window.confirm('Voulez-vous vraiment annuler cette reservation ?')) return;
+    setCancellingId(bookingId);
+    const token = localStorage.getItem('auth_token');
+    const xhr = new XMLHttpRequest();
+    xhr.open('DELETE', `${API}/api/proxy/booking/cancel/${bookingId}`);
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        setBookings(prev => prev.filter(b => (b.id || b.auctionId) !== bookingId));
+        toast.success('Reservation annulee avec succes');
+      } else {
+        let errMsg = 'Impossible d\'annuler cette reservation';
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (typeof data?.detail === 'string') errMsg = data.detail;
+        } catch {}
+        toast.error(errMsg);
+      }
+      setCancellingId(null);
+    };
+    xhr.onerror = () => { toast.error('Erreur de connexion'); setCancellingId(null); };
+    xhr.send();
+  };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -131,7 +163,23 @@ const MyBookings = () => {
                       </div>
                     )}
                     {(b.clientPrice || b.price) && (
-                      <span className="ml-auto text-[#c8a951] font-bold text-sm">{b.clientPrice || b.price} EUR</span>
+                      <span className="text-[#c8a951] font-bold text-sm">{b.clientPrice || b.price} EUR</span>
+                    )}
+                    {/* Cancel button — only for non-cancelled, non-completed bookings */}
+                    {st.label !== 'Annulee' && st.label !== 'Terminee' && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleCancelBooking(b.id || b.auctionId); }}
+                        disabled={cancellingId === (b.id || b.auctionId)}
+                        className="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50"
+                        data-testid={`cancel-booking-${i}`}
+                      >
+                        {cancellingId === (b.id || b.auctionId) ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <XCircle className="w-3.5 h-3.5" />
+                        )}
+                        Annuler
+                      </button>
                     )}
                   </div>
                 </div>
