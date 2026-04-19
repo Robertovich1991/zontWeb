@@ -127,62 +127,53 @@ export const transferService = {
   },
 };
 
+/**
+ * XHR helper — Stripe.js monkey-patches window.fetch for fraud detection,
+ * which corrupts the Response body stream on pages where Stripe Elements is loaded.
+ * Using XMLHttpRequest avoids this entirely.
+ */
+const xhrRequest = (method, url, body, headers = {}) => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+    xhr.onload = () => {
+      let data;
+      try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(data);
+      } else {
+        reject({ response: { data }, status: xhr.status });
+      }
+    };
+    xhr.onerror = () => reject(new Error('Network error'));
+    xhr.send(body || null);
+  });
+};
+
 export const authService = {
   registerPhone: async (phone) => {
-    const resp = await fetch(`${API}/api/proxy/auth/register-phone`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone }),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw { response: { data } };
-    return data;
+    return xhrRequest('POST', `${API}/api/proxy/auth/register-phone`, JSON.stringify({ phone }), { 'Content-Type': 'application/json' });
   },
 
   verifyPhone: async (phoneNumber, verificationCode) => {
-    const resp = await fetch(`${API}/api/proxy/auth/verify-phone`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber, verificationCode }),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw { response: { data } };
-    return data;
+    return xhrRequest('POST', `${API}/api/proxy/auth/verify-phone`, JSON.stringify({ phoneNumber, verificationCode }), { 'Content-Type': 'application/json' });
   },
 
   register: async (userData) => {
-    const resp = await fetch(`${API}/api/proxy/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw { response: { data } };
-    return data;
+    return xhrRequest('POST', `${API}/api/proxy/auth/register`, JSON.stringify(userData), { 'Content-Type': 'application/json' });
   },
 
   sendVerificationEmail: async (email) => {
-    const resp = await fetch(`${API}/api/proxy/auth/send-verification?email=${encodeURIComponent(email)}`);
-    const data = await resp.json();
-    if (!resp.ok) throw { response: { data } };
-    return data;
+    return xhrRequest('GET', `${API}/api/proxy/auth/send-verification?email=${encodeURIComponent(email)}`);
   },
 
   verifyCode: async (code) => {
-    const resp = await fetch(`${API}/api/proxy/auth/verify/${encodeURIComponent(code)}`);
-    const data = await resp.json();
-    if (!resp.ok) throw { response: { data } };
-    return data;
+    return xhrRequest('GET', `${API}/api/proxy/auth/verify/${encodeURIComponent(code)}`);
   },
 
   googleLogin: async (idToken) => {
-    const resp = await fetch(`${API}/api/proxy/auth/google-login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken }),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw { response: { data } };
+    const data = await xhrRequest('POST', `${API}/api/proxy/auth/google-login`, JSON.stringify({ idToken }), { 'Content-Type': 'application/json' });
     const firstName = data.firstName || '';
     const lastName = data.lastName || '';
     const name = firstName ? `${firstName} ${lastName}`.trim() : '';
@@ -192,13 +183,7 @@ export const authService = {
   },
 
   login: async (credentials) => {
-    const resp = await fetch(`${API}/api/proxy/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: credentials.email, password: credentials.password }),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw { response: { data } };
+    const data = await xhrRequest('POST', `${API}/api/proxy/auth/login`, JSON.stringify({ username: credentials.email, password: credentials.password }), { 'Content-Type': 'application/json' });
     const firstName = data.firstName || '';
     const lastName = data.lastName || '';
     const name = firstName ? `${firstName} ${lastName}`.trim() : '';
@@ -208,25 +193,11 @@ export const authService = {
   },
 
   forgotPassword: async (email) => {
-    const resp = await fetch(`${API}/api/proxy/auth/forgot-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw { response: { data } };
-    return data;
+    return xhrRequest('POST', `${API}/api/proxy/auth/forgot-password`, JSON.stringify({ email }), { 'Content-Type': 'application/json' });
   },
 
   resetPassword: async (forgotPasswordToken, newPassword) => {
-    const resp = await fetch(`${API}/api/proxy/auth/reset-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ forgotPasswordToken, newPassword }),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw { response: { data } };
-    return data;
+    return xhrRequest('POST', `${API}/api/proxy/auth/reset-password`, JSON.stringify({ forgotPasswordToken, newPassword }), { 'Content-Type': 'application/json' });
   },
 
   logout: () => {
