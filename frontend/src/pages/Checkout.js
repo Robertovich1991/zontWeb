@@ -35,6 +35,9 @@ const labels = {
     cardNote: 'Your card will be charged immediately upon booking confirmation.',
     secureNote: '3D Secure verification will show 0\u20AC — this is normal. It only validates your card.',
     cardExplain: 'Once your card is verified, the amount will be charged and your booking confirmed instantly.',
+    cardVerified: 'Card verified',
+    cardReadyToPay: 'Your card is ready for payment',
+    payNow: 'Pay',
     step1: 'Vehicle', step2: 'Summary', step3: 'Booking',
     cardError: 'Please check your card details.',
     bookingSuccess: 'Booking confirmed! Your ride has been reserved.',
@@ -72,6 +75,9 @@ const labels = {
     cardNote: 'Votre carte sera débitée dès la confirmation de la réservation.',
     secureNote: 'La vérification 3D Secure affichera 0\u20AC \u2014 c\'est normal. Elle sert uniquement à valider votre carte.',
     cardExplain: 'Une fois votre carte vérifiée, le montant sera débité et votre réservation confirmée immédiatement.',
+    cardVerified: 'Carte verifiee',
+    cardReadyToPay: 'Votre carte est prete pour le paiement',
+    payNow: 'Payer',
     step1: 'Véhicule', step2: 'Résumé', step3: 'Réservation',
     cardError: 'Veuillez vérifier vos informations de carte.',
     bookingSuccess: 'Réservation confirmée ! Votre course a été réservée.',
@@ -109,6 +115,9 @@ const labels = {
     cardNote: 'Средства будут списаны сразу после подтверждения бронирования.',
     secureNote: '3D Secure покажет 0\u20AC \u2014 это нормально. Проверка карты.',
     cardExplain: 'После проверки карты сумма будет списана и бронирование подтверждено.',
+    cardVerified: 'Карта подтверждена',
+    cardReadyToPay: 'Ваша карта готова к оплате',
+    payNow: 'Оплатить',
     step1: 'Авто', step2: 'Детали', step3: 'Бронирование',
     cardError: 'Проверьте данные карты.',
     bookingSuccess: 'Бронирование подтверждено!',
@@ -234,6 +243,10 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const [useNewCard, setUseNewCard] = useState(false);
   const [deletingCard, setDeletingCard] = useState(null);
 
+  // Two-step flow: 1) Add card (0€ 3DS) → 2) Pay
+  const [verifiedCardId, setVerifiedCardId] = useState(null);
+  const [cardAddedBrand, setCardAddedBrand] = useState(null);
+
   // Fetch saved cards when authenticated
   // Uses XHR instead of fetch to avoid Stripe.js intercepting the body stream
   useEffect(() => {
@@ -339,6 +352,19 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
     e.preventDefault();
     if (!stripe || !elements) return;
 
+    // If card already verified → proceed to payment (Step 2)
+    if (verifiedCardId) {
+      return handlePay();
+    }
+
+    // If using a saved card → go straight to payment
+    if (selectedSavedCard && !useNewCard) {
+      setVerifiedCardId(selectedSavedCard);
+      // For saved cards, skip the "card added" intermediate step — pay immediately
+      return handlePayWithCard(selectedSavedCard);
+    }
+
+    // Step 1: Add card (login/register + 3DS verification at 0€)
     // Date validation
     if (searchData.date && searchData.time) {
       const bookingDate = new Date(`${searchData.date}T${searchData.time}`);
@@ -355,7 +381,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
 
     setLoading(true);
     try {
-      // Step 1: Register or Login if needed
+      // Register or Login if needed
       if (!isAuthenticated) {
         if (authMode === 'signup') {
           const formatted = formatPhone(form.phone, phoneCountry);
@@ -367,77 +393,98 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
             password: form.password,
             gender: 'male',
           });
-          // Auto-login after registration
           const loginResult = await authService.login({ email: form.email, password: form.password });
           onLoginDirect(loginResult.user);
         } else {
-          // Sign in mode
           const loginResult = await authService.login({ email: form.email, password: form.password });
           onLoginDirect(loginResult.user);
         }
-        // Send verification email silently
         try { await authService.sendVerificationEmail(form.email); } catch {}
       }
 
-      // Step 2: Get cardId — either from saved card or new SetupIntent
-      let cardId;
-      if (selectedSavedCard && !useNewCard) {
-        // Use saved card directly
-        cardId = selectedSavedCard;
-      } else {
-        // Create SetupIntent for new card + 3DS verification
-        // Uses XHR instead of fetch to avoid Stripe.js body stream interception
-        const token = localStorage.getItem('auth_token');
-        const setupData = await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open('POST', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`);
-          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-          xhr.onload = () => {
-            try {
-              const parsed = JSON.parse(xhr.responseText);
-              if (xhr.status === 401) {
-                // Token expired — force re-login
-                localStorage.removeItem('auth_token');
-                localStorage.removeItem('user');
-                window.location.reload();
-                reject(new Error('Session expired'));
-                return;
-              }
-              resolve(parsed);
+      // Create SetupIntent for new card + 3DS verification (0€)
+      const token = localStorage.getItem('auth_token');
+      const setupData = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.onload = () => {
+          try {
+            const parsed = JSON.parse(xhr.responseText);
+            if (xhr.status === 401) {
+              localStorage.removeItem('auth_token');
+              localStorage.removeItem('user');
+              window.location.reload();
+              reject(new Error('Session expired'));
+              return;
             }
-            catch { reject(new Error('Invalid setup-intent response')); }
-          };
-          xhr.onerror = () => reject(new Error('Network error'));
-          xhr.send();
-        });
-        if (!setupData.clientSecret) {
-          const detail = setupData?.detail;
-          let errMsg = c.bookingError;
-          if (typeof detail === 'string' && detail.trim()) {
-            errMsg = detail;
-          } else if (typeof detail === 'object' && detail) {
-            errMsg = detail.message || detail.error || detail.title || c.bookingError;
+            resolve(parsed);
           }
-          toast.error(errMsg);
-          setLoading(false);
-          return;
+          catch { reject(new Error('Invalid setup-intent response')); }
+        };
+        xhr.onerror = () => reject(new Error('Network error'));
+        xhr.send();
+      });
+      if (!setupData.clientSecret) {
+        const detail = setupData?.detail;
+        let errMsg = c.bookingError;
+        if (typeof detail === 'string' && detail.trim()) {
+          errMsg = detail;
+        } else if (typeof detail === 'object' && detail) {
+          errMsg = detail.message || detail.error || detail.title || c.bookingError;
         }
-
-        // Confirm card setup with 3DS
-        const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
-          setupData.clientSecret,
-          { payment_method: { card: elements.getElement(CardElement) } }
-        );
-        if (setupError) {
-          toast.error(setupError.message || c.cardError);
-          setLoading(false);
-          return;
-        }
-        cardId = setupIntent.payment_method;
+        toast.error(errMsg);
+        setLoading(false);
+        return;
       }
 
-      // Step 4: Submit booking
-      // C# expects tripType="distance" and destination as "lat,lng" coordinates
+      // Confirm card setup with 3DS (0€ verification)
+      const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
+        setupData.clientSecret,
+        { payment_method: { card: elements.getElement(CardElement) } }
+      );
+      if (setupError) {
+        toast.error(setupError.message || c.cardError);
+        setLoading(false);
+        return;
+      }
+
+      // Card verified! Show confirmation before payment
+      const cardId = setupIntent.payment_method;
+      setVerifiedCardId(cardId);
+      setCardAddedBrand(setupIntent.payment_method_types?.[0] || 'card');
+      toast.success(c.cardVerified || 'Carte verifiee !');
+      setLoading(false);
+      // Stop here — user sees "Card verified" and clicks "Pay" button
+
+    } catch (err) {
+      console.error('Card setup error:', err);
+      const msg = err?.response?.data?.detail;
+      if (typeof msg === 'object' && msg !== null) {
+        const apiErrors = {};
+        for (const [key, val] of Object.entries(msg)) {
+          const v = Array.isArray(val) ? val[0] : (typeof val === 'string' ? val : JSON.stringify(val));
+          if (key.includes('Email') || key.includes('UserName')) apiErrors.email = v;
+          else if (key.includes('Phone')) apiErrors.phone = v;
+          else if (key.includes('Password')) apiErrors.password = v;
+          else apiErrors.general = v;
+        }
+        setErrors(apiErrors);
+        const firstErr = Object.values(apiErrors)[0];
+        toast.error(typeof firstErr === 'string' ? firstErr : c.bookingError);
+      } else {
+        const errorText = typeof msg === 'string' ? msg : (err.message || c.bookingError);
+        toast.error(errorText, { duration: 6000 });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2: Submit booking with verified card
+  const handlePayWithCard = async (cardId) => {
+    setLoading(true);
+    try {
       const dropoffCoords = searchData.dropoffCoords;
       const destinationStr = dropoffCoords
         ? `${dropoffCoords.latitude},${dropoffCoords.longitude}`
@@ -511,6 +558,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       setLoading(false);
     }
   };
+
+  const handlePay = () => handlePayWithCard(verifiedCardId);
 
   const imageUrl = transferService.getVehicleImageUrl(selectedCar.imagePath);
 
@@ -622,8 +671,21 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
           {c.payment}
         </h2>
 
-        {/* Saved Cards */}
-        {savedCards.length > 0 && (
+        {/* Card verified confirmation */}
+        {verifiedCardId && (
+          <div className="bg-[#2ecc71]/10 border border-[#2ecc71]/30 rounded-xl p-4 flex items-center gap-3" data-testid="card-verified-banner">
+            <div className="w-10 h-10 bg-[#2ecc71]/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-5 h-5 text-[#2ecc71]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[#2ecc71]">{c.cardVerified || 'Carte verifiee'}</p>
+              <p className="text-xs text-gray-400">{c.cardReadyToPay || 'Votre carte est prete pour le paiement'}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Saved Cards — hide when card already verified */}
+        {!verifiedCardId && savedCards.length > 0 && (
           <div className="space-y-2.5 mb-4" data-testid="saved-cards-section">
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{c.savedCards}</p>
             {savedCards.map((card) => (
@@ -681,8 +743,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
           </div>
         )}
 
-        {/* New Card form (always shown if no saved cards, or when "new card" selected) */}
-        {(useNewCard || savedCards.length === 0) && (
+        {/* New Card form (always shown if no saved cards, or when "new card" selected) — hide when card already verified */}
+        {!verifiedCardId && (useNewCard || savedCards.length === 0) && (
           <>
             <div className="bg-[#0f1a28] rounded-lg p-4 border border-white/5">
               <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} />
@@ -719,17 +781,23 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         {c.cardExplain}
       </p>
 
-      {/* Submit */}
+      {/* Submit — changes based on step */}
       <button
         type="submit"
-        disabled={loading || !stripe || ((useNewCard || savedCards.length === 0) && !cardComplete) || (savedCards.length > 0 && !useNewCard && !selectedSavedCard)}
-        className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-base hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
+        disabled={loading || !stripe || (!verifiedCardId && (useNewCard || savedCards.length === 0) && !cardComplete) || (!verifiedCardId && savedCards.length > 0 && !useNewCard && !selectedSavedCard)}
+        className={`w-full text-white py-4 rounded-xl font-bold text-base transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg ${
+          verifiedCardId ? 'bg-[#2ecc71] hover:bg-[#27ae60] shadow-green-500/20' : 'bg-[#3498db] hover:bg-[#2980b9] shadow-blue-500/20'
+        }`}
         data-testid="checkout-pay-btn"
       >
         {loading ? (
           <><Loader2 className="w-5 h-5 animate-spin" /> {c.processing}</>
+        ) : verifiedCardId ? (
+          <><Lock className="w-5 h-5" /> {c.payNow || 'Payer'} {selectedCar.price}&euro;</>
+        ) : selectedSavedCard && !useNewCard ? (
+          <><CreditCard className="w-5 h-5" /> {c.payBtnSaved}</>
         ) : (
-          <><CreditCard className="w-5 h-5" /> {selectedSavedCard && !useNewCard ? c.payBtnSaved : c.payBtn}</>
+          <><CreditCard className="w-5 h-5" /> {c.payBtn}</>
         )}
       </button>
     </form>

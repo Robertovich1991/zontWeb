@@ -23,7 +23,18 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## What's Been Implemented
 
-### Session Apr 15, 2026 (Latest)
+### Session Apr 22, 2026 (Latest)
+- **Checkout 2-Step Flow**: Split card addition and payment into visible steps
+  - Step 1: "Add your card" → 3D Secure (0€) → Green banner "Card verified ✓"
+  - Step 2: Button changes to "Pay X€" → booking created + payment charged
+  - Saved cards skip step 1 and pay immediately (no change)
+  - Labels added in EN/FR/RU
+- **Yandex Metrica Webvisor Fix**: Moved Yandex Metrika from deferred loading (4s timeout) to immediate loading in `<head>` so Webvisor captures styles correctly
+- **MyBookings Cancel Button**: Added "Annuler" button on each booking card
+- **Auth Redirect Fix**: MyBookings + MyAccount now wait for `authLoading` before redirecting to homepage
+- **XHR Conversion (Complete)**: All authService functions in api.js converted to XMLHttpRequest to avoid Stripe.js fetch() interception
+
+### Session Apr 19, 2026
 - **Checkout "body stream already read" Bug Fix (P0)**: Fixed JS error blocking card addition for existing users
   - Root cause: Stripe.js intercepts native `fetch()` and consumes the Response body stream before application code reads it
   - Fix: Converted all `fetch()` calls in `Checkout.js` to `XMLHttpRequest` (not intercepted by Stripe.js), matching the established pattern in `api.js` `submitBooking`
