@@ -322,4 +322,83 @@
   <url><loc>https://www.zont.cab/transfer-disneylend-parizh</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.zont.cab/disneylend-pariz-transfer</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
 
+  <!-- ==================== GARE DE LYON ==================== -->
+  <url>
+    <loc>https://www.zont.cab/gare-de-lyon-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/gare-de-lyon-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-gare-de-lyon"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/transfer-gar-de-lion"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/gar-de-lion-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-gare-de-lyon"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url><loc>https://www.zont.cab/transfert-gare-de-lyon</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/transfer-gar-de-lion</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/gar-de-lion-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!-- ==================== GARE DU NORD ==================== -->
+  <url>
+    <loc>https://www.zont.cab/gare-du-nord-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/gare-du-nord-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-gare-du-nord"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/transfer-gar-dyu-nor"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/gar-dyu-nor-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-gare-du-nord"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url><loc>https://www.zont.cab/transfert-gare-du-nord</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/transfer-gar-dyu-nor</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/gar-dyu-nor-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!-- ==================== GARE MONTPARNASSE ==================== -->
+  <url>
+    <loc>https://www.zont.cab/gare-montparnasse-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/gare-montparnasse-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-gare-montparnasse"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/transfer-gar-monparnas"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/gar-monparnas-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-gare-montparnasse"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url><loc>https://www.zont.cab/transfert-gare-montparnasse</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/transfer-gar-monparnas</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/gar-monparnas-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!-- ==================== GARE SAINT-LAZARE ==================== -->
+  <url>
+    <loc>https://www.zont.cab/gare-saint-lazare-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/gare-saint-lazare-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-gare-saint-lazare"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/transfer-gar-sen-lazar"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/gar-sen-lazar-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-gare-saint-lazare"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url><loc>https://www.zont.cab/transfert-gare-saint-lazare</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/transfer-gar-sen-lazar</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/gar-sen-lazar-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!-- ==================== GARE D'AUSTERLITZ ==================== -->
+  <url>
+    <loc>https://www.zont.cab/gare-austerlitz-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/gare-austerlitz-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-gare-austerlitz"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/transfer-gar-osterlits"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/gar-osterlits-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-gare-austerlitz"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url><loc>https://www.zont.cab/transfert-gare-austerlitz</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/transfer-gar-osterlits</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/gar-osterlits-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!-- ==================== REVIEW / AVIS ==================== -->
+  <url><loc>https://www.zont.cab/review</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.zont.cab/avis</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+
 </urlset>
