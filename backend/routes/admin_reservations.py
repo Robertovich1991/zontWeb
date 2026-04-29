@@ -76,7 +76,7 @@ def _format_reservation(a):
 
 
 @router.get("")
-async def get_all_reservations(request: Request, max_id: int = 50):
+async def get_all_reservations(request: Request, max_id: int = 200):
     """Scan all C# auctions by ID and return formatted list."""
     token = await _get_company_token()
     if not token:
@@ -84,14 +84,29 @@ async def get_all_reservations(request: Request, max_id: int = 50):
 
     client = get_shared_client()
 
-    # Scan IDs 1 to max_id concurrently
-    tasks = [_fetch_auction(client, token, i) for i in range(1, max_id + 1)]
-    results = await asyncio.gather(*tasks)
-
+    # Scan IDs 1 to max_id concurrently in batches to avoid overloading
+    batch_size = 50
     reservations = []
-    for r in results:
-        if r:
-            reservations.append(_format_reservation(r))
+    consecutive_misses = 0
+
+    for batch_start in range(1, max_id + 1, batch_size):
+        batch_end = min(batch_start + batch_size, max_id + 1)
+        tasks = [_fetch_auction(client, token, i) for i in range(batch_start, batch_end)]
+        results = await asyncio.gather(*tasks)
+
+        batch_found = 0
+        for r in results:
+            if r:
+                reservations.append(_format_reservation(r))
+                batch_found += 1
+
+        # Stop early if a full batch returns nothing (no more reservations)
+        if batch_found == 0:
+            consecutive_misses += 1
+            if consecutive_misses >= 2:
+                break
+        else:
+            consecutive_misses = 0
 
     reservations.sort(key=lambda x: x.get("id", 0), reverse=True)
     return {"reservations": reservations, "total": len(reservations)}

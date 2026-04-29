@@ -28,7 +28,7 @@ export default function ReservationsManager() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${API}/api/admin/reservations?max_id=60`);
+        const res = await fetch(`${API}/api/admin/reservations`);
         const data = await res.json();
         setReservations(data.reservations || []);
       } catch (err) { console.error(err); }
