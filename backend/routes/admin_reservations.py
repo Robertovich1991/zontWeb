@@ -7,6 +7,12 @@ from routes.fleet_shared import get_shared_client, parse_csharp_date, CSHARP_API
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/admin/reservations", tags=["admin-reservations"])
 
+db = None
+
+def set_db(database):
+    global db
+    db = database
+
 # Use a known company token to scan auctions (C# has no admin-level get-all endpoint)
 _COMPANY_CREDS = {"username": "Nandetiri1@gmail.com", "password": "12345678"}
 
@@ -27,7 +33,7 @@ async def _fetch_auction(client, token, aid):
         resp = await client.get(
             f"{CSHARP_API}/api/Auction/company/auctions/{aid}",
             headers={"Authorization": f"Bearer {token}"},
-            timeout=5,
+            timeout=10,
         )
         if resp.status_code == 200:
             d = resp.json()
@@ -76,37 +82,42 @@ def _format_reservation(a):
 
 
 @router.get("")
-async def get_all_reservations(request: Request, max_id: int = 200):
-    """Scan all C# auctions by ID and return formatted list."""
+async def get_all_reservations(request: Request):
+    """Scan all C# auctions by ID in batches. Stores last known max_id in MongoDB."""
     token = await _get_company_token()
     if not token:
         return {"reservations": [], "error": "Auth failed"}
 
     client = get_shared_client()
 
-    # Scan IDs 1 to max_id concurrently in batches to avoid overloading
-    batch_size = 50
-    reservations = []
-    consecutive_misses = 0
+    # Get last known max_id from MongoDB
+    last_scan = await db.kv_store.find_one({"key": "reservations_max_id"}, {"_id": 0}) if db is not None else None
+    known_max = last_scan.get("value", 63) if last_scan else 63
 
-    for batch_start in range(1, max_id + 1, batch_size):
-        batch_end = min(batch_start + batch_size, max_id + 1)
+    # Scan full range: 1 to known_max + 20, in batches of 20
+    scan_up_to = known_max + 20
+    reservations = []
+    actual_max = 0
+
+    batch_size = 20
+    for batch_start in range(1, scan_up_to + 1, batch_size):
+        batch_end = min(batch_start + batch_size, scan_up_to + 1)
         tasks = [_fetch_auction(client, token, i) for i in range(batch_start, batch_end)]
         results = await asyncio.gather(*tasks)
-
-        batch_found = 0
         for r in results:
             if r:
                 reservations.append(_format_reservation(r))
-                batch_found += 1
+                rid = r.get("id", 0)
+                if rid > actual_max:
+                    actual_max = rid
 
-        # Stop early if a full batch returns nothing (no more reservations)
-        if batch_found == 0:
-            consecutive_misses += 1
-            if consecutive_misses >= 2:
-                break
-        else:
-            consecutive_misses = 0
+    # Update stored max_id
+    if db is not None and actual_max > 0:
+        await db.kv_store.update_one(
+            {"key": "reservations_max_id"},
+            {"$set": {"key": "reservations_max_id", "value": actual_max}},
+            upsert=True
+        )
 
     reservations.sort(key=lambda x: x.get("id", 0), reverse=True)
     return {"reservations": reservations, "total": len(reservations)}
