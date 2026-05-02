@@ -17,6 +17,7 @@ import {
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
+const GOOGLE_CLIENT_ID = '71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com';
 const STRIPE_PK = 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO';
 const stripePromise = loadStripe(STRIPE_PK);
 
@@ -60,6 +61,8 @@ const labels = {
     orSimilar: 'or similar',
     amountCharged: 'Amount to be charged',
     afterConfirmation: 'charged upon booking confirmation',
+    or: 'or',
+    phoneHint: 'Your driver may need to contact you upon arrival.',
   },
   fr: {
     title: 'Finalisez Votre Réservation',
@@ -100,6 +103,8 @@ const labels = {
     orSimilar: 'ou similaire',
     amountCharged: 'Montant a debiter',
     afterConfirmation: 'debite des la confirmation',
+    or: 'ou',
+    phoneHint: 'Votre chauffeur pourra vous contacter en cas de besoin a votre arrivee.',
   },
   ru: {
     title: 'Завершите Бронирование',
@@ -140,6 +145,8 @@ const labels = {
     orSimilar: 'или аналог',
     amountCharged: 'Сумма к оплате',
     afterConfirmation: 'списание при подтверждении',
+    or: 'или',
+    phoneHint: 'Водитель свяжется с вами при необходимости по прибытии.',
   },
   hy: {
     title: 'Ամրագրdelays',
@@ -246,6 +253,59 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   // Two-step flow: 1) Add card (0€ 3DS) → 2) Pay
   const [verifiedCardId, setVerifiedCardId] = useState(null);
   const [cardAddedBrand, setCardAddedBrand] = useState(null);
+
+  // Google Sign-In on checkout
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const googleBtnRef = React.useRef(null);
+
+  // Load Google Identity Services and render button
+  React.useEffect(() => {
+    if (isAuthenticated || authMode !== 'signup') return;
+    const renderGoogleBtn = () => {
+      if (!googleBtnRef.current || !window.google?.accounts?.id) return;
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+        auto_select: false,
+      });
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        type: 'standard',
+        theme: 'filled_blue',
+        size: 'large',
+        text: 'continue_with',
+        width: googleBtnRef.current.offsetWidth || 360,
+      });
+    };
+    if (window.google?.accounts?.id) {
+      renderGoogleBtn();
+    } else {
+      const s = document.createElement('script');
+      s.src = 'https://accounts.google.com/gsi/client';
+      s.async = true;
+      s.onload = renderGoogleBtn;
+      document.head.appendChild(s);
+    }
+  }, [isAuthenticated, authMode]);
+
+  const handleGoogleCredential = React.useCallback(async (response) => {
+    if (!response.credential) return;
+    setGoogleLoading(true);
+    try {
+      const result = await authService.googleLogin(response.credential);
+      onLoginDirect(result.user);
+      toast.success('Connexion Google reussie !');
+    } catch (err) {
+      const msg = err?.response?.data;
+      if (typeof msg === 'object') {
+        const firstErr = Object.values(msg)[0];
+        toast.error(Array.isArray(firstErr) ? firstErr[0] : (typeof firstErr === 'string' ? firstErr : 'Erreur Google'));
+      } else {
+        toast.error('Erreur de connexion Google');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  }, [onLoginDirect]);
 
   // Fetch saved cards when authenticated
   // Uses XHR instead of fetch to avoid Stripe.js intercepting the body stream
@@ -585,6 +645,21 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
 
           {authMode === 'signup' ? (
             <div className="space-y-3">
+              {/* Google Sign-In */}
+              <div className="mb-1">
+                <div ref={googleBtnRef} data-testid="checkout-google-btn" className="w-full" style={{ minHeight: 44 }} />
+                {googleLoading && (
+                  <div className="flex items-center justify-center gap-2 mt-2 text-sm text-gray-400">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Connexion Google...
+                  </div>
+                )}
+              </div>
+              {/* Separator */}
+              <div className="flex items-center gap-3 my-1">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-gray-500 uppercase">{c.or || 'ou'}</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.firstName} *</label>
@@ -614,6 +689,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                   error={errors.phone}
                   darkMode={true}
                 />
+                <p className="text-xs text-gray-500 mt-1.5">{c.phoneHint || 'Your driver may need to contact you upon arrival.'}</p>
                 {errors.phone && <p className="text-xs text-red-400 mt-1">{errors.phone}</p>}
               </div>
               <div>
@@ -650,17 +726,32 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         </div>
       )}
 
-      {/* Logged-in user info */}
+      {/* Logged-in user info + phone field if needed */}
       {isAuthenticated && user && (
-        <div className="bg-[#1e2d3d] border border-white/10 rounded-xl p-4 flex items-center gap-3" data-testid="logged-user-info">
-          <div className="w-10 h-10 bg-[#2ecc71]/10 rounded-full flex items-center justify-center flex-shrink-0">
-            <User className="w-5 h-5 text-[#2ecc71]" />
+        <div className="bg-[#1e2d3d] border border-white/10 rounded-xl p-4" data-testid="logged-user-info">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#2ecc71]/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="w-5 h-5 text-[#2ecc71]" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">{c.loggedAs}</p>
+              <p className="text-sm text-white font-medium">{user.name || user.firstName || 'Utilisateur'}</p>
+            </div>
+            <CheckCircle className="w-5 h-5 text-[#2ecc71] ml-auto" />
           </div>
-          <div>
-            <p className="text-xs text-gray-400">{c.loggedAs}</p>
-            <p className="text-sm text-white font-medium">{user.name || user.firstName || 'Utilisateur'}</p>
-          </div>
-          <CheckCircle className="w-5 h-5 text-[#2ecc71] ml-auto" />
+          {/* Phone field for users connected via Google (no phone from Google) */}
+          {!form.phone && (
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.phone}</label>
+              <PhoneInput
+                value={form.phone}
+                onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
+                onCountryChange={setPhoneCountry}
+                darkMode={true}
+              />
+              <p className="text-xs text-gray-500 mt-1.5">{c.phoneHint || 'Your driver may need to contact you upon arrival.'}</p>
+            </div>
+          )}
         </div>
       )}
 
