@@ -258,55 +258,6 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const [googleLoading, setGoogleLoading] = useState(false);
   const googleBtnRef = React.useRef(null);
 
-  // Load Google Identity Services and render button
-  React.useEffect(() => {
-    if (isAuthenticated || authMode !== 'signup') return;
-    const renderGoogleBtn = () => {
-      if (!googleBtnRef.current || !window.google?.accounts?.id) return;
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredential,
-        auto_select: false,
-      });
-      window.google.accounts.id.renderButton(googleBtnRef.current, {
-        type: 'standard',
-        theme: 'filled_blue',
-        size: 'large',
-        text: 'continue_with',
-        width: googleBtnRef.current.offsetWidth || 360,
-      });
-    };
-    if (window.google?.accounts?.id) {
-      renderGoogleBtn();
-    } else {
-      const s = document.createElement('script');
-      s.src = 'https://accounts.google.com/gsi/client';
-      s.async = true;
-      s.onload = renderGoogleBtn;
-      document.head.appendChild(s);
-    }
-  }, [isAuthenticated, authMode]);
-
-  const handleGoogleCredential = React.useCallback(async (response) => {
-    if (!response.credential) return;
-    setGoogleLoading(true);
-    try {
-      const result = await authService.googleLogin(response.credential);
-      onLoginDirect(result.user);
-      toast.success('Connexion Google reussie !');
-    } catch (err) {
-      const msg = err?.response?.data;
-      if (typeof msg === 'object') {
-        const firstErr = Object.values(msg)[0];
-        toast.error(Array.isArray(firstErr) ? firstErr[0] : (typeof firstErr === 'string' ? firstErr : 'Erreur Google'));
-      } else {
-        toast.error('Erreur de connexion Google');
-      }
-    } finally {
-      setGoogleLoading(false);
-    }
-  }, [onLoginDirect]);
-
   // Fetch saved cards when authenticated
   // Uses XHR instead of fetch to avoid Stripe.js intercepting the body stream
   useEffect(() => {
@@ -381,6 +332,55 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '', password: '',
   });
+
+  // Google Sign-In: load GIS and render button
+  const handleGoogleCredential = React.useCallback(async (response) => {
+    if (!response.credential) return;
+    setGoogleLoading(true);
+    try {
+      const result = await authService.googleLogin(response.credential);
+      onLoginDirect(result.user);
+      toast.success('Connexion Google reussie !');
+    } catch (err) {
+      const msg = err?.response?.data;
+      if (typeof msg === 'object') {
+        const firstErr = Object.values(msg)[0];
+        toast.error(Array.isArray(firstErr) ? firstErr[0] : (typeof firstErr === 'string' ? firstErr : 'Erreur Google'));
+      } else {
+        toast.error('Erreur de connexion Google');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  }, [onLoginDirect]);
+
+  React.useEffect(() => {
+    if (isAuthenticated || authMode !== 'signup') return;
+    const renderGoogleBtn = () => {
+      if (!googleBtnRef.current || !window.google?.accounts?.id) return;
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+        auto_select: false,
+      });
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        type: 'standard',
+        theme: 'filled_blue',
+        size: 'large',
+        text: 'continue_with',
+        width: googleBtnRef.current.offsetWidth || 360,
+      });
+    };
+    if (window.google?.accounts?.id) {
+      renderGoogleBtn();
+    } else {
+      const s = document.createElement('script');
+      s.src = 'https://accounts.google.com/gsi/client';
+      s.async = true;
+      s.onload = renderGoogleBtn;
+      document.head.appendChild(s);
+    }
+  }, [isAuthenticated, authMode, handleGoogleCredential]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
