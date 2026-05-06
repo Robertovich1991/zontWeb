@@ -254,7 +254,7 @@ const Partners = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0c1220]" data-testid="partners-page">
+    <div className="min-h-screen flex flex-col bg-white" data-testid="partners-page">
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
@@ -275,23 +275,23 @@ const Partners = () => {
 
       {/* Hero */}
       <section className="relative pt-24 pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0c1220] via-[#111b2e] to-[#0c1220]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f8fafc] via-white to-[#f8fafc]" />
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(46,204,113,0.4) 1px, transparent 0)', backgroundSize: '48px 48px' }} />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center">
           <span className="inline-block mb-5 px-5 py-1.5 bg-[#2ecc71]/10 text-[#2ecc71] text-xs font-semibold tracking-widest uppercase rounded-full border border-[#2ecc71]/20" data-testid="b2b-badge">
             {c.badge}
           </span>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 max-w-4xl mx-auto" data-testid="partners-h1">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6 max-w-4xl mx-auto" data-testid="partners-h1">
             {c.heroTitle}
           </h1>
-          <p className="text-lg text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
             {c.heroSub}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={scrollToContact} className="px-10 py-4 bg-[#2ecc71] text-white font-bold rounded-lg hover:bg-[#27ae60] transition-all shadow-lg shadow-[#2ecc71]/20 text-lg" data-testid="cta-become-partner">
               {c.ctaPartner}
             </button>
-            <button onClick={scrollToContact} className="px-10 py-4 border-2 border-gray-500 text-white font-bold rounded-lg hover:border-[#2ecc71] hover:text-[#2ecc71] transition-all text-lg" data-testid="cta-request-quote">
+            <button onClick={scrollToContact} className="px-10 py-4 border-2 border-gray-300 text-gray-700 font-bold rounded-lg hover:border-[#2ecc71] hover:text-[#2ecc71] transition-all text-lg" data-testid="cta-request-quote">
               {c.ctaQuote}
             </button>
           </div>
@@ -299,21 +299,21 @@ const Partners = () => {
       </section>
 
       {/* Who We Work With */}
-      <section className="py-16 bg-[#111b2e]">
+      <section className="py-16 bg-[#f8fafc]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{c.whoTitle}</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">{c.whoSub}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3">{c.whoTitle}</h2>
+          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">{c.whoSub}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {targets.map((t, i) => (
-              <Link key={i} to={t.path} className="bg-[#1a2744]/60 border border-gray-700/30 rounded-xl p-5 hover:border-[#2ecc71]/40 transition-all group text-center" data-testid={`target-link-${i}`}>
+              <Link key={i} to={t.path} className="bg-white border border-gray-200 rounded-xl p-5 hover:border-[#2ecc71]/40 hover:shadow-lg transition-all group text-center" data-testid={`target-link-${i}`}>
                 <div className="w-12 h-12 rounded-full bg-[#2ecc71]/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-[#2ecc71]/20 transition-colors">
                   {[<Briefcase />, <Globe />, <Hotel />, <Star />, <Users />, <Building2 />, <ArrowRight />, <Plane />][i] && React.cloneElement([<Briefcase className="w-5 h-5 text-[#2ecc71]" />, <Globe className="w-5 h-5 text-[#2ecc71]" />, <Hotel className="w-5 h-5 text-[#2ecc71]" />, <Star className="w-5 h-5 text-[#2ecc71]" />, <Users className="w-5 h-5 text-[#2ecc71]" />, <Building2 className="w-5 h-5 text-[#2ecc71]" />, <ArrowRight className="w-5 h-5 text-[#2ecc71]" />, <Plane className="w-5 h-5 text-[#2ecc71]" />][i])}
                 </div>
-                <div className="text-white font-semibold group-hover:text-[#2ecc71] transition-colors mb-1">
+                <div className="text-gray-900 font-semibold group-hover:text-[#2ecc71] transition-colors mb-1">
                   {t.name[language] || t.name.en}
                 </div>
                 <div className="text-gray-500 text-xs">{t.tagline[language] || t.tagline.en}</div>
-                <ChevronRight className="w-4 h-4 text-gray-600 mx-auto mt-3 group-hover:text-[#2ecc71] transition-colors" />
+                <ChevronRight className="w-4 h-4 text-gray-400 mx-auto mt-3 group-hover:text-[#2ecc71] transition-colors" />
               </Link>
             ))}
           </div>
@@ -321,15 +321,15 @@ const Partners = () => {
       </section>
 
       {/* Services */}
-      <section className="py-16 bg-[#0c1220]">
+      <section className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{c.servicesTitle}</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">{c.servicesSub}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3">{c.servicesTitle}</h2>
+          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">{c.servicesSub}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {c.services.map((s, i) => (
-              <div key={i} className="bg-[#151f33] border border-gray-700/30 rounded-xl p-6">
-                <h3 className="text-white font-semibold mb-2">{s.title}</h3>
-                <p className="text-gray-400 text-sm">{s.desc}</p>
+              <div key={i} className="bg-[#f8fafc] border border-gray-200 rounded-xl p-6">
+                <h3 className="text-gray-900 font-semibold mb-2">{s.title}</h3>
+                <p className="text-gray-600 text-sm">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -337,13 +337,13 @@ const Partners = () => {
       </section>
 
       {/* Why Partner */}
-      <section className="py-16 bg-[#111b2e]">
+      <section className="py-16 bg-[#f8fafc]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{c.whyTitle}</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">{c.whySub}</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3">{c.whyTitle}</h2>
+          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">{c.whySub}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {c.whyPoints.map((p, i) => (
-              <div key={i} className="bg-[#1a2744]/60 border border-gray-700/30 rounded-xl p-6 hover:border-[#2ecc71]/30 transition-all">
+              <div key={i} className="bg-white border border-gray-200 rounded-xl p-6 hover:border-[#2ecc71]/30 hover:shadow-md transition-all">
                 <div className="w-10 h-10 rounded-lg bg-[#2ecc71]/10 flex items-center justify-center mb-4">
                   {p.icon === 'shield' && <Shield className="w-5 h-5 text-[#2ecc71]" />}
                   {p.icon === 'users' && <Users className="w-5 h-5 text-[#2ecc71]" />}
@@ -352,8 +352,8 @@ const Partners = () => {
                   {p.icon === 'clock' && <Clock className="w-5 h-5 text-[#2ecc71]" />}
                   {p.icon === 'headphones' && <Headphones className="w-5 h-5 text-[#2ecc71]" />}
                 </div>
-                <h3 className="text-white font-semibold mb-2">{p.title}</h3>
-                <p className="text-gray-400 text-sm">{p.desc}</p>
+                <h3 className="text-gray-900 font-semibold mb-2">{p.title}</h3>
+                <p className="text-gray-600 text-sm">{p.desc}</p>
               </div>
             ))}
           </div>
@@ -361,9 +361,9 @@ const Partners = () => {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 bg-[#0c1220]">
+      <section className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-12">{c.howTitle}</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-12">{c.howTitle}</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {c.howSteps.map((step, i) => (
               <div key={i} className="text-center relative">
@@ -371,8 +371,8 @@ const Partners = () => {
                   {i + 1}
                 </div>
                 {i < 3 && <div className="hidden md:block absolute top-7 left-[60%] w-[80%] h-px bg-gradient-to-r from-[#2ecc71]/40 to-transparent" />}
-                <h3 className="text-white font-semibold mb-2">{step.title}</h3>
-                <p className="text-gray-400 text-sm">{step.desc}</p>
+                <h3 className="text-gray-900 font-semibold mb-2">{step.title}</h3>
+                <p className="text-gray-600 text-sm">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -380,14 +380,14 @@ const Partners = () => {
       </section>
 
       {/* Trust */}
-      <section className="py-16 bg-[#111b2e]">
+      <section className="py-16 bg-[#f8fafc]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-12">{c.trustTitle}</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-12">{c.trustTitle}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {c.trustPoints.map((tp, i) => (
               <div key={i} className="text-center">
                 <div className="text-4xl font-bold text-[#2ecc71] mb-2">{tp.value}</div>
-                <div className="text-gray-400 text-sm">{tp.label}</div>
+                <div className="text-gray-600 text-sm">{tp.label}</div>
               </div>
             ))}
           </div>
@@ -395,28 +395,28 @@ const Partners = () => {
       </section>
 
       {/* Contact */}
-      <section ref={contactRef} className="py-20 bg-[#0c1220]" id="contact" data-testid="b2b-contact-section">
+      <section ref={contactRef} className="py-20 bg-white" id="contact" data-testid="b2b-contact-section">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="bg-gradient-to-br from-[#151f33] to-[#1a2744] border border-gray-700/40 rounded-2xl p-8 sm:p-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{c.contactTitle}</h2>
-            <p className="text-gray-400 text-center mb-8 max-w-xl mx-auto">{c.contactSub}</p>
+          <div className="bg-gradient-to-br bg-[#f8fafc] border border-gray-200 rounded-2xl p-8 sm:p-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3">{c.contactTitle}</h2>
+            <p className="text-gray-600 text-center mb-8 max-w-xl mx-auto">{c.contactSub}</p>
             {submitted ? (
               <div className="text-center py-8" data-testid="form-success">
                 <CheckCircle className="w-16 h-16 text-[#2ecc71] mx-auto mb-4" />
-                <p className="text-xl text-white font-semibold mb-2">{language === 'fr' ? 'Demande envoyee !' : language === 'ru' ? 'Запрос отправлен!' : language === 'hy' ? 'Հարցումը ուղարկվեց!' : 'Request sent!'}</p>
+                <p className="text-xl text-gray-900 font-semibold mb-2">{language === 'fr' ? 'Demande envoyee !' : language === 'ru' ? 'Запрос отправлен!' : language === 'hy' ? 'Հարցումը ուղարկվեց!' : 'Request sent!'}</p>
                 <p className="text-gray-400">{language === 'fr' ? 'Nous vous repondrons sous 24h.' : language === 'ru' ? 'Мы ответим в течение 24 часов.' : language === 'hy' ? 'Մենք կպատասխանենք 24 ժամվա ընթացքում:' : 'We will respond within 24 hours.'}</p>
               </div>
             ) : (
             <form className="space-y-4 max-w-lg mx-auto" onSubmit={handleSubmit} data-testid="b2b-contact-form">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input type="text" required placeholder={c.formName} value={formState.name} onChange={e => setFormState(p => ({...p, name: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-name" />
-                <input type="text" required placeholder={c.formCompany} value={formState.company} onChange={e => setFormState(p => ({...p, company: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-company" />
+                <input type="text" required placeholder={c.formName} value={formState.name} onChange={e => setFormState(p => ({...p, name: e.target.value}))} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71]" data-testid="form-name" />
+                <input type="text" required placeholder={c.formCompany} value={formState.company} onChange={e => setFormState(p => ({...p, company: e.target.value}))} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71]" data-testid="form-company" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input type="email" required placeholder={c.formEmail} value={formState.email} onChange={e => setFormState(p => ({...p, email: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-email" />
-                <input type="tel" placeholder={c.formPhone} value={formState.phone} onChange={e => setFormState(p => ({...p, phone: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71]" data-testid="form-phone" />
+                <input type="email" required placeholder={c.formEmail} value={formState.email} onChange={e => setFormState(p => ({...p, email: e.target.value}))} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71]" data-testid="form-email" />
+                <input type="tel" placeholder={c.formPhone} value={formState.phone} onChange={e => setFormState(p => ({...p, phone: e.target.value}))} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71]" data-testid="form-phone" />
               </div>
-              <textarea rows="4" placeholder={c.formMessage} value={formState.message} onChange={e => setFormState(p => ({...p, message: e.target.value}))} className="w-full px-4 py-3 bg-[#0c1220] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#2ecc71] resize-none" data-testid="form-message" />
+              <textarea rows="4" placeholder={c.formMessage} value={formState.message} onChange={e => setFormState(p => ({...p, message: e.target.value}))} className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] resize-none" data-testid="form-message" />
               {error && <p className="text-red-400 text-sm text-center">{error}</p>}
               <button type="submit" disabled={submitting} className="w-full py-3.5 bg-[#2ecc71] text-white font-semibold rounded-lg hover:bg-[#27ae60] transition-all shadow-lg shadow-[#2ecc71]/20 disabled:opacity-50" data-testid="form-submit">
                 {submitting ? '...' : c.formSubmit}
