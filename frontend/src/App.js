@@ -138,6 +138,7 @@ const DisneylandTransfer = lazy(() => import("@/pages/cities/DisneylandParis"));
 // B2B Pages (lazy)
 const Partners = lazy(() => import("@/pages/Partners"));
 const TermsOfUse = lazy(() => import("@/pages/TermsOfUse"));
+const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
 const TravelAgencies = lazy(() => import("@/pages/b2b/TravelAgencies"));
 const TourismAgencies = lazy(() => import("@/pages/b2b/TourismAgencies"));
 const HotelsB2B = lazy(() => import("@/pages/b2b/Hotels"));
@@ -296,6 +297,7 @@ function App() {
                   <Route path="/partners" element={<Partners />} />
                   <Route path="/terms" element={<TermsOfUse />} />
                   <Route path="/cgv" element={<TermsOfUse />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
                   {/* VTC Service Pages */}
                   <Route path="/vtc-8-places" element={<VTC8Places />} />
                   <Route path="/vtc-8-seats" element={<VTC8Places />} />
