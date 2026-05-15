@@ -151,19 +151,40 @@ class GoogleLoginRequest(BaseModel):
     idToken: str
 
 
+GOOGLE_CLIENT_ID = "199230843213-u4t2m5tvci7747elp6uqgloug12skek0.apps.googleusercontent.com"
+
+
 @router.post("/auth/google-login")
 async def proxy_google_login(req: GoogleLoginRequest):
-    """Login or register client via Google ID token → C# API."""
+    """Verify Google ID token ourselves, then login/register on C# with classic auth."""
+    from google.oauth2 import id_token as google_id_token
+    from google.auth.transport import requests as google_requests
+    import secrets
+    import string
+
+    # Step 1: Verify Google token
+    try:
+        idinfo = google_id_token.verify_oauth2_token(
+            req.idToken, google_requests.Request(), GOOGLE_CLIENT_ID
+        )
+    except Exception as e:
+        logger.error(f"Google token verification failed: {e}")
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    email = idinfo.get("email", "")
+    first_name = idinfo.get("given_name", "")
+    last_name = idinfo.get("family_name", "")
+
+    if not email:
+        raise HTTPException(status_code=400, detail="No email in Google token")
+
+    # Step 2: Try C# googleLogin first (in case C# accepts the token)
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             resp = await client.post(
                 f"{CSHARP_API}/api/Client/googleLogin",
                 json={"idToken": req.idToken},
-                headers={
-                    "Content-Type": "application/json",
-                    "Origin": "https://zont.cab",
-                    "Referer": "https://zont.cab/",
-                },
+                headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
             )
             if resp.status_code == 200:
                 data = resp.json()
@@ -176,21 +197,58 @@ async def proxy_google_login(req: GoogleLoginRequest):
                         )
                         if profile_resp.status_code == 200:
                             profile = profile_resp.json()
-                            data["firstName"] = profile.get("firstName", "")
-                            data["lastName"] = profile.get("lastName", "")
+                            data["firstName"] = profile.get("firstName", first_name)
+                            data["lastName"] = profile.get("lastName", last_name)
                     except Exception:
-                        pass
-                return data
-            try:
-                error_data = resp.json() if resp.text else {}
-            except Exception:
-                error_data = {}
-            raise HTTPException(status_code=resp.status_code if resp.status_code < 500 else 401, detail=error_data.get("message", "Google login failed - invalid token"))
+                        data["firstName"] = first_name
+                        data["lastName"] = last_name
+                    return data
+    except Exception:
+        pass
+
+    # Step 3: C# googleLogin failed — fallback to classic login/register
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
+
+            # Try register first (new user)
+            reg_resp = await client.post(
+                f"{CSHARP_API}/api/Client",
+                json={
+                    "firstName": first_name,
+                    "lastName": last_name,
+                    "email": email,
+                    "phoneNumber": "",
+                    "password": random_pass,
+                    "gender": "male",
+                    "dateOfBirth": "01/01/2000",
+                },
+                headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+
+            if reg_resp.status_code == 200:
+                # New user registered — login with generated password
+                login_resp = await client.post(
+                    f"{CSHARP_API}/api/Login/client",
+                    json={"username": email, "password": random_pass},
+                    headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+                )
+                if login_resp.status_code == 200:
+                    data = login_resp.json()
+                    data["firstName"] = first_name
+                    data["lastName"] = last_name
+                    return data
+
+            # Registration failed — user already exists, return helpful error
+            raise HTTPException(
+                status_code=400,
+                detail="This email is already registered. Please sign in with your email and password."
+            )
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Google login error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+        logger.error(f"Google login fallback error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach authentication service")
 
 
 @router.post("/auth/register-phone")
