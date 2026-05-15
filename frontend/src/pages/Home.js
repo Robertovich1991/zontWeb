@@ -143,7 +143,7 @@ const popularDest = [
   { nameEn: 'Barcelona', nameFr: 'Barcelone', nameRu: 'Барселона', nameHy: 'Բարսելոնա', price: 39, url: '/transfert-aeroport-barcelone' },
   { nameEn: 'Rome Airport Transfer', nameFr: 'Rome', nameRu: 'Рим', nameHy: 'Հռոմ', price: 40, url: '/transfert-aeroport-rome' },
   { nameEn: 'Berlin Airport Transfer', nameFr: 'Berlin', nameRu: 'Берлин', nameHy: 'Բեռլին', price: 45, url: '/transfert-aeroport-berlin' },
-  { nameEn: 'Monaco', nameFr: 'Monaco', nameRu: 'Монако', nameHy: 'Մոնակո', price: 65, url: '/transfert-aeroport-monaco' },
+  { nameEn: 'Monaco Limo Service', nameFr: 'Monaco', nameRu: 'Монако', nameHy: 'Մոնակո', price: 65, url: '/transfert-aeroport-monaco' },
 ];
 
 const homeSeoUrls = { en: '/', fr: '/fr', ru: '/ru', hy: '/hy' };
