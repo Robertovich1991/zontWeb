@@ -972,7 +972,7 @@ const Home = () => {
               {popularDest.map((d, i) => (
                 <Link key={i} to={d.url} className="group bg-[#0f1419] rounded-xl overflow-hidden border border-gray-700 hover:border-[#2ecc71] transition-all" data-testid={`popular-dest-${i}`}>
                   <div className="h-24 md:h-32 overflow-hidden">
-                    <img src={d.url.includes('disneyland') ? '/images/disneyland.webp' : i === 0 ? IMAGES.cdgDriver : i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    <img src={d.url.includes('disneyland') ? '/images/disneyland.webp' : d.url.includes('nice') ? '/images/nice-transfer.webp' : i === 0 ? IMAGES.cdgDriver : i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   </div>
                   <div className="p-3 md:p-4">
                     <h3 className="text-white font-bold text-sm md:text-base group-hover:text-[#2ecc71] transition-colors">{getName(d)}</h3>
