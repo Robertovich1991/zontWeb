@@ -683,13 +683,13 @@ const Home = () => {
         <section className="relative">
           <div className="absolute inset-0 z-0">
             <img src={IMAGES.hero} alt="Premium airport transfer Mercedes" className="w-full h-full object-cover" loading="eager" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#1a2332]/90 via-[#1a2332]/80 to-[#1a2332]"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#1a2332]/60 via-[#1a2332]/40 to-[#1a2332]/90"></div>
           </div>
           <div className="relative z-10 px-4 pt-8 pb-12 md:pt-16 md:pb-20">
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
                 {/* Left */}
-                <div className="text-center lg:text-left">
+                <div className="text-center lg:text-left bg-[#1a2332]/70 backdrop-blur-sm rounded-2xl p-6 lg:p-8">
                   <div className="flex justify-center lg:justify-start mb-4">
                     <button onClick={() => document.getElementById('tripadvisor-reviews')?.scrollIntoView({ behavior: 'smooth' })} className="bg-[#2ecc71]/20 text-[#2ecc71] px-4 py-1.5 rounded-full text-sm font-semibold inline-flex items-center cursor-pointer hover:bg-[#2ecc71]/30 transition-colors" data-testid="home-trust-badge">
                       <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />4.5/5 Tripadvisor - 29 {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : 'reviews'}
