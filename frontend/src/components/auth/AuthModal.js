@@ -161,13 +161,20 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
       toast.success('Connexion Google réussie !');
       handleClose();
     } catch (error) {
-      const apiErrors = parseApiErrors(error);
-      if (Object.keys(apiErrors).length > 0) {
-        setErrors({ general: Object.values(apiErrors)[0] || 'Erreur de connexion Google' });
+      const detail = error?.response?.data?.detail || '';
+      if (typeof detail === 'string' && detail.includes('already registered')) {
+        // Decode email from token and switch to sign-in
+        try {
+          const payload = JSON.parse(atob(idToken.split('.')[1]));
+          setFormData(prev => ({ ...prev, email: payload.email || '' }));
+        } catch {}
+        setMode('signin');
+        setStep('form');
+        toast.error('Cet email est deja enregistre. Connectez-vous avec votre mot de passe.');
       } else {
-        setErrors({ general: 'Erreur de connexion Google. Réessayez.' });
+        setErrors({ general: detail || 'Erreur de connexion Google. Réessayez.' });
+        toast.error(detail || 'Erreur de connexion Google');
       }
-      toast.error('Erreur de connexion Google');
     } finally {
       setLoading(false);
     }

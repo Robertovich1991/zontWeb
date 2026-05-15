@@ -342,12 +342,18 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       onLoginDirect(result.user);
       toast.success('Connexion Google reussie !');
     } catch (err) {
-      const msg = err?.response?.data;
-      if (typeof msg === 'object') {
-        const firstErr = Object.values(msg)[0];
-        toast.error(Array.isArray(firstErr) ? firstErr[0] : (typeof firstErr === 'string' ? firstErr : 'Erreur Google'));
+      const detail = err?.response?.data?.detail || err?.response?.data;
+      const detailStr = typeof detail === 'string' ? detail : '';
+      if (detailStr.includes('already registered')) {
+        // User exists — decode email from Google token and switch to sign-in mode
+        try {
+          const payload = JSON.parse(atob(response.credential.split('.')[1]));
+          setForm(prev => ({ ...prev, email: payload.email || '' }));
+        } catch {}
+        setAuthMode('signin');
+        toast.error('Cet email est deja enregistre. Connectez-vous avec votre mot de passe.');
       } else {
-        toast.error('Erreur de connexion Google');
+        toast.error(detailStr || 'Erreur de connexion Google');
       }
     } finally {
       setGoogleLoading(false);
