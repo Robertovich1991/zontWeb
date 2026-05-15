@@ -137,12 +137,12 @@ const homeContent = {
 };
 
 const popularDest = [
-  { nameEn: 'Paris CDG', nameFr: 'Paris CDG', nameRu: 'Париж CDG', nameHy: 'Փարիզ CDG', price: 59, url: '/transfert-aeroport-paris' },
-  { nameEn: 'Disneyland', nameFr: 'Disneyland', nameRu: 'Диснейленд', nameHy: 'Disneyland', price: 49, url: '/transfert-disneyland-paris' },
-  { nameEn: 'Nice', nameFr: 'Nice', nameRu: 'Ницца', nameHy: 'Նիցա', price: 35, url: '/transfert-aeroport-nice' },
+  { nameEn: 'Paris Airport Transfer', nameFr: 'Paris CDG', nameRu: 'Париж CDG', nameHy: 'Փարիզ CDG', price: 59, url: '/transfert-aeroport-paris' },
+  { nameEn: 'Disneyland Paris Transfer', nameFr: 'Disneyland', nameRu: 'Диснейленд', nameHy: 'Disneyland', price: 49, url: '/transfert-disneyland-paris' },
+  { nameEn: 'Nice Airport Transfer', nameFr: 'Nice', nameRu: 'Ницца', nameHy: 'Նიցա', price: 35, url: '/transfert-aeroport-nice' },
   { nameEn: 'Barcelona', nameFr: 'Barcelone', nameRu: 'Барселона', nameHy: 'Բարսելոնա', price: 39, url: '/transfert-aeroport-barcelone' },
-  { nameEn: 'Rome', nameFr: 'Rome', nameRu: 'Рим', nameHy: 'Հռոմ', price: 40, url: '/transfert-aeroport-rome' },
-  { nameEn: 'Berlin', nameFr: 'Berlin', nameRu: 'Берлин', nameHy: 'Բեռլին', price: 45, url: '/transfert-aeroport-berlin' },
+  { nameEn: 'Rome Airport Transfer', nameFr: 'Rome', nameRu: 'Рим', nameHy: 'Հռոմ', price: 40, url: '/transfert-aeroport-rome' },
+  { nameEn: 'Berlin Airport Transfer', nameFr: 'Berlin', nameRu: 'Берлин', nameHy: 'Բեռլին', price: 45, url: '/transfert-aeroport-berlin' },
   { nameEn: 'Monaco', nameFr: 'Monaco', nameRu: 'Монако', nameHy: 'Մոնակո', price: 65, url: '/transfert-aeroport-monaco' },
 ];
 
