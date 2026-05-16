@@ -103,7 +103,7 @@ const Header = () => {
                       className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors text-sm"
                       data-testid="nav-vtc-7-places"
                     >
-                      {language === 'en' ? 'Minivan 7 Seats' : language === 'ru' ? 'Минивэн 7 Мест' : language === 'hy' ? 'VTC 7 Տեղ' : 'Minivan 7 Places'}
+                      {language === 'en' ? 'Minivan 7 Seats' : language === 'ru' ? 'Минивэн 7 Мест' : language === 'hy' ? 'VTC 7 Տեղ' : 'VTC 7 Places'}
                     </Link>
                     <Link
                       to={language === 'en' ? '/vtc-8-seats' : language === 'ru' ? '/vtc-8-mest' : language === 'hy' ? '/vtc-8-tegh' : '/vtc-8-places'}
@@ -111,7 +111,7 @@ const Header = () => {
                       className="block px-4 py-2 text-white hover:bg-gray-700 transition-colors text-sm"
                       data-testid="nav-vtc-8-places"
                     >
-                      {language === 'en' ? 'Minibus 8 Seats' : language === 'ru' ? 'Минибус 8 Мест' : language === 'hy' ? 'VTC 8 Տեղ' : 'Minibus 8 Places'}
+                      {language === 'en' ? 'Minibus 8 Seats' : language === 'ru' ? 'Минибус 8 Мест' : language === 'hy' ? 'VTC 8 Տեղ' : 'VTC 8 Places'}
                     </Link>
                   </div>
                 )}
@@ -232,8 +232,8 @@ const Header = () => {
               </Link>
               <div className="py-1 pl-2 border-l-2 border-gray-600 space-y-1">
                 <p className="text-gray-400 text-xs uppercase tracking-wider">Services</p>
-                <Link to={language === 'en' ? '/vtc-7-seats' : language === 'ru' ? '/vtc-7-mest' : language === 'hy' ? '/vtc-7-tegh' : '/vtc-7-places'} onClick={() => setMobileMenuOpen(false)} className="block text-white hover:text-gray-300 py-1 text-sm" data-testid="nav-vtc-7-mobile">{language === 'en' ? 'Minivan 7 Seats' : language === 'ru' ? 'Минивэн 7 Мест' : language === 'hy' ? 'VTC 7 Տեղ' : 'Minivan 7 Places'}</Link>
-                <Link to={language === 'en' ? '/vtc-8-seats' : language === 'ru' ? '/vtc-8-mest' : language === 'hy' ? '/vtc-8-tegh' : '/vtc-8-places'} onClick={() => setMobileMenuOpen(false)} className="block text-white hover:text-gray-300 py-1 text-sm" data-testid="nav-vtc-8-mobile">{language === 'en' ? 'Minibus 8 Seats' : language === 'ru' ? 'Минибус 8 Мест' : language === 'hy' ? 'VTC 8 Տեղ' : 'Minibus 8 Places'}</Link>
+                <Link to={language === 'en' ? '/vtc-7-seats' : language === 'ru' ? '/vtc-7-mest' : language === 'hy' ? '/vtc-7-tegh' : '/vtc-7-places'} onClick={() => setMobileMenuOpen(false)} className="block text-white hover:text-gray-300 py-1 text-sm" data-testid="nav-vtc-7-mobile">{language === 'en' ? 'Minivan 7 Seats' : language === 'ru' ? 'Минивэн 7 Мест' : language === 'hy' ? 'VTC 7 Տեղ' : 'VTC 7 Places'}</Link>
+                <Link to={language === 'en' ? '/vtc-8-seats' : language === 'ru' ? '/vtc-8-mest' : language === 'hy' ? '/vtc-8-tegh' : '/vtc-8-places'} onClick={() => setMobileMenuOpen(false)} className="block text-white hover:text-gray-300 py-1 text-sm" data-testid="nav-vtc-8-mobile">{language === 'en' ? 'Minibus 8 Seats' : language === 'ru' ? 'Минибус 8 Мест' : language === 'hy' ? 'VTC 8 Տեղ' : 'VTC 8 Places'}</Link>
               </div>
               <Link
                 to="/help"
