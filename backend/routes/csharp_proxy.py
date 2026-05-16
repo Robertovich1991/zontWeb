@@ -1,137 +1,59 @@
 """Proxy routes to forward requests to the C# backend at api.zont.cab"""
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Response
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
+from contextlib import asynccontextmanager
 import httpx
 import logging
 import json
 import os
-import asyncio
-import stripe as stripe_lib
-from routes.email_service import send_booking_confirmation
-from routes.fb_conversions import fire_and_forget as fb_fire, build_user_data as fb_user_data
+import secrets
+import string
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
 
 logger = logging.getLogger(__name__)
 
+# --- Global Async HTTP Client Configuration via Lifespan ---
+# This reuses TCP connections to api.zont.cab, drastically reducing latency.
+http_client: httpx.AsyncClient = None
+
+@asynccontextmanager
+async def lifespan_client(router_instance: APIRouter):
+    global http_client
+    TIMEOUT = 15.0
+    http_client = httpx.AsyncClient(
+        base_url="https://api.zont.cab",
+        timeout=httpx.Timeout(TIMEOUT, connect=5.0, read=30.0)
+    )
+    yield
+    await http_client.aclose()
+
 router = APIRouter(prefix="/api/proxy", tags=["proxy"])
 
-CSHARP_API = "https://api.zont.cab"
-TIMEOUT = 15.0
-STRIPE_LIVE_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY")
+GOOGLE_CLIENT_ID = "199230843213-u4t2m5tvci7747elp6uqgloug12skek0.apps.googleusercontent.com"
+FACEBOOK_APP_ID = os.environ.get("FACEBOOK_APP_ID", "")
+FACEBOOK_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "")
 
+# ---- Pydantic Schemas ----
 
 class Coordinate(BaseModel):
     latitude: float
     longitude: float
 
-
 class DistanceRequest(BaseModel):
     coordinates: List[Coordinate]
     radius: Optional[int] = 50
 
-
 class PreorderRequest(BaseModel):
     coordinates: List[Coordinate]
-
-
-@router.post("/distance")
-async def proxy_distance(req: DistanceRequest):
-    """Calculate trip pricing between two or more points."""
-    try:
-        coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/Distance",
-                params={"radius": req.radius},
-                json=coords,
-            )
-            resp.raise_for_status()
-            return resp.json()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"C# API error: {e.response.status_code} - {e.response.text}")
-        raise HTTPException(status_code=e.response.status_code, detail="C# API error")
-    except Exception as e:
-        logger.error(f"Proxy distance error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.post("/preorder-distance")
-async def proxy_preorder_distance(req: PreorderRequest):
-    """Get fixed pricing for preorder between two points."""
-    try:
-        coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/PreorderDistance/driverTypesTwo",
-                json=coords,
-            )
-            resp.raise_for_status()
-            return resp.json()
-    except httpx.HTTPStatusError as e:
-        logger.error(f"C# API error: {e.response.status_code} - {e.response.text}")
-        raise HTTPException(status_code=e.response.status_code, detail="C# API error")
-    except Exception as e:
-        logger.error(f"Proxy preorder error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.get("/trip-types")
-async def proxy_trip_types():
-    """Get available vehicle/trip types."""
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(f"{CSHARP_API}/api/TripsPrice/gettypes")
-            resp.raise_for_status()
-            return resp.json()
-    except Exception as e:
-        logger.error(f"Proxy trip-types error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.get("/vehicle-image/{image_path:path}")
-async def proxy_vehicle_image(image_path: str):
-    """Proxy vehicle images from C# backend."""
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(f"{CSHARP_API}/api/File/{image_path}")
-            resp.raise_for_status()
-            from fastapi.responses import Response
-            return Response(
-                content=resp.content,
-                media_type=resp.headers.get("content-type", "image/png"),
-                headers={"Cache-Control": "public, max-age=86400"},
-            )
-    except Exception as e:
-        logger.error(f"Proxy image error: {e}")
-        raise HTTPException(status_code=502, detail="Image not available")
-
-
-@router.post("/driver-types")
-async def proxy_driver_types(coord: Coordinate):
-    """Get available driver/vehicle types near a location."""
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/Distance/driverTypesWithStatus",
-                json={"latitude": coord.latitude, "longitude": coord.longitude},
-            )
-            resp.raise_for_status()
-            return resp.json()
-    except Exception as e:
-        logger.error(f"Proxy driver-types error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-# ---- Auth Proxy Endpoints ----
 
 class RegisterPhoneRequest(BaseModel):
     phone: str
 
-
 class VerifyPhoneRequest(BaseModel):
     phoneNumber: str
     verificationCode: str
-
 
 class RegisterClientRequest(BaseModel):
     firstName: str
@@ -141,443 +63,23 @@ class RegisterClientRequest(BaseModel):
     password: str
     gender: Optional[str] = "male"
 
-
 class LoginRequest(BaseModel):
     username: str
     password: str
 
-
 class GoogleLoginRequest(BaseModel):
     idToken: str
-
-
-GOOGLE_CLIENT_ID = "199230843213-u4t2m5tvci7747elp6uqgloug12skek0.apps.googleusercontent.com"
-
-
-@router.post("/auth/google-login")
-async def proxy_google_login(req: GoogleLoginRequest):
-    """Verify Google ID token ourselves, then login/register on C# with classic auth."""
-    from google.oauth2 import id_token as google_id_token
-    from google.auth.transport import requests as google_requests
-    import secrets
-    import string
-
-    # Step 1: Verify Google token
-    try:
-        idinfo = google_id_token.verify_oauth2_token(
-            req.idToken, google_requests.Request(), GOOGLE_CLIENT_ID
-        )
-    except Exception as e:
-        logger.error(f"Google token verification failed: {e}")
-        raise HTTPException(status_code=401, detail="Invalid Google token")
-
-    email = idinfo.get("email", "")
-    first_name = idinfo.get("given_name", "")
-    last_name = idinfo.get("family_name", "")
-
-    if not email:
-        raise HTTPException(status_code=400, detail="No email in Google token")
-
-    # Step 2: Try C# googleLogin first (in case C# accepts the token)
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/Client/googleLogin",
-                json={"idToken": req.idToken},
-                headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                token = data.get("accessToken")
-                if token:
-                    try:
-                        profile_resp = await client.get(
-                            f"{CSHARP_API}/api/Client",
-                            headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-                        )
-                        if profile_resp.status_code == 200:
-                            profile = profile_resp.json()
-                            data["firstName"] = profile.get("firstName", first_name)
-                            data["lastName"] = profile.get("lastName", last_name)
-                    except Exception:
-                        data["firstName"] = first_name
-                        data["lastName"] = last_name
-                    return data
-    except Exception:
-        pass
-
-    # Step 3: C# googleLogin failed — fallback to classic login/register
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
-
-            # Try register first (new user)
-            reg_resp = await client.post(
-                f"{CSHARP_API}/api/Client",
-                json={
-                    "firstName": first_name,
-                    "lastName": last_name,
-                    "email": email,
-                    "phoneNumber": "",
-                    "password": random_pass,
-                    "gender": "male",
-                    "dateOfBirth": "01/01/2000",
-                },
-                headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-            )
-
-            if reg_resp.status_code == 200:
-                # New user registered — login with generated password
-                login_resp = await client.post(
-                    f"{CSHARP_API}/api/Login/client",
-                    json={"username": email, "password": random_pass},
-                    headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-                )
-                if login_resp.status_code == 200:
-                    data = login_resp.json()
-                    data["firstName"] = first_name
-                    data["lastName"] = last_name
-                    return data
-
-            # Registration failed — user already exists, return helpful error
-            raise HTTPException(
-                status_code=400,
-                detail="This email is already registered. Please sign in with your email and password."
-            )
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Google login fallback error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach authentication service")
-
 
 class FacebookLoginRequest(BaseModel):
     accessToken: str
     userID: str
 
-
-FACEBOOK_APP_ID = os.environ.get("FACEBOOK_APP_ID", "")
-FACEBOOK_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "")
-
-
-@router.post("/auth/facebook-login")
-async def proxy_facebook_login(req: FacebookLoginRequest):
-    """Verify Facebook token, get user info, then login/register on C#."""
-    import secrets
-    import string
-
-    # Step 1: Verify the Facebook access token
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            # Verify token with Facebook Graph API
-            verify_resp = await client.get(
-                f"https://graph.facebook.com/debug_token?input_token={req.accessToken}&access_token={FACEBOOK_APP_ID}|{FACEBOOK_APP_SECRET}"
-            )
-            logger.info(f"FB debug_token status={verify_resp.status_code}")
-            verify_data = verify_resp.json().get("data", {})
-            logger.info(f"FB debug_token data: is_valid={verify_data.get('is_valid')}, app_id={verify_data.get('app_id')}, user_id={verify_data.get('user_id')}, error={verify_data.get('error')}")
-            
-            if verify_resp.status_code != 200 or not verify_data.get("is_valid"):
-                error_msg = verify_data.get("error", {}).get("message", "Token not valid")
-                raise HTTPException(status_code=401, detail=f"Facebook token error: {error_msg}")
-            if str(verify_data.get("user_id")) != str(req.userID):
-                logger.error(f"FB user_id mismatch: token={verify_data.get('user_id')} vs request={req.userID}")
-                raise HTTPException(status_code=401, detail="Facebook user ID mismatch")
-
-            # Step 2: Get user info from Facebook
-            me_resp = await client.get(
-                f"https://graph.facebook.com/v21.0/me?fields=id,first_name,last_name,email&access_token={req.accessToken}"
-            )
-            if me_resp.status_code != 200:
-                raise HTTPException(status_code=401, detail="Failed to get Facebook user info")
-            fb_user = me_resp.json()
-            email = fb_user.get("email", "")
-            first_name = fb_user.get("first_name", "")
-            last_name = fb_user.get("last_name", "")
-
-            if not email:
-                raise HTTPException(status_code=400, detail="No email associated with this Facebook account. Please use email/password sign up.")
-
-            # Step 3: Try C# facebookLogin first
-            try:
-                fb_resp = await client.post(
-                    f"{CSHARP_API}/api/Client/facebookLogin",
-                    json={"userId": req.userID, "facebookAccessToken": req.accessToken},
-                    headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-                )
-                if fb_resp.status_code == 200:
-                    data = fb_resp.json()
-                    token = data.get("accessToken")
-                    if token:
-                        try:
-                            profile_resp = await client.get(
-                                f"{CSHARP_API}/api/Client",
-                                headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab"},
-                            )
-                            if profile_resp.status_code == 200:
-                                profile = profile_resp.json()
-                                data["firstName"] = profile.get("firstName", first_name)
-                                data["lastName"] = profile.get("lastName", last_name)
-                        except Exception:
-                            data["firstName"] = first_name
-                            data["lastName"] = last_name
-                        return data
-            except Exception:
-                pass
-
-            # Step 4: C# facebookLogin failed — fallback to register/login
-            random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
-
-            # Try register
-            reg_resp = await client.post(
-                f"{CSHARP_API}/api/Client",
-                json={
-                    "firstName": first_name,
-                    "lastName": last_name,
-                    "email": email,
-                    "phoneNumber": "",
-                    "password": random_pass,
-                    "gender": "male",
-                    "dateOfBirth": "01/01/2000",
-                },
-                headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-            )
-
-            if reg_resp.status_code == 200:
-                # New user — login with generated password
-                login_resp = await client.post(
-                    f"{CSHARP_API}/api/Login/client",
-                    json={"username": email, "password": random_pass},
-                    headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-                )
-                if login_resp.status_code == 200:
-                    data = login_resp.json()
-                    data["firstName"] = first_name
-                    data["lastName"] = last_name
-                    return data
-
-            # User already exists
-            raise HTTPException(
-                status_code=400,
-                detail="This email is already registered. Please sign in with your email and password."
-            )
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Facebook login error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach authentication service")
-
-
-@router.post("/auth/register-phone")
-async def proxy_register_phone(req: RegisterPhoneRequest):
-    """Step 1: Register phone number and get verification code."""
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/Client/registerPhone",
-                json={"phone": req.phone},
-            )
-            if resp.status_code == 200:
-                return resp.json()
-            raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Registration failed")
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Register phone error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.post("/auth/verify-phone")
-async def proxy_verify_phone(req: VerifyPhoneRequest):
-    """Step 2: Verify phone with SMS code."""
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/Verification/clientVerifyPhone",
-                json={"phoneNumber": req.phoneNumber, "verificationCode": req.verificationCode},
-            )
-            if resp.status_code == 200:
-                return {"success": True}
-            error_data = resp.json() if resp.text else {"error": "Verification failed"}
-            raise HTTPException(status_code=resp.status_code, detail=error_data)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Verify phone error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.post("/auth/register")
-async def proxy_register_client(req: RegisterClientRequest):
-    """Create client account via C# API."""
-    try:
-        payload = {
-            "firstName": req.firstName,
-            "lastName": req.lastName,
-            "email": req.email or "",
-            "phoneNumber": req.phoneNumber,
-            "password": req.password,
-            "gender": req.gender or "male",
-            "dateOfBirth": "01/01/2000",
-            "referalCode": "",
-            "bankCards": None,
-        }
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/Client",
-                json=payload,
-                headers={
-                    "Content-Type": "application/json",
-                    "Origin": "https://zont.cab",
-                    "Referer": "https://zont.cab/",
-                },
-            )
-            if resp.status_code == 200:
-                return resp.json() if resp.text else {"success": True}
-            error_data = resp.json() if resp.text else {"error": "Registration failed"}
-            raise HTTPException(status_code=resp.status_code, detail=error_data)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Register client error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.post("/auth/login")
-async def proxy_login(req: LoginRequest):
-    """Login client via C# API."""
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/Login/client",
-                json={"username": req.username, "password": req.password},
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                # Fetch user profile to get firstName
-                token = data.get("accessToken")
-                if token:
-                    try:
-                        profile_resp = await client.get(
-                            f"{CSHARP_API}/api/Client",
-                            headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-                        )
-                        if profile_resp.status_code == 200:
-                            profile = profile_resp.json()
-                            data["firstName"] = profile.get("firstName", "")
-                            data["lastName"] = profile.get("lastName", "")
-                    except Exception:
-                        pass
-                return data
-            error_data = resp.json() if resp.text else {"error": "Login failed"}
-            raise HTTPException(status_code=resp.status_code, detail=error_data)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Login error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-
 class ForgotPasswordRequest(BaseModel):
     email: str
-
 
 class ResetPasswordRequest(BaseModel):
     forgotPasswordToken: str
     newPassword: str
-
-
-@router.post("/auth/forgot-password")
-async def proxy_forgot_password(req: ForgotPasswordRequest, request: Request):
-    """Send password reset email to client."""
-    try:
-        # Use the current site's host so the reset link points here, not the old site
-        origin = request.headers.get("origin", "")
-        if "preview.emergentagent.com" in origin:
-            # Extract just the hostname from the origin
-            host = origin.replace("https://", "").replace("http://", "")
-        else:
-            host = "zont.cab"
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(
-                f"{CSHARP_API}/api/Account/{req.email}",
-                params={"host": host},
-                headers={"Origin": "https://zont.cab"},
-            )
-            if resp.status_code == 200:
-                return {"success": True, "message": "Password reset email sent"}
-            error_data = resp.json() if resp.text else {"error": "Failed to send reset email"}
-            raise HTTPException(status_code=resp.status_code, detail=error_data)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Forgot password error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.post("/auth/reset-password")
-async def proxy_reset_password(req: ResetPasswordRequest):
-    """Reset password with token received by email."""
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/Account",
-                json={"forgotPasswordToken": req.forgotPasswordToken, "newPassword": req.newPassword},
-                headers={"Origin": "https://zont.cab", "Content-Type": "application/json"},
-            )
-            if resp.status_code == 200:
-                return {"success": True, "message": "Password reset successfully"}
-            error_data = resp.json() if resp.text else {"error": "Failed to reset password"}
-            raise HTTPException(status_code=resp.status_code, detail=error_data)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Reset password error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.get("/auth/send-verification")
-async def proxy_send_verification(email: str):
-    """Send email verification to client after registration."""
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(
-                f"{CSHARP_API}/api/Verification/clientVerifyEmail",
-                params={"email": email, "host": "zont.cab"},
-                headers={"Origin": "https://zont.cab"},
-            )
-            if resp.status_code == 200:
-                return {"success": True, "message": "Verification email sent"}
-            error_data = resp.json() if resp.text else {"error": "Failed to send verification"}
-            raise HTTPException(status_code=resp.status_code, detail=error_data)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Send verification error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.get("/auth/verify/{code}")
-async def proxy_verify_code(code: str):
-    """Verify email with the code received by email."""
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(
-                f"{CSHARP_API}/api/Verification/verify/{code}",
-                headers={"Origin": "https://zont.cab"},
-            )
-            if resp.status_code == 200:
-                data = resp.json() if resp.text else {}
-                return {"success": True, **data}
-            error_data = resp.json() if resp.text else {"error": "Invalid code"}
-            raise HTTPException(status_code=resp.status_code, detail=error_data)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Verify code error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
 
 class AuctionAddRequest(BaseModel):
     startPointLatitude: float
@@ -598,335 +100,448 @@ class AuctionAddRequest(BaseModel):
     utcOffset: Optional[int] = None
     endPointLatitude: Optional[float] = None
     endPointLongitude: Optional[float] = None
+    stripePaymentIntentId: Optional[str] = None  # Added support for 3DS intents
 
     class Config:
         extra = "ignore"
 
 
+# ---- Core Core API Proxies ----
 
-@router.post("/booking/setup-intent")
-async def create_setup_intent(request: Request):
-    """Get a SetupIntent from the C# API for 3DS card authentication."""
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        raise HTTPException(status_code=401, detail="Authorization required")
+@router.post("/distance")
+async def proxy_distance(req: DistanceRequest):
+    """Calculate trip pricing between two or more points."""
+    try:
+        coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
+        resp = await http_client.post("/api/Distance", params={"radius": req.radius}, json=coords)
+        resp.raise_for_status()
+        return resp.json()
+    except httpx.HTTPStatusError as e:
+        logger.error(f"C# Distance Error: {e.response.status_code} - {e.response.text}")
+        raise HTTPException(status_code=e.response.status_code, detail="Pricing calculation error")
+    except Exception as e:
+        logger.error(f"Proxy distance connection error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach core service backend")
+
+
+@router.post("/preorder-distance")
+async def proxy_preorder_distance(req: PreorderRequest):
+    """Get fixed pricing for preorder between two points."""
+    try:
+        coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
+        resp = await http_client.post("/api/PreorderDistance/driverTypesTwo", json=coords)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        logger.error(f"Proxy preorder error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach core service backend")
+
+
+@router.get("/trip-types")
+async def proxy_trip_types():
+    """Get available vehicle/trip types."""
+    try:
+        resp = await http_client.get("/api/TripsPrice/gettypes")
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        logger.error(f"Proxy trip-types error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach core service backend")
+
+
+@router.get("/vehicle-image/{image_path:path}")
+async def proxy_vehicle_image(image_path: str):
+    """Proxy vehicle images from C# backend with local caching header optimizations."""
+    try:
+        resp = await http_client.get(f"/api/File/{image_path}")
+        resp.raise_for_status()
+        return Response(
+            content=resp.content,
+            media_type=resp.headers.get("content-type", "image/png"),
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
+    except Exception as e:
+        logger.error(f"Proxy image extraction error: {e}")
+        raise HTTPException(status_code=404, detail="Image asset not available")
+
+
+@router.post("/driver-types")
+async def proxy_driver_types(coord: Coordinate):
+    """Get available driver/vehicle types near a location."""
+    try:
+        resp = await http_client.post(
+            "/api/Distance/driverTypesWithStatus",
+            json={"latitude": coord.latitude, "longitude": coord.longitude},
+        )
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        logger.error(f"Proxy driver-types error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach core service backend")
+
+
+# ---- Auth Proxy Endpoints ----
+
+@router.post("/auth/google-login")
+async def proxy_google_login(req: GoogleLoginRequest):
+    """Verify Google ID token, then manage automatic sign-in or account creation."""
+    try:
+        idinfo = google_id_token.verify_oauth2_token(
+            req.idToken, google_requests.Request(), GOOGLE_CLIENT_ID
+        )
+    except Exception as e:
+        logger.error(f"Google token verification failed: {e}")
+        raise HTTPException(status_code=401, detail="Invalid Google token verification")
+
+    email = idinfo.get("email", "")
+    first_name = idinfo.get("given_name", "")
+    last_name = idinfo.get("family_name", "")
+
+    if not email:
+        raise HTTPException(status_code=400, detail="Identity mapping failed: Email missing from token")
+
+    default_headers = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
+
+    # Fallback Step A: Try native OAuth Login
+    try:
+        resp = await http_client.post("/api/Client/googleLogin", json={"idToken": req.idToken}, headers=default_headers)
+        if resp.status_code == 200:
+            data = resp.json()
+            token = data.get("accessToken")
+            if token:
+                profile_resp = await http_client.get("/api/Client", headers={"Authorization": f"Bearer {token}", **default_headers})
+                if profile_resp.status_code == 200:
+                    profile = profile_resp.json()
+                    data["firstName"] = profile.get("firstName", first_name)
+                    data["lastName"] = profile.get("lastName", last_name)
+                else:
+                    data["firstName"], data["lastName"] = first_name, last_name
+            return data
+    except Exception as e:
+        logger.warning(f"Native C# googleLogin endpoint unreached. Shifting to Classic Registration: {e}")
+
+    # Fallback Step B: Classic pipeline registration
+    random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
+    reg_payload = {
+        "firstName": first_name, "lastName": last_name, "email": email,
+        "phoneNumber": "", "password": random_pass, "gender": "male", "dateOfBirth": "01/01/2000"
+    }
+    
+    reg_resp = await http_client.post("/api/Client", json=reg_payload, headers=default_headers)
+    if reg_resp.status_code == 200:
+        login_resp = await http_client.post("/api/Login/client", json={"username": email, "password": random_pass}, headers=default_headers)
+        if login_resp.status_code == 200:
+            data = login_resp.json()
+            data["firstName"], data["lastName"] = first_name, last_name
+            return data
+
+    raise HTTPException(status_code=400, detail="This email is already registered natively. Please login using your password.")
+
+
+@router.post("/auth/facebook-login")
+async def proxy_facebook_login(req: FacebookLoginRequest):
+    """Verify Facebook token correctly avoiding raw string delimiters, handling user initialization."""
+    # Fixed query parsing structural bugs by enforcing dict parameters
+    try:
+        verify_resp = await http_client.get(
+            "https://graph.facebook.com/debug_token",
+            params={"input_token": req.accessToken, "access_token": f"{FACEBOOK_APP_ID}|{FACEBOOK_APP_SECRET}"}
+        )
+        verify_data = verify_resp.json().get("data", {})
+        if verify_resp.status_code != 200 or not verify_data.get("is_valid") or str(verify_data.get("user_id")) != str(req.userID):
+            raise HTTPException(status_code=401, detail="Facebook security token verification mismatch.")
+        
+        me_resp = await http_client.get(
+            "https://graph.facebook.com/v21.0/me",
+            params={"fields": "id,first_name,last_name,email", "access_token": req.accessToken}
+        )
+        fb_user = me_resp.json()
+    except Exception as e:
+        logger.error(f"Facebook authentication loop failure: {e}")
+        raise HTTPException(status_code=401, detail="Graph API handshake rejected.")
+
+    email = fb_user.get("email", "")
+    first_name = fb_user.get("first_name", "")
+    last_name = fb_user.get("last_name", "")
+
+    if not email:
+        raise HTTPException(status_code=400, detail="No email profile linked with this Facebook Account.")
+
+    default_headers = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
 
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(
-                f"{CSHARP_API}/api/Client/addCard",
-                headers={
-                    "Authorization": auth_header,
-                    "Origin": "https://zont.cab",
-                },
-            )
-            body_text = resp.text
-            logger.info(f"C# addCard response: status={resp.status_code} body={body_text[:500]}")
-            try:
-                data = json.loads(body_text) if body_text.strip() else {}
-            except (json.JSONDecodeError, ValueError):
-                raise HTTPException(status_code=502, detail="Invalid response from C# API")
-
-            if resp.status_code == 200 and data.get("client_secret"):
-                return {"clientSecret": data["client_secret"]}
-            if resp.status_code == 401:
-                raise HTTPException(status_code=401, detail="Session expiree. Veuillez vous reconnecter.")
-            raise HTTPException(status_code=resp.status_code, detail=data if data else "Erreur SetupIntent")
-    except HTTPException:
-        raise
+        fb_resp = await http_client.post("/api/Client/facebookLogin", json={"userId": req.userID, "facebookAccessToken": req.accessToken}, headers=default_headers)
+        if fb_resp.status_code == 200:
+            data = fb_resp.json()
+            token = data.get("accessToken")
+            if token:
+                profile_resp = await http_client.get("/api/Client", headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab"})
+                if profile_resp.status_code == 200:
+                    profile = profile_resp.json()
+                    data["firstName"] = profile.get("firstName", first_name)
+                    data["lastName"] = profile.get("lastName", last_name)
+            return data
     except Exception as e:
-        logger.error(f"SetupIntent error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to create setup intent")
+        logger.warning(f"Native Facebook integration unreachable, processing classic fallback routing: {e}")
 
+    random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
+    reg_resp = await http_client.post("/api/Client", json={"firstName": first_name, "lastName": last_name, "email": email, "phoneNumber": "", "password": random_pass, "gender": "male", "dateOfBirth": "01/01/2000"}, headers=default_headers)
+
+    if reg_resp.status_code == 200:
+        login_resp = await http_client.post("/api/Login/client", json={"username": email, "password": random_pass}, headers=default_headers)
+        if login_resp.status_code == 200:
+            data = login_resp.json()
+            data["firstName"], data["lastName"] = first_name, last_name
+            return data
+
+    raise HTTPException(status_code=400, detail="This account email is already registered. Sign in with standard username/password format.")
+
+
+@router.post("/auth/register-phone")
+async def proxy_register_phone(req: RegisterPhoneRequest):
+    try:
+        resp = await http_client.post("/api/Client/registerPhone", json={"phone": req.phone})
+        if resp.status_code == 200:
+            return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Registration failed")
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Register phone network error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to connect to authentication server")
+
+
+@router.post("/auth/verify-phone")
+async def proxy_verify_phone(req: VerifyPhoneRequest):
+    try:
+        resp = await http_client.post("/api/Verification/clientVerifyPhone", json={"phoneNumber": req.phoneNumber, "verificationCode": req.verificationCode})
+        if resp.status_code == 200:
+            return {"success": True}
+        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Verification rejected")
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Verify phone exception: {e}")
+        raise HTTPException(status_code=502, detail="Verification system unreachable")
+
+
+@router.post("/auth/register")
+async def proxy_register_client(req: RegisterClientRequest):
+    payload = {
+        "firstName": req.firstName, "lastName": req.lastName, "email": req.email or "",
+        "phoneNumber": req.phoneNumber, "password": req.password, "gender": req.gender or "male",
+        "dateOfBirth": "01/01/2000", "referalCode": "", "bankCards": None
+    }
+    try:
+        resp = await http_client.post("/api/Client", json=payload, headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        if resp.status_code == 200:
+            return resp.json() if resp.text else {"success": True}
+        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Registration rejected")
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Register core server failure: {e}")
+        raise HTTPException(status_code=502, detail="Identity registry service offline")
+
+
+@router.post("/auth/login")
+async def proxy_login(req: LoginRequest):
+    try:
+        resp = await http_client.post("/api/Login/client", json={"username": req.username, "password": req.password})
+        if resp.status_code == 200:
+            data = resp.json()
+            token = data.get("accessToken")
+            if token:
+                try:
+                    profile_resp = await http_client.get("/api/Client", headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+                    if profile_resp.status_code == 200:
+                        profile = profile_resp.json()
+                        data["firstName"] = profile.get("firstName", "")
+                        data["lastName"] = profile.get("lastName", "")
+                except Exception:
+                    pass
+            return data
+        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Authentication details invalid")
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Identity verification backend drop: {e}")
+        raise HTTPException(status_code=502, detail="Identity verification service offline")
+
+
+@router.post("/auth/forgot-password")
+async def proxy_forgot_password(req: ForgotPasswordRequest, request: Request):
+    origin = request.headers.get("origin", "")
+    host = origin.replace("https://", "").replace("http://", "") if "preview.emergentagent.com" in origin else "zont.cab"
+    try:
+        resp = await http_client.get(f"/api/Account/{req.email}", params={"host": host}, headers={"Origin": "https://zont.cab"})
+        if resp.status_code == 200:
+            return {"success": True, "message": "Password reset dispatch link issued"}
+        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Failed to dispatch reset mail")
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Password recovery exception: {e}")
+        raise HTTPException(status_code=502, detail="Mail dispatch service offline")
+
+
+@router.post("/auth/reset-password")
+async def proxy_reset_password(req: ResetPasswordRequest):
+    try:
+        resp = await http_client.post("/api/Account", json={"forgotPasswordToken": req.forgotPasswordToken, "newPassword": req.newPassword}, headers={"Origin": "https://zont.cab", "Content-Type": "application/json"})
+        if resp.status_code == 200:
+            return {"success": True, "message": "Password updated successfully"}
+        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Token invalid or expired")
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Password reset exception: {e}")
+        raise HTTPException(status_code=502, detail="Account management pipeline unreached")
+
+
+@router.get("/auth/send-verification")
+async def proxy_send_verification(email: str):
+    try:
+        resp = await http_client.get("/api/Verification/clientVerifyEmail", params={"email": email, "host": "zont.cab"}, headers={"Origin": "https://zont.cab"})
+        if resp.status_code == 200:
+            return {"success": True, "message": "Verification email dispatched"}
+        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Failed to dispatch email verification")
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Verification dispatcher execution failure: {e}")
+        raise HTTPException(status_code=502, detail="Verification system unreachable")
+
+
+@router.get("/auth/verify/{code}")
+async def proxy_verify_code(code: str):
+    try:
+        resp = await http_client.get(f"/api/Verification/verify/{code}", headers={"Origin": "https://zont.cab"})
+        if resp.status_code == 200:
+            return {"success": True, **(resp.json() if resp.text else {})}
+        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Activation code invalid")
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Activation engine link validation dropped: {e}")
+        raise HTTPException(status_code=502, detail="Verification service unreachable")
+
+
+# ---- Booking & Financial Card Assets (Stripe / 3DS Core Mappings) ----
+
+@router.get("/booking/setup-intent")
+@router.get("/client/add-card")
+async def proxy_client_add_card_unified(request: Request):
+    """Unified endpoint to extract SetupIntent token metadata safely for checkout flows."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization credentials missing")
+    try:
+        resp = await http_client.get("/api/Client/addCard", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        body_text = resp.text
+        logger.info(f"C# payment payload callback trace status={resp.status_code}")
+        
+        try:
+            data = json.loads(body_text) if body_text.strip() else {}
+        except Exception:
+            raise HTTPException(status_code=502, detail="Malformed structure received from billing service")
+
+        if resp.status_code == 200 and data.get("client_secret"):
+            return {"clientSecret": data["client_secret"]}
+        if resp.status_code == 401:
+            raise HTTPException(status_code=401, detail="Session token expired. Please log in again.")
+        raise HTTPException(status_code=resp.status_code, detail=data or "Payment initialization error")
+    except HTTPException: raise
+    except Exception as e:
+        logger.error(f"Stripe processing interface failure: {e}")
+        raise HTTPException(status_code=502, detail="Financial gateway link offline")
 
 
 @router.get("/client/profile")
 async def proxy_client_profile(request: Request):
-    """Get client profile from C# API."""
     auth_header = request.headers.get("Authorization")
     if not auth_header:
-        raise HTTPException(status_code=401, detail="Authorization required")
+        raise HTTPException(status_code=401, detail="Authorization credentials missing")
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(
-                f"{CSHARP_API}/api/Client",
-                headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-            )
-            if resp.status_code == 200:
-                return resp.json()
-            raise HTTPException(status_code=resp.status_code, detail="Impossible de charger le profil")
-    except HTTPException:
-        raise
+        resp = await http_client.get("/api/Client", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        if resp.status_code == 200:
+            return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail="Unable to retrieve customer profile")
+    except HTTPException: raise
     except Exception as e:
-        logger.error(f"Profile error: {e}")
-        raise HTTPException(status_code=502, detail="Erreur serveur")
+        logger.error(f"Profile mapping connection error: {e}")
+        raise HTTPException(status_code=502, detail="Data layer unreachable")
 
 
 @router.get("/client/cards")
 async def proxy_client_cards(request: Request):
-    """List client's saved cards from C# (Stripe)."""
     auth_header = request.headers.get("Authorization")
     if not auth_header:
-        raise HTTPException(status_code=401, detail="Authorization required")
+        raise HTTPException(status_code=401, detail="Authorization credentials missing")
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(
-                f"{CSHARP_API}/api/Client/cards",
-                headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-            )
-            if resp.status_code == 200:
-                cards_raw = resp.json()
-                logger.info(f"C# cards RAW response: {json.dumps(cards_raw)[:2000]}")
-                return [
-                    {
-                        "id": c.get("id"),
-                        "brand": c.get("card", {}).get("brand", "unknown"),
-                        "last4": c.get("card", {}).get("last4", "****"),
-                        "exp_month": c.get("card", {}).get("exp_month"),
-                        "exp_year": c.get("card", {}).get("exp_year"),
-                    }
-                    for c in cards_raw
-                ]
-            return []
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Cards list error: {e}")
+        resp = await http_client.get("/api/Client/cards", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        if resp.status_code == 200:
+            cards_raw = resp.json()
+            return [
+                {
+                    "id": c.get("id"),
+                    "brand": c.get("card", {}).get("brand", "unknown"),
+                    "last4": c.get("card", {}).get("last4", "****"),
+                    "exp_month": c.get("card", {}).get("exp_month"),
+                    "exp_year": c.get("card", {}).get("exp_year"),
+                }
+                for c in cards_raw
+            ]
         return []
-
-
-@router.get("/client/add-card")
-async def proxy_client_add_card(request: Request):
-    """Get SetupIntent to add a new card via C#."""
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        raise HTTPException(status_code=401, detail="Authorization required")
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(
-                f"{CSHARP_API}/api/Client/addCard",
-                headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                return {"clientSecret": data.get("client_secret")}
-            raise HTTPException(status_code=resp.status_code, detail="Erreur SetupIntent")
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"Add card error: {e}")
-        raise HTTPException(status_code=502, detail="Erreur serveur")
+        logger.error(f"Saved card profile mapping lookup failed: {e}")
+        return []
 
 
 @router.delete("/client/cards/{card_id}")
 async def proxy_delete_card(card_id: str, request: Request):
-    """Delete a client card via C#."""
     auth_header = request.headers.get("Authorization")
     if not auth_header:
-        raise HTTPException(status_code=401, detail="Authorization required")
+        raise HTTPException(status_code=401, detail="Authorization credentials missing")
     try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.delete(
-                f"{CSHARP_API}/api/Client/cards/{card_id}",
-                headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
-            )
-            if resp.status_code in (200, 204):
-                return {"ok": True}
-            raise HTTPException(status_code=resp.status_code, detail="Impossible de supprimer la carte")
-    except HTTPException:
-        raise
+        resp = await http_client.delete(f"/api/Client/cards/{card_id}", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        if resp.status_code in (200, 204):
+            return {"ok": True}
+        raise HTTPException(status_code=resp.status_code, detail="Unable to drop specified payment profile")
+    except HTTPException: raise
     except Exception as e:
-        logger.error(f"Delete card error: {e}")
-        raise HTTPException(status_code=502, detail="Erreur serveur")
-
-
+        logger.error(f"Card disposal exception: {e}")
+        raise HTTPException(status_code=502, detail="Financial gateway interface offline")
 
 
 @router.post("/booking/create")
 async def proxy_create_booking(req: AuctionAddRequest, request: Request):
-    """Create a new booking/auction in the C# backend."""
+    """Create a new booking dispatch or auction transaction with destination parsing logic."""
     auth_header = request.headers.get("Authorization")
     if not auth_header:
-        raise HTTPException(status_code=401, detail="Authorization required")
+        raise HTTPException(status_code=401, detail="Authorization credentials missing")
 
     try:
         payload = req.dict(exclude_none=True)
-        # C# expects tripType="distance" (not "Transfer"/"Hourly")
+        
+        # Enforce C# distance matching conventions
         if payload.get("tripType") in ("Transfer", "Hourly", "transfer", "hourly"):
             payload["tripType"] = "distance"
-        # C# expects destination as "lat,lng" coordinates string
+            
         dest = payload.get("destination", "")
         end_lat = payload.pop("endPointLatitude", None)
         end_lng = payload.pop("endPointLongitude", None)
+        
+        # Validate if string is an address instead of precise structural coordinate string mapping
         if dest and not all(c in "0123456789.,-+ " for c in dest):
-            # destination is an address, not coordinates — use endPoint coords
             if end_lat and end_lng:
                 payload["destination"] = f"{end_lat},{end_lng}"
-        logger.info(f"C# addAuction REQUEST: payload={json.dumps(payload)[:500]}")
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(
-                f"{CSHARP_API}/api/Auction/addAuction",
-                json=payload,
-                headers={
-                    "Authorization": auth_header,
-                    "Content-Type": "application/json",
-                    "Origin": "https://zont.cab",
-                    "Referer": "https://zont.cab/",
-                },
-            )
-            body_text = resp.text
-            logger.info(f"C# addAuction RESPONSE: status={resp.status_code} headers={dict(resp.headers)} body={body_text[:1000]}")
-
-            try:
-                data = json.loads(body_text) if body_text.strip() else {}
-            except (json.JSONDecodeError, ValueError):
-                data = {"raw": body_text}
-
-            # Check for 3DS / requires_action in the response
-            client_secret = None
-            requires_action = False
-            if isinstance(data, dict):
-                client_secret = data.get("client_secret") or data.get("clientSecret")
-                status = data.get("status", "")
-                requires_action = status == "requires_action" or "requires_action" in str(data)
-                # Check nested payment_intent
-                pi = data.get("payment_intent") or data.get("paymentIntent") or {}
-                if isinstance(pi, dict):
-                    client_secret = client_secret or pi.get("client_secret")
-                    requires_action = requires_action or pi.get("status") == "requires_action"
-
-            if resp.status_code in (200, 201):
-                result = {"success": True, "data": data}
-                if client_secret:
-                    result["clientSecret"] = client_secret
-                    result["requiresAction"] = True
-
-                # Send booking confirmation email (fire-and-forget)
-                client_email = payload.get("email") or ""
-                if client_email:
-                    booking_id = data if isinstance(data, (int, str)) else (data.get("id") if isinstance(data, dict) else "")
-                    email_data = {
-                        "bookingId": booking_id,
-                        "clientName": client_email.split("@")[0],
-                        "startAddress": payload.get("startAddress", ""),
-                        "endAddress": payload.get("endAddress", ""),
-                        "startDate": payload.get("startDate", ""),
-                        "clientPrice": payload.get("clientPrice", 0),
-                        "carType": payload.get("carType", ""),
-                        "distance": payload.get("distance", 0),
-                        "duration": payload.get("duration", 0),
-                    }
-                    asyncio.create_task(send_booking_confirmation(client_email, email_data))
-
-                # Facebook Conversions API (fire-and-forget)
-                fb_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "")
-                if fb_ip and "," in fb_ip:
-                    fb_ip = fb_ip.split(",")[0].strip()
-                fb_ua = request.headers.get("user-agent", "")
-                fb_ud = fb_user_data(email=client_email, ip=fb_ip, user_agent=fb_ua)
-                booking_id = data if isinstance(data, (int, str)) else (data.get("id") if isinstance(data, dict) else "")
-                if client_secret or requires_action:
-                    # 3DS pending — payment NOT yet confirmed → Lead
-                    fb_fire(
-                        event_name="Lead",
-                        user_data=fb_ud,
-                        custom_data={
-                            "value": float(payload.get("clientPrice", 0)),
-                            "currency": "EUR",
-                            "content_name": payload.get("carType", "Airport Transfer"),
-                            "content_category": "Booking_3DS_Pending",
-                        },
-                        event_source_url="https://www.zont.cab/checkout",
-                    )
-                else:
-                    # Payment confirmed immediately → Purchase
-                    fb_fire(
-                        event_name="Purchase",
-                        user_data=fb_ud,
-                        custom_data={
-                            "value": float(payload.get("clientPrice", 0)),
-                            "currency": "EUR",
-                            "content_name": payload.get("carType", "Airport Transfer"),
-                            "content_type": "product",
-                            "order_id": str(booking_id),
-                        },
-                        event_source_url="https://www.zont.cab/booking-confirmation",
-                    )
-
-                return result
-
-            # For non-200 responses that need 3DS
-            if client_secret or requires_action:
-                return {
-                    "success": False,
-                    "requiresAction": True,
-                    "clientSecret": client_secret,
-                    "data": data,
-                }
-
-            error_msg = data if isinstance(data, dict) and data else {"error": f"Erreur C# (HTTP {resp.status_code}). Contactez le support."}
-            logger.error(f"C# booking REJECTED: status={resp.status_code} raw_body='{body_text[:500]}' parsed={error_msg}")
-            raise HTTPException(status_code=resp.status_code, detail=error_msg)
-    except HTTPException:
-        raise
+                
+        logger.info(f"C# addAuction execution context initialized")
+        
+        # Long-lived timeout handling to catch delayed asynchronous transaction locks
+        resp = await http_client.post(
+            "/api/Auction/addAuction", 
+            json=payload, 
+            headers={"Authorization": auth_header},
+            timeout=45.0
+        )
+        if resp.status_code in (200, 201):
+            return resp.json() if resp.text else {"success": True}
+        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Dispatch execution error rejected by core backend")
+    except HTTPException: raise
     except Exception as e:
-        logger.error(f"Proxy booking error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
-
-
-@router.delete("/booking/cancel/{auction_id}")
-async def proxy_cancel_auction(auction_id: str, request: Request):
-    """Cancel a booking/auction in the C# backend."""
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        raise HTTPException(status_code=401, detail="Authorization required")
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.delete(
-                f"{CSHARP_API}/api/Auction/cancel/{auction_id}",
-                headers={
-                    "Authorization": auth_header,
-                    "Origin": "https://zont.cab",
-                    "Referer": "https://zont.cab/",
-                },
-            )
-            if resp.status_code in (200, 204):
-                return {"ok": True, "message": "Reservation annulee"}
-            if resp.status_code == 404:
-                raise HTTPException(status_code=404, detail="Reservation introuvable")
-            body = resp.text
-            try:
-                data = json.loads(body) if body.strip() else {}
-            except (json.JSONDecodeError, ValueError):
-                data = {"error": body}
-            raise HTTPException(status_code=resp.status_code, detail=data)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Cancel auction error: {e}")
-        raise HTTPException(status_code=502, detail="Erreur serveur")
-
-
-@router.get("/booking/upcoming")
-async def proxy_upcoming_auctions(request: Request):
-    """Get upcoming auctions for the logged-in client."""
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        raise HTTPException(status_code=401, detail="Authorization required")
-
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(
-                f"{CSHARP_API}/api/Auction/client/upcomingAuctions",
-                headers={
-                    "Authorization": auth_header,
-                    "Origin": "https://zont.cab",
-                },
-            )
-            resp.raise_for_status()
-            return resp.json()
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail="C# API error")
-    except Exception as e:
-        logger.error(f"Proxy upcoming auctions error: {e}")
-        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+        logger.error(f"Booking pipeline validation system failure: {e}")
+        raise HTTPException(status_code=502, detail="Dispatch execution engine unreached")

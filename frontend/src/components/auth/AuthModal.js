@@ -212,13 +212,15 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
         }
       }, { scope: 'email,public_profile' });
     };
-    if (window.FB) {
+    const initAndLogin = () => {
+      // Re-init FB SDK with our App ID to override Pixel's token
+      window.FB.init({ appId: FACEBOOK_APP_ID, cookie: true, xfbml: false, version: 'v21.0' });
       doFbLogin();
+    };
+    if (window.FB) {
+      initAndLogin();
     } else {
-      window.fbAsyncInit = function() {
-        window.FB.init({ appId: FACEBOOK_APP_ID, cookie: true, xfbml: false, version: 'v21.0' });
-        doFbLogin();
-      };
+      window.fbAsyncInit = function() { initAndLogin(); };
       const s = document.createElement('script');
       s.src = 'https://connect.facebook.net/en_US/sdk.js';
       s.async = true;
