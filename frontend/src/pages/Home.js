@@ -965,6 +965,59 @@ const Home = () => {
           </div>
         </section>
 
+        {/* Download App Section */}
+        <section className="py-16 px-4 bg-[#0a0f16]" data-testid="app-download-section">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-[#1a2332] to-[#0f1923] border border-gray-700/50 rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-12">
+              <div className="flex-1 text-center md:text-left">
+                <div className="inline-flex items-center gap-2 bg-[#2ecc71]/10 text-[#2ecc71] text-xs font-semibold px-3 py-1.5 rounded-full border border-[#2ecc71]/20 mb-4">
+                  <MapPin className="w-3.5 h-3.5" />
+                  GPS TRACKING
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">{c.appTitle || 'Track Your Booking in Real Time'}</h2>
+                <p className="text-gray-400 text-sm md:text-base mb-6 leading-relaxed">{c.appSubtitle || 'Download the Zont app'}</p>
+                <div className="flex flex-col gap-2.5 mb-8">
+                  <div className="flex items-center gap-2.5 text-sm text-gray-300 justify-center md:justify-start">
+                    <CheckCircle className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
+                    {c.appFeature1 || 'Live driver tracking'}
+                  </div>
+                  <div className="flex items-center gap-2.5 text-sm text-gray-300 justify-center md:justify-start">
+                    <CheckCircle className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
+                    {c.appFeature2 || 'Instant booking confirmations'}
+                  </div>
+                  <div className="flex items-center gap-2.5 text-sm text-gray-300 justify-center md:justify-start">
+                    <CheckCircle className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
+                    {c.appFeature3 || 'Manage reservations anywhere'}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 justify-center md:justify-start">
+                  <a href="https://apps.apple.com/am/app/zont-cab/id1468482270" target="_blank" rel="noopener noreferrer" data-testid="app-store-badge">
+                    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" className="h-11 hover:opacity-80 transition-opacity" />
+                  </a>
+                  <a href="https://play.google.com/store/apps/details?id=com.zont.rider" target="_blank" rel="noopener noreferrer" data-testid="google-play-badge">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" className="h-11 hover:opacity-80 transition-opacity" />
+                  </a>
+                </div>
+              </div>
+              <div className="flex-shrink-0 w-48 md:w-56">
+                <div className="bg-gradient-to-b from-[#2ecc71]/10 to-transparent rounded-3xl p-4 border border-[#2ecc71]/10">
+                  <div className="bg-[#0f1923] rounded-2xl p-4 flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-[#2ecc71] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2ecc71]/20">
+                      <MapPin className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="text-white font-bold text-lg">Zont</div>
+                    <div className="text-gray-500 text-xs text-center">Transfer & Taxi</div>
+                    <div className="flex items-center gap-1 mt-1">
+                      {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />)}
+                    </div>
+                    <div className="text-gray-500 text-xs">4.8 / 5</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Popular Destinations */}
         <section className="py-12 md:py-20 px-4 bg-[#1a2332]">
           <div className="max-w-7xl mx-auto">
@@ -1091,59 +1144,6 @@ const Home = () => {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">{c.reviewsTitle}</h2>
             <TripAdvisorReviews />
-          </div>
-        </section>
-
-        {/* Download App Section */}
-        <section className="py-16 px-4 bg-[#0a0f16]" data-testid="app-download-section">
-          <div className="max-w-5xl mx-auto">
-            <div className="bg-gradient-to-br from-[#1a2332] to-[#0f1923] border border-gray-700/50 rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-              <div className="flex-1 text-center md:text-left">
-                <div className="inline-flex items-center gap-2 bg-[#2ecc71]/10 text-[#2ecc71] text-xs font-semibold px-3 py-1.5 rounded-full border border-[#2ecc71]/20 mb-4">
-                  <MapPin className="w-3.5 h-3.5" />
-                  GPS TRACKING
-                </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">{c.appTitle || 'Track Your Booking in Real Time'}</h2>
-                <p className="text-gray-400 text-sm md:text-base mb-6 leading-relaxed">{c.appSubtitle || 'Download the Zont app'}</p>
-                <div className="flex flex-col gap-2.5 mb-8">
-                  <div className="flex items-center gap-2.5 text-sm text-gray-300 justify-center md:justify-start">
-                    <CheckCircle className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
-                    {c.appFeature1 || 'Live driver tracking'}
-                  </div>
-                  <div className="flex items-center gap-2.5 text-sm text-gray-300 justify-center md:justify-start">
-                    <CheckCircle className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
-                    {c.appFeature2 || 'Instant booking confirmations'}
-                  </div>
-                  <div className="flex items-center gap-2.5 text-sm text-gray-300 justify-center md:justify-start">
-                    <CheckCircle className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
-                    {c.appFeature3 || 'Manage reservations anywhere'}
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 justify-center md:justify-start">
-                  <a href="https://apps.apple.com/am/app/zont-cab/id1468482270" target="_blank" rel="noopener noreferrer" data-testid="app-store-badge">
-                    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" className="h-11 hover:opacity-80 transition-opacity" />
-                  </a>
-                  <a href="https://play.google.com/store/apps/details?id=com.zont.rider" target="_blank" rel="noopener noreferrer" data-testid="google-play-badge">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" className="h-11 hover:opacity-80 transition-opacity" />
-                  </a>
-                </div>
-              </div>
-              <div className="flex-shrink-0 w-48 md:w-56">
-                <div className="bg-gradient-to-b from-[#2ecc71]/10 to-transparent rounded-3xl p-4 border border-[#2ecc71]/10">
-                  <div className="bg-[#0f1923] rounded-2xl p-4 flex flex-col items-center gap-3">
-                    <div className="w-16 h-16 bg-[#2ecc71] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2ecc71]/20">
-                      <MapPin className="w-8 h-8 text-white" />
-                    </div>
-                    <div className="text-white font-bold text-lg">Zont</div>
-                    <div className="text-gray-500 text-xs text-center">Transfer & Taxi</div>
-                    <div className="flex items-center gap-1 mt-1">
-                      {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />)}
-                    </div>
-                    <div className="text-gray-500 text-xs">4.8 / 5</div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
