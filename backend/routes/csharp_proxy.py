@@ -273,12 +273,15 @@ async def proxy_facebook_login(req: FacebookLoginRequest):
             verify_resp = await client.get(
                 f"https://graph.facebook.com/debug_token?input_token={req.accessToken}&access_token={FACEBOOK_APP_ID}|{FACEBOOK_APP_SECRET}"
             )
-            if verify_resp.status_code != 200:
-                raise HTTPException(status_code=401, detail="Invalid Facebook token")
+            logger.info(f"FB debug_token status={verify_resp.status_code}")
             verify_data = verify_resp.json().get("data", {})
-            if not verify_data.get("is_valid"):
-                raise HTTPException(status_code=401, detail="Facebook token is not valid")
+            logger.info(f"FB debug_token data: is_valid={verify_data.get('is_valid')}, app_id={verify_data.get('app_id')}, user_id={verify_data.get('user_id')}, error={verify_data.get('error')}")
+            
+            if verify_resp.status_code != 200 or not verify_data.get("is_valid"):
+                error_msg = verify_data.get("error", {}).get("message", "Token not valid")
+                raise HTTPException(status_code=401, detail=f"Facebook token error: {error_msg}")
             if str(verify_data.get("user_id")) != str(req.userID):
+                logger.error(f"FB user_id mismatch: token={verify_data.get('user_id')} vs request={req.userID}")
                 raise HTTPException(status_code=401, detail="Facebook user ID mismatch")
 
             # Step 2: Get user info from Facebook
