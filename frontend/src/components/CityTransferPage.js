@@ -14,9 +14,10 @@ import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone
 
 const IMAGES = {
   hero: 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format',
-  sedan: 'https://images.unsplash.com/photo-1764090317623-06968349ad23?w=600&q=75&auto=format',
-  interior: 'https://images.unsplash.com/photo-1661220715153-95724e5f3500?w=600&q=75&auto=format',
-  airport: 'https://images.unsplash.com/photo-1689772640958-7c186dbdfe26?w=600&q=75&auto=format',
+  sedan: '/images/sedan-transfer.webp',
+  interior: '/images/luxury-sedan-transfer.webp',
+  airport: '/images/minibus-8-seats-transfer.webp',
+  minivan: '/images/minivan-7-seats-transfer.webp',
 };
 
 const trustLabels = {
@@ -121,7 +122,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   const vehicles = [
     { id: 1, name: c.sedan, desc: c.sedanDesc, passengers: 3, luggage: 3, price: vehiclesPrices?.sedan || 65, img: IMAGES.sedan },
     { id: 2, name: c.luxury, desc: c.luxuryDesc, passengers: 3, luggage: 3, price: vehiclesPrices?.luxury || 95, img: IMAGES.interior },
-    { id: 3, name: c.minivan, desc: c.minivanDesc, passengers: 6, luggage: 6, price: vehiclesPrices?.minivan || 120, img: IMAGES.sedan },
+    { id: 3, name: c.minivan, desc: c.minivanDesc, passengers: 6, luggage: 6, price: vehiclesPrices?.minivan || 120, img: IMAGES.minivan },
     { id: 4, name: c.minibus, desc: c.minibusDesc, passengers: 8, luggage: 8, price: vehiclesPrices?.minibus || 180, img: IMAGES.airport },
   ];
 
