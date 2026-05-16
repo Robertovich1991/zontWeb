@@ -251,6 +251,120 @@ async def proxy_google_login(req: GoogleLoginRequest):
         raise HTTPException(status_code=502, detail="Failed to reach authentication service")
 
 
+class FacebookLoginRequest(BaseModel):
+    accessToken: str
+    userID: str
+
+
+FACEBOOK_APP_ID = os.environ.get("FACEBOOK_APP_ID", "")
+FACEBOOK_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "")
+
+
+@router.post("/auth/facebook-login")
+async def proxy_facebook_login(req: FacebookLoginRequest):
+    """Verify Facebook token, get user info, then login/register on C#."""
+    import secrets
+    import string
+
+    # Step 1: Verify the Facebook access token
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            # Verify token with Facebook Graph API
+            verify_resp = await client.get(
+                f"https://graph.facebook.com/debug_token?input_token={req.accessToken}&access_token={FACEBOOK_APP_ID}|{FACEBOOK_APP_SECRET}"
+            )
+            if verify_resp.status_code != 200:
+                raise HTTPException(status_code=401, detail="Invalid Facebook token")
+            verify_data = verify_resp.json().get("data", {})
+            if not verify_data.get("is_valid"):
+                raise HTTPException(status_code=401, detail="Facebook token is not valid")
+            if str(verify_data.get("user_id")) != str(req.userID):
+                raise HTTPException(status_code=401, detail="Facebook user ID mismatch")
+
+            # Step 2: Get user info from Facebook
+            me_resp = await client.get(
+                f"https://graph.facebook.com/v21.0/me?fields=id,first_name,last_name,email&access_token={req.accessToken}"
+            )
+            if me_resp.status_code != 200:
+                raise HTTPException(status_code=401, detail="Failed to get Facebook user info")
+            fb_user = me_resp.json()
+            email = fb_user.get("email", "")
+            first_name = fb_user.get("first_name", "")
+            last_name = fb_user.get("last_name", "")
+
+            if not email:
+                raise HTTPException(status_code=400, detail="No email associated with this Facebook account. Please use email/password sign up.")
+
+            # Step 3: Try C# facebookLogin first
+            try:
+                fb_resp = await client.post(
+                    f"{CSHARP_API}/api/Client/facebookLogin",
+                    json={"userId": req.userID, "facebookAccessToken": req.accessToken},
+                    headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+                )
+                if fb_resp.status_code == 200:
+                    data = fb_resp.json()
+                    token = data.get("accessToken")
+                    if token:
+                        try:
+                            profile_resp = await client.get(
+                                f"{CSHARP_API}/api/Client",
+                                headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab"},
+                            )
+                            if profile_resp.status_code == 200:
+                                profile = profile_resp.json()
+                                data["firstName"] = profile.get("firstName", first_name)
+                                data["lastName"] = profile.get("lastName", last_name)
+                        except Exception:
+                            data["firstName"] = first_name
+                            data["lastName"] = last_name
+                        return data
+            except Exception:
+                pass
+
+            # Step 4: C# facebookLogin failed — fallback to register/login
+            random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
+
+            # Try register
+            reg_resp = await client.post(
+                f"{CSHARP_API}/api/Client",
+                json={
+                    "firstName": first_name,
+                    "lastName": last_name,
+                    "email": email,
+                    "phoneNumber": "",
+                    "password": random_pass,
+                    "gender": "male",
+                    "dateOfBirth": "01/01/2000",
+                },
+                headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+
+            if reg_resp.status_code == 200:
+                # New user — login with generated password
+                login_resp = await client.post(
+                    f"{CSHARP_API}/api/Login/client",
+                    json={"username": email, "password": random_pass},
+                    headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+                )
+                if login_resp.status_code == 200:
+                    data = login_resp.json()
+                    data["firstName"] = first_name
+                    data["lastName"] = last_name
+                    return data
+
+            # User already exists
+            raise HTTPException(
+                status_code=400,
+                detail="This email is already registered. Please sign in with your email and password."
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Facebook login error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach authentication service")
+
+
 @router.post("/auth/register-phone")
 async def proxy_register_phone(req: RegisterPhoneRequest):
     """Step 1: Register phone number and get verification code."""

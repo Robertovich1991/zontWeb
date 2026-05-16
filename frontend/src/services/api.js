@@ -182,6 +182,16 @@ export const authService = {
     return { user: { token: data.accessToken, roles: data.roles, name, firstName, lastName }, token: data.accessToken };
   },
 
+  facebookLogin: async (accessToken, userID) => {
+    const data = await xhrRequest('POST', `${API}/api/proxy/auth/facebook-login`, JSON.stringify({ accessToken, userID }), { 'Content-Type': 'application/json' });
+    const firstName = data.firstName || '';
+    const lastName = data.lastName || '';
+    const name = firstName ? `${firstName} ${lastName}`.trim() : '';
+    localStorage.setItem('auth_token', data.accessToken);
+    localStorage.setItem('user', JSON.stringify({ token: data.accessToken, roles: data.roles, name, firstName, lastName }));
+    return { user: { token: data.accessToken, roles: data.roles, name, firstName, lastName }, token: data.accessToken };
+  },
+
   login: async (credentials) => {
     const data = await xhrRequest('POST', `${API}/api/proxy/auth/login`, JSON.stringify({ username: credentials.email, password: credentials.password }), { 'Content-Type': 'application/json' });
     const firstName = data.firstName || '';

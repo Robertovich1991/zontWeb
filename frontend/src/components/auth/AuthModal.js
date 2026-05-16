@@ -6,6 +6,7 @@ import { authService } from '@/services/api';
 import PhoneInput from '@/components/PhoneInput';
 
 const GOOGLE_CLIENT_ID = '199230843213-u4t2m5tvci7747elp6uqgloug12skek0.apps.googleusercontent.com';
+const FACEBOOK_APP_ID = '973858222181967';
 
 // Map C# API error keys to French messages
 const errorTranslations = {
@@ -179,6 +180,64 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
       setLoading(false);
     }
   }, [login]);
+
+  // Facebook Login handler
+  const handleFacebookLogin = useCallback(() => {
+    setLoading(true);
+    setErrors({});
+    const doFbLogin = () => {
+      window.FB.login((response) => {
+        if (response.authResponse) {
+          const { accessToken, userID } = response.authResponse;
+          authService.facebookLogin(accessToken, userID)
+            .then(result => {
+              if (result.user) loginDirect(result.user);
+              toast.success('Connexion Facebook reussie !');
+              handleClose();
+            })
+            .catch(error => {
+              const detail = error?.response?.data?.detail || '';
+              if (typeof detail === 'string' && detail.includes('already registered')) {
+                setMode('signin');
+                setStep('form');
+                toast.error('Cet email est deja enregistre. Connectez-vous avec votre mot de passe.');
+              } else {
+                setErrors({ general: typeof detail === 'string' ? detail : 'Erreur Facebook' });
+                toast.error(typeof detail === 'string' ? detail : 'Erreur Facebook');
+              }
+            })
+            .finally(() => setLoading(false));
+        } else {
+          setLoading(false);
+        }
+      }, { scope: 'email,public_profile' });
+    };
+    if (window.FB) {
+      doFbLogin();
+    } else {
+      window.fbAsyncInit = function() {
+        window.FB.init({ appId: FACEBOOK_APP_ID, cookie: true, xfbml: false, version: 'v21.0' });
+        doFbLogin();
+      };
+      const s = document.createElement('script');
+      s.src = 'https://connect.facebook.net/en_US/sdk.js';
+      s.async = true;
+      document.head.appendChild(s);
+    }
+  }, [login]);
+
+  const FacebookLoginButton = ({ disabled }) => (
+    <button
+      type="button"
+      onClick={handleFacebookLogin}
+      disabled={disabled}
+      className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-[#1877F2] text-white font-medium rounded-md hover:bg-[#166FE5] transition-colors disabled:opacity-50"
+      data-testid="facebook-login-button"
+    >
+      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      Continue with Facebook
+    </button>
+  );
 
   // Client-side validation
   const validateSignUp = () => {
@@ -466,6 +525,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
           {mode === 'signin' && step === 'form' && (
             <>
               <GoogleSignInButton onSuccess={handleGoogleSuccess} disabled={loading} />
+              <FacebookLoginButton disabled={loading} />
               <OrDivider />
               <form onSubmit={handleSignIn} className="space-y-4" data-testid="signin-form">
                 <div>
@@ -527,6 +587,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
 
               {/* Google Sign-In */}
               <GoogleSignInButton onSuccess={handleGoogleSuccess} disabled={loading} />
+              <FacebookLoginButton disabled={loading} />
               <OrDivider />
               <form onSubmit={handleSignUp} className="space-y-3" data-testid="signup-form">
                 <div className="grid grid-cols-2 gap-3">

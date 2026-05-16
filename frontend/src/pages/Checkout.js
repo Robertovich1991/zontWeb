@@ -18,6 +18,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 const GOOGLE_CLIENT_ID = '199230843213-u4t2m5tvci7747elp6uqgloug12skek0.apps.googleusercontent.com';
+const FACEBOOK_APP_ID = '973858222181967';
 const STRIPE_PK = 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO';
 const stripePromise = loadStripe(STRIPE_PK);
 
@@ -258,6 +259,9 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const [googleLoading, setGoogleLoading] = useState(false);
   const googleBtnRef = React.useRef(null);
 
+  // Facebook Login on checkout
+  const [fbLoading, setFbLoading] = useState(false);
+
   // Fetch saved cards when authenticated
   // Uses XHR instead of fetch to avoid Stripe.js intercepting the body stream
   useEffect(() => {
@@ -387,6 +391,49 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       document.head.appendChild(s);
     }
   }, [isAuthenticated, authMode, handleGoogleCredential]);
+
+  // Facebook Login handler
+  const handleFacebookLogin = React.useCallback(() => {
+    setFbLoading(true);
+    const doFbLogin = () => {
+      window.FB.login((response) => {
+        if (response.authResponse) {
+          const { accessToken, userID } = response.authResponse;
+          authService.facebookLogin(accessToken, userID)
+            .then(result => {
+              onLoginDirect(result.user);
+              toast.success('Connexion Facebook reussie !');
+            })
+            .catch(err => {
+              const detail = err?.response?.data?.detail || '';
+              if (typeof detail === 'string' && detail.includes('already registered')) {
+                setAuthMode('signin');
+                toast.error('Cet email est deja enregistre. Connectez-vous avec votre mot de passe.');
+              } else {
+                toast.error(typeof detail === 'string' ? detail : 'Erreur Facebook');
+              }
+            })
+            .finally(() => setFbLoading(false));
+        } else {
+          setFbLoading(false);
+        }
+      }, { scope: 'email,public_profile' });
+    };
+
+    if (window.FB) {
+      doFbLogin();
+    } else {
+      // Load Facebook SDK
+      window.fbAsyncInit = function() {
+        window.FB.init({ appId: FACEBOOK_APP_ID, cookie: true, xfbml: false, version: 'v21.0' });
+        doFbLogin();
+      };
+      const s = document.createElement('script');
+      s.src = 'https://connect.facebook.net/en_US/sdk.js';
+      s.async = true;
+      document.head.appendChild(s);
+    }
+  }, [onLoginDirect]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -660,6 +707,21 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                   </div>
                 )}
               </div>
+              {/* Facebook Login */}
+              <button
+                type="button"
+                onClick={handleFacebookLogin}
+                disabled={fbLoading}
+                className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-[#1877F2] text-white font-medium rounded-md hover:bg-[#166FE5] transition-colors disabled:opacity-50"
+                data-testid="checkout-facebook-btn"
+              >
+                {fbLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                )}
+                Continue with Facebook
+              </button>
               {/* Separator */}
               <div className="flex items-center gap-3 my-1">
                 <div className="flex-1 h-px bg-white/10" />
