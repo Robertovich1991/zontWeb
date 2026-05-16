@@ -137,13 +137,13 @@ const homeContent = {
 };
 
 const popularDest = [
-  { nameEn: 'Paris Airport Transfer', nameFr: 'Paris CDG', nameRu: 'Париж CDG', nameHy: 'Փարիզ CDG', price: 59, url: '/transfert-aeroport-paris' },
-  { nameEn: 'Disneyland Paris Transfer', nameFr: 'Disneyland', nameRu: 'Диснейленд', nameHy: 'Disneyland', price: 49, url: '/transfert-disneyland-paris' },
-  { nameEn: 'Nice Airport Transfer', nameFr: 'Nice', nameRu: 'Ницца', nameHy: 'Նიցա', price: 35, url: '/transfert-aeroport-nice' },
-  { nameEn: 'Barcelona', nameFr: 'Barcelone', nameRu: 'Барселона', nameHy: 'Բարսելոնա', price: 39, url: '/transfert-aeroport-barcelone' },
-  { nameEn: 'Rome Airport Transfer', nameFr: 'Rome', nameRu: 'Рим', nameHy: 'Հռոմ', price: 40, url: '/transfert-aeroport-rome' },
-  { nameEn: 'Berlin Airport Transfer', nameFr: 'Berlin', nameRu: 'Берлин', nameHy: 'Բեռլին', price: 45, url: '/transfert-aeroport-berlin' },
-  { nameEn: 'Monaco Limo Service', nameFr: 'Monaco', nameRu: 'Монако', nameHy: 'Մոնակո', price: 65, url: '/transfert-aeroport-monaco' },
+  { nameEn: 'Paris Airport Transfer', nameFr: 'Paris CDG', nameRu: 'Париж CDG', nameHy: 'Փարիզ CDG', price: 59, urlEn: '/paris-airport-transfer', urlFr: '/transfert-aeroport-paris', urlRu: '/transfer-aeroport-parizh', urlHy: '/pariz-odanavakayan-transfer' },
+  { nameEn: 'Disneyland Paris Transfer', nameFr: 'Disneyland', nameRu: 'Диснейленд', nameHy: 'Disneyland', price: 49, urlEn: '/disneyland-paris-transfer', urlFr: '/transfert-disneyland-paris', urlRu: '/transfer-disneylend-parizh', urlHy: '/disneylend-pariz-transfer' },
+  { nameEn: 'Nice Airport Transfer', nameFr: 'Nice', nameRu: 'Ницца', nameHy: 'Նიցա', price: 35, urlEn: '/nice-airport-transfer', urlFr: '/transfert-aeroport-nice', urlRu: '/transfer-aeroport-nitstsa', urlHy: '/nits-odanavakayan-transfer' },
+  { nameEn: 'Barcelona', nameFr: 'Barcelone', nameRu: 'Барселона', nameHy: 'Բարսելոնա', price: 39, urlEn: '/barcelona-airport-transfer', urlFr: '/transfert-aeroport-barcelone', urlRu: '/transfer-aeroport-barselona', urlHy: '/barselona-odanavakayan-transfer' },
+  { nameEn: 'Rome Airport Transfer', nameFr: 'Rome', nameRu: 'Рим', nameHy: 'Հռոմ', price: 40, urlEn: '/rome-airport-transfer', urlFr: '/transfert-aeroport-rome', urlRu: '/transfer-aeroport-rim', urlHy: '/hrom-odanavakayan-transfer' },
+  { nameEn: 'Berlin Airport Transfer', nameFr: 'Berlin', nameRu: 'Берлин', nameHy: 'Բեռլին', price: 45, urlEn: '/berlin-airport-transfer', urlFr: '/transfert-aeroport-berlin', urlRu: '/transfer-aeroport-berlin', urlHy: '/berlin-odanavakayan-transfer' },
+  { nameEn: 'Monaco Limo Service', nameFr: 'Monaco', nameRu: 'Монако', nameHy: 'Մոնակո', price: 65, urlEn: '/monaco-airport-transfer', urlFr: '/transfert-aeroport-monaco', urlRu: '/transfer-aeroport-monako', urlHy: '/monako-odanavakayan-transfer' },
 ];
 
 const homeSeoUrls = { en: '/', fr: '/fr', ru: '/ru', hy: '/hy' };
@@ -642,6 +642,7 @@ const Home = () => {
   };
 
   const getName = (d) => language === 'fr' ? d.nameFr : language === 'ru' ? d.nameRu : language === 'hy' ? (d.nameHy || d.nameEn) : d.nameEn;
+  const getUrl = (d) => language === 'fr' ? d.urlFr : language === 'ru' ? d.urlRu : language === 'hy' ? (d.urlHy || d.urlEn) : d.urlEn;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="home-page">
@@ -970,9 +971,9 @@ const Home = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">{c.popularTitle}</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
               {popularDest.map((d, i) => (
-                <Link key={i} to={d.url} className="group bg-[#0f1419] rounded-xl overflow-hidden border border-gray-700 hover:border-[#2ecc71] transition-all" data-testid={`popular-dest-${i}`}>
+                <Link key={i} to={getUrl(d)} className="group bg-[#0f1419] rounded-xl overflow-hidden border border-gray-700 hover:border-[#2ecc71] transition-all" data-testid={`popular-dest-${i}`}>
                   <div className="h-24 md:h-32 overflow-hidden">
-                    <img src={d.url.includes('disneyland') ? '/images/disneyland.webp' : d.url.includes('nice') ? '/images/nice-transfer.webp' : i === 0 ? IMAGES.cdgDriver : i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    <img src={d.urlFr.includes('disneyland') ? '/images/disneyland.webp' : d.urlFr.includes('nice') ? '/images/nice-transfer.webp' : i === 0 ? IMAGES.cdgDriver : i % 2 === 0 ? IMAGES.sedan : IMAGES.airport} alt={getName(d)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   </div>
                   <div className="p-3 md:p-4">
                     <h3 className="text-white font-bold text-sm md:text-base group-hover:text-[#2ecc71] transition-colors">{getName(d)}</h3>
