@@ -4,7 +4,7 @@ import { Facebook, Instagram, Phone } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 const Footer = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   return (
     <footer className="bg-[#0f1419] text-white border-t border-gray-800" role="contentinfo">
@@ -22,8 +22,8 @@ const Footer = () => {
           <div>
             <h3 className="text-base font-semibold mb-3 text-gray-300">Nos Services</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/vtc-7-places" className="text-gray-400 hover:text-white transition-colors" data-testid="footer-vtc-7">VTC 7 Places</Link></li>
-              <li><Link to="/vtc-8-places" className="text-gray-400 hover:text-white transition-colors" data-testid="footer-vtc-8">VTC 8 Places</Link></li>
+              <li><Link to={language === 'en' ? '/vtc-7-seats' : language === 'ru' ? '/vtc-7-mest' : language === 'hy' ? '/vtc-7-tegh' : '/vtc-7-places'} className="text-gray-400 hover:text-white transition-colors" data-testid="footer-vtc-7">{language === 'en' ? 'Minivan 7 Seats' : language === 'ru' ? 'Минивэн 7 Мест' : 'VTC 7 Places'}</Link></li>
+              <li><Link to={language === 'en' ? '/vtc-8-seats' : language === 'ru' ? '/vtc-8-mest' : language === 'hy' ? '/vtc-8-tegh' : '/vtc-8-places'} className="text-gray-400 hover:text-white transition-colors" data-testid="footer-vtc-8">{language === 'en' ? 'Minibus 8 Seats' : language === 'ru' ? 'Минибус 8 Мест' : 'VTC 8 Places'}</Link></li>
               <li><Link to="/become-client" className="text-gray-400 hover:text-white transition-colors">{t('nav.becomeClient')}</Link></li>
               <li><Link to="/countries" className="text-gray-400 hover:text-white transition-colors">{t('nav.countries')}</Link></li>
             </ul>
