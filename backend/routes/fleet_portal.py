@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 import httpx
 import logging
+import time
 
 from routes.fleet_shared import (
     get_token, get_company_id, get_db,
@@ -349,13 +350,23 @@ async def fleet_assign_driver_to_vehicle(data: AssignDriverToVehicleRequest, req
 
 COMPANY_PENDING_STATUSES = {"ApprovedByAdmin"}
 
+# Cache for the expensive booking scan results
+_bookings_scan_cache: dict[str, tuple[float, list]] = {}
+BOOKINGS_CACHE_TTL = 45  # seconds
+
 
 @router.get("/bookings")
 async def fleet_bookings(request: Request, count: int = 20, pageNumber: int = 1, type: str = ""):
-    """Only show auctions sent by admin, pending driver assignment, with future dates."""
+    """Show auctions sent by admin, pending driver assignment, with future dates."""
     token = get_token(request)
     company_id = get_company_id(request)
     now = datetime.now()
+
+    # Check result cache first
+    cache_key = f"{token[-16:]}:bookings:{count}:{pageNumber}:{type}"
+    cached = _bookings_scan_cache.get(cache_key)
+    if cached and (time.time() - cached[0]) < BOOKINGS_CACHE_TTL:
+        return cached[1]
 
     params = f"count={count}&pageNumber={pageNumber}&isDescending=true"
     if type:
@@ -374,38 +385,36 @@ async def fleet_bookings(request: Request, count: int = 20, pageNumber: int = 1,
     ]
     seen_ids = {r["id"] for r in results}
 
-    # Scan for hidden pending auctions (C# list hides ApprovedByAdmin)
+    # Scan for hidden pending auctions — only on page 1, batched for speed
     if pageNumber == 1:
         max_id = max(all_ids) if all_ids else 0
-        min_id = min(all_ids) if all_ids else 0
-        scan_start = max(1, min_id - 10) if min_id > 0 else 1
-        scan_end = max_id + 35 if max_id > 0 else 35
+        scan_ids = [i for i in range(max_id + 1, max_id + 16) if i not in all_ids and i not in seen_ids]
 
-        async def check_auction(aid):
-            if aid in all_ids or aid in seen_ids:
+        if scan_ids:
+            import asyncio
+
+            async def check_auction(aid):
+                try:
+                    detail = await csharp_get(f"/api/Auction/company/auctions/{aid}", token, use_cache=True)
+                    if isinstance(detail, dict) and detail.get("id"):
+                        auction_company = detail.get("company") or {}
+                        if auction_company.get("id") == company_id or not auction_company.get("id"):
+                            if detail.get("status") in COMPANY_PENDING_STATUSES and is_future(detail):
+                                return detail
+                except Exception:
+                    pass
                 return None
-            try:
-                detail = await csharp_get(
-                    f"/api/Auction/company/auctions/{aid}", token, use_cache=True
-                )
-                if isinstance(detail, dict) and detail.get("id"):
-                    auction_company = detail.get("company") or {}
-                    if auction_company.get("id") == company_id or not auction_company.get("id"):
-                        if detail.get("status") in COMPANY_PENDING_STATUSES and is_future(detail):
-                            return detail
-            except Exception:
-                pass
-            return None
 
-        import asyncio
-        tasks = [check_auction(i) for i in range(scan_start, scan_end + 1)]
-        scan_results = await asyncio.gather(*tasks)
-        for item in scan_results:
-            if item and item.get("id") not in seen_ids:
-                results.append(format_auction(item))
-                seen_ids.add(item["id"])
+            scan_results = await asyncio.gather(*[check_auction(i) for i in scan_ids])
+            for item in scan_results:
+                if item and item.get("id") not in seen_ids:
+                    results.append(format_auction(item))
+                    seen_ids.add(item["id"])
+
         results.sort(key=lambda x: x.get("id", 0), reverse=True)
 
+    # Cache the result
+    _bookings_scan_cache[cache_key] = (time.time(), results)
     return results
 
 
