@@ -1,8 +1,14 @@
 /**
  * Facebook Pixel + Conversions API helper
  * Fires browser-side Pixel events AND mirrors them server-side for deduplication.
+ * ONLY fires on production domain (www.zont.cab / zont.cab).
  */
 const API = process.env.REACT_APP_BACKEND_URL;
+
+const isProduction = () => {
+  const host = window.location.hostname;
+  return host === 'www.zont.cab' || host === 'zont.cab';
+};
 
 // ---- helpers ----
 const genId = () =>
@@ -16,13 +22,15 @@ const getCookie = (name) => {
 };
 
 const fbq = (...args) => {
+  if (!isProduction()) return;
   if (typeof window !== 'undefined' && window.fbq) {
     window.fbq(...args);
   }
 };
 
-/** Send event server-side (fire-and-forget, no await) */
+/** Send event server-side (fire-and-forget, no await) — production only */
 const sendServer = (payload) => {
+  if (!isProduction()) return;
   try {
     fetch(`${API}/api/fb/track`, {
       method: 'POST',

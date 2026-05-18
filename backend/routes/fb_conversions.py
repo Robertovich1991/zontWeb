@@ -143,9 +143,19 @@ class TrackEventBody(BaseModel):
     order_id: Optional[str] = ""
 
 
+PRODUCTION_DOMAINS = {"www.zont.cab", "zont.cab"}
+
+
 @router.post("/track")
 async def track_event(body: TrackEventBody, request: Request):
     """Generic endpoint: frontend sends an event here for server-side deduplication."""
+    # Only process events from production domain
+    source_url = body.event_source_url or ""
+    from urllib.parse import urlparse
+    parsed = urlparse(source_url)
+    if parsed.hostname not in PRODUCTION_DOMAINS:
+        return {"status": "skipped", "reason": "non-production domain"}
+
     ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "")
     if ip and "," in ip:
         ip = ip.split(",")[0].strip()
