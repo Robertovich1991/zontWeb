@@ -17,17 +17,31 @@ logger = logging.getLogger(__name__)
 # --- Global Async HTTP Client Configuration via Lifespan ---
 # This reuses TCP connections to api.zont.cab, drastically reducing latency.
 http_client: httpx.AsyncClient = None
+_client_lock = None
+
+async def get_http_client():
+    global http_client, _client_lock
+    if _client_lock is None:
+        import asyncio
+        _client_lock = asyncio.Lock()
+    if http_client is None or http_client.is_closed:
+        async with _client_lock:
+            if http_client is None or http_client.is_closed:
+                http_client = httpx.AsyncClient(
+                    base_url="https://api.zont.cab",
+                    timeout=httpx.Timeout(15.0, connect=5.0, read=30.0)
+                )
+    return http_client
 
 @asynccontextmanager
 async def lifespan_client(router_instance: APIRouter):
     global http_client
-    TIMEOUT = 15.0
     http_client = httpx.AsyncClient(
         base_url="https://api.zont.cab",
-        timeout=httpx.Timeout(TIMEOUT, connect=5.0, read=30.0)
+        timeout=httpx.Timeout(15.0, connect=5.0, read=30.0)
     )
     yield
-    await http_client.aclose()
+    await (await get_http_client()).aclose()
 
 router = APIRouter(prefix="/api/proxy", tags=["proxy"])
 
@@ -113,7 +127,7 @@ async def proxy_distance(req: DistanceRequest):
     """Calculate trip pricing between two or more points."""
     try:
         coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        resp = await http_client.post("/api/Distance", params={"radius": req.radius}, json=coords)
+        resp = await (await get_http_client()).post("/api/Distance", params={"radius": req.radius}, json=coords)
         resp.raise_for_status()
         return resp.json()
     except httpx.HTTPStatusError as e:
@@ -129,7 +143,7 @@ async def proxy_preorder_distance(req: PreorderRequest):
     """Get fixed pricing for preorder between two points."""
     try:
         coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        resp = await http_client.post("/api/PreorderDistance/driverTypesTwo", json=coords)
+        resp = await (await get_http_client()).post("/api/PreorderDistance/driverTypesTwo", json=coords)
         resp.raise_for_status()
         return resp.json()
     except Exception as e:
@@ -141,7 +155,7 @@ async def proxy_preorder_distance(req: PreorderRequest):
 async def proxy_trip_types():
     """Get available vehicle/trip types."""
     try:
-        resp = await http_client.get("/api/TripsPrice/gettypes")
+        resp = await (await get_http_client()).get("/api/TripsPrice/gettypes")
         resp.raise_for_status()
         return resp.json()
     except Exception as e:
@@ -153,7 +167,7 @@ async def proxy_trip_types():
 async def proxy_vehicle_image(image_path: str):
     """Proxy vehicle images from C# backend with local caching header optimizations."""
     try:
-        resp = await http_client.get(f"/api/File/{image_path}")
+        resp = await (await get_http_client()).get(f"/api/File/{image_path}")
         resp.raise_for_status()
         return Response(
             content=resp.content,
@@ -169,7 +183,7 @@ async def proxy_vehicle_image(image_path: str):
 async def proxy_driver_types(coord: Coordinate):
     """Get available driver/vehicle types near a location."""
     try:
-        resp = await http_client.post(
+        resp = await (await get_http_client()).post(
             "/api/Distance/driverTypesWithStatus",
             json={"latitude": coord.latitude, "longitude": coord.longitude},
         )
@@ -204,12 +218,12 @@ async def proxy_google_login(req: GoogleLoginRequest):
 
     # Fallback Step A: Try native OAuth Login
     try:
-        resp = await http_client.post("/api/Client/googleLogin", json={"idToken": req.idToken}, headers=default_headers)
+        resp = await (await get_http_client()).post("/api/Client/googleLogin", json={"idToken": req.idToken}, headers=default_headers)
         if resp.status_code == 200:
             data = resp.json()
             token = data.get("accessToken")
             if token:
-                profile_resp = await http_client.get("/api/Client", headers={"Authorization": f"Bearer {token}", **default_headers})
+                profile_resp = await (await get_http_client()).get("/api/Client", headers={"Authorization": f"Bearer {token}", **default_headers})
                 if profile_resp.status_code == 200:
                     profile = profile_resp.json()
                     data["firstName"] = profile.get("firstName", first_name)
@@ -227,9 +241,9 @@ async def proxy_google_login(req: GoogleLoginRequest):
         "phoneNumber": "", "password": random_pass, "gender": "male", "dateOfBirth": "01/01/2000"
     }
     
-    reg_resp = await http_client.post("/api/Client", json=reg_payload, headers=default_headers)
+    reg_resp = await (await get_http_client()).post("/api/Client", json=reg_payload, headers=default_headers)
     if reg_resp.status_code == 200:
-        login_resp = await http_client.post("/api/Login/client", json={"username": email, "password": random_pass}, headers=default_headers)
+        login_resp = await (await get_http_client()).post("/api/Login/client", json={"username": email, "password": random_pass}, headers=default_headers)
         if login_resp.status_code == 200:
             data = login_resp.json()
             data["firstName"], data["lastName"] = first_name, last_name
@@ -243,7 +257,7 @@ async def proxy_facebook_login(req: FacebookLoginRequest):
     """Verify Facebook token correctly avoiding raw string delimiters, handling user initialization."""
     # Fixed query parsing structural bugs by enforcing dict parameters
     try:
-        verify_resp = await http_client.get(
+        verify_resp = await (await get_http_client()).get(
             "https://graph.facebook.com/debug_token",
             params={"input_token": req.accessToken, "access_token": f"{FACEBOOK_APP_ID}|{FACEBOOK_APP_SECRET}"}
         )
@@ -251,7 +265,7 @@ async def proxy_facebook_login(req: FacebookLoginRequest):
         if verify_resp.status_code != 200 or not verify_data.get("is_valid") or str(verify_data.get("user_id")) != str(req.userID):
             raise HTTPException(status_code=401, detail="Facebook security token verification mismatch.")
         
-        me_resp = await http_client.get(
+        me_resp = await (await get_http_client()).get(
             "https://graph.facebook.com/v21.0/me",
             params={"fields": "id,first_name,last_name,email", "access_token": req.accessToken}
         )
@@ -270,12 +284,12 @@ async def proxy_facebook_login(req: FacebookLoginRequest):
     default_headers = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
 
     try:
-        fb_resp = await http_client.post("/api/Client/facebookLogin", json={"userId": req.userID, "facebookAccessToken": req.accessToken}, headers=default_headers)
+        fb_resp = await (await get_http_client()).post("/api/Client/facebookLogin", json={"userId": req.userID, "facebookAccessToken": req.accessToken}, headers=default_headers)
         if fb_resp.status_code == 200:
             data = fb_resp.json()
             token = data.get("accessToken")
             if token:
-                profile_resp = await http_client.get("/api/Client", headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab"})
+                profile_resp = await (await get_http_client()).get("/api/Client", headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab"})
                 if profile_resp.status_code == 200:
                     profile = profile_resp.json()
                     data["firstName"] = profile.get("firstName", first_name)
@@ -285,10 +299,10 @@ async def proxy_facebook_login(req: FacebookLoginRequest):
         logger.warning(f"Native Facebook integration unreachable, processing classic fallback routing: {e}")
 
     random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
-    reg_resp = await http_client.post("/api/Client", json={"firstName": first_name, "lastName": last_name, "email": email, "phoneNumber": "", "password": random_pass, "gender": "male", "dateOfBirth": "01/01/2000"}, headers=default_headers)
+    reg_resp = await (await get_http_client()).post("/api/Client", json={"firstName": first_name, "lastName": last_name, "email": email, "phoneNumber": "", "password": random_pass, "gender": "male", "dateOfBirth": "01/01/2000"}, headers=default_headers)
 
     if reg_resp.status_code == 200:
-        login_resp = await http_client.post("/api/Login/client", json={"username": email, "password": random_pass}, headers=default_headers)
+        login_resp = await (await get_http_client()).post("/api/Login/client", json={"username": email, "password": random_pass}, headers=default_headers)
         if login_resp.status_code == 200:
             data = login_resp.json()
             data["firstName"], data["lastName"] = first_name, last_name
@@ -300,7 +314,7 @@ async def proxy_facebook_login(req: FacebookLoginRequest):
 @router.post("/auth/register-phone")
 async def proxy_register_phone(req: RegisterPhoneRequest):
     try:
-        resp = await http_client.post("/api/Client/registerPhone", json={"phone": req.phone})
+        resp = await (await get_http_client()).post("/api/Client/registerPhone", json={"phone": req.phone})
         if resp.status_code == 200:
             return resp.json()
         raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Registration failed")
@@ -313,7 +327,7 @@ async def proxy_register_phone(req: RegisterPhoneRequest):
 @router.post("/auth/verify-phone")
 async def proxy_verify_phone(req: VerifyPhoneRequest):
     try:
-        resp = await http_client.post("/api/Verification/clientVerifyPhone", json={"phoneNumber": req.phoneNumber, "verificationCode": req.verificationCode})
+        resp = await (await get_http_client()).post("/api/Verification/clientVerifyPhone", json={"phoneNumber": req.phoneNumber, "verificationCode": req.verificationCode})
         if resp.status_code == 200:
             return {"success": True}
         raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Verification rejected")
@@ -331,7 +345,7 @@ async def proxy_register_client(req: RegisterClientRequest):
         "dateOfBirth": "01/01/2000", "referalCode": "", "bankCards": None
     }
     try:
-        resp = await http_client.post("/api/Client", json=payload, headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        resp = await (await get_http_client()).post("/api/Client", json=payload, headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
         if resp.status_code == 200:
             return resp.json() if resp.text else {"success": True}
         raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Registration rejected")
@@ -344,13 +358,13 @@ async def proxy_register_client(req: RegisterClientRequest):
 @router.post("/auth/login")
 async def proxy_login(req: LoginRequest):
     try:
-        resp = await http_client.post("/api/Login/client", json={"username": req.username, "password": req.password})
+        resp = await (await get_http_client()).post("/api/Login/client", json={"username": req.username, "password": req.password})
         if resp.status_code == 200:
             data = resp.json()
             token = data.get("accessToken")
             if token:
                 try:
-                    profile_resp = await http_client.get("/api/Client", headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+                    profile_resp = await (await get_http_client()).get("/api/Client", headers={"Authorization": f"Bearer {token}", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
                     if profile_resp.status_code == 200:
                         profile = profile_resp.json()
                         data["firstName"] = profile.get("firstName", "")
@@ -370,7 +384,7 @@ async def proxy_forgot_password(req: ForgotPasswordRequest, request: Request):
     origin = request.headers.get("origin", "")
     host = origin.replace("https://", "").replace("http://", "") if "preview.emergentagent.com" in origin else "zont.cab"
     try:
-        resp = await http_client.get(f"/api/Account/{req.email}", params={"host": host}, headers={"Origin": "https://zont.cab"})
+        resp = await (await get_http_client()).get(f"/api/Account/{req.email}", params={"host": host}, headers={"Origin": "https://zont.cab"})
         if resp.status_code == 200:
             return {"success": True, "message": "Password reset dispatch link issued"}
         raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Failed to dispatch reset mail")
@@ -383,7 +397,7 @@ async def proxy_forgot_password(req: ForgotPasswordRequest, request: Request):
 @router.post("/auth/reset-password")
 async def proxy_reset_password(req: ResetPasswordRequest):
     try:
-        resp = await http_client.post("/api/Account", json={"forgotPasswordToken": req.forgotPasswordToken, "newPassword": req.newPassword}, headers={"Origin": "https://zont.cab", "Content-Type": "application/json"})
+        resp = await (await get_http_client()).post("/api/Account", json={"forgotPasswordToken": req.forgotPasswordToken, "newPassword": req.newPassword}, headers={"Origin": "https://zont.cab", "Content-Type": "application/json"})
         if resp.status_code == 200:
             return {"success": True, "message": "Password updated successfully"}
         raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Token invalid or expired")
@@ -396,7 +410,7 @@ async def proxy_reset_password(req: ResetPasswordRequest):
 @router.get("/auth/send-verification")
 async def proxy_send_verification(email: str):
     try:
-        resp = await http_client.get("/api/Verification/clientVerifyEmail", params={"email": email, "host": "zont.cab"}, headers={"Origin": "https://zont.cab"})
+        resp = await (await get_http_client()).get("/api/Verification/clientVerifyEmail", params={"email": email, "host": "zont.cab"}, headers={"Origin": "https://zont.cab"})
         if resp.status_code == 200:
             return {"success": True, "message": "Verification email dispatched"}
         raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Failed to dispatch email verification")
@@ -409,7 +423,7 @@ async def proxy_send_verification(email: str):
 @router.get("/auth/verify/{code}")
 async def proxy_verify_code(code: str):
     try:
-        resp = await http_client.get(f"/api/Verification/verify/{code}", headers={"Origin": "https://zont.cab"})
+        resp = await (await get_http_client()).get(f"/api/Verification/verify/{code}", headers={"Origin": "https://zont.cab"})
         if resp.status_code == 200:
             return {"success": True, **(resp.json() if resp.text else {})}
         raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Activation code invalid")
@@ -429,7 +443,7 @@ async def proxy_client_add_card_unified(request: Request):
     if not auth_header:
         raise HTTPException(status_code=401, detail="Authorization credentials missing")
     try:
-        resp = await http_client.get("/api/Client/addCard", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        resp = await (await get_http_client()).get("/api/Client/addCard", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
         body_text = resp.text
         logger.info(f"C# payment payload callback trace status={resp.status_code}")
         
@@ -455,7 +469,7 @@ async def proxy_client_profile(request: Request):
     if not auth_header:
         raise HTTPException(status_code=401, detail="Authorization credentials missing")
     try:
-        resp = await http_client.get("/api/Client", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        resp = await (await get_http_client()).get("/api/Client", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
         if resp.status_code == 200:
             return resp.json()
         raise HTTPException(status_code=resp.status_code, detail="Unable to retrieve customer profile")
@@ -471,7 +485,7 @@ async def proxy_client_cards(request: Request):
     if not auth_header:
         raise HTTPException(status_code=401, detail="Authorization credentials missing")
     try:
-        resp = await http_client.get("/api/Client/cards", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        resp = await (await get_http_client()).get("/api/Client/cards", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
         if resp.status_code == 200:
             cards_raw = resp.json()
             return [
@@ -496,7 +510,7 @@ async def proxy_delete_card(card_id: str, request: Request):
     if not auth_header:
         raise HTTPException(status_code=401, detail="Authorization credentials missing")
     try:
-        resp = await http_client.delete(f"/api/Client/cards/{card_id}", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        resp = await (await get_http_client()).delete(f"/api/Client/cards/{card_id}", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
         if resp.status_code in (200, 204):
             return {"ok": True}
         raise HTTPException(status_code=resp.status_code, detail="Unable to drop specified payment profile")
@@ -532,7 +546,7 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
         logger.info(f"C# addAuction execution context initialized")
         
         # Long-lived timeout handling to catch delayed asynchronous transaction locks
-        resp = await http_client.post(
+        resp = await (await get_http_client()).post(
             "/api/Auction/addAuction", 
             json=payload, 
             headers={"Authorization": auth_header},
