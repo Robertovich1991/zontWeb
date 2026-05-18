@@ -278,10 +278,9 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
         gender: 'male',
       });
       try { await authService.sendVerificationEmail(formData.email); } catch {}
-      setRegisteredEmail(formData.email);
       try { await login({ email: formData.email, password: formData.password }); } catch {}
-      toast.success('Inscription réussie ! Vérifiez votre email.');
-      setStep('verify');
+      toast.success('Inscription reussie !');
+      handleClose();
     } catch (error) {
       const apiErrors = parseApiErrors(error);
       setErrors(apiErrors);
