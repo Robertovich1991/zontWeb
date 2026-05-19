@@ -14,6 +14,13 @@ from google.auth.transport import requests as google_requests
 
 logger = logging.getLogger(__name__)
 
+# --- Database access for social auth ---
+_google_db = None
+
+def set_proxy_db(database):
+    global _google_db
+    _google_db = database
+
 # --- Global Async HTTP Client Configuration via Lifespan ---
 # This reuses TCP connections to api.zont.cab, drastically reducing latency.
 http_client: httpx.AsyncClient = None
@@ -216,40 +223,75 @@ async def proxy_google_login(req: GoogleLoginRequest):
 
     default_headers = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
 
-    # Fallback Step A: Try native OAuth Login
+    # Step 1: Try native C# googleLogin
     try:
         resp = await (await get_http_client()).post("/api/Client/googleLogin", json={"idToken": req.idToken}, headers=default_headers)
         if resp.status_code == 200:
             data = resp.json()
             token = data.get("accessToken")
             if token:
-                profile_resp = await (await get_http_client()).get("/api/Client", headers={"Authorization": f"Bearer {token}", **default_headers})
-                if profile_resp.status_code == 200:
-                    profile = profile_resp.json()
-                    data["firstName"] = profile.get("firstName", first_name)
-                    data["lastName"] = profile.get("lastName", last_name)
-                else:
+                try:
+                    profile_resp = await (await get_http_client()).get("/api/Client", headers={"Authorization": f"Bearer {token}", **default_headers})
+                    if profile_resp.status_code == 200:
+                        profile = profile_resp.json()
+                        data["firstName"] = profile.get("firstName", first_name)
+                        data["lastName"] = profile.get("lastName", last_name)
+                    else:
+                        data["firstName"], data["lastName"] = first_name, last_name
+                except Exception:
                     data["firstName"], data["lastName"] = first_name, last_name
-            return data
+                return data
     except Exception as e:
-        logger.warning(f"Native C# googleLogin endpoint unreached. Shifting to Classic Registration: {e}")
+        logger.warning(f"C# googleLogin failed, using fallback: {e}")
 
-    # Fallback Step B: Classic pipeline registration
+    # Step 2: Check if we have a stored Google password for this user
+    if _google_db is not None:
+        stored = await _google_db.google_auth.find_one({"email": email}, {"_id": 0})
+        if stored and stored.get("password"):
+            login_resp = await (await get_http_client()).post(
+                "/api/Login/client",
+                json={"username": email, "password": stored["password"]},
+                headers=default_headers,
+            )
+            if login_resp.status_code == 200:
+                data = login_resp.json()
+                data["firstName"] = first_name
+                data["lastName"] = last_name
+                return data
+
+    # Step 3: Try register (new user)
     random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
-    reg_payload = {
-        "firstName": first_name, "lastName": last_name, "email": email,
-        "phoneNumber": "", "password": random_pass, "gender": "male", "dateOfBirth": "01/01/2000"
-    }
-    
-    reg_resp = await (await get_http_client()).post("/api/Client", json=reg_payload, headers=default_headers)
+    reg_resp = await (await get_http_client()).post(
+        "/api/Client",
+        json={
+            "firstName": first_name, "lastName": last_name, "email": email,
+            "phoneNumber": "", "password": random_pass, "gender": "male", "dateOfBirth": "01/01/2000",
+        },
+        headers=default_headers,
+    )
     if reg_resp.status_code == 200:
-        login_resp = await (await get_http_client()).post("/api/Login/client", json={"username": email, "password": random_pass}, headers=default_headers)
+        # Store password in MongoDB for future Google logins
+        if _google_db is not None:
+            await _google_db.google_auth.update_one(
+                {"email": email},
+                {"$set": {"email": email, "password": random_pass, "provider": "google", "firstName": first_name, "lastName": last_name}},
+                upsert=True,
+            )
+        login_resp = await (await get_http_client()).post(
+            "/api/Login/client",
+            json={"username": email, "password": random_pass},
+            headers=default_headers,
+        )
         if login_resp.status_code == 200:
             data = login_resp.json()
             data["firstName"], data["lastName"] = first_name, last_name
             return data
 
-    raise HTTPException(status_code=400, detail="This email is already registered natively. Please login using your password.")
+    # Step 4: Email exists in C# but no stored password — cannot auto-login
+    raise HTTPException(
+        status_code=400,
+        detail="This email is already registered. Please sign in with your email and password."
+    )
 
 
 @router.post("/auth/facebook-login")
@@ -299,16 +341,37 @@ async def proxy_facebook_login(req: FacebookLoginRequest):
         logger.warning(f"Native Facebook integration unreachable, processing classic fallback routing: {e}")
 
     random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
+
+    # Check stored password for existing Facebook users
+    if _google_db is not None:
+        stored = await _google_db.google_auth.find_one({"email": email}, {"_id": 0})
+        if stored and stored.get("password"):
+            login_resp = await (await get_http_client()).post(
+                "/api/Login/client",
+                json={"username": email, "password": stored["password"]},
+                headers=default_headers,
+            )
+            if login_resp.status_code == 200:
+                data = login_resp.json()
+                data["firstName"], data["lastName"] = first_name, last_name
+                return data
+
     reg_resp = await (await get_http_client()).post("/api/Client", json={"firstName": first_name, "lastName": last_name, "email": email, "phoneNumber": "", "password": random_pass, "gender": "male", "dateOfBirth": "01/01/2000"}, headers=default_headers)
 
     if reg_resp.status_code == 200:
+        if _google_db is not None:
+            await _google_db.google_auth.update_one(
+                {"email": email},
+                {"$set": {"email": email, "password": random_pass, "provider": "facebook", "firstName": first_name, "lastName": last_name}},
+                upsert=True,
+            )
         login_resp = await (await get_http_client()).post("/api/Login/client", json={"username": email, "password": random_pass}, headers=default_headers)
         if login_resp.status_code == 200:
             data = login_resp.json()
             data["firstName"], data["lastName"] = first_name, last_name
             return data
 
-    raise HTTPException(status_code=400, detail="This account email is already registered. Sign in with standard username/password format.")
+    raise HTTPException(status_code=400, detail="This email is already registered. Please sign in with your email and password.")
 
 
 @router.post("/auth/register-phone")

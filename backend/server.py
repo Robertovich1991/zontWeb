@@ -196,7 +196,8 @@ from routes.admin_cms import router as cms_router
 from routes.admin_upload import router as upload_router
 from routes.public_cms import router as public_router
 from routes.company import router as company_router
-from routes.csharp_proxy import router as proxy_router
+from routes.csharp_proxy import router as proxy_router, set_proxy_db
+set_proxy_db(db)
 from routes.partner import router as partner_router
 from routes.partner_payment import router as partner_payment_router
 from routes.admin_hotels import router as admin_hotels_router
