@@ -69,6 +69,12 @@ db = client[os.environ['DB_NAME']]
 app = FastAPI()
 app.state.db = db
 
+
+@app.get("/health")
+@app.get("/api/health")
+async def health_check():
+    return {"status": "ok"}
+
 # Add cache headers for static assets (lightweight ASGI middleware, NOT BaseHTTPMiddleware)
 app.add_middleware(CacheHeaderMiddleware)
 
@@ -302,37 +308,42 @@ async def stripe_webhook(request: Request):
 @app.on_event("startup")
 async def startup_event():
     """Create MongoDB indexes and initialize shared resources."""
-    logger.info("Creating MongoDB indexes...")
-    # Fleet reservations: most common queries
-    await db.fleet_reservations.create_index([("companyId", 1), ("date", 1)])
-    await db.fleet_reservations.create_index([("companyId", 1), ("driver.id", 1), ("date", 1)])
-    await db.fleet_reservations.create_index([("companyId", 1), ("status", 1)])
-    # Rest days
-    await db.driver_rest_days.create_index([("companyId", 1), ("date", 1)])
-    await db.driver_rest_days.create_index([("companyId", 1), ("driverId", 1), ("date", 1)], unique=True)
-    # Forfaits
-    await db.driver_forfaits.create_index([("driverId", 1), ("companyId", 1), ("month", 1)])
-    await db.driver_forfaits.create_index([("driverId", 1), ("rideId", 1), ("companyId", 1)], unique=True)
-    # GPS indexes
-    await db.gps_devices.create_index([("companyId", 1)])
-    await db.gps_devices.create_index([("imei", 1), ("companyId", 1)], unique=True)
-    await db.gps_positions.create_index([("imei", 1)], unique=True)
-    await db.gps_history.create_index([("imei", 1), ("timestamp", 1)])
-    await db.gps_history.create_index([("receivedAt", 1)], expireAfterSeconds=2592000)  # 30 days TTL
-    # GPS Admin indexes
-    await db.gps_admin_users.create_index([("email", 1)], unique=True)
-    await db.gps_companies.create_index([("companyId", 1)], unique=True)
-    # Promo codes
-    await db.promo_codes.create_index([("code", 1)], unique=True)
-    await db.promo_codes.create_index([("email", 1)])
-    await db.promo_codes.create_index([("expires_at", 1)])
-    # Kiosk indexes
-    await db.kiosk_hotels.create_index([("slug", 1)], unique=True)
-    await db.kiosk_bookings.create_index([("hotelSlug", 1), ("createdAt", -1)])
-    await db.kiosk_bookings.create_index([("reference", 1)], unique=True)
-    # Seed demo hotel
-    await ensure_demo_hotel()
-    logger.info("MongoDB indexes created.")
+    try:
+        logger.info("Creating MongoDB indexes...")
+        # Fleet reservations: most common queries
+        await db.fleet_reservations.create_index([("companyId", 1), ("date", 1)])
+        await db.fleet_reservations.create_index([("companyId", 1), ("driver.id", 1), ("date", 1)])
+        await db.fleet_reservations.create_index([("companyId", 1), ("status", 1)])
+        # Rest days
+        await db.driver_rest_days.create_index([("companyId", 1), ("date", 1)])
+        await db.driver_rest_days.create_index([("companyId", 1), ("driverId", 1), ("date", 1)], unique=True)
+        # Forfaits
+        await db.driver_forfaits.create_index([("driverId", 1), ("companyId", 1), ("month", 1)])
+        await db.driver_forfaits.create_index([("driverId", 1), ("rideId", 1), ("companyId", 1)], unique=True)
+        # GPS indexes
+        await db.gps_devices.create_index([("companyId", 1)])
+        await db.gps_devices.create_index([("imei", 1), ("companyId", 1)], unique=True)
+        await db.gps_positions.create_index([("imei", 1)], unique=True)
+        await db.gps_history.create_index([("imei", 1), ("timestamp", 1)])
+        await db.gps_history.create_index([("receivedAt", 1)], expireAfterSeconds=2592000)  # 30 days TTL
+        # GPS Admin indexes
+        await db.gps_admin_users.create_index([("email", 1)], unique=True)
+        await db.gps_companies.create_index([("companyId", 1)], unique=True)
+        # Promo codes
+        await db.promo_codes.create_index([("code", 1)], unique=True)
+        await db.promo_codes.create_index([("email", 1)])
+        await db.promo_codes.create_index([("expires_at", 1)])
+        # Kiosk indexes
+        await db.kiosk_hotels.create_index([("slug", 1)], unique=True)
+        await db.kiosk_bookings.create_index([("hotelSlug", 1), ("createdAt", -1)])
+        await db.kiosk_bookings.create_index([("reference", 1)], unique=True)
+        # Social auth
+        await db.google_auth.create_index([("email", 1)], unique=True)
+        # Seed demo hotel
+        await ensure_demo_hotel()
+        logger.info("MongoDB indexes created.")
+    except Exception as e:
+        logger.error(f"Startup index creation failed (non-blocking): {e}")
 
 
 @app.on_event("shutdown")
