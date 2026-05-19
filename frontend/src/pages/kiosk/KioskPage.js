@@ -452,18 +452,35 @@ const KioskPage = () => {
           </div>
         )}
 
-        {/* Step 4: Confirmation */}
+        {/* Step 4: Payment QR + Confirmation */}
         {step === 4 && booking && (
           <div className="max-w-lg mx-auto text-center" style={{ animation: 'fadeUp 0.5s ease-out' }}>
-            <div className="w-20 h-20 bg-[#2ecc71]/10 rounded-full flex items-center justify-center mx-auto mb-5">
-              <CheckCircle className="w-12 h-12 text-[#2ecc71]" />
+            {/* QR Code for payment */}
+            {booking.qrCode && (
+              <div className="mb-6">
+                <div className="bg-[#111827]/60 border border-[#2ecc71]/20 rounded-2xl p-6 inline-block">
+                  <img src={booking.qrCode} alt="QR Payment" className="w-48 h-48 mx-auto rounded-lg" data-testid="payment-qr" />
+                </div>
+                <p className="text-white font-bold text-lg mt-4">Scannez pour payer {selectedVehicle?.minAmount}&euro;</p>
+                <p className="text-gray-400 text-sm mt-1">Ou utilisez le lien ci-dessous</p>
+                {booking.paymentUrl && (
+                  <a href={booking.paymentUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-3 bg-[#2ecc71] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#27ae60] transition-colors" data-testid="payment-link">
+                    Payer {selectedVehicle?.minAmount}&euro; par carte
+                  </a>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center gap-4 my-4">
+              <div className="flex-1 h-px bg-white/[0.06]" />
+              <span className="text-xs text-gray-600 uppercase tracking-widest">{t.ref}</span>
+              <div className="flex-1 h-px bg-white/[0.06]" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">{t.confirmed}</h2>
-            <p className="text-gray-400 mb-6">{t.driverWill}</p>
+
             <div className="bg-[#111827]/60 border border-white/[0.06] rounded-xl p-5 text-left mb-6">
-              <div className="text-center mb-4">
-                <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">{t.ref}</p>
+              <div className="text-center mb-3">
                 <p className="text-3xl font-mono font-bold text-[#2ecc71] tracking-wider" data-testid="kiosk-reference">{booking.reference}</p>
+                <p className="text-xs text-yellow-500 font-medium mt-1 uppercase">En attente de paiement</p>
               </div>
               <div className="border-t border-white/10 pt-3 space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-gray-500">{t.dest}</span><span className="text-white font-medium">{selectedDest?.name}</span></div>
