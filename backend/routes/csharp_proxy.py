@@ -53,6 +53,7 @@ async def lifespan_client(router_instance: APIRouter):
 router = APIRouter(prefix="/api/proxy", tags=["proxy"])
 
 GOOGLE_CLIENT_ID = "199230843213-u4t2m5tvci7747elp6uqgloug12skek0.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID_MOBILE = "71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com"
 FACEBOOK_APP_ID = os.environ.get("FACEBOOK_APP_ID", "")
 FACEBOOK_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "")
 
@@ -206,10 +207,16 @@ async def proxy_driver_types(coord: Coordinate):
 @router.post("/auth/google-login")
 async def proxy_google_login(req: GoogleLoginRequest):
     """Verify Google ID token, then manage automatic sign-in or account creation."""
+    # Step 1: Verify Google token (accept both web and mobile client IDs)
     try:
-        idinfo = google_id_token.verify_oauth2_token(
-            req.idToken, google_requests.Request(), GOOGLE_CLIENT_ID
-        )
+        try:
+            idinfo = google_id_token.verify_oauth2_token(
+                req.idToken, google_requests.Request(), GOOGLE_CLIENT_ID
+            )
+        except Exception:
+            idinfo = google_id_token.verify_oauth2_token(
+                req.idToken, google_requests.Request(), GOOGLE_CLIENT_ID_MOBILE
+            )
     except Exception as e:
         logger.error(f"Google token verification failed: {e}")
         raise HTTPException(status_code=401, detail="Invalid Google token verification")
