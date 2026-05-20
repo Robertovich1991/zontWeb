@@ -82,6 +82,8 @@ const FleetDriverProfile = lazy(() => import("@/pages/fleet/FleetDriverProfile")
 // VTC Service Pages
 const VTC8Places = lazy(() => import("@/pages/services/VTC8Places"));
 const VTC7Places = lazy(() => import("@/pages/services/VTC7Places"));
+const DriverAtDisposal = lazy(() => import("@/pages/services/DriverAtDisposal"));
+const DisposalVehicle = lazy(() => import("@/pages/services/DisposalVehicle"));
 const HotelLayout = lazy(() => import("@/pages/hotel/HotelLayout"));
 const HotelDashboard = lazy(() => import("@/pages/hotel/HotelDashboard"));
 const HotelBookings = lazy(() => import("@/pages/hotel/HotelBookings"));
@@ -307,6 +309,15 @@ function App() {
                   <Route path="/vtc-7-seats" element={<VTC7Places />} />
                   <Route path="/vtc-7-mest" element={<VTC7Places />} />
                   <Route path="/vtc-7-tegh" element={<VTC7Places />} />
+                  {/* Driver at Disposal — Mise a disposition */}
+                  <Route path="/driver-at-disposal" element={<DriverAtDisposal />} />
+                  <Route path="/chauffeur-mis-a-disposition" element={<DriverAtDisposal />} />
+                  <Route path="/voditel-s-avtomobilem" element={<DriverAtDisposal />} />
+                  <Route path="/varorde-tramadrutyamb" element={<DriverAtDisposal />} />
+                  <Route path="/driver-at-disposal/:slug" element={<DisposalVehicle />} />
+                  <Route path="/chauffeur-mis-a-disposition/:slug" element={<DisposalVehicle />} />
+                  <Route path="/voditel-s-avtomobilem/:slug" element={<DisposalVehicle />} />
+                  <Route path="/varorde-tramadrutyamb/:slug" element={<DisposalVehicle />} />
                   <Route path="/travel-agencies" element={<TravelAgencies />} />
                   <Route path="/tourism-agencies" element={<TourismAgencies />} />
                   <Route path="/hotels" element={<HotelsB2B />} />

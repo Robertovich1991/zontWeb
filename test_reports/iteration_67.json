@@ -1,0 +1,50 @@
+{
+  "summary": "Frontend-only testing of the new 'Driver at Disposal / Chauffeur mis à disposition' SEO page on Zont.cab. Tested main listing page in all 4 languages (EN/FR/RU/HY), vehicle sub-pages, navigation, FAQ collapsibles, SEO meta (canonical/hreflang/JSON-LD), pricing 'On request' placeholders, mobile responsiveness, header dropdown, footer link, invalid-slug fallback and hero Book-Now CTA. All 18 acceptance items pass.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Disposal main hero (all langs)",
+        "issues": [
+          "H1 is split at the en-dash with the second half coloured gold. For FR the original title contains accented chars ('Privé') and the split renders cleanly; visually OK. No contrast issues observed (dark bg + white/gold text)."
+        ]
+      }
+    ],
+    "console_warnings_observed": [
+      "React warning: 'Invalid DOM property `fetchpriority`. Did you mean `fetchPriority`?' — emitted on subpage. Likely from a global preload/image component (NOT introduced by DriverAtDisposal/DisposalVehicle code which doesn't use that attr). Cosmetic only.",
+      "Google Maps API legacy warnings (pre-existing on homepage, unrelated)."
+    ]
+  },
+  "test_results_detail": {
+    "main_page_FR_/chauffeur-mis-a-disposition": "PASS — all 4 cards present, H1='Chauffeur Mis a Disposition Paris / Location de Chauffeur Privé a l\\'Heure', canonical=https://zont.cab/chauffeur-mis-a-disposition, 5 hreflang links, JSON-LD Service schema present, FAQ-0 present, 0 broken images.",
+    "main_page_EN_/driver-at-disposal": "PASS — same checks; H1='Driver at Disposal Paris / Hourly Chauffeur Rental'.",
+    "main_page_RU_/voditel-s-avtomobilem": "PASS — Cyrillic H1 'Водитель в Распоряжении Париж / Почасовая Аренда Водителя'.",
+    "main_page_HY_/varorde-tramadrutyamb": "PASS — Armenian H1 'Վարորդ Տրամադրությամբ Փարիզում / Ժամային Վարձույթ'.",
+    "vehicle_cards_data_testids": "All 4 present: disposal-vehicle-card-mercedes-s-class, -mercedes-e-class, -mercedes-v-class, -renault-trafic.",
+    "subpage_FR_mercedes-classe-v": "PASS — URL /chauffeur-mis-a-disposition/mercedes-classe-v, hero H1='Mercedes Classe V — Van de luxe 7 places avec chauffeur a Paris', pricing 4h/8h/12h all show 'Sur demande', vehicle-faq-0 collapsible opens on click, back link returns to main page, 3 related-vehicle-* links present, JSON-LD with Service+Product, canonical correct.",
+    "header_dropdown_link": "PASS — clicking nav-services-dropdown opens menu; nav-driver-at-disposal href=/chauffeur-mis-a-disposition (FR active), navigates correctly.",
+    "footer_link": "PASS — footer-driver-at-disposal present with href=/chauffeur-mis-a-disposition.",
+    "hero_book_now_cta": "PASS — redirects to homepage '/'.",
+    "invalid_slug_fallback": "PASS — /chauffeur-mis-a-disposition/unknown-car → redirected to /driver-at-disposal (main disposal page).",
+    "mobile_390x844": "PASS — all 4 cards stack vertically (each x=16, width=358), subpage hero renders correctly.",
+    "images": "PASS — 4 webp files in /images/, sizes 136-177 KB (all < 200KB), filenames SEO-friendly (mercedes-classe-X-chauffeur-prive-paris.webp, renault-trafic-minibus-chauffeur-paris.webp), alt text includes vehicle name + 'chauffeur prive Paris'."
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Optional: Track down the source of the 'fetchpriority' React DOM warning (lowercase attribute) — likely in a global Image/SEO component; not blocking. Use fetchPriority (camelCase) in JSX."
+  ],
+  "critical_code_review_comments": [
+    "disposalData.js is large (~430 lines) but acceptable for SEO content; could be split per-language if it grows further.",
+    "VEHICLE_COPY only defines Armenian (hy) entries for FAQ on main UI but not under each vehicle's VEHICLE_COPY (no hy block for per-vehicle copy). If DisposalVehicle.js falls back to en/fr when hy is missing — verify graceful fallback. Not in scope of the test but worth confirming for Armenian visitors landing on /varorde-tramadrutyamb/mercedes-s-class etc.",
+    "Hero pageTitle is split on '—' to colour the second half gold; in 'fr' the en-dash is present so it works, but if user edits copy in future without the dash, the second line will be empty. Consider rendering a dedicated subtitle field instead of string-splitting."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "N/A (skipped)", "frontend": "100%" },
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Driver-at-Disposal SEO feature fully validated across 4 languages on preview URL. All data-testids present and working. Pricing placeholders ('On request' / 'Sur demande' / 'По запросу' / 'Ըստ պահանջի') intentional. If pricing values are later added, re-run subpage tests to confirm 'From X€' rendering. Armenian per-vehicle long-form copy was not added to VEHICLE_COPY in disposalData.js (only hy UI strings exist) — verify fallback behaviour for /varorde-tramadrutyamb/mercedes-s-class etc.",
+  "rca of the issue": "N/A — no bugs found."
+}
