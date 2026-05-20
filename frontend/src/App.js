@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { trackPageView } from "@/utils/fbPixel";
+import ScrollToTop from "@/components/ScrollToTop";
 import { AuthProvider } from "@/context/AuthContext";
 import { BookingProvider } from "@/context/BookingContext";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -170,6 +171,7 @@ function App() {
         <BookingProvider>
           <div className="App">
             <BrowserRouter>
+              <ScrollToTop />
               <FbPageViewTracker />
               <Suspense fallback={<Loading />}>
                 <Routes>
