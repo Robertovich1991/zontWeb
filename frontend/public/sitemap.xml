@@ -283,6 +283,81 @@
   <url><loc>https://www.zont.cab/vtc-8-mest</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/vtc-8-tegh</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
+  <!-- ==================== DRIVER AT DISPOSAL — MAIN PAGE ==================== -->
+  <url>
+    <loc>https://www.zont.cab/driver-at-disposal</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/driver-at-disposal"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/chauffeur-mis-a-disposition"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/voditel-s-avtomobilem"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/varorde-tramadrutyamb"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/chauffeur-mis-a-disposition"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url><loc>https://www.zont.cab/chauffeur-mis-a-disposition</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.zont.cab/voditel-s-avtomobilem</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.zont.cab/varorde-tramadrutyamb</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+
+  <!-- ==================== DRIVER AT DISPOSAL — MERCEDES S-CLASS ==================== -->
+  <url>
+    <loc>https://www.zont.cab/driver-at-disposal/mercedes-s-class</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/driver-at-disposal/mercedes-s-class"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/chauffeur-mis-a-disposition/mercedes-classe-s"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/voditel-s-avtomobilem/mercedes-s-class"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/varorde-tramadrutyamb/mercedes-s-class"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/chauffeur-mis-a-disposition/mercedes-classe-s"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url><loc>https://www.zont.cab/chauffeur-mis-a-disposition/mercedes-classe-s</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/voditel-s-avtomobilem/mercedes-s-class</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/varorde-tramadrutyamb/mercedes-s-class</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+
+  <!-- ==================== DRIVER AT DISPOSAL — MERCEDES E-CLASS ==================== -->
+  <url>
+    <loc>https://www.zont.cab/driver-at-disposal/mercedes-e-class</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/driver-at-disposal/mercedes-e-class"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/chauffeur-mis-a-disposition/mercedes-classe-e"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/voditel-s-avtomobilem/mercedes-e-class"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/varorde-tramadrutyamb/mercedes-e-class"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/chauffeur-mis-a-disposition/mercedes-classe-e"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url><loc>https://www.zont.cab/chauffeur-mis-a-disposition/mercedes-classe-e</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/voditel-s-avtomobilem/mercedes-e-class</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/varorde-tramadrutyamb/mercedes-e-class</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+
+  <!-- ==================== DRIVER AT DISPOSAL — MERCEDES V-CLASS ==================== -->
+  <url>
+    <loc>https://www.zont.cab/driver-at-disposal/mercedes-v-class</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/driver-at-disposal/mercedes-v-class"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/chauffeur-mis-a-disposition/mercedes-classe-v"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/voditel-s-avtomobilem/mercedes-v-class"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/varorde-tramadrutyamb/mercedes-v-class"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/chauffeur-mis-a-disposition/mercedes-classe-v"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url><loc>https://www.zont.cab/chauffeur-mis-a-disposition/mercedes-classe-v</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/voditel-s-avtomobilem/mercedes-v-class</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/varorde-tramadrutyamb/mercedes-v-class</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+
+  <!-- ==================== DRIVER AT DISPOSAL — RENAULT TRAFIC ==================== -->
+  <url>
+    <loc>https://www.zont.cab/driver-at-disposal/renault-trafic</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/driver-at-disposal/renault-trafic"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/chauffeur-mis-a-disposition/renault-trafic"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/voditel-s-avtomobilem/renault-trafic"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/varorde-tramadrutyamb/renault-trafic"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/chauffeur-mis-a-disposition/renault-trafic"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url><loc>https://www.zont.cab/chauffeur-mis-a-disposition/renault-trafic</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/voditel-s-avtomobilem/renault-trafic</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/varorde-tramadrutyamb/renault-trafic</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+
   <!-- ==================== COUNTRIES ==================== -->
   <url>
     <loc>https://www.zont.cab/countries</loc>
