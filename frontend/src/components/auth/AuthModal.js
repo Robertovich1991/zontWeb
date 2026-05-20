@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { authService } from '@/services/api';
 import PhoneInput from '@/components/PhoneInput';
 
-const GOOGLE_CLIENT_ID = '199230843213-u4t2m5tvci7747elp6uqgloug12skek0.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com';
 const FACEBOOK_APP_ID = '973858222181967';
 
 // Map C# API error keys to French messages

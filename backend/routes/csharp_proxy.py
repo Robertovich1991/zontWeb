@@ -52,7 +52,7 @@ async def lifespan_client(router_instance: APIRouter):
 
 router = APIRouter(prefix="/api/proxy", tags=["proxy"])
 
-GOOGLE_CLIENT_ID = "199230843213-u4t2m5tvci7747elp6uqgloug12skek0.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com"
 GOOGLE_CLIENT_ID_MOBILE = "71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com"
 FACEBOOK_APP_ID = os.environ.get("FACEBOOK_APP_ID", "")
 FACEBOOK_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "")
