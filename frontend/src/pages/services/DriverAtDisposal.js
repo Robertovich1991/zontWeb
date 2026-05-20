@@ -77,6 +77,11 @@ const DriverAtDisposal = () => {
   const lang = ['en', 'fr', 'ru', 'hy'].includes(language) ? language : 'en';
   const ui = UI[lang];
 
+  // Always start at the top when the user arrives on the main disposal page
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
+
   const canonical = `${SITE}${DISPOSAL_BASE_PATH[lang]}`;
   const hreflang = Object.entries(DISPOSAL_BASE_PATH).map(([l, p]) => ({ lang: l, href: `${SITE}${p}` }));
 

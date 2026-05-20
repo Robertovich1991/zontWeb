@@ -32,6 +32,11 @@ const DisposalVehicle = () => {
   const lang = ['en', 'fr', 'ru', 'hy'].includes(language) ? language : 'en';
   const ui = UI[lang];
 
+  // Scroll to top whenever the vehicle slug changes (incl. related vehicles links)
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [slug]);
+
   const vehicle = findVehicleBySlug(slug);
   if (!vehicle) return <Navigate to={DISPOSAL_BASE_PATH[lang]} replace />;
 
