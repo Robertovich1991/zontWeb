@@ -23,7 +23,26 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## What's Been Implemented
 
-### Session Apr 22, 2026 (Latest)
+### Session Feb 20, 2026 (Latest) — Driver at Disposal SEO page
+- **New service page**: "Driver at Disposal / Chauffeur mis à disposition / Водитель в распоряжение / Վարորդ տրամադրությամբ"
+- Main listing page at 4 multilingual URLs:
+  - `/driver-at-disposal` (EN), `/chauffeur-mis-a-disposition` (FR), `/voditel-s-avtomobilem` (RU), `/varorde-tramadrutyamb` (HY)
+- 4 dedicated SEO vehicle sub-pages, each with H1, hero image, 4h/8h/12h pricing strip, 3 long-form SEO paragraphs, vehicle-specific FAQ, related vehicles:
+  - Mercedes S-Class (Flagship VIP/diplomatic)
+  - Mercedes E-Class (Business reference sedan)
+  - Mercedes V-Class (7-seat luxury van)
+  - Renault Trafic (8-seat eco minibus)
+- **SEO**: per-page title, meta description, canonical, hreflang (4 langs), Schema.org Service+Product+AggregateRating JSON-LD
+- **Pricing**: placeholder "On request / Sur demande / По запросу / Ըստ պահանջի" for 4h/8h/12h — user will provide later
+- **Images**: 4 optimized WebP (134-173 KB each, originally 2+ MB PNG) with SEO-friendly filenames in `/app/frontend/public/images/`:
+  - `mercedes-classe-s-chauffeur-prive-paris.webp`
+  - `mercedes-classe-e-chauffeur-prive-paris.webp`
+  - `mercedes-classe-v-chauffeur-prive-paris.webp`
+  - `renault-trafic-minibus-chauffeur-paris.webp`
+- **Navigation**: Added gold-highlighted "Chauffeur mis à disposition" link at top of Services dropdown (Header desktop + mobile) and Footer
+- **Test status**: 18/18 acceptance items pass (iteration 67), 0 issues found
+
+### Session Apr 22, 2026
 - **Checkout 2-Step Flow**: Split card addition and payment into visible steps
   - Step 1: "Add your card" → 3D Secure (0€) → Green banner "Card verified ✓"
   - Step 2: Button changes to "Pay X€" → booking created + payment charged
