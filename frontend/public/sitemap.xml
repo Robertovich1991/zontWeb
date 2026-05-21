@@ -283,6 +283,21 @@
   <url><loc>https://www.zont.cab/vtc-8-mest</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/vtc-8-tegh</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
+  <!-- ==================== HOTELS B2B — Borne ZONT ==================== -->
+  <url>
+    <loc>https://www.zont.cab/hotel-booking-kiosk</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/hotel-booking-kiosk"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/borne-reservation-hotel"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/terminal-bronirovaniya-otel"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hyuranots-kropak"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/borne-reservation-hotel"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url><loc>https://www.zont.cab/borne-reservation-hotel</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/terminal-bronirovaniya-otel</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.zont.cab/hyuranots-kropak</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+
   <!-- ==================== DRIVER AT DISPOSAL — MAIN PAGE ==================== -->
   <url>
     <loc>https://www.zont.cab/driver-at-disposal</loc>

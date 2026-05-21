@@ -1,15 +1,30 @@
-import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useRef, useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { useLanguage } from '@/context/LanguageContext';
 import { CheckCircle, ArrowRight, Phone, Mail, Building2, Clock, Shield, Users, Star, Plane, ChevronRight } from 'lucide-react';
+import { matchPathToLanguage } from '@/utils/pageUrlMaps';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) => {
-  const { language } = useLanguage();
+  const { language: ctxLanguage, changeLanguage } = useLanguage();
+  const location = useLocation();
+
+  // If the current path is registered as a translated page, force the language
+  // to match the URL — so SEO content always matches the URL the visitor opened.
+  const urlMatch = matchPathToLanguage(location.pathname);
+  const language = urlMatch?.language || ctxLanguage;
+
+  // Keep the global LanguageContext in sync (so Header switcher reflects reality)
+  useEffect(() => {
+    if (urlMatch?.language && urlMatch.language !== ctxLanguage) {
+      changeLanguage(urlMatch.language);
+    }
+  }, [urlMatch?.language, ctxLanguage, changeLanguage]);
+
   const c = content[language] || content.en;
   const contactRef = useRef(null);
   const [formState, setFormState] = useState({ name: '', company: '', email: '', phone: '', message: '' });
@@ -54,6 +69,7 @@ const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) =>
           { lang: 'en', href: `https://www.zont.cab${seoUrls.en}` },
           { lang: 'fr', href: `https://www.zont.cab${seoUrls.fr || seoUrls.en}` },
           { lang: 'ru', href: `https://www.zont.cab${seoUrls.ru || seoUrls.en}` },
+          { lang: 'hy', href: `https://www.zont.cab${seoUrls.hy || seoUrls.en}` },
         ] : undefined}
         jsonLd={{
           "@context": "https://schema.org",

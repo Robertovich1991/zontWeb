@@ -1,5 +1,5 @@
-import React from 'react';
-import { useParams, useNavigate, Link, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useParams, useNavigate, Link, Navigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -12,6 +12,7 @@ import {
   UI,
   DURATIONS,
 } from './disposalData';
+import { matchPathToLanguage } from '@/utils/pageUrlMaps';
 import { Clock, Users, Briefcase, Check, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
 const SITE = 'https://zont.cab';
@@ -27,9 +28,20 @@ const findVehicleBySlug = (slug) => {
 
 const DisposalVehicle = () => {
   const { slug } = useParams();
-  const { language } = useLanguage();
+  const { language: ctxLanguage, changeLanguage } = useLanguage();
   const navigate = useNavigate();
-  const lang = ['en', 'fr', 'ru', 'hy'].includes(language) ? language : 'en';
+  const location = useLocation();
+
+  // Force language from URL so SEO content always matches the visitor's URL
+  const urlMatch = matchPathToLanguage(location.pathname);
+  const lang = urlMatch?.language || (['en', 'fr', 'ru', 'hy'].includes(ctxLanguage) ? ctxLanguage : 'en');
+
+  useEffect(() => {
+    if (urlMatch?.language && urlMatch.language !== ctxLanguage) {
+      changeLanguage(urlMatch.language);
+    }
+  }, [urlMatch?.language, ctxLanguage, changeLanguage]);
+
   const ui = UI[lang];
 
   const vehicle = findVehicleBySlug(slug);

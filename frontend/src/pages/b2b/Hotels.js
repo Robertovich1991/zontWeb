@@ -247,7 +247,12 @@ const content = {
   },
 };
 
-const seoUrls = { en: '/hotels', fr: '/hotels', ru: '/hotels', hy: '/hotels' };
+const seoUrls = {
+  en: '/hotel-booking-kiosk',
+  fr: '/borne-reservation-hotel',
+  ru: '/terminal-bronirovaniya-otel',
+  hy: '/hyuranots-kropak',
+};
 
 const relatedPages = [
   { path: '/concierge-services', name: 'Concierge Services', tagline: 'VIP chauffeur solutions' },

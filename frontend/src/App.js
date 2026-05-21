@@ -323,6 +323,10 @@ function App() {
                   <Route path="/travel-agencies" element={<TravelAgencies />} />
                   <Route path="/tourism-agencies" element={<TourismAgencies />} />
                   <Route path="/hotels" element={<HotelsB2B />} />
+                  <Route path="/hotel-booking-kiosk" element={<HotelsB2B />} />
+                  <Route path="/borne-reservation-hotel" element={<HotelsB2B />} />
+                  <Route path="/terminal-bronirovaniya-otel" element={<HotelsB2B />} />
+                  <Route path="/hyuranots-kropak" element={<HotelsB2B />} />
                   <Route path="/concierge-services" element={<ConciergeServices />} />
                   <Route path="/event-agencies" element={<EventAgencies />} />
                   <Route path="/corporate-clients" element={<CorporateClients />} />

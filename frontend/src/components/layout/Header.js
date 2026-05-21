@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Menu, X, ChevronDown, Globe, Phone } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
+import { buildTranslatedUrl } from '@/utils/pageUrlMaps';
 
 const Header = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const { t, language, changeLanguage } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('signin');
@@ -40,6 +42,11 @@ const Header = () => {
   const handleLanguageChange = (langCode) => {
     changeLanguage(langCode);
     setLangDropdownOpen(false);
+    // If we are on a registered multi-language page, jump to the matching URL
+    const translatedUrl = buildTranslatedUrl(location.pathname, langCode);
+    if (translatedUrl && translatedUrl !== location.pathname) {
+      navigate(translatedUrl);
+    }
   };
 
   return (
