@@ -32,7 +32,7 @@ const content = {
     contactSub: 'Can\'t find an answer? Our team responds within minutes.',
     contactInfo: [
       { type: 'email', label: 'Email Support', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
-      { type: 'phone', label: 'Phone Support', value: '+33 1 23 45 67 89', action: 'tel:+33123456789' },
+      { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
       { type: 'address', label: 'Office', value: 'Paris, France', action: null },
     ],
     formName: 'Your Name', formEmail: 'Email', formSubject: 'Subject',
@@ -66,7 +66,7 @@ const content = {
     contactSub: 'Vous ne trouvez pas de reponse ? Notre equipe repond en quelques minutes.',
     contactInfo: [
       { type: 'email', label: 'Support Email', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
-      { type: 'phone', label: 'Support Telephone', value: '+33 1 23 45 67 89', action: 'tel:+33123456789' },
+      { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
       { type: 'address', label: 'Bureau', value: 'Paris, France', action: null },
     ],
     formName: 'Votre Nom', formEmail: 'Email', formSubject: 'Sujet',
@@ -100,7 +100,7 @@ const content = {
     contactSub: 'Не нашли ответ? Наша команда отвечает в течение минут.',
     contactInfo: [
       { type: 'email', label: 'Email Поддержки', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
-      { type: 'phone', label: 'Телефон', value: '+33 1 23 45 67 89', action: 'tel:+33123456789' },
+      { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
       { type: 'address', label: 'Офис', value: 'Париж, Франция', action: null },
     ],
     formName: 'Ваше Имя', formEmail: 'Email', formSubject: 'Тема',
@@ -134,7 +134,7 @@ const content = {
     contactSub: 'Patasxan chgтaq? Mer timy patasxanum e ropeneri yntacqum.',
     contactInfo: [
       { type: 'email', label: 'Email Ajakcut yun', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
-      { type: 'phone', label: 'Heraxos', value: '+33 1 23 45 67 89', action: 'tel:+33123456789' },
+      { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
       { type: 'address', label: 'Grasenyak', value: 'Pariz, Fransia', action: null },
     ],
     formName: 'Dzer Anuny', formEmail: 'Email', formSubject: 'Tema',
@@ -250,16 +250,21 @@ const Help = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
             {c.contactInfo.map((info, i) => {
+              const isExternal = info.action && info.action.startsWith('http');
               const content = (
                 <div className="bg-[#1a2332] rounded-xl p-5 text-center border border-gray-800 hover:border-[#2ecc71]/40 transition-colors" data-testid={`contact-${info.type}`}>
                   {info.type === 'email' && <Mail className="w-7 h-7 text-[#2ecc71] mx-auto mb-3" />}
-                  {info.type === 'phone' && <Phone className="w-7 h-7 text-[#2ecc71] mx-auto mb-3" />}
+                  {info.type === 'phone' && (
+                    <svg className="w-7 h-7 text-[#25D366] mx-auto mb-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.94 11.94 0 0012 0C5.37 0 0 5.37 0 12c0 2.11.55 4.11 1.6 5.92L0 24l6.32-1.65A11.94 11.94 0 0012 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 21.82a9.81 9.81 0 01-5-1.36l-.36-.22-3.75.98 1-3.66-.24-.38A9.83 9.83 0 1121.82 12 9.83 9.83 0 0112 21.82zm5.4-7.36c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15s-.77.97-.94 1.17c-.17.2-.35.22-.65.07a8.1 8.1 0 01-2.38-1.47 8.97 8.97 0 01-1.65-2.05c-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.07-.8.37s-1.05 1.02-1.05 2.5 1.07 2.9 1.22 3.1c.15.2 2.12 3.24 5.13 4.54.72.31 1.28.5 1.71.64.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.08-.12-.27-.2-.57-.35z"/></svg>
+                  )}
                   {info.type === 'address' && <MapPin className="w-7 h-7 text-[#2ecc71] mx-auto mb-3" />}
                   <h3 className="font-semibold text-white text-sm mb-1">{info.label}</h3>
                   <p className="text-gray-400 text-sm">{info.value}</p>
                 </div>
               );
-              return info.action ? <a key={i} href={info.action}>{content}</a> : <div key={i}>{content}</div>;
+              return info.action
+                ? <a key={i} href={info.action} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener noreferrer' : undefined}>{content}</a>
+                : <div key={i}>{content}</div>;
             })}
           </div>
 

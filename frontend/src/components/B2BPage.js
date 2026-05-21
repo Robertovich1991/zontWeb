@@ -279,8 +279,9 @@ const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) =>
               <a href="mailto:partners@zont.cab" className="flex items-center gap-2 hover:text-[#2ecc71] transition-colors">
                 <Mail className="w-4 h-4" /> partners@zont.cab
               </a>
-              <a href="tel:+33123456789" className="flex items-center gap-2 hover:text-[#2ecc71] transition-colors">
-                <Phone className="w-4 h-4" /> +33 1 23 45 67 89
+              <a href="https://wa.me/33783777027" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-[#2ecc71] transition-colors" data-testid="b2b-whatsapp-link">
+                <svg className="w-4 h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.94 11.94 0 0012 0C5.37 0 0 5.37 0 12c0 2.11.55 4.11 1.6 5.92L0 24l6.32-1.65A11.94 11.94 0 0012 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 21.82a9.81 9.81 0 01-5-1.36l-.36-.22-3.75.98 1-3.66-.24-.38A9.83 9.83 0 1121.82 12 9.83 9.83 0 0112 21.82zm5.4-7.36c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15s-.77.97-.94 1.17c-.17.2-.35.22-.65.07a8.1 8.1 0 01-2.38-1.47 8.97 8.97 0 01-1.65-2.05c-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.07-.8.37s-1.05 1.02-1.05 2.5 1.07 2.9 1.22 3.1c.15.2 2.12 3.24 5.13 4.54.72.31 1.28.5 1.71.64.72.23 1.37.2 1.89.12.58-.09 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.08-.12-.27-.2-.57-.35z"/></svg>
+                +33 7 83 77 70 27
               </a>
             </div>
           </div>
