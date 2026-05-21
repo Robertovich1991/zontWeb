@@ -18,6 +18,12 @@ export const MULTI_LANG_URLS = {
     ru: '/terminal-bronirovaniya-otel',
     hy: '/hyuranots-kropak',
   },
+  partners: {
+    en: '/b2b-airport-transfers',
+    fr: '/b2b-transferts-aeroport',
+    ru: '/b2b-transfery-iz-aeroporta',
+    hy: '/b2b-odanavakayani-transfer',
+  },
 };
 
 // Vehicle sub-slug maps for the disposal pages (used to build full sub-paths).
@@ -78,6 +84,13 @@ export const matchPathToLanguage = (pathname) => {
   // legacy /hotels — default to FR (since this is the most-used in the business)
   if (clean === '/hotels') return { pageKey: 'hotels', language: 'fr' };
 
+  // 4) partners (B2B airport transfers)
+  for (const [lang, path] of Object.entries(MULTI_LANG_URLS.partners)) {
+    if (clean === path) return { pageKey: 'partners', language: lang };
+  }
+  // legacy /partners — default to FR
+  if (clean === '/partners') return { pageKey: 'partners', language: 'fr' };
+
   return null;
 };
 
@@ -98,6 +111,9 @@ export const buildTranslatedUrl = (pathname, targetLang) => {
   }
   if (pageKey === 'hotels') {
     return MULTI_LANG_URLS.hotels[targetLang] || MULTI_LANG_URLS.hotels.en;
+  }
+  if (pageKey === 'partners') {
+    return MULTI_LANG_URLS.partners[targetLang] || MULTI_LANG_URLS.partners.en;
   }
   return null;
 };

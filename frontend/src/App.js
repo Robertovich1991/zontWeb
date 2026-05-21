@@ -299,6 +299,10 @@ function App() {
                   <Route path="/countries" element={<Countries />} />
                   {/* B2B Pages */}
                   <Route path="/partners" element={<Partners />} />
+                  <Route path="/b2b-airport-transfers" element={<Partners />} />
+                  <Route path="/b2b-transferts-aeroport" element={<Partners />} />
+                  <Route path="/b2b-transfery-iz-aeroporta" element={<Partners />} />
+                  <Route path="/b2b-odanavakayani-transfer" element={<Partners />} />
                   <Route path="/terms" element={<TermsOfUse />} />
                   <Route path="/cgv" element={<TermsOfUse />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />

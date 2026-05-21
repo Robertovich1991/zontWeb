@@ -292,7 +292,7 @@ const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) =>
       {c.backToPartners && (
         <div className="bg-[#0c1220] pb-8">
           <div className="max-w-6xl mx-auto px-4 text-center">
-            <Link to="/partners" className="text-gray-400 hover:text-[#2ecc71] transition-colors text-sm inline-flex items-center gap-1">
+            <Link to={language === 'en' ? '/b2b-airport-transfers' : language === 'ru' ? '/b2b-transfery-iz-aeroporta' : language === 'hy' ? '/b2b-odanavakayani-transfer' : '/b2b-transferts-aeroport'} className="text-gray-400 hover:text-[#2ecc71] transition-colors text-sm inline-flex items-center gap-1">
               <ArrowRight className="w-3 h-3 rotate-180" /> {c.backToPartners}
             </Link>
           </div>
