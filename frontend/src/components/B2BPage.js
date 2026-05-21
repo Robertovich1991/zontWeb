@@ -8,7 +8,7 @@ import { CheckCircle, ArrowRight, Phone, Mail, Building2, Clock, Shield, Users, 
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-const B2BPage = ({ content, seoUrls, relatedPages }) => {
+const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) => {
   const { language } = useLanguage();
   const c = content[language] || content.en;
   const contactRef = useRef(null);
@@ -99,14 +99,28 @@ const B2BPage = ({ content, seoUrls, relatedPages }) => {
               </div>
             </div>
             <div className="flex-1 max-w-md">
-              <div className="grid grid-cols-2 gap-3">
-                {(c.heroStats || []).map((stat, i) => (
-                  <div key={i} className="bg-[#151f33]/80 backdrop-blur border border-gray-700/40 rounded-xl p-5 text-center">
-                    <div className="text-2xl font-bold text-[#2ecc71]">{stat.value}</div>
-                    <div className="text-xs text-gray-400 mt-1">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
+              {heroImage ? (
+                <div className="relative rounded-2xl overflow-hidden border border-gray-700/40 shadow-2xl shadow-black/40">
+                  <img
+                    src={heroImage}
+                    alt={heroImageAlt || c.heroTitle}
+                    loading="eager"
+                    width="900"
+                    height="1200"
+                    className="w-full h-auto object-cover"
+                    data-testid="b2b-hero-image"
+                  />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {(c.heroStats || []).map((stat, i) => (
+                    <div key={i} className="bg-[#151f33]/80 backdrop-blur border border-gray-700/40 rounded-xl p-5 text-center">
+                      <div className="text-2xl font-bold text-[#2ecc71]">{stat.value}</div>
+                      <div className="text-xs text-gray-400 mt-1">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
