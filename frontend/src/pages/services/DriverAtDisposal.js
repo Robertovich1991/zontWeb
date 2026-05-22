@@ -126,14 +126,15 @@ const DriverAtDisposal = () => {
         {/* Hero */}
         <section className="relative overflow-hidden bg-gradient-to-br from-[#0a0e14] via-[#11161f] to-[#0a0e14]">
           <div
-            className="absolute inset-0 opacity-30"
+            className="absolute inset-0 opacity-70"
             style={{
               backgroundImage: `url('/images/mercedes-classe-s-chauffeur-prive-paris.webp')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e14] via-[#0a0e14]/85 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e14]/95 via-[#0a0e14]/55 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e14]/60 via-transparent to-transparent" />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
             <div className="max-w-3xl">
