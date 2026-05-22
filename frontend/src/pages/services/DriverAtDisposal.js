@@ -125,60 +125,49 @@ const DriverAtDisposal = () => {
       <main className="pt-16">
         {/* Hero */}
         <section className="relative overflow-hidden bg-[#0a0e14]">
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              {/* Text column */}
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-6">
-                  <Clock size={16} className="text-[#c8a951]" />
-                  <span className="text-xs uppercase tracking-[0.3em] text-[#c8a951] font-medium">
-                    4h / 8h / 12h
-                  </span>
-                </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light leading-tight mb-6 tracking-tight">
-                  {ui.pageTitle.split('—')[0].trim()}
-                  <span className="block text-[#c8a951] font-normal mt-2">
-                    {ui.pageTitle.split('—')[1]?.trim()}
-                  </span>
-                </h1>
-                <p className="text-lg text-gray-300 leading-relaxed max-w-xl mb-8">
-                  {ui.pageSubtitle}
-                </p>
-                <div className="flex flex-wrap items-center gap-4">
-                  <a
-                    href="#fleet"
-                    data-testid="hero-discover-fleet-btn"
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-[#c8a951] hover:bg-[#d4b85c] text-[#0a0e14] font-semibold uppercase tracking-wider text-sm transition-all"
-                  >
-                    {ui.fleetTitle}
-                    <ChevronRight size={18} />
-                  </a>
-                  <button
-                    onClick={() => navigate('/')}
-                    data-testid="hero-book-now-btn"
-                    className="inline-flex items-center gap-2 px-8 py-4 border border-white/30 hover:border-white text-white font-medium uppercase tracking-wider text-sm transition-all"
-                  >
-                    {ui.bookNow}
-                  </button>
-                </div>
-              </div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url('/images/mercedes-classe-s-chauffeur-prive-paris.webp')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e14]/85 via-[#0a0e14]/25 to-transparent" />
 
-              {/* Photo column */}
-              <div className="relative">
-                <div className="relative aspect-[4/5] sm:aspect-[5/4] lg:aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl shadow-black/60 ring-1 ring-white/5">
-                  <img
-                    src="/images/mercedes-classe-s-chauffeur-prive-paris.webp"
-                    alt="Mercedes Classe S — Chauffeur privé Paris Tour Eiffel"
-                    loading="eager"
-                    fetchpriority="high"
-                    width="900"
-                    height="1125"
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                </div>
-                {/* Gold accent corner */}
-                <div className="absolute -top-3 -right-3 w-20 h-20 border-t-2 border-r-2 border-[#c8a951]/60 rounded-tr-2xl pointer-events-none" />
-                <div className="absolute -bottom-3 -left-3 w-20 h-20 border-b-2 border-l-2 border-[#c8a951]/60 rounded-bl-2xl pointer-events-none" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-2 mb-6">
+                <Clock size={16} className="text-[#c8a951]" />
+                <span className="text-xs uppercase tracking-[0.3em] text-[#c8a951] font-medium">
+                  4h / 8h / 12h
+                </span>
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light leading-tight mb-6 tracking-tight drop-shadow-lg">
+                {ui.pageTitle.split('—')[0].trim()}
+                <span className="block text-[#c8a951] font-normal mt-2">
+                  {ui.pageTitle.split('—')[1]?.trim()}
+                </span>
+              </h1>
+              <p className="text-lg text-gray-200 leading-relaxed max-w-2xl mb-8 drop-shadow">
+                {ui.pageSubtitle}
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <a
+                  href="#fleet"
+                  data-testid="hero-discover-fleet-btn"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-[#c8a951] hover:bg-[#d4b85c] text-[#0a0e14] font-semibold uppercase tracking-wider text-sm transition-all"
+                >
+                  {ui.fleetTitle}
+                  <ChevronRight size={18} />
+                </a>
+                <button
+                  onClick={() => navigate('/')}
+                  data-testid="hero-book-now-btn"
+                  className="inline-flex items-center gap-2 px-8 py-4 border border-white/50 hover:border-white bg-black/30 backdrop-blur-sm text-white font-medium uppercase tracking-wider text-sm transition-all"
+                >
+                  {ui.bookNow}
+                </button>
               </div>
             </div>
           </div>
