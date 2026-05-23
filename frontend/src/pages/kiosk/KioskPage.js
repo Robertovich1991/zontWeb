@@ -32,6 +32,19 @@ const LANGS = {
     newBooking: 'Nouvelle reservation', back: 'Retour', continue: 'Continuer',
     searchOther: 'Rechercher une autre destination...', calcPrice: 'Calcul du prix en cours...',
     booking: 'Reservation en cours...', date: 'Date', time: 'Heure',
+    disposalBannerTitle: 'Chauffeur prive a disposition',
+    disposalBannerSub: 'Paris 4h • Versailles 5h • Fontainebleau 8h • Mont-Saint-Michel 12h',
+    disposalCta: 'Decouvrir les excursions',
+    disposalTitle: 'Excursions avec chauffeur prive',
+    disposalSub: 'Choisissez votre destination et votre duree. Tarif fixe, tout inclus.',
+    disposalParis: 'Visite de Paris',
+    disposalParisSub: '4 heures • Tour Eiffel, Louvre, Champs-Elysees',
+    disposalVersailles: 'Chateau de Versailles',
+    disposalVersaillesSub: '5 heures • Aller-retour + temps de visite',
+    disposalFontainebleau: 'Chateau de Fontainebleau',
+    disposalFontainebleauSub: '8 heures • Foret + chateau royal',
+    disposalMSM: 'Mont-Saint-Michel',
+    disposalMSMSub: '12 heures • Journee complete depuis Paris',
   },
   en: {
     heroTitle: 'Book your private chauffeur',
@@ -54,6 +67,19 @@ const LANGS = {
     newBooking: 'New booking', back: 'Back', continue: 'Continue',
     searchOther: 'Search another destination...', calcPrice: 'Calculating price...',
     booking: 'Booking in progress...', date: 'Date', time: 'Time',
+    disposalBannerTitle: 'Private chauffeur at disposal',
+    disposalBannerSub: 'Paris 4h • Versailles 5h • Fontainebleau 8h • Mont-Saint-Michel 12h',
+    disposalCta: 'Discover the excursions',
+    disposalTitle: 'Private chauffeur excursions',
+    disposalSub: 'Pick your destination and duration. Fixed price, all included.',
+    disposalParis: 'Paris City Tour',
+    disposalParisSub: '4 hours • Eiffel Tower, Louvre, Champs-Elysees',
+    disposalVersailles: 'Palace of Versailles',
+    disposalVersaillesSub: '5 hours • Round-trip + visiting time',
+    disposalFontainebleau: 'Fontainebleau Castle',
+    disposalFontainebleauSub: '8 hours • Forest + royal castle',
+    disposalMSM: 'Mont-Saint-Michel',
+    disposalMSMSub: '12 hours • Full day from Paris',
   },
   ru: {
     heroTitle: 'Закажите личного водителя',
@@ -76,6 +102,19 @@ const LANGS = {
     newBooking: 'Новое бронирование', back: 'Назад', continue: 'Продолжить',
     searchOther: 'Поиск другого направления...', calcPrice: 'Расчёт цены...',
     booking: 'Бронирование...', date: 'Дата', time: 'Время',
+    disposalBannerTitle: 'Личный водитель в распоряжение',
+    disposalBannerSub: 'Париж 4ч • Версаль 5ч • Фонтенбло 8ч • Мон-Сен-Мишель 12ч',
+    disposalCta: 'Открыть экскурсии',
+    disposalTitle: 'Экскурсии с личным водителем',
+    disposalSub: 'Выберите направление и длительность. Фиксированная цена, всё включено.',
+    disposalParis: 'Тур по Парижу',
+    disposalParisSub: '4 часа • Эйфелева башня, Лувр, Елисейские поля',
+    disposalVersailles: 'Версальский дворец',
+    disposalVersaillesSub: '5 часов • Туда-обратно + время на осмотр',
+    disposalFontainebleau: 'Замок Фонтенбло',
+    disposalFontainebleauSub: '8 часов • Лес + королевский замок',
+    disposalMSM: 'Мон-Сен-Мишель',
+    disposalMSMSub: '12 часов • Полный день из Парижа',
   },
 };
 
@@ -328,6 +367,83 @@ const KioskPage = () => {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Driver at Disposal banner */}
+            <button
+              onClick={() => setStep(0.8)}
+              className="block w-full max-w-5xl mx-auto mt-5 group relative overflow-hidden rounded-2xl border border-[#c8a951]/40 hover:border-[#c8a951] bg-gradient-to-r from-[#111827] to-[#1a2332] transition-all active:scale-[0.99]"
+              data-testid="kiosk-disposal-banner"
+            >
+              <div className="grid grid-cols-[1fr_1.4fr] items-stretch min-h-[180px]">
+                <div className="relative overflow-hidden">
+                  <img
+                    src="/images/chauffeur-prive-chateau-versailles-renault-trafic.webp"
+                    alt="Chauffeur prive Versailles Fontainebleau Mont Saint Michel"
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#111827]/40" />
+                </div>
+                <div className="p-5 lg:p-6 flex flex-col justify-center">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4 text-[#c8a951]" />
+                    <span className="text-[10px] uppercase tracking-[0.25em] text-[#c8a951] font-bold">4h • 5h • 8h • 12h</span>
+                  </div>
+                  <h3 className="text-xl lg:text-2xl font-bold text-white mb-2 leading-tight">{t.disposalBannerTitle}</h3>
+                  <p className="text-sm text-gray-300 leading-relaxed mb-3">{t.disposalBannerSub}</p>
+                  <span className="inline-flex items-center gap-2 text-[#c8a951] font-bold text-sm uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+                    {t.disposalCta}
+                    <ChevronRight className="w-4 h-4" />
+                  </span>
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Step 0.8: Disposal excursions */}
+        {step === 0.8 && (
+          <div style={{ animation: 'fadeUp 0.3s ease-out' }} data-testid="kiosk-disposal-screen">
+            <button
+              onClick={() => setStep(0)}
+              className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#c8a951] mb-4 transition-colors"
+              data-testid="kiosk-disposal-back"
+            >
+              <ChevronRight className="w-4 h-4 rotate-180" /> {t.back}
+            </button>
+            <h2 className="text-2xl lg:text-3xl font-bold text-center mb-2">{t.disposalTitle}</h2>
+            <p className="text-center text-gray-400 text-sm mb-8 max-w-2xl mx-auto">{t.disposalSub}</p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-5xl mx-auto">
+              {[
+                { id: 'disposal-paris', name: t.disposalParis, sub: t.disposalParisSub, hours: 4, address: 'Paris, Ile-de-France, France' },
+                { id: 'disposal-versailles', name: t.disposalVersailles, sub: t.disposalVersaillesSub, hours: 5, address: 'Chateau de Versailles, France' },
+                { id: 'disposal-fontainebleau', name: t.disposalFontainebleau, sub: t.disposalFontainebleauSub, hours: 8, address: 'Chateau de Fontainebleau, France' },
+                { id: 'disposal-msm', name: t.disposalMSM, sub: t.disposalMSMSub, hours: 12, address: 'Mont-Saint-Michel, Normandie, France' },
+              ].map((d) => (
+                <button
+                  key={d.id}
+                  onClick={() => {
+                    setSelectedDest({ name: `${d.name} (${d.hours}h)`, address: d.address, cheapest: 0, custom: true, hours: d.hours });
+                    setCustomPricing(true);
+                    setStep(1);
+                  }}
+                  className="bg-[#111827]/80 border border-white/[0.06] hover:border-[#c8a951]/40 rounded-xl p-5 text-left transition-all active:scale-[0.98] flex items-start gap-4 group"
+                  data-testid={`disposal-${d.id}`}
+                >
+                  <div className="w-12 h-12 bg-[#c8a951]/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-[#c8a951]/20 transition-colors">
+                    <Clock className="w-6 h-6 text-[#c8a951]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-3 mb-1">
+                      <p className="text-white font-bold text-base">{d.name}</p>
+                      <span className="text-[#c8a951] font-bold text-sm whitespace-nowrap">{d.hours}h</span>
+                    </div>
+                    <p className="text-gray-500 text-xs leading-relaxed">{d.sub}</p>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
         )}
