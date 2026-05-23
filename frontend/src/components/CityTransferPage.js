@@ -27,7 +27,7 @@ const trustLabels = {
   ru: { trips: 'Выполненных Поездок', available: 'Доступно', fixed: 'Фиксированные Цены', rating: 'Рейтинг', reviews: 'отзывов', trustTitle: 'Доверие тысяч путешественников', paySecure: 'Безопасная Оплата', payDesc: 'Все карты принимаются', verifiedDriver: 'Проверенные Водители', verifiedDesc: 'Лицензированные профессионалы', flightTrack: 'Отслеживание Рейса', flightDesc: 'Мониторинг в реальном времени', freeCancel: 'Бесплатная Отмена', cancelDesc: 'До 24 часов' },
 };
 
-const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage, pageId, showDisposalCta }) => {
+const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage, pageId, showDisposalCta, ogImage }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { startBooking, setVehicleResults } = useBooking();
@@ -253,7 +253,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         title={seoTitle}
         description={seoDesc}
         canonical={seoUrls ? `https://www.zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
-        ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
+        ogImage={ogImage ? (ogImage.startsWith('http') ? ogImage : `https://www.zont.cab${ogImage}`) : (heroImage ? (heroImage.startsWith('http') ? heroImage : `https://www.zont.cab${heroImage}`) : "https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format")}
         hreflang={seoUrls ? [
           { lang: 'en', href: `https://www.zont.cab${seoUrls.en}` },
           { lang: 'fr', href: `https://www.zont.cab${seoUrls.fr}` },
