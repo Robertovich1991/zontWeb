@@ -92,6 +92,19 @@ const DriverAtDisposal = () => {
   const canonical = `${SITE}${DISPOSAL_BASE_PATH[lang]}`;
   const hreflang = Object.entries(DISPOSAL_BASE_PATH).map(([l, p]) => ({ lang: l, href: `${SITE}${p}` }));
 
+  // Build offers only for vehicles with a defined price (avoid Google "missing price")
+  const offers = VEHICLES.flatMap((v) => {
+    const validPrices = Object.values(v.pricing).filter((p) => typeof p === 'number' && p > 0);
+    if (validPrices.length === 0) return [];
+    return [{
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: `${v.name[lang]} — ${ui.pageTitle}` },
+      availability: 'https://schema.org/InStock',
+      priceCurrency: 'EUR',
+      price: Math.min(...validPrices),
+    }];
+  });
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Service',
@@ -100,12 +113,7 @@ const DriverAtDisposal = () => {
     provider: { '@type': 'Organization', name: 'Zont', url: SITE, telephone: '+33783777027' },
     areaServed: { '@type': 'City', name: 'Paris' },
     serviceType: 'Chauffeur service',
-    offers: VEHICLES.map((v) => ({
-      '@type': 'Offer',
-      itemOffered: { '@type': 'Service', name: `${v.name[lang]} — ${ui.pageTitle}` },
-      availability: 'https://schema.org/InStock',
-      priceCurrency: 'EUR',
-    })),
+    ...(offers.length > 0 ? { offers } : {}),
   };
 
   return (

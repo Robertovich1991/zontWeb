@@ -54,6 +54,17 @@ const DisposalVehicle = () => {
     href: `${SITE}${p}/${VEHICLE_SLUGS[vehicle.id][l]}`,
   }));
 
+  // Build offers only when at least one price tier is defined (avoid Google "missing lowPrice/highPrice")
+  const validPrices = Object.values(vehicle.pricing).filter((p) => typeof p === 'number' && p > 0);
+  const offers = validPrices.length > 0 ? {
+    '@type': 'AggregateOffer',
+    priceCurrency: 'EUR',
+    lowPrice: Math.min(...validPrices),
+    highPrice: Math.max(...validPrices),
+    availability: 'https://schema.org/InStock',
+    offerCount: validPrices.length,
+  } : undefined;
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -61,12 +72,7 @@ const DisposalVehicle = () => {
     description: copy.hero,
     image: `${SITE}${vehicle.image}`,
     brand: { '@type': 'Brand', name: vehicle.id.startsWith('mercedes') ? 'Mercedes-Benz' : 'Renault' },
-    offers: {
-      '@type': 'AggregateOffer',
-      priceCurrency: 'EUR',
-      availability: 'https://schema.org/InStock',
-      offerCount: 3,
-    },
+    ...(offers ? { offers } : {}),
     aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.9', reviewCount: '412' },
   };
 
