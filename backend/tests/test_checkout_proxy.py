@@ -9,9 +9,9 @@ import time
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
-# Test credentials from main agent
-TEST_CLIENT_EMAIL = "testclient@zont.cab"
-TEST_CLIENT_PASSWORD = "test1234"
+# Test credentials — load from environment, no hardcoded secrets
+TEST_CLIENT_EMAIL = os.environ.get('TEST_CLIENT_EMAIL', 'testclient@example.com')
+TEST_CLIENT_PASSWORD = os.environ.get('TEST_CLIENT_PASSWORD', 'changeme')
 
 
 class TestAuthProxy:

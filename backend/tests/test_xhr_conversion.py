@@ -8,9 +8,9 @@ import os
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
-# Test credentials
-TEST_CLIENT_EMAIL = "garikgalstyan@gmail.com"
-TEST_CLIENT_PASSWORD = "12345678"
+# Test credentials — load from environment, no hardcoded secrets
+TEST_CLIENT_EMAIL = os.environ.get('TEST_CLIENT_EMAIL', 'testclient@example.com')
+TEST_CLIENT_PASSWORD = os.environ.get('TEST_CLIENT_PASSWORD', 'changeme')
 
 
 class TestAuthServiceXHR:

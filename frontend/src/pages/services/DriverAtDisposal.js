@@ -180,8 +180,8 @@ const DriverAtDisposal = () => {
               {ui.whatsIncluded}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {[ui.inc1, ui.inc2, ui.inc3, ui.inc4, ui.inc5, ui.inc6].map((inc, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm text-gray-300">
+              {[ui.inc1, ui.inc2, ui.inc3, ui.inc4, ui.inc5, ui.inc6].map((inc) => (
+                <div key={inc} className="flex items-start gap-2 text-sm text-gray-300">
                   <Check size={16} className="text-[#c8a951] flex-shrink-0 mt-0.5" />
                   <span>{inc}</span>
                 </div>
@@ -220,7 +220,7 @@ const DriverAtDisposal = () => {
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {ui.useCases.map((c, i) => (
-                <div key={i} className="p-6 bg-[#11161f] border border-white/5 rounded-lg hover:border-[#c8a951]/30 transition-colors">
+                <div key={c.t} className="p-6 bg-[#11161f] border border-white/5 rounded-lg hover:border-[#c8a951]/30 transition-colors">
                   <div className="text-[#c8a951] text-2xl font-light mb-3">0{i + 1}</div>
                   <h3 className="text-lg font-medium mb-2">{c.t}</h3>
                   <p className="text-sm text-gray-400 leading-relaxed">{c.d}</p>
@@ -237,7 +237,7 @@ const DriverAtDisposal = () => {
             <div className="space-y-4">
               {ui.faqs.map((f, i) => (
                 <details
-                  key={i}
+                  key={f.q}
                   data-testid={`disposal-faq-${i}`}
                   className="group bg-[#11161f] border border-white/5 rounded-lg p-6 cursor-pointer hover:border-[#c8a951]/30 transition-colors"
                 >

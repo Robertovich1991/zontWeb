@@ -206,8 +206,8 @@ const DisposalVehicle = () => {
               {ui.whatsIncluded}
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
-              {[ui.inc1, ui.inc2, ui.inc3, ui.inc4, ui.inc5, ui.inc6].map((inc, i) => (
-                <div key={i} className="flex items-start gap-3 text-base text-gray-300">
+              {[ui.inc1, ui.inc2, ui.inc3, ui.inc4, ui.inc5, ui.inc6].map((inc) => (
+                <div key={inc} className="flex items-start gap-3 text-base text-gray-300">
                   <Check size={18} className="text-[#c8a951] flex-shrink-0 mt-1" />
                   <span>{inc}</span>
                 </div>
@@ -223,7 +223,7 @@ const DisposalVehicle = () => {
             <div className="space-y-3">
               {copy.faq.map((f, i) => (
                 <details
-                  key={i}
+                  key={f.q}
                   data-testid={`vehicle-faq-${i}`}
                   className="group bg-[#11161f] border border-white/5 rounded-lg p-5 cursor-pointer hover:border-[#c8a951]/30 transition-colors"
                 >

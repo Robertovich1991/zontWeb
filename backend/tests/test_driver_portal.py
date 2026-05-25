@@ -8,9 +8,9 @@ import os
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
-# Test credentials from review request
-CSHARP_DRIVER_EMAIL = "nandetiri1@gmail.com"
-CSHARP_DRIVER_PASSWORD = "12345678"
+# Test credentials — load from environment, no hardcoded secrets
+CSHARP_DRIVER_EMAIL = os.environ.get('TEST_DRIVER_EMAIL', 'testdriver@example.com')
+CSHARP_DRIVER_PASSWORD = os.environ.get('TEST_DRIVER_PASSWORD', 'changeme')
 
 
 class TestDriverLogin:
