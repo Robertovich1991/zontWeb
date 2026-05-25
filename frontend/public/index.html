@@ -1,33 +1,58 @@
 <!doctype html>
 <html lang="fr">
     <head>
-        <!-- Google Tag Manager -->
-        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-KF9XWFT7');</script>
-        <!-- End Google Tag Manager -->
-
-        <!-- Meta Pixel Code — production only (www.zont.cab) -->
+        <!-- Tracking scripts — production only (zont.cab) — prevents preview env pollution -->
         <script>
-        if (window.location.hostname === 'www.zont.cab' || window.location.hostname === 'zont.cab') {
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '26750687997954052');
-        fbq('track', 'PageView');
-        }
+        (function(){
+          var host = window.location.hostname;
+          var IS_PROD = (host === 'www.zont.cab' || host === 'zont.cab');
+          if (!IS_PROD) return; // 🔒 Tracking DISABLED on preview/dev/staging
+
+          // ───── Google Tag Manager ─────
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-KF9XWFT7');
+
+          // ───── Meta Pixel ─────
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '26750687997954052');
+          fbq('track', 'PageView');
+
+          // ───── Yandex Metrika ─────
+          (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+          m[i].l=1*new Date();k=e.createElement(t);a=e.getElementsByTagName(t)[0];k.async=1;k.src=r;a.parentNode.insertBefore(k,a);
+          })(window, document,'script','https://mc.yandex.ru/metrika/tag.js', 'ym');
+          ym(91814401, 'init', {webvisor:true, clickmap:true, trackLinks:true, accurateTrackBounce:true, trackHash:true});
+
+          // ───── Google Analytics 4 + Google Ads ─────
+          var gaScript = document.createElement('script');
+          gaScript.async = true;
+          gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-LWM17GPD3P';
+          document.head.appendChild(gaScript);
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', 'G-LWM17GPD3P');
+          gtag('config', 'AW-1014783804');
+        })();
         </script>
-        <noscript><img height="1" width="1" style="display:none"
-        src="https://www.facebook.com/tr?id=26750687997954052&ev=PageView&noscript=1"
-        /></noscript>
-        <!-- End Meta Pixel Code -->
+        <noscript>
+          <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KF9XWFT7"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+          <img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=26750687997954052&ev=PageView&noscript=1" />
+        </noscript>
+        <!-- End tracking scripts -->
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1a2332" />
@@ -55,25 +80,6 @@
         <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
         <title>Zont - Transfert Aeroport Premium | Chauffeur Prive Europe</title>
         <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
-        <!-- Yandex.Metrika counter — must load immediately for Webvisor to capture styles -->
-        <script type="text/javascript">
-            (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-            m[i].l=1*new Date();k=e.createElement(t);a=e.getElementsByTagName(t)[0];k.async=1;k.src=r;a.parentNode.insertBefore(k,a);
-            })(window, document,'script','https://mc.yandex.ru/metrika/tag.js', 'ym');
-            ym(91814401, 'init', {webvisor:true, clickmap:true, trackLinks:true, accurateTrackBounce:true, trackHash:true});
-        </script>
-        <!-- /Yandex.Metrika counter -->
-        <!-- Google Analytics + Ads — must load immediately for conversion tracking on Checkout -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LWM17GPD3P"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            window.gtag = gtag;
-            gtag('js', new Date());
-            gtag('config', 'G-LWM17GPD3P');
-            gtag('config', 'AW-1014783804');
-        </script>
-        <!-- /Google Analytics + Ads -->
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
         <!--
         These two scripts have been added for the Visual Edits, please do not edit or remove them
@@ -100,10 +106,6 @@
         </script>
     </head>
     <body>
-        <!-- Google Tag Manager (noscript) -->
-        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KF9XWFT7"
-        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-        <!-- End Google Tag Manager (noscript) -->
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="root"></div>
         <script>
