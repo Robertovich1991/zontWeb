@@ -506,7 +506,9 @@ async def proxy_verify_code(code: str):
 # ---- Booking & Financial Card Assets (Stripe / 3DS Core Mappings) ----
 
 @router.get("/booking/setup-intent")
+@router.post("/booking/setup-intent")
 @router.get("/client/add-card")
+@router.post("/client/add-card")
 async def proxy_client_add_card_unified(request: Request):
     """Unified endpoint to extract SetupIntent token metadata safely for checkout flows."""
     auth_header = request.headers.get("Authorization")

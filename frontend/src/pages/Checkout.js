@@ -337,6 +337,19 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
     firstName: '', lastName: '', email: '', phone: '', password: '',
   });
 
+  // Pre-fill form fields from authenticated user profile (fixes empty phone bug)
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setForm(prev => ({
+        ...prev,
+        firstName: prev.firstName || user.firstName || user.name?.split(' ')[0] || '',
+        lastName:  prev.lastName  || user.lastName  || user.name?.split(' ').slice(1).join(' ') || '',
+        email:     prev.email     || user.email     || '',
+        phone:     prev.phone     || user.phone     || user.phoneNumber || user.phone_number || '',
+      }));
+    }
+  }, [isAuthenticated, user]);
+
   // Google Sign-In: load GIS and render button
   const handleGoogleCredential = React.useCallback(async (response) => {
     if (!response.credential) return;
