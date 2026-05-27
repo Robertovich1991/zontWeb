@@ -286,6 +286,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
               "priceCurrency": "EUR",
               "lowPrice": Math.min(...Object.values(vehiclesPrices)),
               "highPrice": Math.max(...Object.values(vehiclesPrices)),
+              "offerCount": Object.values(vehiclesPrices).length,
             }} : {}),
             ...(reviewSchema?.aggregateRating ? { "aggregateRating": reviewSchema.aggregateRating } : {}),
             ...(reviewSchema?.reviews?.length ? { "review": reviewSchema.reviews } : {}),
