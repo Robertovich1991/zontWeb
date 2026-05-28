@@ -16,6 +16,7 @@ const cityImages = {
   nice: 'https://images.unsplash.com/photo-1584464743211-134b56a08510?w=600&q=75&auto=format',
   cannes: 'https://images.unsplash.com/photo-1594041966249-ebee737fb001?w=600&q=75&auto=format',
   cotedazur: 'https://images.unsplash.com/photo-1584464743211-134b56a08510?w=600&q=75&auto=format',
+  disneyland: '/images/disneyland.webp',
   monaco: '/images/monaco-driver-service.jpg',
   berlin: 'https://images.unsplash.com/photo-1659413084271-ca1345764e15?w=600&q=75&auto=format',
   munich: 'https://images.unsplash.com/photo-1659413084271-ca1345764e15?w=600&q=75&auto=format',
@@ -105,7 +106,7 @@ const translations = {
 
 const startingPrices = {
   paris: 65, cdg: 65, orly: 45, beauvais: 120, paristrainstation: 25,
-  nice: 35, monaco: 65, cannes: 70, cotedazur: 45,
+  nice: 35, monaco: 65, cannes: 70, cotedazur: 45, disneyland: 49,
   berlin: 45, munich: 55, rome: 40, milan: 35, alicante: 30, barcelona: 39, yerevan: 15,
 };
 
