@@ -27,7 +27,7 @@ const trustLabels = {
   ru: { trips: 'Выполненных Поездок', available: 'Доступно', fixed: 'Фиксированные Цены', rating: 'Рейтинг', reviews: 'отзывов', trustTitle: 'Доверие тысяч путешественников', paySecure: 'Безопасная Оплата', payDesc: 'Все карты принимаются', verifiedDriver: 'Проверенные Водители', verifiedDesc: 'Лицензированные профессионалы', flightTrack: 'Отслеживание Рейса', flightDesc: 'Мониторинг в реальном времени', freeCancel: 'Бесплатная Отмена', cancelDesc: 'До 24 часов' },
 };
 
-const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage, pageId, showDisposalCta, ogImage }) => {
+const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage, pageId, showDisposalCta, ogImage, extraSections }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { startBooking, setVehicleResults } = useBooking();
@@ -748,6 +748,9 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
           </div>
         </section>
       </main>
+
+      {/* EXTRA SECTIONS — page-specific SEO blocks (e.g. Disneyland hotels grid) */}
+      {extraSections}
 
       {/* STICKY MOBILE CTA */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#1a2332] border-t border-gray-700 p-3 z-40 safe-area-bottom" data-testid="mobile-sticky-cta">

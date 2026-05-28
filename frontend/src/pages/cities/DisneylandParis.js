@@ -1,5 +1,6 @@
 import React from 'react';
 import CityTransferPage from '@/components/CityTransferPage';
+import DisneylandMainSections from '@/components/DisneylandMainSections';
 
 const content = {
   en: {
@@ -139,5 +140,13 @@ const content = {
 const vehiclesPrices = { sedan: 59, luxury: 85, minivan: 110, minibus: 160 };
 
 const seoUrls = { en: '/disneyland-paris-transfer', fr: '/transfert-disneyland-paris', ru: '/transfer-disneylend-parizh', hy: '/disneylend-pariz-transfer' };
-const DisneylandTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} pageId="disneyland" />;
+const DisneylandTransfer = () => (
+  <CityTransferPage
+    content={content}
+    vehicles={vehiclesPrices}
+    seoUrls={seoUrls}
+    pageId="disneyland"
+    extraSections={<DisneylandMainSections />}
+  />
+);
 export default DisneylandTransfer;

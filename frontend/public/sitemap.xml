@@ -427,6 +427,35 @@
   <url><loc>https://www.zont.cab/transfer-disneylend-parizh</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.zont.cab/disneylend-pariz-transfer</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
 
+  <!-- ==================== DISNEYLAND PARIS — ROUTE SEO PAGES ==================== -->
+  <url><loc>https://www.zont.cab/cdg-to-disneyland-paris-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/orly-to-disneyland-paris-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/beauvais-to-disneyland-paris-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/paris-to-disneyland-paris-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/disneyland-paris-to-cdg-airport-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/disneyland-paris-to-orly-airport-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!-- ==================== DISNEYLAND PARIS — OFFICIAL DISNEY HOTELS ==================== -->
+  <url><loc>https://www.zont.cab/disneyland-hotel-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/disney-hotel-new-york-art-of-marvel-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/disney-newport-bay-club-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/disney-sequoia-lodge-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/disney-hotel-cheyenne-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/disney-hotel-santa-fe-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/disney-davy-crockett-ranch-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!-- ==================== DISNEYLAND PARIS — PARTNER HOTELS ==================== -->
+  <url><loc>https://www.zont.cab/hotel-elysee-val-d-europe-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/staycity-aparthotels-disneyland-paris-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/ki-space-hotel-spa-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/bb-hotel-disneyland-paris-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/adagio-val-d-europe-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/explorers-hotel-disneyland-paris-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/campanile-val-de-france-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/dream-castle-hotel-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/grand-magic-hotel-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/villages-nature-paris-transfer</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
   <!-- ==================== GARE DE LYON ==================== -->
   <url>
     <loc>https://www.zont.cab/gare-de-lyon-transfer</loc>

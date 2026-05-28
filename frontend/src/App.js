@@ -137,6 +137,7 @@ const GareMontparnasseTransfer = lazy(() => import("@/pages/cities/GareMontparna
 const GareSaintLazareTransfer = lazy(() => import("@/pages/cities/GareSaintLazare"));
 const GareAusterlitzTransfer = lazy(() => import("@/pages/cities/GareAusterlitz"));
 const DisneylandTransfer = lazy(() => import("@/pages/cities/DisneylandParis"));
+const DisneyTransferPage = lazy(() => import("@/components/DisneyTransferPage"));
 
 // B2B Pages (lazy)
 const Partners = lazy(() => import("@/pages/Partners"));
@@ -230,6 +231,32 @@ function App() {
                   <Route path="/transfert-disneyland-paris" element={<DisneylandTransfer />} />
                   <Route path="/transfer-disneylend-parizh" element={<DisneylandTransfer />} />
                   <Route path="/disneylend-pariz-transfer" element={<DisneylandTransfer />} />
+                  {/* Disneyland Paris — Route SEO sub-pages */}
+                  <Route path="/cdg-to-disneyland-paris-transfer" element={<DisneyTransferPage routeSlug="cdg-to-disneyland-paris-transfer" />} />
+                  <Route path="/orly-to-disneyland-paris-transfer" element={<DisneyTransferPage routeSlug="orly-to-disneyland-paris-transfer" />} />
+                  <Route path="/beauvais-to-disneyland-paris-transfer" element={<DisneyTransferPage routeSlug="beauvais-to-disneyland-paris-transfer" />} />
+                  <Route path="/paris-to-disneyland-paris-transfer" element={<DisneyTransferPage routeSlug="paris-to-disneyland-paris-transfer" />} />
+                  <Route path="/disneyland-paris-to-cdg-airport-transfer" element={<DisneyTransferPage routeSlug="disneyland-paris-to-cdg-airport-transfer" />} />
+                  <Route path="/disneyland-paris-to-orly-airport-transfer" element={<DisneyTransferPage routeSlug="disneyland-paris-to-orly-airport-transfer" />} />
+                  {/* Disneyland Paris — Official Disney Hotels */}
+                  <Route path="/disneyland-hotel-transfer" element={<DisneyTransferPage hotelSlug="disneyland-hotel-transfer" />} />
+                  <Route path="/disney-hotel-new-york-art-of-marvel-transfer" element={<DisneyTransferPage hotelSlug="disney-hotel-new-york-art-of-marvel-transfer" />} />
+                  <Route path="/disney-newport-bay-club-transfer" element={<DisneyTransferPage hotelSlug="disney-newport-bay-club-transfer" />} />
+                  <Route path="/disney-sequoia-lodge-transfer" element={<DisneyTransferPage hotelSlug="disney-sequoia-lodge-transfer" />} />
+                  <Route path="/disney-hotel-cheyenne-transfer" element={<DisneyTransferPage hotelSlug="disney-hotel-cheyenne-transfer" />} />
+                  <Route path="/disney-hotel-santa-fe-transfer" element={<DisneyTransferPage hotelSlug="disney-hotel-santa-fe-transfer" />} />
+                  <Route path="/disney-davy-crockett-ranch-transfer" element={<DisneyTransferPage hotelSlug="disney-davy-crockett-ranch-transfer" />} />
+                  {/* Disneyland Paris — Partner Hotels */}
+                  <Route path="/hotel-elysee-val-d-europe-transfer" element={<DisneyTransferPage hotelSlug="hotel-elysee-val-d-europe-transfer" />} />
+                  <Route path="/staycity-aparthotels-disneyland-paris-transfer" element={<DisneyTransferPage hotelSlug="staycity-aparthotels-disneyland-paris-transfer" />} />
+                  <Route path="/ki-space-hotel-spa-transfer" element={<DisneyTransferPage hotelSlug="ki-space-hotel-spa-transfer" />} />
+                  <Route path="/bb-hotel-disneyland-paris-transfer" element={<DisneyTransferPage hotelSlug="bb-hotel-disneyland-paris-transfer" />} />
+                  <Route path="/adagio-val-d-europe-transfer" element={<DisneyTransferPage hotelSlug="adagio-val-d-europe-transfer" />} />
+                  <Route path="/explorers-hotel-disneyland-paris-transfer" element={<DisneyTransferPage hotelSlug="explorers-hotel-disneyland-paris-transfer" />} />
+                  <Route path="/campanile-val-de-france-transfer" element={<DisneyTransferPage hotelSlug="campanile-val-de-france-transfer" />} />
+                  <Route path="/dream-castle-hotel-transfer" element={<DisneyTransferPage hotelSlug="dream-castle-hotel-transfer" />} />
+                  <Route path="/grand-magic-hotel-transfer" element={<DisneyTransferPage hotelSlug="grand-magic-hotel-transfer" />} />
+                  <Route path="/villages-nature-paris-transfer" element={<DisneyTransferPage hotelSlug="villages-nature-paris-transfer" />} />
                   {/* Nice */}
                   <Route path="/nice-airport-transfer" element={<NiceTransfer />} />
                   <Route path="/transfert-aeroport-nice" element={<NiceTransfer />} />
