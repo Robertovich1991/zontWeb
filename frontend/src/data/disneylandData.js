@@ -292,7 +292,7 @@ export const disneyHotels = {
     name: 'Dream Castle Hotel',
     category: 'partner',
     address: '40 Avenue de la Fosse des Pressoirs, 77700 Magny-le-Hongre',
-    image: '/images/disneyland.webp',
+    image: '/images/transfer-disney-hotel-dream-castle.webp',
     metaTitle: 'Dream Castle Hotel Transfer | Private Driver to Disneyland',
     metaDesc: 'Private transfer to Dream Castle Hotel near Disneyland Paris. Fixed price from CDG, Orly, Beauvais and Paris. Comfortable family vehicles.',
     short: 'Private transfer to Dream Castle Hotel, a popular family hotel close to Disney Parks.',
