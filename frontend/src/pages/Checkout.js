@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import PhoneInput from '@/components/PhoneInput';
+import LastMinuteWarning from '@/components/LastMinuteWarning';
 import { toast } from 'sonner';
 import { trackInitiateCheckout } from '@/utils/fbPixel';
 import {
@@ -1104,6 +1105,7 @@ const Checkout = () => {
                           </div>
                         </div>
                       )}
+                      <LastMinuteWarning date={searchData.date} time={searchData.time} compact />
                     </div>
                     <div className="border-t border-white/10 pt-3">
                       <div className="flex justify-between items-center">

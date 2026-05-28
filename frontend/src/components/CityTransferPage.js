@@ -9,6 +9,7 @@ import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
+import LastMinuteWarning from '@/components/LastMinuteWarning';
 import { trackSearch } from '@/utils/fbPixel';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
 
@@ -413,6 +414,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                             className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="time-input" aria-label={c.timeLabel} />
                         </div>
                       </div>
+                      <LastMinuteWarning date={date} time={time} />
                       <button type="submit" disabled={loading}
                         className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#27ae60] transition-colors uppercase tracking-wide shadow-lg shadow-[#2ecc71]/30"
                         data-testid="submit-booking-btn">
