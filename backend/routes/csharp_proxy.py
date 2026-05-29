@@ -315,7 +315,7 @@ async def proxy_facebook_login(req: FacebookLoginRequest):
             raise HTTPException(status_code=401, detail="Facebook security token verification mismatch.")
         
         me_resp = await (await get_http_client()).get(
-            "https://graph.facebook.com/v21.0/me",
+            "https://graph.facebook.com/v25.0/me",
             params={"fields": "id,first_name,last_name,email", "access_token": req.accessToken}
         )
         fb_user = me_resp.json()

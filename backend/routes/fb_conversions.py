@@ -19,8 +19,7 @@ router = APIRouter(prefix="/api/fb", tags=["facebook"])
 
 PIXEL_ID = os.environ.get("FB_PIXEL_ID", "")
 ACCESS_TOKEN = os.environ.get("FB_CAPI_TOKEN", "")
-GRAPH_URL = f"https://graph.facebook.com/v21.0/{PIXEL_ID}/events"
-
+GRAPH_URL = f"https://graph.facebook.com/v25.0/{PIXEL_ID}/events"
 
 # --------------- Hashing helpers ---------------
 
