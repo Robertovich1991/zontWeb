@@ -790,99 +790,6 @@ const Home = () => {
                           </div>
                         )}
                       </div>
-
-                      {/* AI Booking Block — placed after Google address fields */}
-                      <div className="bg-gradient-to-r from-[#2ecc71]/10 to-[#2ecc71]/5 border border-[#2ecc71]/25 rounded-xl p-3" data-testid="ai-booking-block">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-6 h-6 rounded-md bg-[#2ecc71]/20 flex items-center justify-center shrink-0">
-                            <Sparkles className="w-3.5 h-3.5 text-[#2ecc71]" />
-                          </div>
-                          <p className="text-gray-800 font-semibold text-xs sm:text-sm">{c.aiTitle}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <div className="flex-1 min-w-0 relative">
-                            <input
-                              type="text"
-                              value={aiText}
-                              onChange={(e) => setAiText(e.target.value)}
-                              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAIParse())}
-                              placeholder={c.aiPlaceholder}
-                              className="w-full px-3 py-2 pr-9 bg-white text-gray-900 placeholder-gray-400 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-xs outline-none"
-                              data-testid="ai-text-input"
-                            />
-                            <button
-                              type="button"
-                              onClick={isListening ? stopListening : startListening}
-                              className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:text-[#2ecc71]'}`}
-                              data-testid="ai-mic-btn"
-                              title="Voice input"
-                            >
-                              {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleAIParse()}
-                            disabled={aiLoading || !aiText.trim()}
-                            className="px-3 py-2 bg-[#2ecc71] text-white rounded-lg font-bold text-xs hover:bg-[#27ae60] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 flex items-center gap-1"
-                            data-testid="ai-auto-btn"
-                          >
-                            {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                            {aiLoading ? c.aiLoading.split(' ')[0] : c.aiBtn}
-                          </button>
-                        </div>
-
-                        {/* Guided Mode - ONE question at a time */}
-                        {guidedStep && (
-                          <div className="mt-3 pt-3 border-t border-[#2ecc71]/15 animate-[fadeIn_0.3s_ease-out]" data-testid="guided-mode">
-                            <p className="text-gray-800 text-xs font-medium mb-2">{guidedQuestions[guidedStep]}</p>
-                            <div className="flex flex-wrap gap-1.5 mb-2">
-                              {(guidedSuggestions[guidedStep] || []).map((s, i) => (
-                                <button
-                                  key={i}
-                                  type="button"
-                                  onClick={() => handleGuidedAnswer(s)}
-                                  className="px-3 py-1.5 bg-white text-gray-700 text-xs rounded-full border border-gray-200 hover:bg-[#2ecc71]/10 hover:border-[#2ecc71]/40 transition-all"
-                                  data-testid={`guided-btn-${i}`}
-                                >
-                                  {s}
-                                </button>
-                              ))}
-                            </div>
-                            <div className="flex gap-2">
-                              <div className="flex-1 min-w-0 relative">
-                                <input
-                                  type="text"
-                                  value={guidedInput}
-                                  onChange={(e) => setGuidedInput(e.target.value)}
-                                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleGuidedSubmit())}
-                                  placeholder={guidedStep?.includes('exact') ? '12 Rue de Rivoli, Paris' : '...'}
-                                  className="w-full px-3 py-2 pr-9 bg-white text-gray-900 placeholder-gray-400 rounded-lg border border-gray-200 focus:border-[#2ecc71] text-xs outline-none"
-                                  data-testid="guided-input"
-                                  autoFocus
-                                />
-                                <button
-                                  type="button"
-                                  onClick={isListening ? stopListening : startGuidedListening}
-                                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:text-[#2ecc71]'}`}
-                                  data-testid="guided-mic-btn"
-                                >
-                                  {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                                </button>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={handleGuidedSubmit}
-                                disabled={!guidedInput.trim()}
-                                className="px-3 py-2 bg-[#2ecc71] text-white rounded-lg text-xs font-bold hover:bg-[#27ae60] disabled:opacity-50 transition-colors"
-                                data-testid="guided-submit"
-                              >
-                                OK
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label htmlFor="h-date" className="block text-gray-700 font-medium text-sm mb-1">{c.date}</label>
@@ -940,6 +847,99 @@ const Home = () => {
                               <ChevronRight className="w-4 h-4 text-[#2ecc71]/50 group-hover:text-[#2ecc71] shrink-0 transition-colors" />
                             </button>
                           ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* AI Booking Block — placed BELOW the white reservation card */}
+                  <div className="mt-3 bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/15" data-testid="ai-booking-block">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-[#2ecc71]/20 flex items-center justify-center shrink-0">
+                        <Sparkles className="w-4 h-4 text-[#2ecc71]" />
+                      </div>
+                      <p className="text-white font-semibold text-sm">{c.aiTitle}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex-1 min-w-0 relative">
+                        <input
+                          type="text"
+                          value={aiText}
+                          onChange={(e) => setAiText(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAIParse()}
+                          placeholder={c.aiPlaceholder}
+                          className="w-full px-3 py-2.5 pr-10 bg-white/10 text-white placeholder-gray-400 rounded-lg border border-white/15 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-xs outline-none"
+                          data-testid="ai-text-input"
+                        />
+                        <button
+                          type="button"
+                          onClick={isListening ? stopListening : startListening}
+                          className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all ${isListening ? 'bg-red-500/80 text-white animate-pulse' : 'text-gray-400 hover:text-[#2ecc71]'}`}
+                          data-testid="ai-mic-btn"
+                          title="Voice input"
+                        >
+                          {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleAIParse()}
+                        disabled={aiLoading || !aiText.trim()}
+                        className="px-4 py-2.5 bg-[#2ecc71] text-white rounded-lg font-bold text-xs hover:bg-[#27ae60] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 flex items-center gap-1.5"
+                        data-testid="ai-auto-btn"
+                      >
+                        {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                        {aiLoading ? c.aiLoading.split(' ')[0] : c.aiBtn}
+                      </button>
+                    </div>
+
+                    {/* Guided Mode - ONE question at a time */}
+                    {guidedStep && (
+                      <div className="mt-3 pt-3 border-t border-white/10 animate-[fadeIn_0.3s_ease-out]" data-testid="guided-mode">
+                        <p className="text-white/90 text-xs font-medium mb-2">{guidedQuestions[guidedStep]}</p>
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {(guidedSuggestions[guidedStep] || []).map((s, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => handleGuidedAnswer(s)}
+                              className="px-3 py-1.5 bg-white/10 text-white text-xs rounded-full border border-white/15 hover:bg-[#2ecc71]/20 hover:border-[#2ecc71]/40 transition-all"
+                              data-testid={`guided-btn-${i}`}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="flex-1 min-w-0 relative">
+                            <input
+                              type="text"
+                              value={guidedInput}
+                              onChange={(e) => setGuidedInput(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleGuidedSubmit()}
+                              placeholder={guidedStep?.includes('exact') ? '12 Rue de Rivoli, Paris' : '...'}
+                              className="w-full px-3 py-2 pr-9 bg-white/10 text-white placeholder-gray-400 rounded-lg border border-white/15 focus:border-[#2ecc71] text-xs outline-none"
+                              data-testid="guided-input"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={isListening ? stopListening : startGuidedListening}
+                              className={`absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full transition-all ${isListening ? 'bg-red-500/80 text-white animate-pulse' : 'text-gray-400 hover:text-[#2ecc71]'}`}
+                              data-testid="guided-mic-btn"
+                            >
+                              {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleGuidedSubmit}
+                            disabled={!guidedInput.trim()}
+                            className="px-3 py-2 bg-[#2ecc71] text-white rounded-lg text-xs font-bold hover:bg-[#27ae60] disabled:opacity-50 transition-colors"
+                            data-testid="guided-submit"
+                          >
+                            OK
+                          </button>
                         </div>
                       </div>
                     )}
