@@ -194,7 +194,7 @@ export const disneyHotels = {
     name: 'Disney Davy Crockett Ranch',
     category: 'official',
     address: 'Route du Bois de Citry, 77174 Villeneuve-le-Comte',
-    image: '/images/disneyland.webp',
+    image: '/images/transfer-disney-davy-crockett-ranch.webp',
     metaTitle: 'Disney Davy Crockett Ranch Transfer | Private Driver',
     metaDesc: 'Private transfer to Disney Davy Crockett Ranch at Disneyland Paris. No shuttle service to parks — book a direct ride from CDG, Orly, Beauvais and Paris.',
     short: 'Private transfer to Disney Davy Crockett Ranch, recommended for guests who need a direct ride.',
