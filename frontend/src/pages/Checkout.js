@@ -19,7 +19,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 const GOOGLE_CLIENT_ID = '71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com';
-const FACEBOOK_APP_ID = '973858222181967';
+const FACEBOOK_APP_ID = '1783544712624133';
 const STRIPE_PK = 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO';
 const stripePromise = loadStripe(STRIPE_PK);
 
