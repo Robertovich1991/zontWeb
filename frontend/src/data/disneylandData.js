@@ -316,7 +316,7 @@ export const disneyHotels = {
     name: 'Center Parcs Villages Nature Paris',
     category: 'partner',
     address: 'Route de Villeneuve, 77700 Bailly-Romainvilliers',
-    image: '/images/disneyland.webp',
+    image: '/images/transfer-villages-nature-paris.webp',
     metaTitle: 'Villages Nature Paris Transfer | Private Driver to Center Parcs',
     metaDesc: 'Private transfer to Villages Nature Paris (Center Parcs) near Disneyland Paris. Fixed price from CDG, Orly, Beauvais and Paris. Family vehicles.',
     short: 'Private transfer to Villages Nature Paris, with direct ride from airports and Paris.',
