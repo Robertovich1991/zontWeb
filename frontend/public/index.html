@@ -54,6 +54,20 @@
             src="https://www.facebook.com/tr?id=26750687997954052&ev=PageView&noscript=1" />
         </noscript>
         <!-- End tracking scripts -->
+
+        <!-- Facebook SDK — global init (must override Meta Pixel's token with our App ID) -->
+        <script>
+          window.fbAsyncInit = function() {
+            window.FB.init({
+              appId      : '1783544712624133',
+              cookie     : true,
+              xfbml      : false,
+              version    : 'v21.0'
+            });
+          };
+        </script>
+        <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#1a2332" />

@@ -185,7 +185,13 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
   const handleFacebookLogin = useCallback(() => {
     setLoading(true);
     setErrors({});
+
     const doFbLogin = () => {
+      if (!window.FB) {
+        setLoading(false);
+        toast.error('Facebook SDK not ready. Please try again.');
+        return;
+      }
       window.FB.login((response) => {
         if (response.authResponse) {
           const { accessToken, userID } = response.authResponse;
@@ -208,25 +214,22 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
             })
             .finally(() => setLoading(false));
         } else {
-          setLoading(false);
+          setLoading(false); // User closed the popup
         }
-      }, { scope: 'email,public_profile' });
+      }, { scope: 'email,public_profile', auth_type: 'rerequest' });
     };
-    const initAndLogin = () => {
-      // Re-init FB SDK with our App ID to override Pixel's token
-      window.FB.init({ appId: FACEBOOK_APP_ID, cookie: true, xfbml: false, version: 'v21.0' });
+
+    if (window.FB && window.FB.getLoginStatus) {
       doFbLogin();
-    };
-    if (window.FB) {
-      initAndLogin();
     } else {
-      window.fbAsyncInit = function() { initAndLogin(); };
-      const s = document.createElement('script');
-      s.src = 'https://connect.facebook.net/en_US/sdk.js';
-      s.async = true;
-      document.head.appendChild(s);
+      // SDK still loading — chain after existing fbAsyncInit
+      const existingCallback = window.fbAsyncInit;
+      window.fbAsyncInit = function () {
+        if (typeof existingCallback === 'function') existingCallback();
+        doFbLogin();
+      };
     }
-  }, [login]);
+  }, [loginDirect, handleClose]);
 
   const FacebookLoginButton = ({ disabled }) => (
     <button
