@@ -631,3 +631,65 @@ async def proxy_create_booking(req: AuctionAddRequest, request: Request):
     except Exception as e:
         logger.error(f"Booking pipeline validation system failure: {e}")
         raise HTTPException(status_code=502, detail="Dispatch execution engine unreached")
+
+
+
+# ============================================================================
+# CLIENT BOOKINGS — Restored 2026-05-29 (was removed in commit c7ef5b2)
+# Used by /pages/MyBookings.js to display client's upcoming/past reservations
+# ============================================================================
+
+@router.get("/booking/upcoming")
+async def proxy_upcoming_auctions(request: Request):
+    """Get upcoming auctions/bookings for the logged-in client."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+
+    try:
+        resp = await (await get_http_client()).get(
+            "/api/Auction/client/upcomingAuctions",
+            headers={
+                "Authorization": auth_header,
+                "Origin": "https://zont.cab",
+            },
+        )
+        resp.raise_for_status()
+        return resp.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail="C# API error")
+    except Exception as e:
+        logger.error(f"Proxy upcoming auctions error: {e}")
+        raise HTTPException(status_code=502, detail="Failed to reach C# backend")
+
+
+@router.delete("/booking/cancel/{auction_id}")
+async def proxy_cancel_auction(auction_id: str, request: Request):
+    """Cancel a booking/auction in the C# backend."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Authorization required")
+    try:
+        resp = await (await get_http_client()).delete(
+            f"/api/Auction/cancel/{auction_id}",
+            headers={
+                "Authorization": auth_header,
+                "Origin": "https://zont.cab",
+                "Referer": "https://zont.cab/",
+            },
+        )
+        if resp.status_code in (200, 204):
+            return {"ok": True, "message": "Reservation annulee"}
+        if resp.status_code == 404:
+            raise HTTPException(status_code=404, detail="Reservation introuvable")
+        body = resp.text
+        try:
+            data = json.loads(body) if body.strip() else {}
+        except (json.JSONDecodeError, ValueError):
+            data = {"error": body}
+        raise HTTPException(status_code=resp.status_code, detail=data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Cancel auction error: {e}")
+        raise HTTPException(status_code=502, detail="Erreur serveur")
