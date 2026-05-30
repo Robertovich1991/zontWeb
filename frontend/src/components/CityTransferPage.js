@@ -14,7 +14,8 @@ import { trackSearch } from '@/utils/fbPixel';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
 
 const IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format',
+  hero: '/images/hero.webp',
+  heroMobile: '/images/hero-800.webp',
   sedan: '/images/sedan-transfer.webp',
   interior: '/images/luxury-sedan-transfer.webp',
   airport: '/images/minibus-8-seats-transfer.webp',
@@ -254,7 +255,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         title={seoTitle}
         description={seoDesc}
         canonical={seoUrls ? `https://www.zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
-        ogImage={ogImage ? (ogImage.startsWith('http') ? ogImage : `https://www.zont.cab${ogImage}`) : (heroImage ? (heroImage.startsWith('http') ? heroImage : `https://www.zont.cab${heroImage}`) : "https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format")}
+        ogImage={ogImage ? (ogImage.startsWith('http') ? ogImage : `https://www.zont.cab${ogImage}`) : (heroImage ? (heroImage.startsWith('http') ? heroImage : `https://www.zont.cab${heroImage}`) : "https://www.zont.cab/images/hero.webp")}
         hreflang={seoUrls ? [
           { lang: 'en', href: `https://www.zont.cab${seoUrls.en}` },
           { lang: 'fr', href: `https://www.zont.cab${seoUrls.fr}` },
@@ -301,7 +302,18 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         <section className="relative">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
-            <img src={heroImage || IMAGES.hero} alt={c.title} className="w-full h-full object-cover" loading="eager" />
+            <img
+              src={heroImage || IMAGES.hero}
+              srcSet={heroImage ? undefined : `${IMAGES.heroMobile} 800w, ${IMAGES.hero} 1280w`}
+              sizes="100vw"
+              alt={c.title}
+              width="1280"
+              height="896"
+              className="w-full h-full object-cover"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+            />
             <div className="absolute inset-0 bg-gradient-to-b from-[#1a2332]/90 via-[#1a2332]/80 to-[#1a2332]"></div>
           </div>
 

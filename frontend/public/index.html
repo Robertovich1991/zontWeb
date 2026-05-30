@@ -8,6 +8,9 @@
           var IS_PROD = (host === 'www.zont.cab' || host === 'zont.cab');
           if (!IS_PROD) return; // 🔒 Tracking DISABLED on preview/dev/staging
 
+          // ⚡ Defer all tracking until after first paint to protect LCP/FID
+          var initTrackers = function(){
+
           // ───── Google Tag Manager ─────
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
           new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -45,6 +48,14 @@
           gtag('config', 'G-MNN6VJZYDP'); // GA4 — Zont Cab property (visitor analytics) [PRIMARY]
           gtag('config', 'G-LWM17GPD3P'); // Google Tag — Comfort Cars (Google Ads conversions)
           gtag('config', 'AW-1014783804'); // Google Ads conversion tracking
+          };
+
+          // Schedule trackers after page becomes interactive (idle or fallback timeout)
+          if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(initTrackers, { timeout: 2000 });
+          } else {
+            window.addEventListener('load', function(){ setTimeout(initTrackers, 800); });
+          }
         })();
         </script>
         <noscript>
@@ -86,6 +97,10 @@
         <meta property="og:image" content="https://www.zont.cab/icon-512.png" />
         <meta property="fb:app_id" content="1783544712624133" />
         <link rel="canonical" href="https://www.zont.cab" />
+
+        <!-- Preload hero image (used by all CityTransferPages) for fast LCP -->
+        <link rel="preload" as="image" href="/images/hero-800.webp" type="image/webp" media="(max-width: 800px)" fetchpriority="high" />
+        <link rel="preload" as="image" href="/images/hero.webp" type="image/webp" media="(min-width: 801px)" fetchpriority="high" />
         <meta property="og:url" content="https://www.zont.cab" />
         <script>if(window.location.hostname==='zont.cab'){window.location.replace('https://www.zont.cab'+window.location.pathname+window.location.search)}</script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
