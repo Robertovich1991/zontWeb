@@ -138,6 +138,7 @@ const GareSaintLazareTransfer = lazy(() => import("@/pages/cities/GareSaintLazar
 const GareAusterlitzTransfer = lazy(() => import("@/pages/cities/GareAusterlitz"));
 const DisneylandTransfer = lazy(() => import("@/pages/cities/DisneylandParis"));
 const DisneyTransferPage = lazy(() => import("@/components/DisneyTransferPage"));
+const MICETransportation = lazy(() => import("@/pages/MICETransportation"));
 
 // B2B Pages (lazy)
 const Partners = lazy(() => import("@/pages/Partners"));
@@ -257,6 +258,11 @@ function App() {
                   <Route path="/dream-castle-hotel-transfer" element={<DisneyTransferPage hotelSlug="dream-castle-hotel-transfer" />} />
                   <Route path="/grand-magic-hotel-transfer" element={<DisneyTransferPage hotelSlug="grand-magic-hotel-transfer" />} />
                   <Route path="/villages-nature-paris-transfer" element={<DisneyTransferPage hotelSlug="villages-nature-paris-transfer" />} />
+
+                  {/* MICE Transportation Paris — Multi-language */}
+                  <Route path="/mice-transportation-paris" element={<MICETransportation />} />
+                  <Route path="/transport-mice-paris" element={<MICETransportation />} />
+                  <Route path="/mice-transport-parij" element={<MICETransportation />} />
                   {/* Nice */}
                   <Route path="/nice-airport-transfer" element={<NiceTransfer />} />
                   <Route path="/transfert-aeroport-nice" element={<NiceTransfer />} />

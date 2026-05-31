@@ -24,6 +24,11 @@ export const MULTI_LANG_URLS = {
     ru: '/b2b-transfery-iz-aeroporta',
     hy: '/b2b-odanavakayani-transfer',
   },
+  mice: {
+    en: '/mice-transportation-paris',
+    fr: '/transport-mice-paris',
+    ru: '/mice-transport-parij',
+  },
 };
 
 // Vehicle sub-slug maps for the disposal pages (used to build full sub-paths).
