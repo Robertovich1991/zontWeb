@@ -11,6 +11,8 @@ import secrets
 import string
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
+import jwt
+from jwt import PyJWKClient, InvalidTokenError
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +59,23 @@ GOOGLE_CLIENT_ID_MOBILE = "71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.goo
 FACEBOOK_APP_ID = os.environ.get("FACEBOOK_APP_ID", "")
 FACEBOOK_APP_SECRET = os.environ.get("FACEBOOK_APP_SECRET", "")
 
+# ─── Apple Sign In configuration ───
+APPLE_JWKS_URL = "https://appleid.apple.com/auth/keys"
+APPLE_ISSUER = "https://appleid.apple.com"
+# Allowed audiences (bundle IDs / service IDs) — token is valid if `aud` matches ANY of these
+APPLE_AUDIENCES = [
+    "com.zont.r",       # React Native iOS app
+    "com.zont.cab",     # Web Service ID (if configured later)
+]
+# Lazy-init JWKS client (caches Apple's public keys)
+_apple_jwks_client: PyJWKClient | None = None
+
+def _get_apple_jwks_client() -> PyJWKClient:
+    global _apple_jwks_client
+    if _apple_jwks_client is None:
+        _apple_jwks_client = PyJWKClient(APPLE_JWKS_URL, cache_keys=True, lifespan=3600)
+    return _apple_jwks_client
+
 # ---- Pydantic Schemas ----
 
 class Coordinate(BaseModel):
@@ -95,6 +114,13 @@ class GoogleLoginRequest(BaseModel):
 class FacebookLoginRequest(BaseModel):
     accessToken: str
     userID: str
+
+class AppleLoginRequest(BaseModel):
+    identityToken: str
+    # Optional fields sent on FIRST sign-in only (Apple security model)
+    firstName: str | None = None
+    lastName: str | None = None
+    email: str | None = None
 
 class ForgotPasswordRequest(BaseModel):
     email: str
@@ -298,6 +324,139 @@ async def proxy_google_login(req: GoogleLoginRequest):
     raise HTTPException(
         status_code=400,
         detail="This email is already registered. Please sign in with your email and password."
+    )
+
+
+# ============================================================================
+# APPLE SIGN-IN — Verify Apple identityToken (JWT) + reuse Google fallback pattern
+# Used by React Native (com.zont.r) and Web Service IDs
+# ============================================================================
+
+@router.post("/auth/apple-login")
+async def proxy_apple_login(req: AppleLoginRequest):
+    """Verify Apple identityToken (RS256 JWT signed by Apple) and provision/login user in C#."""
+    # ─── Step 1: Verify Apple JWT against Apple's public keys (JWKS) ───
+    try:
+        signing_key = _get_apple_jwks_client().get_signing_key_from_jwt(req.identityToken)
+    except InvalidTokenError as e:
+        logger.warning(f"Apple token header invalid: {e}")
+        raise HTTPException(status_code=401, detail="Invalid Apple identity token")
+    except Exception as e:
+        logger.error(f"Apple JWKS key fetch failed: {e}")
+        raise HTTPException(status_code=503, detail="Unable to verify Apple token (JWKS unreachable)")
+
+    decoded: Dict[str, Any] | None = None
+    last_err: Exception | None = None
+    for aud in APPLE_AUDIENCES:
+        try:
+            decoded = jwt.decode(
+                req.identityToken,
+                key=signing_key.key,
+                algorithms=["RS256"],
+                audience=aud,
+                issuer=APPLE_ISSUER,
+                options={"require": ["exp", "iat", "iss", "aud", "sub"]},
+                leeway=300,  # 5 min clock skew
+            )
+            break
+        except InvalidTokenError as e:
+            last_err = e
+            continue
+    if decoded is None:
+        logger.error(f"Apple token invalid for all audiences ({APPLE_AUDIENCES}): {last_err}")
+        raise HTTPException(status_code=401, detail="Invalid Apple identity token")
+
+    apple_sub: str = decoded.get("sub", "")
+    if not apple_sub:
+        raise HTTPException(status_code=400, detail="Apple token missing 'sub' claim")
+
+    # Apple returns email ONLY on first sign-in. After that, use the persisted email.
+    email: str = (decoded.get("email") or req.email or "").lower().strip()
+    first_name = (req.firstName or "").strip()
+    last_name = (req.lastName or "").strip()
+
+    default_headers = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
+
+    # ─── Step 2: Look up existing Apple user in our MongoDB cache ───
+    stored = None
+    if _google_db is not None:
+        stored = await _google_db.google_auth.find_one(
+            {"$or": [{"apple_sub": apple_sub}, {"email": email}] if email else [{"apple_sub": apple_sub}]},
+            {"_id": 0},
+        )
+        if stored:
+            # Backfill missing fields (email is the canonical key for C# backend)
+            if not email and stored.get("email"):
+                email = stored["email"]
+            if not first_name and stored.get("firstName"):
+                first_name = stored["firstName"]
+            if not last_name and stored.get("lastName"):
+                last_name = stored["lastName"]
+
+    # If still no email after lookup, we cannot create a C# account
+    if not email:
+        raise HTTPException(
+            status_code=400,
+            detail="Email required on first Apple sign-in. Please grant email access and try again.",
+        )
+
+    # ─── Step 3: If we have a stored password → login directly in C# ───
+    if stored and stored.get("password"):
+        login_resp = await (await get_http_client()).post(
+            "/api/Login/client",
+            json={"username": email, "password": stored["password"]},
+            headers=default_headers,
+        )
+        if login_resp.status_code == 200:
+            data = login_resp.json()
+            data["firstName"] = first_name or stored.get("firstName", "")
+            data["lastName"] = last_name or stored.get("lastName", "")
+            return data
+
+    # ─── Step 4: Register new user in C# with random password ───
+    random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
+    reg_resp = await (await get_http_client()).post(
+        "/api/Client",
+        json={
+            "firstName": first_name or "Apple",
+            "lastName": last_name or "User",
+            "email": email,
+            "phoneNumber": "",
+            "password": random_pass,
+            "gender": "male",
+            "dateOfBirth": "01/01/2000",
+        },
+        headers=default_headers,
+    )
+    if reg_resp.status_code == 200:
+        if _google_db is not None:
+            await _google_db.google_auth.update_one(
+                {"email": email},
+                {"$set": {
+                    "email": email,
+                    "password": random_pass,
+                    "provider": "apple",
+                    "apple_sub": apple_sub,
+                    "firstName": first_name or "Apple",
+                    "lastName": last_name or "User",
+                }},
+                upsert=True,
+            )
+        login_resp = await (await get_http_client()).post(
+            "/api/Login/client",
+            json={"username": email, "password": random_pass},
+            headers=default_headers,
+        )
+        if login_resp.status_code == 200:
+            data = login_resp.json()
+            data["firstName"] = first_name or "Apple"
+            data["lastName"] = last_name or "User"
+            return data
+
+    # ─── Step 5: Email exists in C# but no stored password — cannot auto-login ───
+    raise HTTPException(
+        status_code=400,
+        detail="This email is already registered. Please sign in with your email and password.",
     )
 
 
