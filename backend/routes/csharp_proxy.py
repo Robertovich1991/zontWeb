@@ -67,6 +67,11 @@ APPLE_AUDIENCES = [
     "com.zont.r",       # React Native iOS app
     "com.zont.cab",     # Web Service ID (if configured later)
 ]
+# Our own JWT secret for issuing access tokens to Apple-authenticated users
+ZONT_JWT_SECRET = os.environ.get("JWT_SECRET", "zont-admin-secret-key-2025")
+ZONT_JWT_ALG = "HS256"
+ZONT_JWT_EXP_SECONDS = 60 * 60 * 24 * 30  # 30 days
+
 # Lazy-init JWKS client (caches Apple's public keys)
 _apple_jwks_client: PyJWKClient | None = None
 
@@ -328,13 +333,18 @@ async def proxy_google_login(req: GoogleLoginRequest):
 
 
 # ============================================================================
-# APPLE SIGN-IN — Verify Apple identityToken (JWT) + reuse Google fallback pattern
-# Used by React Native (com.zont.r) and Web Service IDs
+# APPLE SIGN-IN — Standalone Python implementation
+# Verifies Apple identityToken, creates/finds user in MongoDB `apple_users`,
+# returns our own JWT. Does NOT depend on the C# backend.
 # ============================================================================
 
 @router.post("/auth/apple-login")
 async def proxy_apple_login(req: AppleLoginRequest):
-    """Verify Apple identityToken (RS256 JWT signed by Apple) and provision/login user in C#."""
+    """Verify Apple identityToken and provision/login user in our MongoDB."""
+    import time
+    import uuid
+    from datetime import datetime, timezone
+
     # ─── Step 1: Verify Apple JWT against Apple's public keys (JWKS) ───
     try:
         signing_key = _get_apple_jwks_client().get_signing_key_from_jwt(req.identityToken)
@@ -356,7 +366,7 @@ async def proxy_apple_login(req: AppleLoginRequest):
                 audience=aud,
                 issuer=APPLE_ISSUER,
                 options={"require": ["exp", "iat", "iss", "aud", "sub"]},
-                leeway=300,  # 5 min clock skew
+                leeway=300,
             )
             break
         except InvalidTokenError as e:
@@ -370,94 +380,86 @@ async def proxy_apple_login(req: AppleLoginRequest):
     if not apple_sub:
         raise HTTPException(status_code=400, detail="Apple token missing 'sub' claim")
 
-    # Apple returns email ONLY on first sign-in. After that, use the persisted email.
-    email: str = (decoded.get("email") or req.email or "").lower().strip()
+    # Apple sends `email` only on the FIRST sign-in. After that, RN passes the
+    # email it stored locally (req.email). The Apple sub is the canonical key.
+    token_email = (decoded.get("email") or "").lower().strip()
+    body_email = (req.email or "").lower().strip()
+    email = token_email or body_email
     first_name = (req.firstName or "").strip()
     last_name = (req.lastName or "").strip()
+    is_private_relay = bool(decoded.get("is_private_email", False))
 
-    default_headers = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
+    if _google_db is None:
+        raise HTTPException(status_code=503, detail="Database unavailable")
 
-    # ─── Step 2: Look up existing Apple user in our MongoDB cache ───
-    stored = None
-    if _google_db is not None:
-        stored = await _google_db.google_auth.find_one(
-            {"$or": [{"apple_sub": apple_sub}, {"email": email}] if email else [{"apple_sub": apple_sub}]},
-            {"_id": 0},
-        )
-        if stored:
-            # Backfill missing fields (email is the canonical key for C# backend)
-            if not email and stored.get("email"):
-                email = stored["email"]
-            if not first_name and stored.get("firstName"):
-                first_name = stored["firstName"]
-            if not last_name and stored.get("lastName"):
-                last_name = stored["lastName"]
+    now_iso = datetime.now(timezone.utc).isoformat()
 
-    # If still no email after lookup, we cannot create a C# account
-    if not email:
-        raise HTTPException(
-            status_code=400,
-            detail="Email required on first Apple sign-in. Please grant email access and try again.",
-        )
+    # ─── Step 2: Look up existing Apple user in MongoDB (primary key = apple_sub) ───
+    user = await _google_db.apple_users.find_one({"apple_sub": apple_sub}, {"_id": 0})
 
-    # ─── Step 3: If we have a stored password → login directly in C# ───
-    if stored and stored.get("password"):
-        login_resp = await (await get_http_client()).post(
-            "/api/Login/client",
-            json={"username": email, "password": stored["password"]},
-            headers=default_headers,
-        )
-        if login_resp.status_code == 200:
-            data = login_resp.json()
-            data["firstName"] = first_name or stored.get("firstName", "")
-            data["lastName"] = last_name or stored.get("lastName", "")
-            return data
-
-    # ─── Step 4: Register new user in C# with random password ───
-    random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
-    reg_resp = await (await get_http_client()).post(
-        "/api/Client",
-        json={
-            "firstName": first_name or "Apple",
-            "lastName": last_name or "User",
-            "email": email,
-            "phoneNumber": "",
-            "password": random_pass,
-            "gender": "male",
-            "dateOfBirth": "01/01/2000",
-        },
-        headers=default_headers,
-    )
-    if reg_resp.status_code == 200:
-        if _google_db is not None:
-            await _google_db.google_auth.update_one(
-                {"email": email},
-                {"$set": {
-                    "email": email,
-                    "password": random_pass,
-                    "provider": "apple",
-                    "apple_sub": apple_sub,
-                    "firstName": first_name or "Apple",
-                    "lastName": last_name or "User",
-                }},
-                upsert=True,
+    if user:
+        # Existing user — backfill missing fields if RN provided them this time
+        updates = {"last_login_at": now_iso}
+        if not user.get("email") and email:
+            updates["email"] = email
+        if not user.get("first_name") and first_name:
+            updates["first_name"] = first_name
+        if not user.get("last_name") and last_name:
+            updates["last_name"] = last_name
+        await _google_db.apple_users.update_one({"apple_sub": apple_sub}, {"$set": updates})
+        user.update(updates)
+        is_new_user = False
+    else:
+        # New user — create record
+        if not email:
+            raise HTTPException(
+                status_code=400,
+                detail="Email required on first Apple sign-in. Please grant email access and try again.",
             )
-        login_resp = await (await get_http_client()).post(
-            "/api/Login/client",
-            json={"username": email, "password": random_pass},
-            headers=default_headers,
-        )
-        if login_resp.status_code == 200:
-            data = login_resp.json()
-            data["firstName"] = first_name or "Apple"
-            data["lastName"] = last_name or "User"
-            return data
+        user = {
+            "id": str(uuid.uuid4()),
+            "apple_sub": apple_sub,
+            "email": email,
+            "first_name": first_name or "Apple",
+            "last_name": last_name or "User",
+            "is_private_relay": is_private_relay,
+            "provider": "apple",
+            "created_at": now_iso,
+            "last_login_at": now_iso,
+        }
+        await _google_db.apple_users.insert_one(dict(user))  # copy to avoid mutation with _id
+        is_new_user = True
 
-    # ─── Step 5: Email exists in C# but no stored password — cannot auto-login ───
-    raise HTTPException(
-        status_code=400,
-        detail="This email is already registered. Please sign in with your email and password.",
-    )
+    # ─── Step 3: Issue our own JWT (HS256, 30 days) ───
+    now_ts = int(time.time())
+    payload = {
+        "sub": user["id"],
+        "apple_sub": apple_sub,
+        "email": user["email"],
+        "provider": "apple",
+        "iat": now_ts,
+        "exp": now_ts + ZONT_JWT_EXP_SECONDS,
+        "type": "client",
+    }
+    access_token = jwt.encode(payload, ZONT_JWT_SECRET, algorithm=ZONT_JWT_ALG)
+
+    return {
+        "accessToken": access_token,
+        "tokenType": "Bearer",
+        "expiresIn": ZONT_JWT_EXP_SECONDS,
+        "isNewUser": is_new_user,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "firstName": user["first_name"],
+            "lastName": user["last_name"],
+            "provider": "apple",
+        },
+        # Top-level fields for backwards compatibility with Google/Facebook response shape
+        "firstName": user["first_name"],
+        "lastName": user["last_name"],
+        "email": user["email"],
+    }
 
 
 @router.post("/auth/facebook-login")
