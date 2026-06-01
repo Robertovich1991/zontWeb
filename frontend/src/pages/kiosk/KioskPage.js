@@ -118,129 +118,63 @@ const LANGS = {
   },
 };
 
-/* ──── ATTRACT SCREEN — Premium Digital Concierge ──── */
-const AttractScreen = ({ hotelName, onTap, lang, setLang }) => {
+/* ──── ATTRACT SCREEN — Premium Image Idle ──── */
+const AttractScreen = ({ hotelName, onTap }) => {
   const [tapping, setTapping] = useState(false);
-
   const handleTap = (e) => {
     if (tapping) return;
     setTapping(true);
-    // Eye-open animation plays for 800ms, then forward to next step
-    setTimeout(() => onTap(e), 800);
+    // Brief flash, then forward to kiosk flow (language step already exists there)
+    setTimeout(() => onTap(e), 350);
   };
-
-  const labels = {
-    fr: { title: 'RESERVEZ VOTRE CHAUFFEUR PRIVE', sub: 'AEROPORT • VILLE • A L\'HEURE', tap: 'TOUCHEZ POUR COMMENCER', airport: 'AEROPORT', city: 'VILLE', hourly: 'A L\'HEURE', s1: 'Transferts CDG, Orly, Beauvais', s2: 'Trajets Paris & Ile-de-France', s3: 'Service avec chauffeur a l\'heure' },
-    en: { title: 'BOOK YOUR PRIVATE DRIVER', sub: 'AIRPORT • CITY • HOURLY', tap: 'TOUCH TO START', airport: 'AIRPORT', city: 'CITY', hourly: 'HOURLY', s1: 'CDG, Orly, Beauvais transfers', s2: 'Paris & Île-de-France rides', s3: 'Private chauffeur by the hour' },
-    ru: { title: 'ЗАКАЖИТЕ ЧАСТНОГО ШОФЁРА', sub: 'АЭРОПОРТ • ГОРОД • ПОЧАСОВО', tap: 'НАЖМИТЕ ЧТОБЫ НАЧАТЬ', airport: 'АЭРОПОРТ', city: 'ГОРОД', hourly: 'ПОЧАСОВО', s1: 'Трансферы CDG, Orly, Beauvais', s2: 'Поездки Париж и пригороды', s3: 'Шофёр почасово' },
-  };
-  const L = labels[lang] || labels.fr;
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#0b1120] text-white select-none overflow-hidden flex flex-col"
+      className="fixed inset-0 z-50 bg-black select-none overflow-hidden cursor-pointer"
       onClick={handleTap}
       onTouchStart={handleTap}
       data-testid="kiosk-attract-screen"
     >
-      {/* Soft dotted background */}
-      <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(46,204,113,0.4) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+      {/* Background image — premium chauffeur idle visual */}
+      <img
+        src="/images/kiosk-idle-screen.webp"
+        alt="ZONT — Your private driver is ready"
+        className="absolute inset-0 w-full h-full object-cover"
+        draggable={false}
+      />
 
-      {/* Radial green glow center */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 35%, rgba(46,204,113,0.08) 0%, transparent 60%)' }} />
+      {/* Tap flash overlay */}
+      <div
+        className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${tapping ? 'opacity-100' : 'opacity-0'}`}
+        style={{ background: 'radial-gradient(circle at 25% 80%, rgba(46,204,113,0.45) 0%, transparent 50%)' }}
+      />
 
-      {/* ── HEADER : Logo ZONT ── */}
-      <div className="relative pt-10 flex flex-col items-center">
-        <div className={`transition-all duration-500 ${tapping ? 'scale-110 opacity-100' : 'opacity-95'}`}>
-          <span className="text-[#2ecc71] text-4xl font-black tracking-[0.3em]" style={{ textShadow: '0 0 30px rgba(46,204,113,0.5)' }}>ZONT</span>
-        </div>
-        {hotelName && <p className="text-xs text-gray-500 uppercase tracking-widest mt-2">{hotelName}</p>}
+      {/* Animated pulsing touch ring overlay (positioned on top of the TOUCH icon in the image) */}
+      <div
+        className="absolute pointer-events-none"
+        style={{ left: '29%', top: '85%', transform: 'translate(-50%, -50%)' }}
+      >
+        <div
+          className="w-24 h-24 rounded-full border-2 border-[#2ecc71]"
+          style={{ animation: 'kioskRingPulse 2s ease-out infinite' }}
+        />
+        <div
+          className="w-24 h-24 rounded-full border-2 border-[#2ecc71] absolute inset-0"
+          style={{ animation: 'kioskRingPulse 2s ease-out infinite 1s' }}
+        />
       </div>
 
-      {/* ── ANIMATED EYE (replaces previous Car icon) ── */}
-      <div className="relative flex justify-center mt-8">
-        <ConciergeEye tapping={tapping} />
-      </div>
-
-      {/* ── HEADLINE ── */}
-      <div className="relative text-center px-6 mt-6">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-[0.08em] mb-3">{L.title}</h1>
-        <p className="text-[#2ecc71] text-sm sm:text-base font-semibold tracking-[0.25em]">{L.sub}</p>
-      </div>
-
-      {/* ── LANGUAGE SELECTOR ── */}
-      <div className="relative flex justify-center gap-2 mt-7 px-4 flex-wrap">
-        {[
-          { code: 'en', label: 'ENGLISH' },
-          { code: 'fr', label: 'FRANÇAIS' },
-          { code: 'ru', label: 'РУССКИЙ' },
-        ].map(l => (
-          <button
-            key={l.code}
-            onClick={(e) => { e.stopPropagation(); setLang(l.code); }}
-            className={`px-5 py-2.5 rounded-full text-xs font-bold tracking-widest border-2 transition-all ${lang === l.code ? 'bg-[#2ecc71] text-[#0b1120] border-[#2ecc71]' : 'bg-transparent text-gray-300 border-gray-600 hover:border-[#2ecc71]/50'}`}
-            data-testid={`kiosk-lang-${l.code}`}
-          >
-            {l.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ── SERVICE CARDS (visual hint) ── */}
-      <div className="relative grid grid-cols-3 gap-3 max-w-3xl mx-auto mt-8 px-4 w-full">
-        {[
-          { icon: '✈', title: L.airport, sub: L.s1 },
-          { icon: '🏙', title: L.city, sub: L.s2 },
-          { icon: '⏱', title: L.hourly, sub: L.s3 },
-        ].map((s, i) => (
-          <div
-            key={i}
-            className="bg-white/[0.03] border border-[#2ecc71]/20 rounded-xl p-4 text-center hover:border-[#2ecc71]/60 transition-colors backdrop-blur"
-            data-testid={`kiosk-service-card-${i}`}
-          >
-            <div className="text-3xl mb-2">{s.icon}</div>
-            <p className="text-[#2ecc71] font-bold text-xs tracking-widest mb-1">{s.title}</p>
-            <p className="text-gray-400 text-[10px] leading-tight">{s.sub}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* ── BOTTOM : TOUCH TO START ── */}
-      <div className="relative mt-auto pb-10 flex flex-col items-center">
-        <div className="relative" style={{ animation: 'kioskTapPulse 2s ease-in-out infinite' }}>
-          {/* Outer ring */}
-          <div className="w-16 h-16 rounded-full border-2 border-[#2ecc71]/40 flex items-center justify-center bg-[#2ecc71]/5 absolute -inset-0" />
-          {/* Inner finger icon (SVG) */}
-          <div className="w-16 h-16 flex items-center justify-center relative">
-            <svg width="24" height="32" viewBox="0 0 24 32" fill="none" className="text-[#2ecc71]">
-              <path d="M12 2v14M12 16c-3 0-5 2-5 5v6h10v-6c0-3-2-5-5-5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="currentColor" fillOpacity="0.15"/>
-            </svg>
-          </div>
-        </div>
-        <p className="text-gray-300 text-sm font-bold uppercase tracking-[0.3em] mt-4">{L.tap}</p>
-      </div>
+      {/* Hotel-specific label (small, top-left corner) */}
+      {hotelName && (
+        <p className="absolute top-4 left-6 text-xs text-[#2ecc71]/70 font-medium uppercase tracking-widest z-10">
+          {hotelName}
+        </p>
+      )}
 
       <style>{`
-        @keyframes kioskTapPulse { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.08)} }
-        @keyframes eyeLookAround {
-          0%   { transform: translate(0, 0); }
-          25%  { transform: translate(-7px, 1px); }
-          50%  { transform: translate(0, 0); }
-          75%  { transform: translate(7px, 1px); }
-          100% { transform: translate(0, 0); }
-        }
-        @keyframes eyeBlink {
-          0%, 92%, 100% { transform: scaleY(1); }
-          94%, 97%      { transform: scaleY(0.05); }
-        }
-        @keyframes eyeOpen {
-          0%   { transform: scaleY(0.05); }
-          100% { transform: scaleY(1); }
-        }
-        @keyframes eyeFlash {
-          0%   { filter: drop-shadow(0 0 20px rgba(46,204,113,0.5)); }
-          50%  { filter: drop-shadow(0 0 60px rgba(46,204,113,1)); }
-          100% { filter: drop-shadow(0 0 20px rgba(46,204,113,0.5)); }
+        @keyframes kioskRingPulse {
+          0%   { transform: scale(0.9); opacity: 0.9; }
+          100% { transform: scale(1.8); opacity: 0; }
         }
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
@@ -248,51 +182,7 @@ const AttractScreen = ({ hotelName, onTap, lang, setLang }) => {
   );
 };
 
-/* ──── ANIMATED CONCIERGE EYE (SVG + CSS) ──── */
-const ConciergeEye = ({ tapping }) => (
-  <div
-    className="relative"
-    style={{
-      animation: tapping ? 'eyeFlash 0.7s ease-in-out' : 'none',
-    }}
-  >
-    <svg
-      width="180"
-      height="120"
-      viewBox="0 0 180 120"
-      fill="none"
-      style={{ filter: 'drop-shadow(0 0 24px rgba(46,204,113,0.45))' }}
-    >
-      {/* Outer eye glow ring */}
-      <ellipse cx="90" cy="60" rx="85" ry="50" stroke="rgba(46,204,113,0.15)" strokeWidth="1" fill="none" />
-      <ellipse cx="90" cy="60" rx="72" ry="42" stroke="rgba(46,204,113,0.25)" strokeWidth="1" fill="none" />
-
-      {/* Upper eyelid (animated to blink) */}
-      <g style={{ transformOrigin: '90px 60px', animation: tapping ? 'eyeOpen 0.4s ease-out' : 'eyeBlink 6s infinite' }}>
-        {/* Eye white */}
-        <ellipse cx="90" cy="60" rx="60" ry="34" fill="#0b1120" stroke="#2ecc71" strokeWidth="2.5" />
-
-        {/* Iris (looks around) */}
-        <g style={{ animation: tapping ? 'none' : 'eyeLookAround 7s ease-in-out infinite' }}>
-          <circle cx="90" cy="60" r="20" fill="#2ecc71" />
-          <circle cx="90" cy="60" r="20" fill="url(#irisGradient)" />
-          {/* Pupil */}
-          <circle cx="90" cy="60" r="9" fill="#0b1120" />
-          {/* Highlight */}
-          <circle cx="84" cy="54" r="3.5" fill="rgba(255,255,255,0.85)" />
-          <circle cx="96" cy="65" r="1.5" fill="rgba(255,255,255,0.5)" />
-        </g>
-      </g>
-
-      <defs>
-        <radialGradient id="irisGradient" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#3ee683" />
-          <stop offset="100%" stopColor="#1a8c4a" />
-        </radialGradient>
-      </defs>
-    </svg>
-  </div>
-);
+/* (Concierge eye component removed — replaced by full-image idle screen) */
 
 /* ──── MAIN KIOSK ──── */
 const KioskPage = () => {
@@ -400,7 +290,7 @@ const KioskPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0b1120] flex flex-col text-white select-none" data-testid="kiosk-page">
-      {showAttract && <AttractScreen hotelName={hotel?.name} onTap={() => { setShowAttract(false); resetIdleTimer(); }} lang={lang} setLang={setLang} />}
+      {showAttract && <AttractScreen hotelName={hotel?.name} onTap={() => { setShowAttract(false); resetIdleTimer(); }} />}
 
       {/* Header */}
       <header className="px-6 py-4 flex items-center justify-between flex-shrink-0 border-b border-white/[0.06]">
