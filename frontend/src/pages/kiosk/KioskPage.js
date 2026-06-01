@@ -32,6 +32,11 @@ const LANGS = {
     newBooking: 'Nouvelle reservation', back: 'Retour', continue: 'Continuer',
     searchOther: 'Rechercher une autre destination...', calcPrice: 'Calcul du prix en cours...',
     booking: 'Reservation en cours...', date: 'Date', time: 'Heure',
+    stillHereTitle: 'Etes-vous toujours la ?',
+    stillHereSub: 'Sans reponse de votre part, votre reservation sera effacee dans',
+    stillHereSeconds: 'secondes',
+    stillHereStay: 'Continuer ma reservation',
+    stillHereLeave: 'Quitter',
     disposalBannerTitle: 'Chauffeur prive a disposition',
     disposalBannerSub: 'Paris 4h • Versailles 5h • Fontainebleau 8h • Mont-Saint-Michel 12h',
     disposalCta: 'Decouvrir les excursions',
@@ -45,6 +50,14 @@ const LANGS = {
     disposalFontainebleauSub: '8 heures • Foret + chateau royal',
     disposalMSM: 'Mont-Saint-Michel',
     disposalMSMSub: '12 heures • Journee complete depuis Paris',
+    hourlyTitle: 'Chauffeur a l\'heure — duree libre',
+    hourlySub: 'Choisissez la duree, votre vehicule, c\'est tout. Le chauffeur est a votre disposition partout en region parisienne.',
+    hourlyCta: 'Reserver a l\'heure',
+    hourlyPickDuration: 'Combien d\'heures ?',
+    hourlyMin: 'minimum 3 heures',
+    hourlyHours: 'heures',
+    hourlyHour: 'heure',
+    hourlyContinue: 'Voir les vehicules',
   },
   en: {
     heroTitle: 'Book your private chauffeur',
@@ -67,6 +80,11 @@ const LANGS = {
     newBooking: 'New booking', back: 'Back', continue: 'Continue',
     searchOther: 'Search another destination...', calcPrice: 'Calculating price...',
     booking: 'Booking in progress...', date: 'Date', time: 'Time',
+    stillHereTitle: 'Are you still there?',
+    stillHereSub: 'Without a response your booking will be cleared in',
+    stillHereSeconds: 'seconds',
+    stillHereStay: 'Continue my booking',
+    stillHereLeave: 'Leave',
     disposalBannerTitle: 'Private chauffeur at disposal',
     disposalBannerSub: 'Paris 4h • Versailles 5h • Fontainebleau 8h • Mont-Saint-Michel 12h',
     disposalCta: 'Discover the excursions',
@@ -80,6 +98,14 @@ const LANGS = {
     disposalFontainebleauSub: '8 hours • Forest + royal castle',
     disposalMSM: 'Mont-Saint-Michel',
     disposalMSMSub: '12 hours • Full day from Paris',
+    hourlyTitle: 'Chauffeur by the hour — free duration',
+    hourlySub: 'Pick the duration and your vehicle. The driver is at your disposal anywhere in the Paris region.',
+    hourlyCta: 'Book by the hour',
+    hourlyPickDuration: 'How many hours?',
+    hourlyMin: 'minimum 3 hours',
+    hourlyHours: 'hours',
+    hourlyHour: 'hour',
+    hourlyContinue: 'View vehicles',
   },
   ru: {
     heroTitle: 'Закажите личного водителя',
@@ -102,6 +128,11 @@ const LANGS = {
     newBooking: 'Новое бронирование', back: 'Назад', continue: 'Продолжить',
     searchOther: 'Поиск другого направления...', calcPrice: 'Расчёт цены...',
     booking: 'Бронирование...', date: 'Дата', time: 'Время',
+    stillHereTitle: 'Вы ещё здесь?',
+    stillHereSub: 'Без ответа ваше бронирование будет удалено через',
+    stillHereSeconds: 'секунд',
+    stillHereStay: 'Продолжить бронирование',
+    stillHereLeave: 'Выйти',
     disposalBannerTitle: 'Личный водитель в распоряжение',
     disposalBannerSub: 'Париж 4ч • Версаль 5ч • Фонтенбло 8ч • Мон-Сен-Мишель 12ч',
     disposalCta: 'Открыть экскурсии',
@@ -115,6 +146,14 @@ const LANGS = {
     disposalFontainebleauSub: '8 часов • Лес + королевский замок',
     disposalMSM: 'Мон-Сен-Мишель',
     disposalMSMSub: '12 часов • Полный день из Парижа',
+    hourlyTitle: 'Водитель по часам — свободная длительность',
+    hourlySub: 'Выберите длительность и автомобиль. Водитель в вашем распоряжении по всему Парижскому региону.',
+    hourlyCta: 'Заказать по часам',
+    hourlyPickDuration: 'Сколько часов?',
+    hourlyMin: 'минимум 3 часа',
+    hourlyHours: 'часов',
+    hourlyHour: 'час',
+    hourlyContinue: 'Посмотреть автомобили',
   },
 };
 
@@ -188,27 +227,66 @@ const KioskPage = () => {
   const [booking, setBooking] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [customPricing, setCustomPricing] = useState(false);
+  const [customHours, setCustomHours] = useState(4); // free hourly duration
+  const [showIdlePrompt, setShowIdlePrompt] = useState(false);
+  const [idleCountdown, setIdleCountdown] = useState(15);
+  const idlePromptTimerRef = useRef(null);
+  const idleCountdownIntervalRef = useRef(null);
 
   const resetKiosk = useCallback(() => {
     setStep(0); setSelectedDest(null); setDate(''); setTime('');
     setSelectedVehicle(null); setClientName(''); setClientPhone('');
     setBooking(null); setSubmitting(false); setCustomPricing(false);
+    setCustomHours(4);
+    setShowIdlePrompt(false);
   }, []);
 
-  // Idle timer
+  const clearIdlePrompt = useCallback(() => {
+    if (idlePromptTimerRef.current) { clearTimeout(idlePromptTimerRef.current); idlePromptTimerRef.current = null; }
+    if (idleCountdownIntervalRef.current) { clearInterval(idleCountdownIntervalRef.current); idleCountdownIntervalRef.current = null; }
+    setShowIdlePrompt(false);
+    setIdleCountdown(15);
+  }, []);
+
+  // Idle timer: after 60s of inactivity show "Still here?" prompt with 15s countdown
   const resetIdleTimer = useCallback(() => {
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    if (showAttract) return;
-    idleTimerRef.current = setTimeout(() => { resetKiosk(); setShowAttract(true); }, 90000);
-  }, [showAttract, resetKiosk]);
+    // Don't run idle prompt on attract screen, while prompt already showing, or on confirmation step 4
+    if (showAttract || showIdlePrompt || step === 4) return;
+    idleTimerRef.current = setTimeout(() => {
+      // Don't prompt if user already on confirmation step (booking paid/awaiting payment)
+      setShowIdlePrompt(true);
+      setIdleCountdown(15);
+      // Start countdown
+      idleCountdownIntervalRef.current = setInterval(() => {
+        setIdleCountdown((c) => {
+          if (c <= 1) {
+            // Auto-reset
+            clearInterval(idleCountdownIntervalRef.current);
+            idleCountdownIntervalRef.current = null;
+            setShowIdlePrompt(false);
+            resetKiosk();
+            setShowAttract(true);
+            return 15;
+          }
+          return c - 1;
+        });
+      }, 1000);
+    }, 60000);
+  }, [showAttract, showIdlePrompt, step, resetKiosk]);
 
   useEffect(() => {
     const events = ['click', 'touchstart', 'mousemove', 'keydown'];
-    const h = () => resetIdleTimer();
+    const h = () => { if (!showIdlePrompt) resetIdleTimer(); };
     events.forEach(e => document.addEventListener(e, h, { passive: true }));
     resetIdleTimer();
-    return () => { events.forEach(e => document.removeEventListener(e, h)); if (idleTimerRef.current) clearTimeout(idleTimerRef.current); };
-  }, [resetIdleTimer]);
+    return () => {
+      events.forEach(e => document.removeEventListener(e, h));
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      if (idlePromptTimerRef.current) clearTimeout(idlePromptTimerRef.current);
+      if (idleCountdownIntervalRef.current) clearInterval(idleCountdownIntervalRef.current);
+    };
+  }, [resetIdleTimer, showIdlePrompt]);
 
   useEffect(() => {
     const now = new Date(); now.setHours(now.getHours() + 2);
@@ -272,6 +350,40 @@ const KioskPage = () => {
   return (
     <div className="min-h-screen bg-[#0b1120] flex flex-col text-white select-none" data-testid="kiosk-page">
       {showAttract && <AttractScreen hotelName={hotel?.name} onTap={() => { setShowAttract(false); resetIdleTimer(); }} />}
+
+      {/* Idle Prompt — "Still here?" modal with auto-countdown */}
+      {showIdlePrompt && !showAttract && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-6" data-testid="kiosk-idle-prompt">
+          <div className="bg-[#111827] border-2 border-[#c8a951]/60 rounded-3xl p-8 max-w-md w-full text-center shadow-2xl" style={{ animation: 'fadeUp 0.4s ease-out' }}>
+            <div className="w-16 h-16 mx-auto mb-5 bg-[#c8a951]/15 rounded-full flex items-center justify-center">
+              <Clock className="w-8 h-8 text-[#c8a951]" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-3" style={{ fontFamily: "'Manrope', sans-serif" }}>
+              {t.stillHereTitle}
+            </h3>
+            <p className="text-gray-400 text-sm mb-2">{t.stillHereSub}</p>
+            <p className="text-[#c8a951] font-black text-5xl mb-6 tabular-nums" data-testid="kiosk-idle-countdown">
+              {idleCountdown}<span className="text-lg text-gray-500 font-normal ml-2">{t.stillHereSeconds}</span>
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => { clearIdlePrompt(); resetIdleTimer(); }}
+                className="w-full bg-[#2ecc71] hover:bg-[#27ae60] text-white py-4 rounded-xl font-bold text-base transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                data-testid="kiosk-idle-continue"
+              >
+                <CheckCircle className="w-5 h-5" />{t.stillHereStay}
+              </button>
+              <button
+                onClick={() => { clearIdlePrompt(); resetKiosk(); setShowAttract(true); }}
+                className="w-full bg-transparent border border-white/15 hover:border-white/30 text-gray-300 hover:text-white py-3 rounded-xl font-medium text-sm transition-all"
+                data-testid="kiosk-idle-leave"
+              >
+                {t.stillHereLeave}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <header className="px-6 py-4 flex items-center justify-between flex-shrink-0 border-b border-white/[0.06]">
@@ -443,6 +555,36 @@ const KioskPage = () => {
               </div>
             )}
 
+            {/* HOURLY FREE — premium card at the top */}
+            <button
+              onClick={() => { setCustomHours(4); setStep(0.85); }}
+              className="block w-full max-w-5xl mx-auto mb-5 group relative overflow-hidden rounded-2xl border-2 border-[#c8a951]/50 hover:border-[#c8a951] bg-gradient-to-r from-[#1a1f2e] via-[#1a2332] to-[#2a1f1a] transition-all active:scale-[0.99] text-left"
+              data-testid="kiosk-hourly-free-cta"
+            >
+              <div className="absolute top-3 right-3 z-10">
+                <span className="bg-[#c8a951] text-[#0b1120] text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                  ★ {lang === 'fr' ? 'Sur-mesure' : lang === 'ru' ? 'На заказ' : 'Custom'}
+                </span>
+              </div>
+              <div className="p-5 lg:p-6 flex items-center gap-5">
+                <div className="w-16 h-16 rounded-2xl bg-[#c8a951]/15 border border-[#c8a951]/30 flex items-center justify-center flex-shrink-0 group-hover:bg-[#c8a951]/25 transition-colors">
+                  <Clock className="w-8 h-8 text-[#c8a951]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg lg:text-xl font-bold text-white mb-1.5 leading-tight">{t.hourlyTitle}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">{t.hourlySub}</p>
+                </div>
+                <ChevronRight className="w-6 h-6 text-[#c8a951] flex-shrink-0 group-hover:translate-x-1 transition-transform hidden sm:block" />
+              </div>
+            </button>
+
+            {/* Separator */}
+            <div className="flex items-center gap-3 max-w-5xl mx-auto mb-4">
+              <div className="flex-1 h-px bg-white/[0.06]" />
+              <span className="text-[10px] text-gray-600 uppercase tracking-widest font-semibold">{lang === 'fr' ? 'Ou forfaits prets-a-partir' : lang === 'ru' ? 'Или готовые пакеты' : 'Or ready-to-go packages'}</span>
+              <div className="flex-1 h-px bg-white/[0.06]" />
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-5xl mx-auto">
               {[
                 { id: 'disposal-paris', name: t.disposalParis, sub: t.disposalParisSub, hours: 4, address: 'Paris, Ile-de-France, France', lat: 48.8566, lng: 2.3522 },
@@ -492,6 +634,124 @@ const KioskPage = () => {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Step 0.85: Hourly Free — choose custom duration */}
+        {step === 0.85 && (
+          <div className="max-w-2xl mx-auto" style={{ animation: 'fadeUp 0.3s ease-out' }} data-testid="kiosk-hourly-screen">
+            <button
+              onClick={() => setStep(0.8)}
+              className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#c8a951] mb-6 transition-colors"
+              data-testid="kiosk-hourly-back"
+            >
+              <ChevronRight className="w-4 h-4 rotate-180" /> {t.back}
+            </button>
+
+            {customPricing && (
+              <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center" data-testid="kiosk-hourly-loading">
+                <div className="bg-[#111827] border border-[#c8a951]/30 rounded-2xl p-8 flex flex-col items-center gap-3">
+                  <Loader2 className="w-10 h-10 text-[#c8a951] animate-spin" />
+                  <p className="text-white font-medium">{t.calcPrice}</p>
+                </div>
+              </div>
+            )}
+
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 mx-auto mb-4 bg-[#c8a951]/15 rounded-2xl flex items-center justify-center">
+                <Clock className="w-8 h-8 text-[#c8a951]" />
+              </div>
+              <h2 className="text-2xl lg:text-3xl font-bold mb-2">{t.hourlyPickDuration}</h2>
+              <p className="text-gray-500 text-sm">{t.hourlyMin}</p>
+            </div>
+
+            {/* Big number with - / + */}
+            <div className="bg-[#111827]/60 border border-white/[0.06] rounded-2xl p-6 mb-6 flex items-center justify-between gap-6 max-w-md mx-auto">
+              <button
+                onClick={() => setCustomHours(Math.max(3, customHours - 1))}
+                disabled={customHours <= 3}
+                className="w-14 h-14 rounded-xl bg-[#c8a951]/10 border border-[#c8a951]/30 hover:bg-[#c8a951]/20 text-[#c8a951] font-black text-2xl transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+                data-testid="kiosk-hourly-minus"
+              >
+                −
+              </button>
+              <div className="text-center flex-1">
+                <p className="text-6xl font-black text-white tabular-nums leading-none" data-testid="kiosk-hourly-value">{customHours}</p>
+                <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold mt-2">
+                  {customHours > 1 ? t.hourlyHours : t.hourlyHour}
+                </p>
+              </div>
+              <button
+                onClick={() => setCustomHours(Math.min(12, customHours + 1))}
+                disabled={customHours >= 12}
+                className="w-14 h-14 rounded-xl bg-[#c8a951]/10 border border-[#c8a951]/30 hover:bg-[#c8a951]/20 text-[#c8a951] font-black text-2xl transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+                data-testid="kiosk-hourly-plus"
+              >
+                +
+              </button>
+            </div>
+
+            {/* Quick-pick chips */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+              {[3, 4, 6, 8, 10, 12].map(h => (
+                <button
+                  key={h}
+                  onClick={() => setCustomHours(h)}
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${customHours === h ? 'bg-[#c8a951] text-[#0b1120]' : 'bg-[#111827] border border-white/10 text-gray-400 hover:text-white hover:border-[#c8a951]/40'}`}
+                  data-testid={`kiosk-hourly-chip-${h}`}
+                >
+                  {h}h
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={async () => {
+                setCustomPricing(true);
+                try {
+                  // Use Paris central coordinates as baseline pricing reference (C# returns 4h-equivalent Paris pricing)
+                  const resp = await fetch(`${API}/api/kiosk/${slug}/custom-price`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      destinationLat: 48.8566,
+                      destinationLng: 2.3522,
+                      destinationAddress: 'Paris, Ile-de-France, France',
+                      destinationName: `Chauffeur a disposition ${customHours}h`,
+                    }),
+                  });
+                  if (!resp.ok) throw new Error('pricing-failed');
+                  const data = await resp.json();
+                  // Scale prices: C# returns Paris 4h baseline, scale linearly with chosen hours
+                  const scale = customHours / 4;
+                  const scaled = (data.vehicles || []).map(v => ({
+                    ...v,
+                    minAmount: Math.round(v.minAmount * scale),
+                    maxAmount: Math.round(v.maxAmount * scale),
+                  }));
+                  setSelectedDest({
+                    ...data,
+                    vehicles: scaled,
+                    name: `Chauffeur a disposition (${customHours}h)`,
+                    address: 'Region parisienne',
+                    custom: true,
+                    isHourly: true,
+                    isHourlyFree: true,
+                    hours: customHours,
+                  });
+                  setStep(1);
+                } catch {
+                  setError('Pricing error');
+                  setTimeout(() => setError(null), 3000);
+                } finally {
+                  setCustomPricing(false);
+                }
+              }}
+              className="w-full bg-[#c8a951] hover:bg-[#b89841] text-[#0b1120] py-4 rounded-xl font-black text-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 max-w-md mx-auto"
+              data-testid="kiosk-hourly-continue"
+            >
+              {t.hourlyContinue} <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
         )}
 
