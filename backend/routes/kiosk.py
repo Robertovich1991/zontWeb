@@ -148,6 +148,121 @@ async def get_kiosk_prices(slug: str):
     return {"hotel": hotel, "destinations": results}
 
 
+class KioskHourlyPriceRequest(BaseModel):
+    hours: int
+
+
+# Cache for C# TripsPrice grid (refreshed every 1h)
+_trips_price_cache = {"data": None, "fetched_at": None}
+
+
+async def fetch_csharp_trips_price():
+    """Fetch authoritative hourly pricing grid from C# admin (per-vehicle perMinuteForTime + baseFare).
+    Cached in memory for 1h to avoid hammering C#.
+    """
+    from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+    now = _dt.now(_tz.utc)
+    if _trips_price_cache["data"] and _trips_price_cache["fetched_at"] \
+            and (now - _trips_price_cache["fetched_at"]) < _td(hours=1):
+        return _trips_price_cache["data"]
+
+    company_user = os.environ.get("CSHARP_COMPANY_USERNAME", "Nandetiri1@gmail.com")
+    company_pwd = os.environ.get("CSHARP_COMPANY_PASSWORD", "12345678")
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+        login = await client.post(
+            f"{CSHARP_API}/api/Login/company",
+            json={"username": company_user, "password": company_pwd},
+            headers={"Content-Type": "application/json"},
+        )
+        if login.status_code != 200:
+            raise HTTPException(502, "C# company auth failed")
+        token = login.json().get("accessToken", "")
+        resp = await client.get(
+            f"{CSHARP_API}/api/TripsPrice",
+            headers={"Authorization": f"Bearer {token}", "Accept": "application/json"},
+        )
+        if resp.status_code != 200:
+            raise HTTPException(502, "C# TripsPrice unreachable")
+        data = resp.json()
+
+    _trips_price_cache["data"] = data
+    _trips_price_cache["fetched_at"] = now
+    return data
+
+
+@router.post("/{slug}/hourly-price")
+async def get_kiosk_hourly_price(slug: str, req: KioskHourlyPriceRequest):
+    """Compute disposal (chauffeur-by-hour) pricing from C# TripsPrice grid.
+
+    Formula: price = baseFare + (perMinuteForTime * hours * 60)
+    Bounded by minimum amount.
+    Image paths are enriched from /driverTypesTwo (which does include imagePath).
+    """
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    if req.hours < 1 or req.hours > 24:
+        raise HTTPException(400, "Hours must be between 1 and 24")
+    hotel = await db.kiosk_hotels.find_one({"slug": slug}, {"_id": 0})
+    if not hotel:
+        raise HTTPException(404, "Hotel not found")
+
+    grid = await fetch_csharp_trips_price()
+
+    # Fetch imagePath from driverTypesTwo (Paris route as reference)
+    image_map = {}
+    try:
+        hotel_coords = {"latitude": hotel["lat"], "longitude": hotel["lng"]}
+        paris_coords = {"latitude": 48.8566, "longitude": 2.3522}
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            r = await client.post(
+                f"{CSHARP_API}/api/PreorderDistance/driverTypesTwo",
+                json=[hotel_coords, paris_coords],
+            )
+            if r.status_code == 200:
+                for v in r.json() or []:
+                    tt = (v.get("tripType") or "").strip()
+                    if tt and v.get("imagePath"):
+                        image_map[tt] = v["imagePath"]
+    except Exception as e:
+        logger.warning(f"imagePath enrichment failed: {e}")
+
+    minutes = req.hours * 60
+    DISPLAY_ORDER = ["Standard Car", "Shuttle private 8 pers.", "Luxury Sedan", "Luxury Van"]
+    vehicles = []
+    for v in grid:
+        trip_type = (v.get("tripTypes") or "").strip()
+        if trip_type not in DISPLAY_ORDER:
+            continue
+        base = float(v.get("baseFare") or 0)
+        per_min = float(v.get("perMinuteForTime") or 0)
+        minimum = float(v.get("minimum") or 0)
+        price = base + (per_min * minutes)
+        if minimum > price:
+            price = minimum
+        vehicles.append({
+            "tripType": trip_type,
+            "minAmount": round(price),
+            "maxAmount": round(price),
+            "duration": minutes,
+            "distance": 0,
+            "passenger": v.get("passenger", 0),
+            "luggage": v.get("luggage", 0),
+            "imagePath": image_map.get(trip_type, "") or "",
+            "description": v.get("description", "") or "",
+        })
+    vehicles.sort(key=lambda x: DISPLAY_ORDER.index(x["tripType"]) if x["tripType"] in DISPLAY_ORDER else 99)
+
+    return {
+        "name": f"Chauffeur a disposition ({req.hours}h)",
+        "address": "Region parisienne",
+        "lat": hotel["lat"],
+        "lng": hotel["lng"],
+        "hours": req.hours,
+        "vehicles": vehicles,
+        "cheapest": min((v["minAmount"] for v in vehicles), default=0),
+    }
+
+
 @router.post("/{slug}/custom-price")
 async def get_kiosk_custom_price(slug: str, req: KioskCustomPriceRequest):
     """Fetch real-time prices for a custom destination entered via Google Places."""

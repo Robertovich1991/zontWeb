@@ -600,19 +600,22 @@ const KioskPage = () => {
                   onClick={async () => {
                     setCustomPricing(true);
                     try {
-                      const resp = await fetch(`${API}/api/kiosk/${slug}/custom-price`, {
+                      // Use authoritative hourly pricing for fixed disposal packages too
+                      const resp = await fetch(`${API}/api/kiosk/${slug}/hourly-price`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          destinationLat: d.lat,
-                          destinationLng: d.lng,
-                          destinationAddress: d.address,
-                          destinationName: `${d.name} (${d.hours}h)`,
-                        }),
+                        body: JSON.stringify({ hours: d.hours }),
                       });
                       if (!resp.ok) throw new Error('pricing-failed');
                       const data = await resp.json();
-                      setSelectedDest({ ...data, custom: true, hours: d.hours, isHourly: true });
+                      setSelectedDest({
+                        ...data,
+                        name: `${d.name} (${d.hours}h)`,
+                        address: d.address,
+                        custom: true,
+                        hours: d.hours,
+                        isHourly: true,
+                      });
                       setStep(1);
                     } catch {
                       setError('Pricing error');
@@ -723,31 +726,16 @@ const KioskPage = () => {
               onClick={async () => {
                 setCustomPricing(true);
                 try {
-                  // Use Paris central coordinates as baseline pricing reference (C# returns 4h-equivalent Paris pricing)
-                  const resp = await fetch(`${API}/api/kiosk/${slug}/custom-price`, {
+                  // Authoritative hourly pricing from C# TripsPrice admin grid
+                  const resp = await fetch(`${API}/api/kiosk/${slug}/hourly-price`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      destinationLat: 48.8566,
-                      destinationLng: 2.3522,
-                      destinationAddress: 'Paris, Ile-de-France, France',
-                      destinationName: `Chauffeur a disposition ${customHours}h`,
-                    }),
+                    body: JSON.stringify({ hours: customHours }),
                   });
                   if (!resp.ok) throw new Error('pricing-failed');
                   const data = await resp.json();
-                  // Scale prices: C# returns Paris 4h baseline, scale linearly with chosen hours
-                  const scale = customHours / 4;
-                  const scaled = (data.vehicles || []).map(v => ({
-                    ...v,
-                    minAmount: Math.round(v.minAmount * scale),
-                    maxAmount: Math.round(v.maxAmount * scale),
-                  }));
                   setSelectedDest({
                     ...data,
-                    vehicles: scaled,
-                    name: `Chauffeur a disposition (${customHours}h)`,
-                    address: 'Region parisienne',
                     custom: true,
                     isHourly: true,
                     isHourlyFree: true,
