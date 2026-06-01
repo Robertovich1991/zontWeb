@@ -17,6 +17,14 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 01, 2026 — Kiosk Hourly Disposal Vehicles Fix (P0)
+- **Bug**: Kiosk "Location voiture à l'heure" (Disposal excursions screen) showed empty vehicle list at Step 2 because clicking a disposal destination (Paris 4h / Versailles 5h / Fontainebleau 8h / Mont-Saint-Michel 12h) only set `selectedDest` locally without calling pricing API → `selectedDest.vehicles` was always undefined.
+- **Fix**: `KioskPage.js` disposal buttons now call existing `POST /api/kiosk/{slug}/custom-price` with proper lat/lng for each disposal destination → populates `vehicles[]` with 4 categories (Shuttle 8p, Luxury Sedan, Luxury Van, Standard Car) returned from C# `/api/PreorderDistance/driverTypesTwo`.
+- Added full-screen loading overlay during pricing fetch + auto-error handling.
+- **Tested**: Versailles 5h flow → 4 vehicles rendered with images & prices (81€, 108€, 123€, 69€).
+- **Note for user**: Prices shown are *transfer/round-trip distance* baseline from C# (no dedicated hourly endpoint exists in C# Swagger). If you provide a fixed hourly rate table per vehicle, we can replace these later.
+
+
 - Schema.org reviews use `Product` type (not `LocalBusiness`) for Google compliance
 - PlacesAutocomplete shows place name + address for clarity
 - AuthModal checks `isOpen` prop before rendering

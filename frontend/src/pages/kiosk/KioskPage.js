@@ -434,19 +434,47 @@ const KioskPage = () => {
             <h2 className="text-2xl lg:text-3xl font-bold text-center mb-2">{t.disposalTitle}</h2>
             <p className="text-center text-gray-400 text-sm mb-8 max-w-2xl mx-auto">{t.disposalSub}</p>
 
+            {customPricing && (
+              <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center" data-testid="kiosk-disposal-loading">
+                <div className="bg-[#111827] border border-[#c8a951]/30 rounded-2xl p-8 flex flex-col items-center gap-3">
+                  <Loader2 className="w-10 h-10 text-[#c8a951] animate-spin" />
+                  <p className="text-white font-medium">{t.calcPrice}</p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-5xl mx-auto">
               {[
-                { id: 'disposal-paris', name: t.disposalParis, sub: t.disposalParisSub, hours: 4, address: 'Paris, Ile-de-France, France' },
-                { id: 'disposal-versailles', name: t.disposalVersailles, sub: t.disposalVersaillesSub, hours: 5, address: 'Chateau de Versailles, France' },
-                { id: 'disposal-fontainebleau', name: t.disposalFontainebleau, sub: t.disposalFontainebleauSub, hours: 8, address: 'Chateau de Fontainebleau, France' },
-                { id: 'disposal-msm', name: t.disposalMSM, sub: t.disposalMSMSub, hours: 12, address: 'Mont-Saint-Michel, Normandie, France' },
+                { id: 'disposal-paris', name: t.disposalParis, sub: t.disposalParisSub, hours: 4, address: 'Paris, Ile-de-France, France', lat: 48.8566, lng: 2.3522 },
+                { id: 'disposal-versailles', name: t.disposalVersailles, sub: t.disposalVersaillesSub, hours: 5, address: 'Chateau de Versailles, France', lat: 48.8049, lng: 2.1204 },
+                { id: 'disposal-fontainebleau', name: t.disposalFontainebleau, sub: t.disposalFontainebleauSub, hours: 8, address: 'Chateau de Fontainebleau, France', lat: 48.4021, lng: 2.7000 },
+                { id: 'disposal-msm', name: t.disposalMSM, sub: t.disposalMSMSub, hours: 12, address: 'Mont-Saint-Michel, Normandie, France', lat: 48.6361, lng: -1.5115 },
               ].map((d) => (
                 <button
                   key={d.id}
-                  onClick={() => {
-                    setSelectedDest({ name: `${d.name} (${d.hours}h)`, address: d.address, cheapest: 0, custom: true, hours: d.hours });
+                  onClick={async () => {
                     setCustomPricing(true);
-                    setStep(1);
+                    try {
+                      const resp = await fetch(`${API}/api/kiosk/${slug}/custom-price`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          destinationLat: d.lat,
+                          destinationLng: d.lng,
+                          destinationAddress: d.address,
+                          destinationName: `${d.name} (${d.hours}h)`,
+                        }),
+                      });
+                      if (!resp.ok) throw new Error('pricing-failed');
+                      const data = await resp.json();
+                      setSelectedDest({ ...data, custom: true, hours: d.hours, isHourly: true });
+                      setStep(1);
+                    } catch {
+                      setError('Pricing error');
+                      setTimeout(() => setError(null), 3000);
+                    } finally {
+                      setCustomPricing(false);
+                    }
                   }}
                   className="bg-[#111827]/80 border border-white/[0.06] hover:border-[#c8a951]/40 rounded-xl p-5 text-left transition-all active:scale-[0.98] flex items-start gap-4 group"
                   data-testid={`disposal-${d.id}`}
