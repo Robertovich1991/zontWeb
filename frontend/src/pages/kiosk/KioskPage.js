@@ -58,6 +58,7 @@ const LANGS = {
     hourlyHours: 'heures',
     hourlyHour: 'heure',
     hourlyContinue: 'Voir les vehicules',
+    hourlyTollsNotice: 'Les peages et routes payantes sont a la charge du client.',
   },
   en: {
     heroTitle: 'Book your private chauffeur',
@@ -106,6 +107,7 @@ const LANGS = {
     hourlyHours: 'hours',
     hourlyHour: 'hour',
     hourlyContinue: 'View vehicles',
+    hourlyTollsNotice: 'Toll roads and motorway fees are paid by the client.',
   },
   ru: {
     heroTitle: 'Закажите личного водителя',
@@ -154,6 +156,7 @@ const LANGS = {
     hourlyHours: 'часов',
     hourlyHour: 'час',
     hourlyContinue: 'Посмотреть автомобили',
+    hourlyTollsNotice: 'Платные дороги и трассы оплачиваются клиентом.',
   },
 };
 
@@ -692,7 +695,7 @@ const KioskPage = () => {
             </div>
 
             {/* Quick-pick chips */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
               {[3, 4, 6, 8, 10, 12].map(h => (
                 <button
                   key={h}
@@ -703,6 +706,17 @@ const KioskPage = () => {
                   {h}h
                 </button>
               ))}
+            </div>
+
+            {/* Toll-roads notice */}
+            <div className="bg-[#c8a951]/8 border border-[#c8a951]/25 rounded-xl px-4 py-3 mb-6 flex items-start gap-3 max-w-md mx-auto" data-testid="kiosk-hourly-tolls-notice">
+              <ShieldCheck className="w-5 h-5 text-[#c8a951] flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-gray-300 leading-relaxed">
+                <span className="text-[#c8a951] font-bold">
+                  {lang === 'fr' ? 'Bon a savoir : ' : lang === 'ru' ? 'Важно: ' : 'Good to know: '}
+                </span>
+                {t.hourlyTollsNotice}
+              </p>
             </div>
 
             <button
