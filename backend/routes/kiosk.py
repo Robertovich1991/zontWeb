@@ -242,12 +242,12 @@ async def create_kiosk_booking(req: KioskBookingRequest):
         logger.error(f"Stripe session creation failed: {e}")
         raise HTTPException(502, "Payment service unavailable")
 
-    # Generate QR code as base64
+    # Generate QR code as base64 — black on white for maximum camera compatibility
     qr_data = session.url
-    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=8, border=2)
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=10, border=4)
     qr.add_data(qr_data)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="#2ecc71", back_color="#0b1120")
+    img = qr.make_image(fill_color="black", back_color="white")
     buffer = io.BytesIO()
     img.save(buffer, format="PNG")
     qr_base64 = base64.b64encode(buffer.getvalue()).decode()

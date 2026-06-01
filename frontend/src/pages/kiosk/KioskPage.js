@@ -621,8 +621,8 @@ const KioskPage = () => {
             {/* QR Code for payment */}
             {booking.qrCode && (
               <div className="mb-6">
-                <div className="bg-[#111827]/60 border border-[#2ecc71]/20 rounded-2xl p-6 inline-block">
-                  <img src={booking.qrCode} alt="QR Payment" className="w-48 h-48 mx-auto rounded-lg" data-testid="payment-qr" />
+                <div className="bg-white border border-[#2ecc71]/20 rounded-2xl p-4 inline-block">
+                  <img src={booking.qrCode} alt="QR Payment" className="w-64 h-64 mx-auto block" data-testid="payment-qr" />
                 </div>
                 <p className="text-white font-bold text-lg mt-4">Scannez pour payer {selectedVehicle?.minAmount}&euro;</p>
                 <p className="text-gray-400 text-sm mt-1">Ou utilisez le lien ci-dessous</p>
