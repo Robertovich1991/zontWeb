@@ -130,39 +130,24 @@ const AttractScreen = ({ hotelName, onTap }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black select-none overflow-hidden cursor-pointer"
+      className="fixed inset-0 z-50 bg-black select-none overflow-hidden cursor-pointer flex items-center justify-center"
       onClick={handleTap}
       onTouchStart={handleTap}
       data-testid="kiosk-attract-screen"
     >
-      {/* Background image — premium chauffeur idle visual */}
+      {/* Background image — premium chauffeur idle visual (entire image visible, letterboxed if needed) */}
       <img
         src="/images/kiosk-idle-screen.webp"
         alt="ZONT — Your private driver is ready"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="max-w-full max-h-full w-auto h-auto object-contain"
         draggable={false}
       />
 
       {/* Tap flash overlay */}
       <div
         className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${tapping ? 'opacity-100' : 'opacity-0'}`}
-        style={{ background: 'radial-gradient(circle at 25% 80%, rgba(46,204,113,0.45) 0%, transparent 50%)' }}
+        style={{ background: 'radial-gradient(circle at 50% 50%, rgba(46,204,113,0.45) 0%, transparent 50%)' }}
       />
-
-      {/* Animated pulsing touch ring overlay (positioned on top of the TOUCH icon in the image) */}
-      <div
-        className="absolute pointer-events-none"
-        style={{ left: '29%', top: '85%', transform: 'translate(-50%, -50%)' }}
-      >
-        <div
-          className="w-24 h-24 rounded-full border-2 border-[#2ecc71]"
-          style={{ animation: 'kioskRingPulse 2s ease-out infinite' }}
-        />
-        <div
-          className="w-24 h-24 rounded-full border-2 border-[#2ecc71] absolute inset-0"
-          style={{ animation: 'kioskRingPulse 2s ease-out infinite 1s' }}
-        />
-      </div>
 
       {/* Hotel-specific label (small, top-left corner) */}
       {hotelName && (
@@ -172,10 +157,6 @@ const AttractScreen = ({ hotelName, onTap }) => {
       )}
 
       <style>{`
-        @keyframes kioskRingPulse {
-          0%   { transform: scale(0.9); opacity: 0.9; }
-          100% { transform: scale(1.8); opacity: 0; }
-        }
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
     </div>
