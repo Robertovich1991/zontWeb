@@ -86,6 +86,36 @@ async def ensure_demo_hotel():
 
 # ---------- Endpoints ----------
 
+@router.get("/{slug}/manifest.json")
+async def get_kiosk_manifest(slug: str):
+    """Dynamic PWA manifest for a specific hotel kiosk.
+    Makes "Add to Home Screen" install the kiosk directly to that hotel.
+    """
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    hotel = await db.kiosk_hotels.find_one({"slug": slug}, {"_id": 0})
+    if not hotel:
+        raise HTTPException(404, "Hotel not found")
+
+    return {
+        "name": f"Zont Transfer — {hotel.get('name', 'Kiosk')}",
+        "short_name": "Zont Kiosk",
+        "description": "Reservez votre chauffeur prive — service hotel 24h/24",
+        "start_url": f"/kiosk/{slug}",
+        "scope": f"/kiosk/{slug}",
+        "display": "fullscreen",
+        "orientation": "any",
+        "background_color": "#0b1120",
+        "theme_color": "#0b1120",
+        "categories": ["travel", "business"],
+        "icons": [
+            {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+            {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+            {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+        ],
+    }
+
+
 @router.get("/{slug}")
 async def get_hotel_kiosk(slug: str):
     """Get hotel info for kiosk display."""

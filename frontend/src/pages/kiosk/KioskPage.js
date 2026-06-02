@@ -311,6 +311,59 @@ const KioskPage = () => {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  // PWA "Add to Home Screen": dynamic manifest + iOS meta tags per kiosk slug
+  useEffect(() => {
+    if (!slug) return;
+    const apiBase = process.env.REACT_APP_BACKEND_URL || '';
+
+    // Replace the default site manifest with the kiosk-specific one
+    let manifestLink = document.querySelector('link[rel="manifest"]');
+    const originalManifest = manifestLink ? manifestLink.getAttribute('href') : null;
+    if (!manifestLink) {
+      manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      document.head.appendChild(manifestLink);
+    }
+    manifestLink.setAttribute('href', `${apiBase}/api/kiosk/${slug}/manifest.json`);
+
+    // iOS PWA meta tags (Apple ignores the web manifest, uses these instead)
+    const metas = [
+      { name: 'apple-mobile-web-app-capable', content: 'yes' },
+      { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+      { name: 'apple-mobile-web-app-title', content: 'Zont Kiosk' },
+      { name: 'mobile-web-app-capable', content: 'yes' },
+      { name: 'theme-color', content: '#0b1120' },
+    ];
+    const addedMetas = [];
+    metas.forEach(({ name, content }) => {
+      let el = document.querySelector(`meta[name="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('name', name);
+        document.head.appendChild(el);
+        addedMetas.push(el);
+      }
+      el.setAttribute('content', content);
+    });
+
+    // iOS apple-touch-icon
+    let appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+    const originalIconHref = appleIcon ? appleIcon.getAttribute('href') : null;
+    if (!appleIcon) {
+      appleIcon = document.createElement('link');
+      appleIcon.rel = 'apple-touch-icon';
+      document.head.appendChild(appleIcon);
+    }
+    appleIcon.setAttribute('href', '/icon-512.png');
+
+    return () => {
+      // Restore original manifest when leaving the kiosk page
+      if (manifestLink && originalManifest) manifestLink.setAttribute('href', originalManifest);
+      if (appleIcon && originalIconHref) appleIcon.setAttribute('href', originalIconHref);
+      addedMetas.forEach(el => el.remove());
+    };
+  }, [slug]);
+
   const handleCustomDest = async (place) => {
     if (!place.latitude || !place.longitude) return;
     setCustomPricing(true);
