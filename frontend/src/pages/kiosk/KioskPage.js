@@ -251,20 +251,29 @@ const KioskPage = () => {
     setIdleCountdown(15);
   }, []);
 
+  const showIdlePromptRef = useRef(false);
+  const showAttractRef = useRef(true);
+  const stepRef = useRef(0);
+  useEffect(() => { showIdlePromptRef.current = showIdlePrompt; }, [showIdlePrompt]);
+  useEffect(() => {
+    showAttractRef.current = showAttract;
+    // When leaving the attract screen, re-arm the idle timer
+    if (!showAttract) resetIdleTimerRef.current && resetIdleTimerRef.current();
+  }, [showAttract]);
+  useEffect(() => { stepRef.current = step; }, [step]);
+
+  const resetIdleTimerRef = useRef(null);
+
   // Idle timer: after 60s of inactivity show "Still here?" prompt with 15s countdown
   const resetIdleTimer = useCallback(() => {
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    // Don't run idle prompt on attract screen, while prompt already showing, or on confirmation step 4
-    if (showAttract || showIdlePrompt || step === 4) return;
+    if (showAttractRef.current || showIdlePromptRef.current || stepRef.current === 4) return;
     idleTimerRef.current = setTimeout(() => {
-      // Don't prompt if user already on confirmation step (booking paid/awaiting payment)
       setShowIdlePrompt(true);
       setIdleCountdown(15);
-      // Start countdown
       idleCountdownIntervalRef.current = setInterval(() => {
         setIdleCountdown((c) => {
           if (c <= 1) {
-            // Auto-reset
             clearInterval(idleCountdownIntervalRef.current);
             idleCountdownIntervalRef.current = null;
             setShowIdlePrompt(false);
@@ -276,11 +285,13 @@ const KioskPage = () => {
         });
       }, 1000);
     }, 60000);
-  }, [showAttract, showIdlePrompt, step, resetKiosk]);
+  }, [resetKiosk]);
+
+  useEffect(() => { resetIdleTimerRef.current = resetIdleTimer; }, [resetIdleTimer]);
 
   useEffect(() => {
     const events = ['click', 'touchstart', 'mousemove', 'keydown'];
-    const h = () => { if (!showIdlePrompt) resetIdleTimer(); };
+    const h = () => { if (!showIdlePromptRef.current) resetIdleTimer(); };
     events.forEach(e => document.addEventListener(e, h, { passive: true }));
     resetIdleTimer();
     return () => {
@@ -289,7 +300,7 @@ const KioskPage = () => {
       if (idlePromptTimerRef.current) clearTimeout(idlePromptTimerRef.current);
       if (idleCountdownIntervalRef.current) clearInterval(idleCountdownIntervalRef.current);
     };
-  }, [resetIdleTimer, showIdlePrompt]);
+  }, [resetIdleTimer]);
 
   useEffect(() => {
     const now = new Date(); now.setHours(now.getHours() + 2);
