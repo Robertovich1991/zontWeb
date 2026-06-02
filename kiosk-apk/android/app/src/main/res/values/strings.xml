@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Zont Kiosk</string>
+    <string name="title_activity_main">Zont Kiosk</string>
+    <string name="package_name">cab.zont.kiosk</string>
+    <string name="custom_url_scheme">cab.zont.kiosk</string>
+</resources>

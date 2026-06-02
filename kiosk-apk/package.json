@@ -1,0 +1,11 @@
+{
+  "name": "kiosk-apk",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "6",
+    "@capacitor/cli": "6",
+    "@capacitor/core": "6"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "appId": "cab.zont.kiosk",
+  "appName": "Zont Kiosk",
+  "webDir": "www",
+  "server": {
+    "url": "https://zont.cab/kiosk/bristol",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0b1120"
+  }
+}
