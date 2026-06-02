@@ -437,44 +437,44 @@ const KioskPage = () => {
             </div>
 
             {/* 4 Category Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto mb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-10">
               {[
                 { icon: Plane, title: t.airports, sub: t.airportsSub, action: () => { if (airportDests.length === 1) { setSelectedDest(airportDests[0]); setStep(1); } else { setSelectedDest(null); setStep(0.5); } }, cat: 'airports' },
                 { icon: TrainFront, title: t.stations, sub: t.stationsSub, action: () => { if (stationDests.length === 1) { setSelectedDest(stationDests[0]); setStep(1); } else { setSelectedDest(null); setStep(0.6); } }, cat: 'stations' },
                 { icon: Castle, title: t.disney, sub: t.disneySub, action: () => { const d = disneyDests[0] || destinations.find(dd => dd.name?.toLowerCase().includes('disney')); if (d) { setSelectedDest(d); setStep(1); } }, cat: 'disney' },
                 { icon: MapPin, title: t.other, sub: t.otherSub, action: () => setStep(0.7), cat: 'other' },
               ].map((c, i) => (
-                <button key={i} onClick={c.action} className="group bg-[#111827]/80 border border-[#2ecc71]/10 hover:border-[#2ecc71]/40 rounded-2xl p-5 text-center transition-all hover:bg-[#2ecc71]/5 active:scale-[0.98]" data-testid={`cat-${c.cat}`}>
-                  <div className="w-14 h-14 mx-auto mb-3 bg-[#2ecc71]/10 rounded-xl flex items-center justify-center group-hover:bg-[#2ecc71]/20 transition-colors">
-                    <c.icon className="w-7 h-7 text-[#2ecc71]" />
+                <button key={i} onClick={c.action} className="group bg-[#111827]/80 border-2 border-[#2ecc71]/15 hover:border-[#2ecc71]/50 rounded-3xl p-8 text-center transition-all hover:bg-[#2ecc71]/5 active:scale-[0.98]" data-testid={`cat-${c.cat}`}>
+                  <div className="w-24 h-24 mx-auto mb-5 bg-[#2ecc71]/10 rounded-2xl flex items-center justify-center group-hover:bg-[#2ecc71]/20 transition-colors">
+                    <c.icon className="w-12 h-12 text-[#2ecc71]" />
                   </div>
-                  <h3 className="text-white font-bold text-base mb-1" style={{ fontFamily: "'Manrope', sans-serif" }}>{c.title}</h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">{c.sub}</p>
-                  <ChevronRight className="w-4 h-4 text-gray-600 mx-auto mt-3 group-hover:text-[#2ecc71] transition-colors" />
+                  <h3 className="text-white font-bold text-xl lg:text-2xl mb-2" style={{ fontFamily: "'Manrope', sans-serif" }}>{c.title}</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">{c.sub}</p>
+                  <ChevronRight className="w-6 h-6 text-gray-600 mx-auto mt-4 group-hover:text-[#2ecc71] transition-colors" />
                 </button>
               ))}
             </div>
 
             {/* Popular Destinations */}
-            <div className="max-w-5xl mx-auto mb-6">
-              <div className="flex items-center gap-4 mb-4">
+            <div className="max-w-6xl mx-auto mb-6">
+              <div className="flex items-center gap-4 mb-5">
                 <div className="flex-1 h-px bg-white/[0.06]" />
-                <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold">{t.popular}</span>
+                <span className="text-sm text-gray-500 uppercase tracking-widest font-semibold">{t.popular}</span>
                 <div className="flex-1 h-px bg-white/[0.06]" />
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {destinations.slice(0, 4).map((d, i) => (
-                  <button key={i} onClick={() => { setSelectedDest(d); setStep(1); }} className="bg-[#111827]/60 border border-white/[0.06] hover:border-[#2ecc71]/30 rounded-xl px-4 py-3 flex items-center gap-3 transition-all text-left group" data-testid={`pop-dest-${i}`}>
-                    <div className="w-9 h-9 bg-[#2ecc71]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      {d.icon === 'plane' ? <Plane className="w-4 h-4 text-[#2ecc71]" /> : d.icon === 'train' ? <TrainFront className="w-4 h-4 text-[#2ecc71]" /> : <MapPin className="w-4 h-4 text-[#2ecc71]" />}
+                  <button key={i} onClick={() => { setSelectedDest(d); setStep(1); }} className="bg-[#111827]/60 border border-white/[0.06] hover:border-[#2ecc71]/40 rounded-2xl px-5 py-4 flex items-center gap-4 transition-all text-left group" data-testid={`pop-dest-${i}`}>
+                    <div className="w-14 h-14 bg-[#2ecc71]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                      {d.icon === 'plane' ? <Plane className="w-7 h-7 text-[#2ecc71]" /> : d.icon === 'train' ? <TrainFront className="w-7 h-7 text-[#2ecc71]" /> : <MapPin className="w-7 h-7 text-[#2ecc71]" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-semibold truncate">{d.name}</p>
+                      <p className="text-white text-base lg:text-lg font-semibold truncate">{d.name}</p>
                       <p className="text-gray-500 text-xs truncate">{d.address?.split(',').slice(0,2).join(',')}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <p className="text-[10px] text-gray-600 uppercase">{t.from}</p>
-                      <p className="text-[#2ecc71] font-bold text-lg">{d.cheapest}<span className="text-xs">&euro;</span></p>
+                      <p className="text-[#2ecc71] font-bold text-2xl">{d.cheapest}<span className="text-xs">&euro;</span></p>
                     </div>
                   </button>
                 ))}
@@ -760,14 +760,14 @@ const KioskPage = () => {
         {/* Step 0.5: Airport list */}
         {step === 0.5 && (
           <div style={{ animation: 'fadeUp 0.3s ease-out' }}>
-            <h2 className="text-2xl font-bold text-center mb-6">{t.airports}</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            <h2 className="text-3xl lg:text-4xl font-bold text-center mb-10">{t.airports}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {airportDests.map((d, i) => (
-                <button key={i} onClick={() => { setSelectedDest(d); setStep(1); }} className="bg-[#111827]/80 border border-white/[0.06] hover:border-[#2ecc71]/40 rounded-xl p-5 text-left transition-all">
-                  <Plane className="w-6 h-6 text-[#2ecc71] mb-2" />
-                  <p className="text-white font-bold">{d.name}</p>
-                  <p className="text-gray-500 text-xs mt-1">{d.address?.split(',').slice(0,2).join(',')}</p>
-                  {d.cheapest > 0 && <p className="text-[#2ecc71] font-bold text-xl mt-2">{d.cheapest}<span className="text-sm">&euro;</span></p>}
+                <button key={i} onClick={() => { setSelectedDest(d); setStep(1); }} className="bg-[#111827]/80 border-2 border-white/[0.08] hover:border-[#2ecc71]/50 rounded-2xl p-7 text-left transition-all active:scale-[0.98]">
+                  <Plane className="w-10 h-10 text-[#2ecc71] mb-4" />
+                  <p className="text-white font-bold text-xl lg:text-2xl mb-2">{d.name}</p>
+                  <p className="text-gray-400 text-sm mb-3">{d.address?.split(',').slice(0,2).join(',')}</p>
+                  {d.cheapest > 0 && <p className="text-[#2ecc71] font-bold text-3xl lg:text-4xl mt-2">{d.cheapest}<span className="text-lg">&euro;</span></p>}
                 </button>
               ))}
             </div>
@@ -777,12 +777,12 @@ const KioskPage = () => {
         {/* Step 0.6: Station list */}
         {step === 0.6 && (
           <div style={{ animation: 'fadeUp 0.3s ease-out' }}>
-            <h2 className="text-2xl font-bold text-center mb-6">{t.stations}</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            <h2 className="text-3xl lg:text-4xl font-bold text-center mb-10">{t.stations}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {stationDests.map((d, i) => (
-                <button key={i} onClick={() => { setSelectedDest(d); setStep(1); }} className="bg-[#111827]/80 border border-white/[0.06] hover:border-[#2ecc71]/40 rounded-xl p-5 text-left transition-all">
-                  <TrainFront className="w-6 h-6 text-[#2ecc71] mb-2" />
-                  <p className="text-white font-bold">{d.name}</p>
+                <button key={i} onClick={() => { setSelectedDest(d); setStep(1); }} className="bg-[#111827]/80 border-2 border-white/[0.08] hover:border-[#2ecc71]/50 rounded-2xl p-7 text-left transition-all active:scale-[0.98]">
+                  <TrainFront className="w-10 h-10 text-[#2ecc71] mb-4" />
+                  <p className="text-white font-bold text-xl lg:text-2xl mb-2">{d.name}</p>
                   <p className="text-gray-500 text-xs mt-1">{d.address?.split(',').slice(0,2).join(',')}</p>
                   {d.cheapest > 0 && <p className="text-[#2ecc71] font-bold text-xl mt-2">{d.cheapest}<span className="text-sm">&euro;</span></p>}
                 </button>
@@ -807,20 +807,20 @@ const KioskPage = () => {
 
         {/* Step 1: Date/Time */}
         {step === 1 && (
-          <div className="max-w-lg mx-auto" style={{ animation: 'fadeUp 0.3s ease-out' }}>
-            <h2 className="text-2xl font-bold text-center mb-2">{t.when}</h2>
-            <p className="text-gray-500 text-center mb-6">{t.towards} <span className="text-[#2ecc71] font-medium">{selectedDest?.name}</span></p>
-            <div className="space-y-4">
+          <div className="max-w-2xl mx-auto" style={{ animation: 'fadeUp 0.3s ease-out' }}>
+            <h2 className="text-3xl lg:text-4xl font-bold text-center mb-3">{t.when}</h2>
+            <p className="text-gray-400 text-center text-lg mb-10">{t.towards} <span className="text-[#2ecc71] font-medium">{selectedDest?.name}</span></p>
+            <div className="space-y-6">
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.date}</label>
-                <input type="date" value={date} onChange={e => setDate(e.target.value)} min={new Date().toISOString().split('T')[0]} className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-date" />
+                <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wide font-semibold">{t.date}</label>
+                <input type="date" value={date} onChange={e => setDate(e.target.value)} min={new Date().toISOString().split('T')[0]} className="w-full px-6 py-5 bg-[#111827] border-2 border-white/10 rounded-2xl text-white text-2xl focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-date" />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.time}</label>
-                <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-time" />
+                <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wide font-semibold">{t.time}</label>
+                <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full px-6 py-5 bg-[#111827] border-2 border-white/10 rounded-2xl text-white text-2xl focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-time" />
               </div>
-              <button onClick={() => { if (date && time) setStep(2); }} disabled={!date || !time} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-next">
-                {t.continue} <ArrowRight className="w-5 h-5" />
+              <button onClick={() => { if (date && time) setStep(2); }} disabled={!date || !time} className="w-full bg-[#2ecc71] text-white py-5 rounded-2xl font-bold text-xl hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-3 mt-4" data-testid="kiosk-next">
+                {t.continue} <ArrowRight className="w-6 h-6" />
               </button>
             </div>
           </div>
@@ -829,21 +829,21 @@ const KioskPage = () => {
         {/* Step 2: Vehicle */}
         {step === 2 && (
           <div style={{ animation: 'fadeUp 0.3s ease-out' }}>
-            <h2 className="text-2xl font-bold text-center mb-6">{t.chooseVehicle}</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            <h2 className="text-3xl lg:text-4xl font-bold text-center mb-10">{t.chooseVehicle}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
               {(selectedDest?.vehicles || []).map((v, i) => {
                 const imgUrl = transferService.getVehicleImageUrl(v.imagePath);
                 return (
-                  <button key={i} onClick={() => { setSelectedVehicle(v); setStep(3); }} className="bg-[#111827]/80 border border-white/[0.06] hover:border-[#2ecc71]/40 rounded-xl p-4 text-left transition-all active:scale-[0.98]" data-testid={`vehicle-${i}`}>
-                    <div className="h-24 flex items-center justify-center mb-3">
-                      {imgUrl ? <img src={imgUrl} alt={v.tripType} className="max-h-full max-w-full object-contain" /> : <Car className="w-12 h-12 text-gray-600" />}
+                  <button key={i} onClick={() => { setSelectedVehicle(v); setStep(3); }} className="bg-[#111827]/80 border-2 border-white/[0.08] hover:border-[#2ecc71]/60 rounded-2xl p-6 text-left transition-all active:scale-[0.98] shadow-lg hover:shadow-[#2ecc71]/10" data-testid={`vehicle-${i}`}>
+                    <div className="h-48 lg:h-56 flex items-center justify-center mb-5">
+                      {imgUrl ? <img src={imgUrl} alt={v.tripType} className="max-h-full max-w-full object-contain" /> : <Car className="w-32 h-32 text-gray-600" />}
                     </div>
-                    <h4 className="text-white font-bold mb-1">{v.tripType}</h4>
-                    <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
-                      <span className="flex items-center gap-1"><Users className="w-3 h-3" />{v.passenger}</span>
-                      <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" />{v.luggage}</span>
+                    <h4 className="text-white font-bold text-xl lg:text-2xl mb-3 leading-tight">{v.tripType}</h4>
+                    <div className="flex items-center gap-5 text-sm text-gray-400 mb-4">
+                      <span className="flex items-center gap-1.5"><Users className="w-5 h-5" />{v.passenger}</span>
+                      <span className="flex items-center gap-1.5"><Briefcase className="w-5 h-5" />{v.luggage}</span>
                     </div>
-                    <p className="text-[#2ecc71] font-bold text-2xl">{v.minAmount}<span className="text-sm">&euro;</span></p>
+                    <p className="text-[#2ecc71] font-black text-4xl lg:text-5xl">{v.minAmount}<span className="text-xl">&euro;</span></p>
                   </button>
                 );
               })}
