@@ -78,7 +78,7 @@ const homeContent = {
     s2: 'Rencontrez Votre Chauffeur', s2d: 'Chauffeur aux arrivées avec pancarte à votre nom. Aide aux bagages.',
     s3: 'Profitez du Trajet', s3d: 'Transfert direct confortable dans un véhicule premium.',
     seoTitle: 'Zont - Transfert Aéroport Premium en Europe | Chauffeur Privé',
-    seoDesc: 'Service de chauffeur privé premium dans 16 villes européennes. Prix fixes, suivi de vol. Réservez en ligne.',
+    seoDesc: 'Transfert privé premium en 120+ villes d\'Europe. Prix fixes garantis, suivi des vols en temps réel et accueil personnalisé. Réservez en ligne maintenant.',
   },
   ru: {
     heroTitle: 'Премиум Трансфер из Аэропорта',
