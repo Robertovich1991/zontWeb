@@ -164,6 +164,13 @@ const airportLinks = [
     image: '/images/beauvais-driver-meet.webp',
     price: 120,
   },
+  {
+    name: 'Disneyland Paris',
+    url: { en: '/disneyland-paris-transfer', fr: '/transfert-disneyland-paris', ru: '/transfer-disneyland-parizh', hy: '/disneyland-paris-odanavakayani-transfer' },
+    desc: { en: 'CDG, Orly & Paris hotels to Disneyland Paris', fr: 'CDG, Orly et hotels Paris vers Disneyland Paris', ru: 'Из CDG, Orly и отелей Парижа в Disneyland Paris', hy: 'CDG, Orly Disneyland Paris' },
+    image: '/images/disneyland.webp',
+    price: 75,
+  },
 ];
 
 const seoUrls = { en: '/paris-airport-transfer', fr: '/transfert-aeroport-paris', ru: '/transfer-aeroport-parizh', hy: '/pariz-odanavakayani-transfer' };
