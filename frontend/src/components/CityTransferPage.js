@@ -90,7 +90,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
       const cleanSlug = slug.startsWith('/') ? slug.slice(1) : slug;
       fetch(`${API}/api/public/pages/by-slug/${cleanSlug}`).then(r => r.json()).then(d => {
         if (d && d.id) setCmsPage(d);
-      }).catch(() => {});
+        else setCmsPage(null);
+      }).catch(() => { setCmsPage(null); });
     }
     // Fetch CMS trust blocks
     fetch(`${API}/api/public/trust-blocks`).then(r => r.json()).then(setCmsTrustBlocks).catch(() => {});
@@ -107,7 +108,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   // CMS overrides for SEO fields
   const seoTitle = (cmsPage?.seo?.title?.[language]) || c.title;
   const seoDesc = (cmsPage?.seo?.meta_description?.[language]) || c.description;
-  const heroTitle = (cmsPage?.seo?.h1?.[language]) || c.title;
+  const heroTitle = (cmsPage?.seo?.h1?.[language]) || c.h1 || c.title;
   const heroSubtitle = (cmsPage?.seo?.h2?.[language]) || c.subtitle;
   const introText = (cmsPage?.intro?.[language]) || c.description;
   const mainContent = (cmsPage?.main_content?.[language]) || c.description2;
