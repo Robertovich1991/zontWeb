@@ -232,6 +232,7 @@ function App() {
                   <Route path="/disneyland-paris-transfer" element={<DisneylandTransfer />} />
                   <Route path="/transfert-disneyland-paris" element={<DisneylandTransfer />} />
                   <Route path="/transfer-disneylend-parizh" element={<DisneylandTransfer />} />
+                  <Route path="/transfer-disneyland-parizh" element={<DisneylandTransfer />} />
                   <Route path="/disneylend-pariz-transfer" element={<DisneylandTransfer />} />
                   {/* Disneyland Paris — Route SEO sub-pages */}
                   <Route path="/cdg-to-disneyland-paris-transfer" element={<DisneyTransferPage routeSlug="cdg-to-disneyland-paris-transfer" />} />
