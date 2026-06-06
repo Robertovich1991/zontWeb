@@ -645,8 +645,9 @@ const Home = () => {
   const getName = (d) => language === 'fr' ? d.nameFr : language === 'ru' ? d.nameRu : language === 'hy' ? (d.nameHy || d.nameEn) : d.nameEn;
   const getUrl = (d) => language === 'fr' ? d.urlFr : language === 'ru' ? d.urlRu : language === 'hy' ? (d.urlHy || d.urlEn) : d.urlEn;
 
-  // Localized URL & description for JSON-LD (per language)
-  const langPath = language === 'fr' ? '' : `/${language}`;
+  // Localized URL & description for JSON-LD (per language).
+  // English uses the root domain (no /en prefix). French/Russian/Armenian use /fr, /ru, /hy respectively.
+  const langPath = language === 'en' ? '' : `/${language}`;
   const pageUrl = `https://www.zont.cab${langPath}`;
   const searchUrl = `https://www.zont.cab${langPath}/search?q={search_term_string}`;
   const serviceTypeLocalized = (

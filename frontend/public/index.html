@@ -95,37 +95,35 @@
             (function(){
                 try {
                     var p = (window.location.pathname || '').toLowerCase();
-                    var lang = 'fr', metaDesc, ogTitle, ogDesc;
+                    var lang = 'en', metaDesc, ogTitle, ogDesc;
 
-                    // Detect language from URL prefix OR from a Russian/Armenian-specific slug
+                    // Detect language from URL prefix (NOTE: /en does NOT exist — English is the root /).
+                    // Or from a Russian-specific slug for localized SEO pages.
                     var ruSlugs = ['/taksi-', '/transfer-', '/aeroporta', '/parizh', '/disneyland-parizh', '/versal', '/zhiverni', '/monsenmishel', '/evrodisney', '/luvr-', '/shantilli'];
-                    var enSlugs = ['/paris-airport', '/disneyland-paris', '/cdg-airport', '/orly-airport', '/beauvais-airport', '/versailles-day-trip', '/giverny', '/mont-saint-michel', '/eurodisney', '/louvre', '/chantilly'];
-                    var frSlugs = ['/transfert-', '/disneyland-paris', '/transfert-aeroport', '/visite-de-versailles', '/excursion-'];
 
                     if (p.indexOf('/ru') === 0) lang = 'ru';
-                    else if (p.indexOf('/en') === 0) lang = 'en';
+                    else if (p.indexOf('/fr') === 0) lang = 'fr';
                     else if (p.indexOf('/hy') === 0) lang = 'hy';
                     else {
                         for (var i = 0; i < ruSlugs.length; i++) { if (p.indexOf(ruSlugs[i]) === 0) { lang = 'ru'; break; } }
-                        if (lang === 'fr') { for (var i = 0; i < enSlugs.length; i++) { if (p.indexOf(enSlugs[i]) === 0) { lang = 'en'; break; } } }
                     }
 
                     if (lang === 'ru') {
                         metaDesc = 'Трансферы из аэропортов Парижа (CDG/ORY/BVA) и 120+ городов Европы у лицензированных водителей: фиксированная цена и отслеживание рейса.';
                         ogTitle = 'Zont — Премиум трансфер из аэропорта в Европе';
                         ogDesc  = 'Частный водитель в Париже и 120+ городах Европы. Фиксированные цены, встреча с табличкой, отслеживание рейса.';
-                    } else if (lang === 'en') {
-                        metaDesc = 'Professional private driver for Paris airports (CDG, ORY, BVA). Fixed prices, flight tracking, and meet & greet—book your 24/7 Paris airport transfer.';
-                        ogTitle = 'Zont — Premium Airport Transfer in Europe';
-                        ogDesc  = 'Private chauffeur service in 120+ cities. Fixed prices, flight tracking, meet & greet.';
+                    } else if (lang === 'fr') {
+                        metaDesc = "Transfert privé premium en 120+ villes d'Europe. Prix fixes garantis, suivi des vols en temps réel et accueil personnalisé. Réservez en ligne maintenant.";
+                        ogTitle = 'Zont — Transfert Aéroport Premium en Europe';
+                        ogDesc  = 'Chauffeur privé en 120+ villes. Prix fixes, suivi de vol, accueil personnalisé.';
                     } else if (lang === 'hy') {
                         metaDesc = 'Պրեմիում օդանավակայանի տրանսֆեր Փարիզում (CDG/ORY/BVA) և 120+ եվրոպական քաղաքներում: Հաստատ գներ, թռիչքի հետևելում:';
                         ogTitle = 'Zont — Պրեմիում օդանավակայանի տրանսֆեր Եվրոպայում';
                         ogDesc  = 'Մասնավոր վարորդ 120+ եվրոպական քաղաքներում: Հաստատ գներ, թռիչքի հետևելում:';
                     } else {
-                        metaDesc = "Transfert privé premium en 120+ villes d'Europe. Prix fixes garantis, suivi des vols en temps réel et accueil personnalisé. Réservez en ligne maintenant.";
-                        ogTitle = 'Zont — Transfert Aéroport Premium en Europe';
-                        ogDesc  = 'Chauffeur privé en 120+ villes. Prix fixes, suivi de vol, accueil personnalisé.';
+                        metaDesc = 'Professional private driver for Paris airports (CDG, ORY, BVA). Fixed prices, flight tracking, and meet & greet—book your 24/7 Paris airport transfer.';
+                        ogTitle = 'Zont — Premium Airport Transfer in Europe';
+                        ogDesc  = 'Private chauffeur service in 120+ cities. Fixed prices, flight tracking, meet & greet.';
                     }
                     document.documentElement.lang = lang;
                     var m = document.querySelector('meta[name="description"]'); if (m) m.setAttribute('content', metaDesc);
@@ -197,18 +195,19 @@
                     var p = window.location.pathname || '';
                     var h1 = document.getElementById('static-seo-h1');
                     if (!h1) return;
+                    // English is the root (/) — no /en prefix exists.
                     if (p.indexOf('/ru') === 0) {
                         h1.innerText = 'Zont — Премиум трансфер из аэропорта с частным водителем в Европе';
                         document.documentElement.lang = 'ru';
-                    } else if (p.indexOf('/en') === 0) {
-                        h1.innerText = 'Zont — Premium Airport Transfer with Private Chauffeur in Europe';
-                        document.documentElement.lang = 'en';
+                    } else if (p.indexOf('/fr') === 0) {
+                        h1.innerText = 'Zont — Transfert Aéroport Premium avec Chauffeur Privé en Europe';
+                        document.documentElement.lang = 'fr';
                     } else if (p.indexOf('/hy') === 0) {
                         h1.innerText = 'Zont — Պրեմիում օդանավակայանի տրանսֆեր մասնավոր վարորդով Եվրոպայում';
                         document.documentElement.lang = 'hy';
                     } else {
-                        h1.innerText = 'Zont — Transfert Aéroport Premium avec Chauffeur Privé en Europe';
-                        document.documentElement.lang = 'fr';
+                        h1.innerText = 'Zont — Premium Airport Transfer with Private Chauffeur in Europe';
+                        document.documentElement.lang = 'en';
                     }
                 } catch(e) {}
             })();
