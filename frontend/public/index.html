@@ -138,6 +138,35 @@
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
+        <!-- Static H1 for crawlers that don't execute JS (Babylovegrowth, GPTBot, basic bots).
+             Hidden visually; React replaces it after hydration. -->
+        <h1 id="static-seo-h1" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">
+            Zont — Premium Airport Transfer with Private Chauffeur in Europe
+        </h1>
+        <script>
+            // Localize the static H1 based on the URL path before React hydrates.
+            // Crawlers that don't execute JS will still read the default English H1 above.
+            (function(){
+                try {
+                    var p = window.location.pathname || '';
+                    var h1 = document.getElementById('static-seo-h1');
+                    if (!h1) return;
+                    if (p.indexOf('/ru') === 0) {
+                        h1.innerText = 'Zont — Премиум трансфер из аэропорта с частным водителем в Европе';
+                        document.documentElement.lang = 'ru';
+                    } else if (p.indexOf('/en') === 0) {
+                        h1.innerText = 'Zont — Premium Airport Transfer with Private Chauffeur in Europe';
+                        document.documentElement.lang = 'en';
+                    } else if (p.indexOf('/hy') === 0) {
+                        h1.innerText = 'Zont — Պրեմիում օդանավակայանի տրանսֆեր մասնավոր վարորդով Եվրոպայում';
+                        document.documentElement.lang = 'hy';
+                    } else {
+                        h1.innerText = 'Zont — Transfert Aéroport Premium avec Chauffeur Privé en Europe';
+                        document.documentElement.lang = 'fr';
+                    }
+                } catch(e) {}
+            })();
+        </script>
         <div id="root"></div>
         <script>
             // Deferred analytics: load PostHog only
