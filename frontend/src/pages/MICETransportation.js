@@ -118,7 +118,7 @@ const content = {
 
   fr: {
     metaTitle: 'Transport MICE Paris | Chauffeur d\'Affaires & Événementiel | ZONT',
-    metaDesc: 'Transport MICE professionnel à Paris. Service chauffeur, transferts aéroport, navettes de congrès, voyages VIP et transport de groupe pour événements.',
+    metaDesc: 'Transport MICE à Paris pour congrès, séminaires et événements : chauffeurs professionnels, transferts aéroport, navettes VIP et flotte premium.',
     h1: 'Transport MICE à Paris',
     subtitle: 'Services Professionnels Chauffeur & Événementiel',
     heroDesc: 'Transport haut de gamme pour Réunions, Incentives, Congrès et Salons à Paris et en Île-de-France.',
