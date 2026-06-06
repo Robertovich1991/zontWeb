@@ -107,7 +107,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
 
   // CMS overrides for SEO fields
   const seoTitle = (cmsPage?.seo?.title?.[language]) || c.title;
-  const seoDesc = (cmsPage?.seo?.meta_description?.[language]) || c.description;
+  const seoDesc = (cmsPage?.seo?.meta_description?.[language]) || c.metaDescription || c.description;
   const heroTitle = (cmsPage?.seo?.h1?.[language]) || c.h1 || c.title;
   const heroSubtitle = (cmsPage?.seo?.h2?.[language]) || c.subtitle;
   const introText = (cmsPage?.intro?.[language]) || c.description;
