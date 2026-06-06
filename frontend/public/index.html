@@ -87,7 +87,53 @@
         <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="description" content="Zont - Service de transfert aeroport premium en Europe. Chauffeur prive, prix fixes, suivi de vol. Reservez votre transfert depuis Paris CDG, Orly, Nice, Barcelone et 120+ villes." />
+        <meta name="description" content="Premium private chauffeur and airport transfer service across Europe. Fixed prices, flight tracking, meet & greet. Paris CDG, Orly, Beauvais, Nice, Barcelona and 120+ cities." />
+        <script>
+            // Localize meta description, og:title, og:description and html lang BEFORE React hydrates.
+            // This ensures crawlers that don't execute heavy JS (Babylovegrowth, GPTBot, simple bots)
+            // still see the correct localized SEO meta on /ru, /en, /hy, /fr.
+            (function(){
+                try {
+                    var p = (window.location.pathname || '').toLowerCase();
+                    var lang = 'fr', metaDesc, ogTitle, ogDesc;
+
+                    // Detect language from URL prefix OR from a Russian/Armenian-specific slug
+                    var ruSlugs = ['/taksi-', '/transfer-', '/aeroporta', '/parizh', '/disneyland-parizh', '/versal', '/zhiverni', '/monsenmishel', '/evrodisney', '/luvr-', '/shantilli'];
+                    var enSlugs = ['/paris-airport', '/disneyland-paris', '/cdg-airport', '/orly-airport', '/beauvais-airport', '/versailles-day-trip', '/giverny', '/mont-saint-michel', '/eurodisney', '/louvre', '/chantilly'];
+                    var frSlugs = ['/transfert-', '/disneyland-paris', '/transfert-aeroport', '/visite-de-versailles', '/excursion-'];
+
+                    if (p.indexOf('/ru') === 0) lang = 'ru';
+                    else if (p.indexOf('/en') === 0) lang = 'en';
+                    else if (p.indexOf('/hy') === 0) lang = 'hy';
+                    else {
+                        for (var i = 0; i < ruSlugs.length; i++) { if (p.indexOf(ruSlugs[i]) === 0) { lang = 'ru'; break; } }
+                        if (lang === 'fr') { for (var i = 0; i < enSlugs.length; i++) { if (p.indexOf(enSlugs[i]) === 0) { lang = 'en'; break; } } }
+                    }
+
+                    if (lang === 'ru') {
+                        metaDesc = 'Трансферы из аэропортов Парижа (CDG/ORY/BVA) и 120+ городов Европы у лицензированных водителей: фиксированная цена и отслеживание рейса.';
+                        ogTitle = 'Zont — Премиум трансфер из аэропорта в Европе';
+                        ogDesc  = 'Частный водитель в Париже и 120+ городах Европы. Фиксированные цены, встреча с табличкой, отслеживание рейса.';
+                    } else if (lang === 'en') {
+                        metaDesc = 'Professional private driver for Paris airports (CDG, ORY, BVA). Fixed prices, flight tracking, and meet & greet—book your 24/7 Paris airport transfer.';
+                        ogTitle = 'Zont — Premium Airport Transfer in Europe';
+                        ogDesc  = 'Private chauffeur service in 120+ cities. Fixed prices, flight tracking, meet & greet.';
+                    } else if (lang === 'hy') {
+                        metaDesc = 'Պրեմիում օդանավակայանի տրանսֆեր Փարիզում (CDG/ORY/BVA) և 120+ եվրոպական քաղաքներում: Հաստատ գներ, թռիչքի հետևելում:';
+                        ogTitle = 'Zont — Պրեմիում օդանավակայանի տրանսֆեր Եվրոպայում';
+                        ogDesc  = 'Մասնավոր վարորդ 120+ եվրոպական քաղաքներում: Հաստատ գներ, թռիչքի հետևելում:';
+                    } else {
+                        metaDesc = "Transfert privé premium en 120+ villes d'Europe. Prix fixes garantis, suivi des vols en temps réel et accueil personnalisé. Réservez en ligne maintenant.";
+                        ogTitle = 'Zont — Transfert Aéroport Premium en Europe';
+                        ogDesc  = 'Chauffeur privé en 120+ villes. Prix fixes, suivi de vol, accueil personnalisé.';
+                    }
+                    document.documentElement.lang = lang;
+                    var m = document.querySelector('meta[name="description"]'); if (m) m.setAttribute('content', metaDesc);
+                    var ot = document.querySelector('meta[property="og:title"]'); if (ot) ot.setAttribute('content', ogTitle);
+                    var od = document.querySelector('meta[property="og:description"]'); if (od) od.setAttribute('content', ogDesc);
+                } catch(e) {}
+            })();
+        </script>
         <meta name="robots" content="index, follow" />
         <meta name="author" content="Zont" />
         <meta property="og:type" content="website" />
