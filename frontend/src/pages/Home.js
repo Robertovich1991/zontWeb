@@ -645,6 +645,17 @@ const Home = () => {
   const getName = (d) => language === 'fr' ? d.nameFr : language === 'ru' ? d.nameRu : language === 'hy' ? (d.nameHy || d.nameEn) : d.nameEn;
   const getUrl = (d) => language === 'fr' ? d.urlFr : language === 'ru' ? d.urlRu : language === 'hy' ? (d.urlHy || d.urlEn) : d.urlEn;
 
+  // Localized URL & description for JSON-LD (per language)
+  const langPath = language === 'fr' ? '' : `/${language}`;
+  const pageUrl = `https://www.zont.cab${langPath}`;
+  const searchUrl = `https://www.zont.cab${langPath}/search?q={search_term_string}`;
+  const serviceTypeLocalized = (
+    language === 'ru' ? 'Премиум трансфер из аэропорта с частным водителем' :
+    language === 'fr' ? 'Transfert aeroport premium avec chauffeur prive' :
+    language === 'hy' ? 'Պրեմիում օդանավակայանի տրանսֆեր մասնավոր վարորդով' :
+    'Premium airport transfer with private chauffeur'
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="home-page">
       <SEO
@@ -663,7 +674,7 @@ const Home = () => {
             "@context": "https://schema.org",
             "@type": "Organization",
             "name": "Zont",
-            "url": "https://www.zont.cab",
+            "url": pageUrl,
             "logo": "https://www.zont.cab/logo.png",
             "description": c.seoDesc,
             "contactPoint": { "@type": "ContactPoint", "telephone": "+33783777027", "contactType": "customer service", "availableLanguage": ["French", "English", "Russian", "Armenian"] },
@@ -673,8 +684,34 @@ const Home = () => {
             "@context": "https://schema.org",
             "@type": "WebSite",
             "name": "Zont",
-            "url": "https://www.zont.cab",
-            "potentialAction": { "@type": "SearchAction", "target": "https://www.zont.cab/countries?q={search_term_string}", "query-input": "required name=search_term_string" }
+            "url": pageUrl,
+            "inLanguage": language,
+            "potentialAction": { "@type": "SearchAction", "target": searchUrl, "query-input": "required name=search_term_string" }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": c.seoTitle,
+            "url": pageUrl,
+            "inLanguage": language,
+            "description": c.seoDesc
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "serviceType": serviceTypeLocalized,
+            "description": c.seoDesc,
+            "provider": { "@type": "Organization", "name": "Zont", "url": pageUrl },
+            "areaServed": { "@type": "Country", "name": "Europe" }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Zont",
+            "url": pageUrl,
+            "description": c.seoDesc,
+            "areaServed": "Europe",
+            "priceRange": "€€"
           }
         ]}
       />
