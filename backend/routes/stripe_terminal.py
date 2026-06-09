@@ -60,15 +60,17 @@ async def get_or_create_location(req: RegisterReaderRequest) -> str:
         return hotel["stripe_terminal_location_id"]
 
     display_name = req.locationDisplayName or hotel.get("name") or req.hotelSlug
+    address = {
+        "line1": req.addressLine1,
+        "city": req.city,
+        "postal_code": req.postalCode,
+        "country": req.country,
+    }
+    if req.addressLine2:  # Only include line2 if non-empty (Stripe rejects empty string)
+        address["line2"] = req.addressLine2
     location = stripe.terminal.Location.create(
         display_name=display_name,
-        address={
-            "line1": req.addressLine1,
-            "line2": req.addressLine2 or "",
-            "city": req.city,
-            "postal_code": req.postalCode,
-            "country": req.country,
-        },
+        address=address,
         metadata={"hotel_slug": req.hotelSlug},
     )
     await db.kiosk_hotels.update_one(
