@@ -238,15 +238,28 @@ const KioskPage = () => {
   const [paymentIntentId, setPaymentIntentId] = useState(null);
   const [terminalStatus, setTerminalStatus] = useState(null); // 'waiting_card' | 'processing' | 'paid' | 'cancelled' | 'error'
   const [terminalError, setTerminalError] = useState(null);
+  // Refs to avoid stale closure inside resetKiosk
+  const paymentIntentIdRef = useRef(null);
+  const terminalStatusRef = useRef(null);
+  useEffect(() => { paymentIntentIdRef.current = paymentIntentId; }, [paymentIntentId]);
+  useEffect(() => { terminalStatusRef.current = terminalStatus; }, [terminalStatus]);
   const idlePromptTimerRef = useRef(null);
   const idleCountdownIntervalRef = useRef(null);
 
   const resetKiosk = useCallback(() => {
+    // Cancel any pending terminal payment to avoid TPE staying on "Tap or insert" after the kiosk resets
+    const pi = paymentIntentIdRef.current;
+    const status = terminalStatusRef.current;
+    if (pi && status !== 'paid' && status !== 'cancelled') {
+      // Use keepalive so the request survives the unmount/reset
+      fetch(`${API}/api/stripe-terminal/cancel-payment/${pi}`, { method: 'POST', keepalive: true }).catch(() => {});
+    }
     setStep(0); setSelectedDest(null); setDate(''); setTime('');
     setSelectedVehicle(null); setClientName(''); setClientPhone('');
     setBooking(null); setSubmitting(false); setCustomPricing(false);
     setCustomHours(4);
     setShowIdlePrompt(false);
+    setPaymentIntentId(null); setTerminalStatus(null); setTerminalError(null);
   }, []);
 
   const clearIdlePrompt = useCallback(() => {
@@ -314,8 +327,13 @@ const KioskPage = () => {
   }, [step]);
 
   useEffect(() => {
-    if (step === 4 && booking) { const t2 = setTimeout(() => { resetKiosk(); setShowAttract(true); }, 45000); return () => clearTimeout(t2); }
-  }, [step, booking, resetKiosk]);
+    // Auto-reset the payment screen after 90s of inactivity (e.g. customer walked away)
+    // resetKiosk() will also cancel the pending Stripe Terminal PaymentIntent so the TPE goes back to idle
+    if (step === 4 && booking && terminalStatus !== 'paid') {
+      const t2 = setTimeout(() => { resetKiosk(); setShowAttract(true); }, 90000);
+      return () => clearTimeout(t2);
+    }
+  }, [step, booking, terminalStatus, resetKiosk]);
 
   useEffect(() => {
     if (!slug) return;
@@ -1004,6 +1022,15 @@ const KioskPage = () => {
                 <p className="text-gray-300 text-lg mb-1">sur le terminal de paiement</p>
                 <p className="text-[#2ecc71] font-black text-5xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
                 <p className="text-gray-500 text-sm mt-4">Sans contact, insertion ou Apple Pay</p>
+                {/* Accepted card brands */}
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-6" data-testid="accepted-card-brands">
+                  <span className="bg-white text-[#1a1f71] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>VISA</span>
+                  <span className="bg-white text-[#eb001b] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>Mastercard</span>
+                  <span className="bg-white text-[#006fcf] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>AMEX</span>
+                  <span className="bg-white text-[#0e3a8a] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>CB</span>
+                  <span className="bg-black border border-white/40 text-white font-bold px-3 py-1.5 rounded text-sm" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif' }}>Apple Pay</span>
+                  <span className="bg-white text-black font-bold px-3 py-1.5 rounded text-sm">Google Pay</span>
+                </div>
                 <button onClick={handleCancelTerminalPayment} className="mt-6 text-gray-500 text-sm underline hover:text-gray-300" data-testid="cancel-terminal-payment">
                   Annuler le paiement
                 </button>
