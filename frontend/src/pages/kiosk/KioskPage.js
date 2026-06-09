@@ -996,35 +996,108 @@ const KioskPage = () => {
           </div>
         )}
 
-        {/* Step 3: Client Info */}
+        {/* Step 3: Client Info — 2-column layout (recap + form) */}
         {step === 3 && (
-          <div className="max-w-lg mx-auto" style={{ animation: 'fadeUp 0.3s ease-out' }}>
-            <h2 className="text-2xl font-bold text-center mb-2">{t.yourInfo}</h2>
-            <p className="text-gray-500 text-center mb-6">{t.driverContact}</p>
-            <div className="bg-[#111827]/60 border border-white/[0.06] rounded-xl p-4 mb-5 flex items-center justify-between text-sm">
-              <div><p className="text-gray-500">{t.towards}</p><p className="text-white font-semibold">{selectedDest?.name}</p></div>
-              <div><p className="text-gray-500">{date} {time}</p><p className="text-white font-semibold">{selectedVehicle?.tripType}</p></div>
-              <p className="text-[#2ecc71] font-bold text-2xl">{selectedVehicle?.minAmount}<span className="text-sm">&euro;</span></p>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.name} *</label>
-                <input type="text" value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Jean Dupont" className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-name" autoFocus />
+          <div className="max-w-[1400px] mx-auto" style={{ animation: 'fadeUp 0.3s ease-out' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 items-start">
+
+              {/* === LEFT — Booking recap with map + route === */}
+              <div className="bg-gradient-to-b from-[#111827]/90 to-[#0b1120]/90 border border-white/[0.08] rounded-3xl p-6 lg:p-8 shadow-xl" data-testid="booking-recap-panel">
+                <h3 className="text-xs uppercase tracking-[0.25em] text-[#2ecc71] font-bold mb-4">{lang === 'fr' ? 'Recapitulatif' : lang === 'ru' ? 'Сводка' : lang === 'hy' ? 'Ամփոփում' : 'Booking summary'}</h3>
+
+                {/* Route summary - pickup → destination */}
+                <div className="space-y-3 mb-5">
+                  <div className="flex items-start gap-3">
+                    <div className="relative flex flex-col items-center pt-1">
+                      <div className="w-3 h-3 rounded-full bg-[#2ecc71] ring-4 ring-[#2ecc71]/20" />
+                      <div className="w-0.5 h-10 bg-gradient-to-b from-[#2ecc71] to-[#2ecc71]/30" />
+                      <div className="w-3 h-3 rounded-sm bg-[#c8a951] ring-4 ring-[#c8a951]/20" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest text-gray-500 font-semibold">{lang === 'fr' ? 'Depart' : lang === 'ru' ? 'Откуда' : 'Pickup'}</p>
+                        <p className="text-white text-lg lg:text-xl font-bold truncate">{hotel?.name}</p>
+                        <p className="text-gray-500 text-xs truncate">{hotel?.address}</p>
+                      </div>
+                      <div className="mt-7">
+                        <p className="text-[10px] uppercase tracking-widest text-gray-500 font-semibold">{lang === 'fr' ? 'Destination' : lang === 'ru' ? 'Куда' : 'Drop-off'}</p>
+                        <p className="text-white text-lg lg:text-xl font-bold truncate">{selectedDest?.name}</p>
+                        <p className="text-gray-500 text-xs truncate">{selectedDest?.address}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Static Google Map showing both points */}
+                {hotel?.lat && selectedDest?.lat && (
+                  <div className="rounded-2xl overflow-hidden border border-white/10 mb-5" data-testid="booking-recap-map">
+                    <img
+                      src={`https://maps.googleapis.com/maps/api/staticmap?size=640x260&scale=2&maptype=roadmap&style=feature:all|element:geometry|color:0x1a2332&style=feature:all|element:labels.text.fill|color:0x8a9bb8&style=feature:all|element:labels.text.stroke|color:0x0b1120&style=feature:road|element:geometry|color:0x2a3447&style=feature:water|element:geometry|color:0x0d2236&style=feature:poi|element:labels|visibility:off&markers=color:0x2ecc71%7Clabel:A%7C${hotel.lat},${hotel.lng}&markers=color:0xc8a951%7Clabel:B%7C${selectedDest.lat},${selectedDest.lng}&path=color:0x2ecc71BB|weight:4|${hotel.lat},${hotel.lng}|${selectedDest.lat},${selectedDest.lng}&key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}`}
+                      alt="Itineraire"
+                      className="w-full h-auto block"
+                    />
+                  </div>
+                )}
+
+                {/* Vehicle + date/time + price */}
+                <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-[#0b1120]/60 border border-white/[0.06] rounded-2xl p-4">
+                  <div className="w-24 h-16 flex items-center justify-center">
+                    {selectedVehicle?.imagePath
+                      ? <img src={transferService.getVehicleImageUrl(selectedVehicle.imagePath)} alt={selectedVehicle.tripType} className="max-h-full max-w-full object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.5)]" />
+                      : <Car className="w-12 h-12 text-gray-600" />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-white font-bold text-base lg:text-lg truncate">{selectedVehicle?.tripType}</p>
+                    <p className="text-gray-500 text-xs flex items-center gap-3 mt-0.5">
+                      <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{date}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{time}</span>
+                    </p>
+                  </div>
+                  <p className="text-[#2ecc71] font-black text-3xl lg:text-4xl leading-none">{selectedVehicle?.minAmount}<span className="text-lg">&euro;</span></p>
+                </div>
+
+                {/* Trust badges */}
+                <div className="grid grid-cols-3 gap-2 mt-4">
+                  <div className="bg-[#0b1120]/40 border border-white/[0.05] rounded-lg px-2 py-2 flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
+                    <span className="text-[10px] text-gray-400 leading-tight">{t.fixedPrice}</span>
+                  </div>
+                  <div className="bg-[#0b1120]/40 border border-white/[0.05] rounded-lg px-2 py-2 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
+                    <span className="text-[10px] text-gray-400 leading-tight">{t.h24}</span>
+                  </div>
+                  <div className="bg-[#0b1120]/40 border border-white/[0.05] rounded-lg px-2 py-2 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
+                    <span className="text-[10px] text-gray-400 leading-tight">{t.fastBook}</span>
+                  </div>
+                </div>
               </div>
+
+              {/* === RIGHT — Form === */}
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.phone} *</label>
-                <PhoneInput
-                  value={clientPhone}
-                  onChange={(e) => setClientPhone(e.target.value)}
-                  onCountryChange={(code) => setClientCountryCode(code)}
-                  priorityCountries={['FR', 'US', 'GB', 'ES', 'BR']}
-                  size="large"
-                  darkMode={true}
-                />
+                <h2 className="text-2xl lg:text-3xl font-bold mb-2">{t.yourInfo}</h2>
+                <p className="text-gray-500 mb-6">{t.driverContact}</p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.name} *</label>
+                    <input type="text" value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Jean Dupont" className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-name" autoFocus />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.phone} *</label>
+                    <PhoneInput
+                      value={clientPhone}
+                      onChange={(e) => setClientPhone(e.target.value)}
+                      onCountryChange={(code) => setClientCountryCode(code)}
+                      priorityCountries={['FR', 'US', 'GB', 'ES', 'BR']}
+                      size="large"
+                      darkMode={true}
+                    />
+                  </div>
+                  <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim()} className="w-full bg-[#2ecc71] text-white py-5 rounded-xl font-bold text-xl hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
+                    {submitting ? <><Loader2 className="w-6 h-6 animate-spin" />{t.booking}</> : <><CheckCircle className="w-6 h-6" />{t.confirm}</>}
+                  </button>
+                </div>
               </div>
-              <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim()} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
-                {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />{t.booking}</> : <><CheckCircle className="w-5 h-5" />{t.confirm}</>}
-              </button>
             </div>
           </div>
         )}
