@@ -961,21 +961,34 @@ const KioskPage = () => {
         {/* Step 2: Vehicle */}
         {step === 2 && (
           <div style={{ animation: 'fadeUp 0.3s ease-out' }}>
-            <h2 className="text-3xl lg:text-4xl font-bold text-center mb-10">{t.chooseVehicle}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-              {(selectedDest?.vehicles || []).map((v, i) => {
+            <h2 className="text-3xl lg:text-4xl font-bold text-center mb-8">{t.chooseVehicle}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-[1600px] mx-auto">
+              {[...(selectedDest?.vehicles || [])].sort((a, b) => (a.minAmount || 0) - (b.minAmount || 0)).map((v, i) => {
                 const imgUrl = transferService.getVehicleImageUrl(v.imagePath);
                 return (
-                  <button key={i} onClick={() => { setSelectedVehicle(v); setStep(3); }} className="bg-[#111827]/80 border-2 border-white/[0.08] hover:border-[#2ecc71]/60 rounded-2xl p-6 text-left transition-all active:scale-[0.98] shadow-lg hover:shadow-[#2ecc71]/10" data-testid={`vehicle-${i}`}>
-                    <div className="h-48 lg:h-56 flex items-center justify-center mb-5">
-                      {imgUrl ? <img src={imgUrl} alt={v.tripType} className="max-h-full max-w-full object-contain" /> : <Car className="w-32 h-32 text-gray-600" />}
+                  <button
+                    key={i}
+                    onClick={() => { setSelectedVehicle(v); setStep(3); }}
+                    className="group relative bg-gradient-to-b from-[#111827]/90 to-[#0b1120]/90 border-2 border-white/[0.08] hover:border-[#2ecc71] rounded-3xl px-6 pt-5 pb-6 text-center transition-all active:scale-[0.98] shadow-xl hover:shadow-2xl hover:shadow-[#2ecc71]/20 hover:-translate-y-1"
+                    data-testid={`vehicle-${i}`}
+                  >
+                    {/* Soft green glow behind the car (depth on dark bg) */}
+                    <div className="absolute inset-x-6 top-4 h-44 lg:h-56 xl:h-72 bg-[radial-gradient(ellipse_at_center,rgba(46,204,113,0.12),transparent_70%)] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    {/* Vehicle image — much larger for 21" kiosk */}
+                    <div className="relative h-44 lg:h-56 xl:h-72 flex items-center justify-center mb-4 transition-transform duration-500 group-hover:scale-105">
+                      {imgUrl
+                        ? <img src={imgUrl} alt={v.tripType} className="max-h-full max-w-full object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)]" />
+                        : <Car className="w-40 h-40 lg:w-52 lg:h-52 text-gray-700" />}
                     </div>
-                    <h4 className="text-white font-bold text-xl lg:text-2xl mb-3 leading-tight">{v.tripType}</h4>
-                    <div className="flex items-center gap-5 text-sm text-gray-400 mb-4">
-                      <span className="flex items-center gap-1.5"><Users className="w-5 h-5" />{v.passenger}</span>
-                      <span className="flex items-center gap-1.5"><Briefcase className="w-5 h-5" />{v.luggage}</span>
+                    <h4 className="text-white font-bold text-xl lg:text-2xl xl:text-3xl mb-3 leading-tight">{v.tripType}</h4>
+                    <div className="flex items-center justify-center gap-6 text-sm lg:text-base text-gray-400 mb-4">
+                      <span className="flex items-center gap-1.5"><Users className="w-5 h-5 lg:w-6 lg:h-6 text-[#2ecc71]/70" />{v.passenger}</span>
+                      <span className="flex items-center gap-1.5"><Briefcase className="w-5 h-5 lg:w-6 lg:h-6 text-[#2ecc71]/70" />{v.luggage}</span>
                     </div>
-                    <p className="text-[#2ecc71] font-black text-4xl lg:text-5xl">{v.minAmount}<span className="text-xl">&euro;</span></p>
+                    <div className="border-t border-white/[0.06] pt-4">
+                      <p className="text-[10px] uppercase tracking-widest text-gray-500 font-semibold mb-1">{t.from}</p>
+                      <p className="text-[#2ecc71] font-black text-5xl lg:text-6xl xl:text-7xl leading-none">{v.minAmount}<span className="text-2xl">&euro;</span></p>
+                    </div>
                   </button>
                 );
               })}
