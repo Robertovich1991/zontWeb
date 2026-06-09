@@ -5,7 +5,8 @@ import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import {
   Plane, TrainFront, Castle, MapPin, Clock, Users, Briefcase,
   ChevronRight, ChevronLeft, CheckCircle, Phone, User, Loader2,
-  Calendar, ArrowRight, RotateCcw, Car, Search, Euro, Zap, ShieldCheck, Sparkles
+  Calendar, ArrowRight, RotateCcw, Car, Search, Euro, Zap, ShieldCheck, Sparkles,
+  CreditCard, Check, X
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -233,6 +234,10 @@ const KioskPage = () => {
   const [customHours, setCustomHours] = useState(4); // free hourly duration
   const [showIdlePrompt, setShowIdlePrompt] = useState(false);
   const [idleCountdown, setIdleCountdown] = useState(15);
+  // Stripe Terminal (physical card reader) state
+  const [paymentIntentId, setPaymentIntentId] = useState(null);
+  const [terminalStatus, setTerminalStatus] = useState(null); // 'waiting_card' | 'processing' | 'paid' | 'cancelled' | 'error'
+  const [terminalError, setTerminalError] = useState(null);
   const idlePromptTimerRef = useRef(null);
   const idleCountdownIntervalRef = useRef(null);
 
@@ -986,21 +991,61 @@ const KioskPage = () => {
           </div>
         )}
 
-        {/* Step 4: Payment QR + Confirmation */}
+        {/* Step 4: Stripe Terminal payment + Confirmation */}
         {step === 4 && booking && (
           <div className="max-w-lg mx-auto text-center" style={{ animation: 'fadeUp 0.5s ease-out' }}>
-            {/* QR Code for payment */}
-            {booking.qrCode && (
-              <div className="mb-6">
-                <div className="bg-white border border-[#2ecc71]/20 rounded-2xl p-4 inline-block">
-                  <img src={booking.qrCode} alt="QR Payment" className="w-64 h-64 mx-auto block" data-testid="payment-qr" />
+            {/* === Terminal payment in progress === */}
+            {terminalStatus === 'waiting_card' && (
+              <div className="mb-6" data-testid="terminal-waiting-card">
+                <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#2ecc71]/10 border-4 border-[#2ecc71]/40 flex items-center justify-center" style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>
+                  <CreditCard className="w-16 h-16 text-[#2ecc71]" />
                 </div>
-                <p className="text-white font-bold text-lg mt-4">Scannez pour payer {selectedVehicle?.minAmount}&euro;</p>
-                <p className="text-gray-400 text-sm mt-1">Ou utilisez le lien ci-dessous</p>
-                {booking.paymentUrl && (
-                  <a href={booking.paymentUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-3 bg-[#2ecc71] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#27ae60] transition-colors" data-testid="payment-link">
-                    Payer {selectedVehicle?.minAmount}&euro; par carte
-                  </a>
+                <h3 className="text-3xl font-bold text-white mb-2">Présentez votre carte</h3>
+                <p className="text-gray-300 text-lg mb-1">sur le terminal de paiement</p>
+                <p className="text-[#2ecc71] font-black text-5xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
+                <p className="text-gray-500 text-sm mt-4">Sans contact, insertion ou Apple Pay</p>
+                <button onClick={handleCancelTerminalPayment} className="mt-6 text-gray-500 text-sm underline hover:text-gray-300" data-testid="cancel-terminal-payment">
+                  Annuler le paiement
+                </button>
+              </div>
+            )}
+
+            {terminalStatus === 'processing' && (
+              <div className="mb-6" data-testid="terminal-processing">
+                <Loader2 className="w-20 h-20 text-[#2ecc71] animate-spin mx-auto mb-6" />
+                <h3 className="text-2xl font-bold text-white mb-2">Traitement du paiement…</h3>
+                <p className="text-gray-400">Veuillez patienter</p>
+              </div>
+            )}
+
+            {terminalStatus === 'paid' && (
+              <div className="mb-6" data-testid="terminal-paid">
+                <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#2ecc71] flex items-center justify-center" style={{ animation: 'fadeUp 0.4s ease-out' }}>
+                  <Check className="w-20 h-20 text-white" strokeWidth={3} />
+                </div>
+                <h3 className="text-4xl font-black text-[#2ecc71] mb-2">Paiement accepté !</h3>
+                <p className="text-white text-lg">Votre chauffeur arrive bientôt</p>
+                <p className="text-[#2ecc71] font-bold text-3xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
+              </div>
+            )}
+
+            {(terminalStatus === 'error' || terminalStatus === 'cancelled') && (
+              <div className="mb-6" data-testid="terminal-error">
+                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <X className="w-14 h-14 text-red-400" strokeWidth={3} />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  {terminalStatus === 'cancelled' ? 'Paiement annulé' : 'Erreur de paiement'}
+                </h3>
+                {terminalError && <p className="text-red-400 text-sm mt-2">{terminalError}</p>}
+                {/* Fallback: show QR if terminal failed */}
+                {booking.qrCode && (
+                  <div className="mt-6">
+                    <p className="text-gray-300 text-sm mb-3">Vous pouvez payer en scannant ce QR code :</p>
+                    <div className="bg-white border border-[#2ecc71]/20 rounded-2xl p-4 inline-block">
+                      <img src={booking.qrCode} alt="QR Payment" className="w-48 h-48 mx-auto block" data-testid="payment-qr-fallback" />
+                    </div>
+                  </div>
                 )}
               </div>
             )}
