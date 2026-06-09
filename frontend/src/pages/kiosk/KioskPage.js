@@ -996,14 +996,50 @@ const KioskPage = () => {
           </div>
         )}
 
-        {/* Step 3: Client Info — 2-column layout (recap + form) */}
+        {/* Step 3: Client Info */}
         {step === 3 && (
-          <div className="max-w-[1400px] mx-auto" style={{ animation: 'fadeUp 0.3s ease-out' }}>
+          <div className="max-w-lg mx-auto" style={{ animation: 'fadeUp 0.3s ease-out' }}>
+            <h2 className="text-2xl font-bold text-center mb-2">{t.yourInfo}</h2>
+            <p className="text-gray-500 text-center mb-6">{t.driverContact}</p>
+            <div className="bg-[#111827]/60 border border-white/[0.06] rounded-xl p-4 mb-5 flex items-center justify-between text-sm">
+              <div><p className="text-gray-500">{t.towards}</p><p className="text-white font-semibold">{selectedDest?.name}</p></div>
+              <div><p className="text-gray-500">{date} {time}</p><p className="text-white font-semibold">{selectedVehicle?.tripType}</p></div>
+              <p className="text-[#2ecc71] font-bold text-2xl">{selectedVehicle?.minAmount}<span className="text-sm">&euro;</span></p>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.name} *</label>
+                <input type="text" value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Jean Dupont" className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-name" autoFocus />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.phone} *</label>
+                <PhoneInput
+                  value={clientPhone}
+                  onChange={(e) => setClientPhone(e.target.value)}
+                  onCountryChange={(code) => setClientCountryCode(code)}
+                  priorityCountries={['FR', 'US', 'GB', 'ES', 'BR']}
+                  size="large"
+                  darkMode={true}
+                />
+              </div>
+              <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim()} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
+                {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />{t.booking}</> : <><CheckCircle className="w-5 h-5" />{t.confirm}</>}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Stripe Terminal payment + Confirmation — 2-column with recap+map */}
+        {step === 4 && booking && (
+          <div className="max-w-[1400px] mx-auto" style={{ animation: 'fadeUp 0.5s ease-out' }}>
             <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 items-start">
 
               {/* === LEFT — Booking recap with map + route === */}
-              <div className="bg-gradient-to-b from-[#111827]/90 to-[#0b1120]/90 border border-white/[0.08] rounded-3xl p-6 lg:p-8 shadow-xl" data-testid="booking-recap-panel">
-                <h3 className="text-xs uppercase tracking-[0.25em] text-[#2ecc71] font-bold mb-4">{lang === 'fr' ? 'Recapitulatif' : lang === 'ru' ? 'Сводка' : lang === 'hy' ? 'Ամփոփում' : 'Booking summary'}</h3>
+              <div className="bg-gradient-to-b from-[#111827]/90 to-[#0b1120]/90 border border-white/[0.08] rounded-3xl p-6 lg:p-8 shadow-xl" data-testid="payment-recap-panel">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xs uppercase tracking-[0.25em] text-[#2ecc71] font-bold">{lang === 'fr' ? 'Recapitulatif' : lang === 'ru' ? 'Сводка' : lang === 'hy' ? 'Ամփոփում' : 'Booking summary'}</h3>
+                  <span className="text-[10px] uppercase tracking-wider text-yellow-500 font-bold bg-yellow-500/10 px-3 py-1 rounded-full">{t.ref}: <span className="font-mono">{booking.reference}</span></span>
+                </div>
 
                 {/* Route summary - pickup → destination */}
                 <div className="space-y-3 mb-5">
@@ -1030,7 +1066,7 @@ const KioskPage = () => {
 
                 {/* Static Google Map showing both points */}
                 {hotel?.lat && selectedDest?.lat && (
-                  <div className="rounded-2xl overflow-hidden border border-white/10 mb-5" data-testid="booking-recap-map">
+                  <div className="rounded-2xl overflow-hidden border border-white/10 mb-5" data-testid="payment-recap-map">
                     <img
                       src={`https://maps.googleapis.com/maps/api/staticmap?size=640x260&scale=2&maptype=roadmap&style=feature:all|element:geometry|color:0x1a2332&style=feature:all|element:labels.text.fill|color:0x8a9bb8&style=feature:all|element:labels.text.stroke|color:0x0b1120&style=feature:road|element:geometry|color:0x2a3447&style=feature:water|element:geometry|color:0x0d2236&style=feature:poi|element:labels|visibility:off&markers=color:0x2ecc71%7Clabel:A%7C${hotel.lat},${hotel.lng}&markers=color:0xc8a951%7Clabel:B%7C${selectedDest.lat},${selectedDest.lng}&path=color:0x2ecc71BB|weight:4|${hotel.lat},${hotel.lng}|${selectedDest.lat},${selectedDest.lng}&key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}`}
                       alt="Itineraire"
@@ -1051,148 +1087,94 @@ const KioskPage = () => {
                     <p className="text-gray-500 text-xs flex items-center gap-3 mt-0.5">
                       <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{date}</span>
                       <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{time}</span>
+                      <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{clientName}</span>
                     </p>
                   </div>
                   <p className="text-[#2ecc71] font-black text-3xl lg:text-4xl leading-none">{selectedVehicle?.minAmount}<span className="text-lg">&euro;</span></p>
                 </div>
-
-                {/* Trust badges */}
-                <div className="grid grid-cols-3 gap-2 mt-4">
-                  <div className="bg-[#0b1120]/40 border border-white/[0.05] rounded-lg px-2 py-2 flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
-                    <span className="text-[10px] text-gray-400 leading-tight">{t.fixedPrice}</span>
-                  </div>
-                  <div className="bg-[#0b1120]/40 border border-white/[0.05] rounded-lg px-2 py-2 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
-                    <span className="text-[10px] text-gray-400 leading-tight">{t.h24}</span>
-                  </div>
-                  <div className="bg-[#0b1120]/40 border border-white/[0.05] rounded-lg px-2 py-2 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#2ecc71] flex-shrink-0" />
-                    <span className="text-[10px] text-gray-400 leading-tight">{t.fastBook}</span>
-                  </div>
-                </div>
               </div>
 
-              {/* === RIGHT — Form === */}
-              <div>
-                <h2 className="text-2xl lg:text-3xl font-bold mb-2">{t.yourInfo}</h2>
-                <p className="text-gray-500 mb-6">{t.driverContact}</p>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.name} *</label>
-                    <input type="text" value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Jean Dupont" className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-name" autoFocus />
+              {/* === RIGHT — Terminal payment status === */}
+              <div className="text-center">
+                {!terminalStatus && (
+                  <div data-testid="terminal-initializing">
+                    <Loader2 className="w-20 h-20 text-[#2ecc71] animate-spin mx-auto mb-6" />
+                    <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">{lang === 'fr' ? 'Connexion au terminal…' : lang === 'ru' ? 'Подключение к терминалу…' : lang === 'hy' ? 'Միանում է տերմինալին…' : 'Connecting to terminal…'}</h3>
+                    <p className="text-gray-400">{lang === 'fr' ? 'Veuillez patienter quelques instants' : lang === 'ru' ? 'Пожалуйста, подождите' : 'Please wait a moment'}</p>
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.phone} *</label>
-                    <PhoneInput
-                      value={clientPhone}
-                      onChange={(e) => setClientPhone(e.target.value)}
-                      onCountryChange={(code) => setClientCountryCode(code)}
-                      priorityCountries={['FR', 'US', 'GB', 'ES', 'BR']}
-                      size="large"
-                      darkMode={true}
-                    />
-                  </div>
-                  <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim()} className="w-full bg-[#2ecc71] text-white py-5 rounded-xl font-bold text-xl hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
-                    {submitting ? <><Loader2 className="w-6 h-6 animate-spin" />{t.booking}</> : <><CheckCircle className="w-6 h-6" />{t.confirm}</>}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+                )}
 
-        {/* Step 4: Stripe Terminal payment + Confirmation */}
-        {step === 4 && booking && (
-          <div className="max-w-lg mx-auto text-center" style={{ animation: 'fadeUp 0.5s ease-out' }}>
-            {/* === Terminal payment in progress === */}
-            {terminalStatus === 'waiting_card' && (
-              <div className="mb-6" data-testid="terminal-waiting-card">
-                <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#2ecc71]/10 border-4 border-[#2ecc71]/40 flex items-center justify-center" style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>
-                  <CreditCard className="w-16 h-16 text-[#2ecc71]" />
-                </div>
-                <h3 className="text-3xl font-bold text-white mb-2">Présentez votre carte</h3>
-                <p className="text-gray-300 text-lg mb-1">sur le terminal de paiement</p>
-                <p className="text-[#2ecc71] font-black text-5xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
-                <p className="text-gray-500 text-sm mt-4">Sans contact, insertion ou Apple Pay</p>
-                {/* Accepted card brands */}
-                <div className="flex flex-wrap items-center justify-center gap-2 mt-6" data-testid="accepted-card-brands">
-                  <span className="bg-white text-[#1a1f71] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>VISA</span>
-                  <span className="bg-white text-[#eb001b] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>Mastercard</span>
-                  <span className="bg-white text-[#006fcf] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>AMEX</span>
-                  <span className="bg-white text-[#0e3a8a] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>CB</span>
-                  <span className="bg-black border border-white/40 text-white font-bold px-3 py-1.5 rounded text-sm" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif' }}>Apple Pay</span>
-                  <span className="bg-white text-black font-bold px-3 py-1.5 rounded text-sm">Google Pay</span>
-                </div>
-                <button onClick={handleCancelTerminalPayment} className="mt-6 text-gray-500 text-sm underline hover:text-gray-300" data-testid="cancel-terminal-payment">
-                  Annuler le paiement
-                </button>
-              </div>
-            )}
-
-            {terminalStatus === 'processing' && (
-              <div className="mb-6" data-testid="terminal-processing">
-                <Loader2 className="w-20 h-20 text-[#2ecc71] animate-spin mx-auto mb-6" />
-                <h3 className="text-2xl font-bold text-white mb-2">Traitement du paiement…</h3>
-                <p className="text-gray-400">Veuillez patienter</p>
-              </div>
-            )}
-
-            {terminalStatus === 'paid' && (
-              <div className="mb-6" data-testid="terminal-paid">
-                <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#2ecc71] flex items-center justify-center" style={{ animation: 'fadeUp 0.4s ease-out' }}>
-                  <Check className="w-20 h-20 text-white" strokeWidth={3} />
-                </div>
-                <h3 className="text-4xl font-black text-[#2ecc71] mb-2">Paiement accepté !</h3>
-                <p className="text-white text-lg">Votre chauffeur arrive bientôt</p>
-                <p className="text-[#2ecc71] font-bold text-3xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
-              </div>
-            )}
-
-            {(terminalStatus === 'error' || terminalStatus === 'cancelled') && (
-              <div className="mb-6" data-testid="terminal-error">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
-                  <X className="w-14 h-14 text-red-400" strokeWidth={3} />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {terminalStatus === 'cancelled' ? 'Paiement annulé' : 'Erreur de paiement'}
-                </h3>
-                {terminalError && <p className="text-red-400 text-sm mt-2">{terminalError}</p>}
-                {/* Fallback: show QR if terminal failed */}
-                {booking.qrCode && (
-                  <div className="mt-6">
-                    <p className="text-gray-300 text-sm mb-3">Vous pouvez payer en scannant ce QR code :</p>
-                    <div className="bg-white border border-[#2ecc71]/20 rounded-2xl p-4 inline-block">
-                      <img src={booking.qrCode} alt="QR Payment" className="w-48 h-48 mx-auto block" data-testid="payment-qr-fallback" />
+                {terminalStatus === 'waiting_card' && (
+                  <div data-testid="terminal-waiting-card">
+                    <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#2ecc71]/10 border-4 border-[#2ecc71]/40 flex items-center justify-center" style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>
+                      <CreditCard className="w-16 h-16 text-[#2ecc71]" />
                     </div>
+                    <h3 className="text-3xl lg:text-4xl font-bold text-white mb-2">Présentez votre carte</h3>
+                    <p className="text-gray-300 text-lg mb-1">sur le terminal de paiement</p>
+                    <p className="text-[#2ecc71] font-black text-6xl lg:text-7xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
+                    <p className="text-gray-500 text-sm mt-4">Sans contact, insertion ou Apple Pay</p>
+                    {/* Accepted card brands */}
+                    <div className="flex flex-wrap items-center justify-center gap-2 mt-6" data-testid="accepted-card-brands">
+                      <span className="bg-white text-[#1a1f71] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>VISA</span>
+                      <span className="bg-white text-[#eb001b] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>Mastercard</span>
+                      <span className="bg-white text-[#006fcf] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>AMEX</span>
+                      <span className="bg-white text-[#0e3a8a] font-black px-3 py-1.5 rounded text-sm tracking-wide" style={{ fontFamily: 'Arial Black, Arial, sans-serif' }}>CB</span>
+                      <span className="bg-black border border-white/40 text-white font-bold px-3 py-1.5 rounded text-sm" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif' }}>Apple Pay</span>
+                      <span className="bg-white text-black font-bold px-3 py-1.5 rounded text-sm">Google Pay</span>
+                    </div>
+                    <button onClick={handleCancelTerminalPayment} className="mt-6 text-gray-500 text-sm underline hover:text-gray-300" data-testid="cancel-terminal-payment">
+                      Annuler le paiement
+                    </button>
+                  </div>
+                )}
+
+                {terminalStatus === 'processing' && (
+                  <div data-testid="terminal-processing">
+                    <Loader2 className="w-20 h-20 text-[#2ecc71] animate-spin mx-auto mb-6" />
+                    <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">Traitement du paiement…</h3>
+                    <p className="text-gray-400">Veuillez patienter</p>
+                  </div>
+                )}
+
+                {terminalStatus === 'paid' && (
+                  <div data-testid="terminal-paid">
+                    <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#2ecc71] flex items-center justify-center" style={{ animation: 'fadeUp 0.4s ease-out' }}>
+                      <Check className="w-20 h-20 text-white" strokeWidth={3} />
+                    </div>
+                    <h3 className="text-4xl lg:text-5xl font-black text-[#2ecc71] mb-2">Paiement accepté !</h3>
+                    <p className="text-white text-lg lg:text-xl">Votre chauffeur arrive bientôt</p>
+                    <p className="text-[#2ecc71] font-bold text-3xl lg:text-4xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
+                    <button onClick={resetKiosk} className="mt-8 bg-[#111827] border border-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/[0.05] transition-colors">
+                      <RotateCcw className="w-4 h-4 inline mr-2" />{t.newBooking}
+                    </button>
+                  </div>
+                )}
+
+                {(terminalStatus === 'error' || terminalStatus === 'cancelled') && (
+                  <div data-testid="terminal-error">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
+                      <X className="w-14 h-14 text-red-400" strokeWidth={3} />
+                    </div>
+                    <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">
+                      {terminalStatus === 'cancelled' ? 'Paiement annulé' : 'Erreur de paiement'}
+                    </h3>
+                    {terminalError && <p className="text-red-400 text-sm mt-2">{terminalError}</p>}
+                    {/* Fallback: show QR if terminal failed */}
+                    {booking.qrCode && (
+                      <div className="mt-6">
+                        <p className="text-gray-300 text-sm mb-3">Vous pouvez payer en scannant ce QR code :</p>
+                        <div className="bg-white border border-[#2ecc71]/20 rounded-2xl p-4 inline-block">
+                          <img src={booking.qrCode} alt="QR Payment" className="w-48 h-48 mx-auto block" data-testid="payment-qr-fallback" />
+                        </div>
+                      </div>
+                    )}
+                    <button onClick={resetKiosk} className="mt-6 bg-[#111827] border border-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/[0.05] transition-colors">
+                      <RotateCcw className="w-4 h-4 inline mr-2" />{t.newBooking}
+                    </button>
                   </div>
                 )}
               </div>
-            )}
-
-            <div className="flex items-center gap-4 my-4">
-              <div className="flex-1 h-px bg-white/[0.06]" />
-              <span className="text-xs text-gray-600 uppercase tracking-widest">{t.ref}</span>
-              <div className="flex-1 h-px bg-white/[0.06]" />
             </div>
-
-            <div className="bg-[#111827]/60 border border-white/[0.06] rounded-xl p-5 text-left mb-6">
-              <div className="text-center mb-3">
-                <p className="text-3xl font-mono font-bold text-[#2ecc71] tracking-wider" data-testid="kiosk-reference">{booking.reference}</p>
-                <p className="text-xs text-yellow-500 font-medium mt-1 uppercase">En attente de paiement</p>
-              </div>
-              <div className="border-t border-white/10 pt-3 space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">{t.dest}</span><span className="text-white font-medium">{selectedDest?.name}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">{t.dateTime}</span><span className="text-white font-medium">{date} {time}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">{t.vehicle}</span><span className="text-white font-medium">{selectedVehicle?.tripType}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">{t.passenger}</span><span className="text-white font-medium">{clientName}</span></div>
-                <div className="flex justify-between border-t border-white/10 pt-2"><span className="text-gray-500 font-bold">{t.total}</span><span className="text-[#2ecc71] font-bold text-xl">{selectedVehicle?.minAmount}&euro;</span></div>
-              </div>
-            </div>
-            <p className="text-gray-600 text-xs">{t.autoReset}</p>
-            <button onClick={resetKiosk} className="mt-4 bg-[#111827] border border-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/[0.05] transition-colors">
-              <RotateCcw className="w-4 h-4 inline mr-2" />{t.newBooking}
-            </button>
           </div>
         )}
       </main>
