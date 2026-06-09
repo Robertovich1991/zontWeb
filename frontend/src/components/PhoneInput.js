@@ -166,7 +166,7 @@ const UI_TEXTS = {
   hy: { searchPlaceholder: '\u0553\u0576\u057f\u0580\u0565\u056c \u0565\u0580\u056f\u056b\u0580...', noResult: '\u0531\u0580\u0564\u0575\u0578\u0582\u0576\u0584 \u0579\u056f\u0561\u0576' },
 };
 
-const PhoneInput = ({ value, onChange, onCountryChange, className, error, darkMode = true }) => {
+const PhoneInput = ({ value, onChange, onCountryChange, className, error, darkMode = true, priorityCountries = [], size = 'default' }) => {
   let lang = 'fr';
   try { const ctx = useLanguage(); if (ctx?.language) lang = ctx.language; } catch {}
 
@@ -212,6 +212,15 @@ const PhoneInput = ({ value, onChange, onCountryChange, className, error, darkMo
       )
     : COUNTRIES;
 
+  /* When no search, prepend priority countries (kept in given order) above an alphabetical list */
+  const priorityList = !search && priorityCountries.length
+    ? priorityCountries.map(iso => ISO_MAP[iso]).filter(Boolean)
+    : [];
+  const priorityIsoSet = new Set(priorityList.map(c => c.iso));
+  const restList = filtered.filter(c => !priorityIsoSet.has(c.iso));
+
+  const isLarge = size === 'large';
+
   const handleSelect = (country) => {
     setSelected(country);
     setOpen(false);
@@ -232,46 +241,62 @@ const PhoneInput = ({ value, onChange, onCountryChange, className, error, darkMo
     <div className="relative" ref={ref}>
       <div className={`flex rounded-lg border ${border} overflow-hidden`}>
         <button type="button" onClick={() => setOpen(!open)}
-          className={`flex items-center gap-1.5 px-3 py-3 ${bg} border-r ${border} shrink-0 ${text} text-sm`}
+          className={`flex items-center gap-1.5 ${isLarge ? 'px-4 py-4' : 'px-3 py-3'} ${bg} border-r ${border} shrink-0 ${text} ${isLarge ? 'text-base' : 'text-sm'}`}
           data-testid="phone-country-btn">
-          <span className="text-lg leading-none">{selected.flag}</span>
-          <span className="text-xs font-medium">{selected.code}</span>
-          <ChevronDown className="w-3 h-3 opacity-50" />
+          <span className={isLarge ? 'text-2xl leading-none' : 'text-lg leading-none'}>{selected.flag}</span>
+          <span className={`${isLarge ? 'text-base' : 'text-xs'} font-medium`}>{selected.code}</span>
+          <ChevronDown className={isLarge ? 'w-4 h-4 opacity-50' : 'w-3 h-3 opacity-50'} />
         </button>
         <input type="tel" value={value} onChange={onChange} placeholder="6 12 34 56 78"
-          className={`flex-1 px-3 py-3 ${bg} ${text} ${placeholder} focus:outline-none text-sm ${className || ''}`}
+          className={`flex-1 ${isLarge ? 'px-5 py-4 text-lg' : 'px-3 py-3 text-sm'} ${bg} ${text} ${placeholder} focus:outline-none ${className || ''}`}
           data-testid="phone-number-input" />
       </div>
 
       {open && (
-        <div className={`absolute top-full left-0 mt-1 w-full ${dropBg} border ${dropBorder} rounded-xl shadow-xl z-50 max-h-[320px] overflow-hidden`} data-testid="phone-country-dropdown">
+        <div className={`absolute top-full left-0 mt-1 w-full ${dropBg} border ${dropBorder} rounded-xl shadow-xl z-50 ${isLarge ? 'max-h-[480px]' : 'max-h-[320px]'} overflow-hidden`} data-testid="phone-country-dropdown">
           <div className="p-2 border-b border-gray-600/30">
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40" />
+              <Search className={`absolute ${isLarge ? 'left-3 w-5 h-5' : 'left-2.5 w-4 h-4'} top-1/2 -translate-y-1/2 opacity-40`} />
               <input ref={searchRef} type="text" value={search} onChange={e => setSearch(e.target.value)}
                 placeholder={texts.searchPlaceholder}
-                className={`w-full pl-8 pr-8 py-2 rounded-lg ${searchBg} text-sm border-0 focus:outline-none focus:ring-1 focus:ring-[#2ecc71]`}
+                className={`w-full ${isLarge ? 'pl-10 pr-10 py-3 text-base' : 'pl-8 pr-8 py-2 text-sm'} rounded-lg ${searchBg} border-0 focus:outline-none focus:ring-1 focus:ring-[#2ecc71]`}
                 data-testid="phone-country-search" />
               {search && (
-                <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100">
-                  <X className="w-3.5 h-3.5" />
+                <button onClick={() => setSearch('')} className={`absolute ${isLarge ? 'right-3' : 'right-2.5'} top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100`}>
+                  <X className={isLarge ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
                 </button>
               )}
             </div>
           </div>
-          <div className="overflow-y-auto max-h-[260px]">
+          <div className={`overflow-y-auto ${isLarge ? 'max-h-[400px]' : 'max-h-[260px]'}`}>
             {filtered.length === 0 ? (
-              <div className="px-4 py-6 text-center text-sm opacity-40">{texts.noResult}</div>
+              <div className={`px-4 ${isLarge ? 'py-8 text-base' : 'py-6 text-sm'} text-center opacity-40`}>{texts.noResult}</div>
             ) : (
-              filtered.map(c => (
-                <button key={c.iso} type="button" onClick={() => handleSelect(c)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm ${text} ${hoverBg} transition ${selected.iso === c.iso ? 'bg-[#2ecc71]/10' : ''}`}
-                  data-testid={`country-${c.iso}`}>
-                  <span className="text-lg leading-none">{c.flag}</span>
-                  <span className="flex-1 text-left">{getName(c)}</span>
-                  <span className="opacity-50 text-xs">{c.code}</span>
-                </button>
-              ))
+              <>
+                {priorityList.map(c => (
+                  <button key={`pri-${c.iso}`} type="button" onClick={() => handleSelect(c)}
+                    className={`w-full flex items-center gap-3 ${isLarge ? 'px-5 py-4 text-base' : 'px-4 py-2.5 text-sm'} ${text} ${hoverBg} transition ${selected.iso === c.iso ? 'bg-[#2ecc71]/10' : ''}`}
+                    data-testid={`country-${c.iso}`}>
+                    <span className={isLarge ? 'text-2xl leading-none' : 'text-lg leading-none'}>{c.flag}</span>
+                    <span className="flex-1 text-left">{getName(c)}</span>
+                    <span className={`opacity-50 ${isLarge ? 'text-sm' : 'text-xs'}`}>{c.code}</span>
+                  </button>
+                ))}
+                {priorityList.length > 0 && restList.length > 0 && (
+                  <div className="px-4 py-1 border-t border-b border-gray-600/30 bg-black/20 text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
+                    {lang === 'fr' ? 'Tous les pays' : lang === 'ru' ? '\u0412\u0441\u0435 \u0441\u0442\u0440\u0430\u043d\u044b' : lang === 'hy' ? '\u0532\u0578\u056c\u0578\u0580 \u0565\u0580\u056f\u0580\u0576\u0565\u0580\u0568' : 'All countries'}
+                  </div>
+                )}
+                {restList.map(c => (
+                  <button key={c.iso} type="button" onClick={() => handleSelect(c)}
+                    className={`w-full flex items-center gap-3 ${isLarge ? 'px-5 py-4 text-base' : 'px-4 py-2.5 text-sm'} ${text} ${hoverBg} transition ${selected.iso === c.iso ? 'bg-[#2ecc71]/10' : ''}`}
+                    data-testid={`country-${c.iso}`}>
+                    <span className={isLarge ? 'text-2xl leading-none' : 'text-lg leading-none'}>{c.flag}</span>
+                    <span className="flex-1 text-left">{getName(c)}</span>
+                    <span className={`opacity-50 ${isLarge ? 'text-sm' : 'text-xs'}`}>{c.code}</span>
+                  </button>
+                ))}
+              </>
             )}
           </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { transferService } from '@/services/api';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
+import PhoneInput from '@/components/PhoneInput';
 import {
   Plane, TrainFront, Castle, MapPin, Clock, Users, Briefcase,
   ChevronRight, ChevronLeft, CheckCircle, Phone, User, Loader2,
@@ -228,6 +229,7 @@ const KioskPage = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
+  const [clientCountryCode, setClientCountryCode] = useState('+33');
   const [booking, setBooking] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [customPricing, setCustomPricing] = useState(false);
@@ -255,7 +257,7 @@ const KioskPage = () => {
       fetch(`${API}/api/stripe-terminal/cancel-payment/${pi}`, { method: 'POST', keepalive: true }).catch(() => {});
     }
     setStep(0); setSelectedDest(null); setDate(''); setTime('');
-    setSelectedVehicle(null); setClientName(''); setClientPhone('');
+    setSelectedVehicle(null); setClientName(''); setClientPhone(''); setClientCountryCode('+33');
     setBooking(null); setSubmitting(false); setCustomPricing(false);
     setCustomHours(4);
     setShowIdlePrompt(false);
@@ -416,10 +418,13 @@ const KioskPage = () => {
   const handleSubmitBooking = async () => {
     if (!clientName.trim() || !clientPhone.trim()) return;
     setSubmitting(true);
+    // Combine country code + local number, stripping any leading 0 / + characters from the local part
+    const localNumber = clientPhone.trim().replace(/[^\d]/g, '').replace(/^0+/, '');
+    const fullPhone = `${clientCountryCode}${localNumber}`;
     try {
       const resp = await fetch(`${API}/api/kiosk/book`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hotelSlug: slug, clientName: clientName.trim(), clientPhone: clientPhone.trim(), destination: selectedDest.name, destinationAddress: selectedDest.address, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.minAmount, passengers: 1 }),
+        body: JSON.stringify({ hotelSlug: slug, clientName: clientName.trim(), clientPhone: fullPhone, destination: selectedDest.name, destinationAddress: selectedDest.address, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.minAmount, passengers: 1 }),
       });
       if (!resp.ok) throw new Error();
       const data = await resp.json();
@@ -1000,7 +1005,14 @@ const KioskPage = () => {
               </div>
               <div>
                 <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.phone} *</label>
-                <input type="tel" value={clientPhone} onChange={e => setClientPhone(e.target.value)} placeholder="+33 6 12 34 56 78" className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-phone" />
+                <PhoneInput
+                  value={clientPhone}
+                  onChange={(e) => setClientPhone(e.target.value)}
+                  onCountryChange={(code) => setClientCountryCode(code)}
+                  priorityCountries={['FR', 'US', 'GB', 'ES', 'BR']}
+                  size="large"
+                  darkMode={true}
+                />
               </div>
               <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim()} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
                 {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />{t.booking}</> : <><CheckCircle className="w-5 h-5" />{t.confirm}</>}
