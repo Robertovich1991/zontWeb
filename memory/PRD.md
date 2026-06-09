@@ -95,6 +95,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Complete Wialon removal + Custom GPS webhook system
 - Reviews system with LLM auto-translation, Google Ads/GA4 tracking
 - 2026-02-09: Fixed Google Search Console "missing highPrice/lowPrice" warnings in Product structured data on city transfer pages (CityTransferPage.js) — now filters numeric prices, adds availability, falls back to default tier when vehiclesPrices is empty/undefined
+- 2026-02-09: **Stripe Terminal physique (Reader S700) opérationnel** — Registered at Bristol Lobby (slug: `bristol`) | Reader ID: `tmr_GiSbzAmuecR6pP` | Location ID: `tml_GiSbzA31RMBRID` | Bug fix: `address.line2` was sent as empty string causing Stripe 400 — now omitted if not provided | E2E flow validated: booking → push payment → reader prompt → tap card → `paid` in DB (canal `terminal`)
 
 ## Prioritized Backlog
 
