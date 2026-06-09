@@ -284,13 +284,24 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             "description": c.description,
             "image": "https://www.zont.cab/logo512.png",
             "brand": { "@type": "Brand", "name": "Zont" },
-            ...(vehiclesPrices ? { "offers": {
-              "@type": "AggregateOffer",
-              "priceCurrency": "EUR",
-              "lowPrice": Math.min(...Object.values(vehiclesPrices)),
-              "highPrice": Math.max(...Object.values(vehiclesPrices)),
-              "offerCount": Object.values(vehiclesPrices).length,
-            }} : {}),
+            ...(() => {
+              // Build offers only when at least one numeric price is available
+              // (avoid Google "missing lowPrice/highPrice" warnings caused by Infinity/NaN serialized as null)
+              const fallbackPrices = { sedan: 65, luxury: 95, minivan: 120, minibus: 180 };
+              const source = (vehiclesPrices && Object.keys(vehiclesPrices).length > 0) ? vehiclesPrices : fallbackPrices;
+              const validPrices = Object.values(source).filter((p) => typeof p === 'number' && isFinite(p) && p > 0);
+              if (validPrices.length === 0) return {};
+              return {
+                "offers": {
+                  "@type": "AggregateOffer",
+                  "priceCurrency": "EUR",
+                  "lowPrice": Math.min(...validPrices),
+                  "highPrice": Math.max(...validPrices),
+                  "offerCount": validPrices.length,
+                  "availability": "https://schema.org/InStock",
+                }
+              };
+            })(),
             ...(reviewSchema?.aggregateRating ? { "aggregateRating": reviewSchema.aggregateRating } : {}),
             ...(reviewSchema?.reviews?.length ? { "review": reviewSchema.reviews } : {}),
           }

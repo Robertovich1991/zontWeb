@@ -94,6 +94,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Android download button, GPS Super Admin Portal
 - Complete Wialon removal + Custom GPS webhook system
 - Reviews system with LLM auto-translation, Google Ads/GA4 tracking
+- 2026-02-09: Fixed Google Search Console "missing highPrice/lowPrice" warnings in Product structured data on city transfer pages (CityTransferPage.js) — now filters numeric prices, adds availability, falls back to default tier when vehiclesPrices is empty/undefined
 
 ## Prioritized Backlog
 

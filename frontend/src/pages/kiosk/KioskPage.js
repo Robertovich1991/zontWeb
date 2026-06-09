@@ -400,9 +400,54 @@ const KioskPage = () => {
       });
       if (!resp.ok) throw new Error();
       const data = await resp.json();
-      setBooking(data); setStep(4);
+      setBooking(data);
+      setStep(4);
+
+      // Push payment to the physical Stripe Terminal reader
+      try {
+        const pay = await fetch(`${API}/api/stripe-terminal/create-payment`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookingReference: data.reference }),
+        });
+        const payData = await pay.json();
+        if (pay.ok && payData.payment_intent_id) {
+          setPaymentIntentId(payData.payment_intent_id);
+          setTerminalStatus('waiting_card');
+        } else {
+          setTerminalStatus('error');
+          setTerminalError(payData.detail || 'Terminal indisponible');
+        }
+      } catch (e) {
+        setTerminalStatus('error');
+        setTerminalError('Terminal de paiement injoignable');
+      }
     } catch { setError('Booking error'); setTimeout(() => setError(null), 3000); }
     finally { setSubmitting(false); }
+  };
+
+  // Poll Stripe Terminal payment status every 2 seconds
+  useEffect(() => {
+    if (!paymentIntentId || terminalStatus === 'paid' || terminalStatus === 'error' || terminalStatus === 'cancelled') return;
+    const interval = setInterval(async () => {
+      try {
+        const r = await fetch(`${API}/api/stripe-terminal/payment-status/${paymentIntentId}`);
+        const data = await r.json();
+        setTerminalStatus(data.status);
+        if (data.last_payment_error) setTerminalError(data.last_payment_error);
+        if (data.status === 'paid' || data.status === 'cancelled') {
+          clearInterval(interval);
+        }
+      } catch {}
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [paymentIntentId, terminalStatus]);
+
+  const handleCancelTerminalPayment = async () => {
+    if (!paymentIntentId) return;
+    try {
+      await fetch(`${API}/api/stripe-terminal/cancel-payment/${paymentIntentId}`, { method: 'POST' });
+    } catch {}
+    setTerminalStatus('cancelled');
   };
 
   // Group destinations by category

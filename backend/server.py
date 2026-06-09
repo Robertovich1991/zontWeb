@@ -233,6 +233,8 @@ from routes.fleet_driver_profile import router as fleet_driver_profile_router
 app.include_router(fleet_driver_profile_router)
 from routes.fleet_gps import router as fleet_gps_router
 app.include_router(fleet_gps_router)
+from routes.stripe_terminal import router as stripe_terminal_router
+app.include_router(stripe_terminal_router, prefix="/api")
 from routes.gps_admin import router as gps_admin_router
 app.include_router(gps_admin_router)
 from routes.driver_portal import router as driver_portal_router
