@@ -609,10 +609,7 @@ const KioskPage = () => {
                       <p className="text-white text-base lg:text-lg font-semibold truncate">{d.name}</p>
                       <p className="text-gray-500 text-xs truncate">{d.address?.split(',').slice(0,2).join(',')}</p>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-[10px] text-gray-600 uppercase">{t.from}</p>
-                      <p className="text-[#2ecc71] font-bold text-2xl">{d.cheapest}<span className="text-xs">&euro;</span></p>
-                    </div>
+                    <ChevronRight className="w-6 h-6 text-gray-600 flex-shrink-0 group-hover:text-[#2ecc71] group-hover:translate-x-1 transition-all" />
                   </button>
                 ))}
               </div>
@@ -903,8 +900,7 @@ const KioskPage = () => {
                 <button key={i} onClick={() => { setSelectedDest(d); setStep(1); }} className="bg-[#111827]/80 border-2 border-white/[0.08] hover:border-[#2ecc71]/50 rounded-2xl p-7 text-left transition-all active:scale-[0.98]">
                   <Plane className="w-10 h-10 text-[#2ecc71] mb-4" />
                   <p className="text-white font-bold text-xl lg:text-2xl mb-2">{d.name}</p>
-                  <p className="text-gray-400 text-sm mb-3">{d.address?.split(',').slice(0,2).join(',')}</p>
-                  {d.cheapest > 0 && <p className="text-[#2ecc71] font-bold text-3xl lg:text-4xl mt-2">{d.cheapest}<span className="text-lg">&euro;</span></p>}
+                  <p className="text-gray-400 text-sm">{d.address?.split(',').slice(0,2).join(',')}</p>
                 </button>
               ))}
             </div>
@@ -921,7 +917,6 @@ const KioskPage = () => {
                   <TrainFront className="w-10 h-10 text-[#2ecc71] mb-4" />
                   <p className="text-white font-bold text-xl lg:text-2xl mb-2">{d.name}</p>
                   <p className="text-gray-500 text-xs mt-1">{d.address?.split(',').slice(0,2).join(',')}</p>
-                  {d.cheapest > 0 && <p className="text-[#2ecc71] font-bold text-xl mt-2">{d.cheapest}<span className="text-sm">&euro;</span></p>}
                 </button>
               ))}
             </div>
