@@ -7,6 +7,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { BookingProvider } from "@/context/BookingContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Toaster } from "@/components/ui/sonner";
+import SmartAppBanner from "@/components/SmartAppBanner";
 import { AdminAuthProvider, useAdminAuth } from "@/pages/admin/AdminAuthContext";
 import { FleetAuthProvider } from "@/pages/fleet/FleetAuthContext";
 import { HotelAuthProvider, useHotelAuth } from "@/pages/hotel/HotelAuthContext";
@@ -175,6 +176,7 @@ function App() {
             <BrowserRouter>
               <ScrollToTop />
               <FbPageViewTracker />
+              <SmartAppBanner />
               <Suspense fallback={<Loading />}>
                 <Routes>
                   <Route path="/" element={<Home />} />
