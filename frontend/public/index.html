@@ -1,6 +1,18 @@
 <!doctype html>
 <html lang="fr">
     <head>
+        <!-- /blog/* — Redirect to blog subdomain (BabyLoveGrowth-hosted). Runs synchronously before anything else. -->
+        <script>
+        (function(){
+          var p = window.location.pathname || '';
+          if (p === '/blog' || p.indexOf('/blog/') === 0) {
+            var rest = p.replace(/^\/blog\/?/, '');
+            var target = 'https://blog.zont.cab/' + rest + window.location.search + window.location.hash;
+            window.location.replace(target);
+          }
+        })();
+        </script>
+
         <!-- CookieYes consent banner — GDPR compliance (loaded first as per CookieYes docs) -->
         <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/10b3379f09fa8cb675cd23078d7d5862/script.js"></script>
 

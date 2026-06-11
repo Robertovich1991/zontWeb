@@ -167,6 +167,16 @@ function FbPageViewTracker() {
   return null;
 }
 
+// Redirect /blog/* to blog subdomain (preserves sub-path)
+function BlogRedirect() {
+  React.useEffect(() => {
+    const p = window.location.pathname || '';
+    const rest = p.replace(/^\/blog\/?/, '');
+    window.location.replace('https://blog.zont.cab/' + rest + window.location.search + window.location.hash);
+  }, []);
+  return null;
+}
+
 function App() {
   return (
     <LanguageProvider>
@@ -179,6 +189,9 @@ function App() {
               <SmartAppBanner />
               <Suspense fallback={<Loading />}>
                 <Routes>
+                  {/* /blog/* — redirect to blog subdomain (handled in index.html for direct loads, and here for SPA navigations) */}
+                  <Route path="/blog/*" element={<BlogRedirect />} />
+                  <Route path="/blog" element={<BlogRedirect />} />
                   <Route path="/" element={<Home />} />
                   <Route path="/fr" element={<Home />} />
                   <Route path="/ru" element={<Home />} />
