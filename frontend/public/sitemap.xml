@@ -104,6 +104,14 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://www.zont.cab/es/hazte-cliente</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/hazte-cliente"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/become-client"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/become-client"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.zont.cab/es/chofer-privado-a-disposicion</loc>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/chofer-privado-a-disposicion"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/driver-at-disposal"/>

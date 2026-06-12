@@ -25,7 +25,7 @@ const Footer = () => {
               <li><Link to={language === 'en' ? '/driver-at-disposal' : language === 'ru' ? '/voditel-s-avtomobilem' : language === 'hy' ? '/varorde-tramadrutyamb' : '/chauffeur-mis-a-disposition'} className="text-[#c8a951] hover:text-[#d4b85c] transition-colors font-medium" data-testid="footer-driver-at-disposal">{language === 'en' ? 'Driver at Disposal' : language === 'ru' ? 'Водитель в распоряжение' : language === 'hy' ? 'Վարորդ տրամադրությամբ' : 'Chauffeur mis à disposition'}</Link></li>
               <li><Link to={language === 'en' ? '/vtc-7-seats' : language === 'ru' ? '/vtc-7-mest' : language === 'hy' ? '/vtc-7-tegh' : '/vtc-7-places'} className="text-gray-400 hover:text-white transition-colors" data-testid="footer-vtc-7">{language === 'en' ? 'Minivan 7 Seats' : language === 'ru' ? 'Минивэн 7 Мест' : 'VTC 7 Places'}</Link></li>
               <li><Link to={language === 'en' ? '/vtc-8-seats' : language === 'ru' ? '/vtc-8-mest' : language === 'hy' ? '/vtc-8-tegh' : '/vtc-8-places'} className="text-gray-400 hover:text-white transition-colors" data-testid="footer-vtc-8">{language === 'en' ? 'Minibus 8 Seats' : language === 'ru' ? 'Минибус 8 Мест' : 'VTC 8 Places'}</Link></li>
-              <li><Link to="/become-client" className="text-gray-400 hover:text-white transition-colors">{t('nav.becomeClient')}</Link></li>
+              <li><Link to={language === 'es' ? '/es/hazte-cliente' : '/become-client'} className="text-gray-400 hover:text-white transition-colors">{t('nav.becomeClient')}</Link></li>
               <li><Link to="/countries" className="text-gray-400 hover:text-white transition-colors">{t('nav.countries')}</Link></li>
             </ul>
           </div>

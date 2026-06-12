@@ -362,6 +362,7 @@ function App() {
                   <Route path="/looking-for-partners" element={<LookingForPartners />} />
                   <Route path="/become-driver" element={<BecomeDriver />} />
                   <Route path="/become-client" element={<BecomeClient />} />
+                  <Route path="/es/hazte-cliente" element={<BecomeClient />} />
                   <Route path="/help" element={<Help />} />
                   <Route path="/countries" element={<Countries />} />
                   {/* B2B Pages */}

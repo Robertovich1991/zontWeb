@@ -231,6 +231,63 @@ const content = {
       { q: 'Karol em chegel amrагrumy?', a: 'Ayo, anvchar 24 zham arach.' },
     ],
   },
+  es: {
+    seoTitle: 'Hazte cliente ZONT | Traslados privados con conductor en Paris',
+    seoDesc: 'Hazte cliente ZONT y reserva tu traslado privado en Paris en 2 minutos. Precio fijo, conductor profesional, app movil iOS/Android, soporte 24/7. \u00a1Unete a mas de 50 000 viajeros!',
+    heroTitle: 'Tu traslado premium',
+    heroAccent: 'Reservado en 2 minutos',
+    heroSub: 'Precios fijos. Conductores verificados. Asistencia 24/7. Reserva online o en la app en 16 ciudades europeas.',
+    heroCta: 'Reservar ahora',
+    heroCtaApp: 'Descargar la app',
+    stepsTitle: 'Reserva tu traslado en 4 pasos simples',
+    stepsSub: 'Desde la reserva hasta la llegada, todo esta pensado para tu comodidad',
+    steps: [
+      { icon: 'globe', num: '01', title: 'Reserva online o en la app', desc: 'Reserva en nuestra web o en la app movil (iOS/Android). Confirmacion instantanea de precio sin sorpresas.' },
+      { icon: 'calendar', num: '02', title: 'Reserva anticipada', desc: 'Reserva con dias o semanas de antelacion. Tu traslado queda garantizado a precio fijo desde el primer momento.' },
+      { icon: 'mappin', num: '03', title: 'Encuentra a tu conductor', desc: 'Tu conductor verificado te espera en llegadas con un cartel personalizado. 60 minutos de espera gratis si tu vuelo se retrasa.' },
+      { icon: 'car', num: '04', title: 'Disfruta del confort premium', desc: 'Viaja en un vehiculo limpio y climatizado (Mercedes, BMW). Valora tu experiencia despues de cada trayecto.' },
+    ],
+    advantagesTitle: 'Por que mas de 50 000 viajeros confian en ZONT',
+    advantages: [
+      { icon: 'shield', title: 'Conductores verificados', desc: 'Cada conductor pasa un control de antecedentes, tiene licencia VTC y es valorado por nuestra comunidad. Tu seguridad es nuestra prioridad.' },
+      { icon: 'headphones', title: 'Asistencia 24/7', desc: 'Nuestro equipo multilingue de soporte esta disponible las 24 horas. Antes, durante y despues de tu viaje.' },
+      { icon: 'lock', title: 'Precios fijos garantizados', desc: 'El precio que ves es el precio que pagas. Sin recargos por hora punta, sin gastos ocultos. Peajes incluidos.' },
+      { icon: 'plane', title: 'Seguimiento de vuelos en tiempo real', desc: 'Monitoramos tu vuelo en directo. Si hay retraso, tu conductor se adapta automaticamente sin coste adicional.' },
+      { icon: 'zap', title: 'Cancelacion gratis', desc: '\u00bfCambio de planes? Cancela gratis hasta 24 horas antes de tu traslado. Flexibilidad total garantizada.' },
+      { icon: 'creditcard', title: 'Pago seguro', desc: 'Paga online de forma segura con Visa, Mastercard, PayPal o Apple Pay. Tus datos estan cifrados y protegidos.' },
+    ],
+    platformTitle: 'Reserva donde quieras, cuando quieras',
+    platformSub: 'Disponible en Web, iOS y Android',
+    platformPoints: [
+      'Reserva al instante en zont.cab desde cualquier navegador',
+      'Descarga la app gratis en App Store o Google Play',
+      'Gestiona tus reservas y sigue a tu conductor en tiempo real',
+      'Guarda tus direcciones favoritas para reservar mas rapido',
+      'Recibe notificaciones y confirmaciones de reserva al instante',
+    ],
+    statsTitle: 'ZONT en cifras',
+    stats: [
+      { val: '50 000+', label: 'Viajes realizados' },
+      { val: '16', label: 'Ciudades europeas' },
+      { val: '4.5/5', label: 'Valoracion media' },
+      { val: '24/7', label: 'Asistencia disponible' },
+    ],
+    reviewsTitle: 'Lo que dicen nuestros clientes',
+    reviews: [],
+    ctaTitle: '\u00bfListo para descubrir el traslado premium?',
+    ctaSub: 'Unete a mas de 50 000 viajeros satisfechos. Reserva tu primer traslado hoy mismo.',
+    ctaWeb: 'Reservar online',
+    ctaApp: 'Descargar la app',
+    faqTitle: 'Preguntas frecuentes',
+    faqs: [
+      { q: '\u00bfCon cuanta antelacion puedo reservar?', a: 'Puedes reservar tu traslado con dias, semanas e incluso meses de antelacion. Cuanto antes reserves, mayor sera la disponibilidad y mas garantia de obtener el vehiculo que prefieras.' },
+      { q: '\u00bfQue pasa si mi vuelo se retrasa?', a: 'Hacemos seguimiento de todos los vuelos en tiempo real. Si tu vuelo se retrasa, tu conductor ajusta automaticamente su hora de llegada sin coste adicional. Disfrutas de 60 minutos de espera gratis.' },
+      { q: '\u00bfComo se verifican los conductores?', a: 'Todos los conductores pasan un control de antecedentes, poseen licencias profesionales VTC validas y son valorados continuamente por nuestros pasajeros. Solo los mejores siguen activos en la plataforma.' },
+      { q: '\u00bfPuedo cancelar mi reserva?', a: 'Si, puedes cancelar gratis hasta 24 horas antes de tu traslado. Pasado ese plazo se pueden aplicar gastos de cancelacion segun el caso.' },
+      { q: '\u00bfHay que pagar deposito al reservar?', a: 'No exigimos deposito. Puedes pagar el total al reservar o eligir pago al conductor en algunos casos. Aceptamos Visa, Mastercard, AMEX, PayPal y Apple Pay.' },
+      { q: '\u00bfEl conductor habla espanol?', a: 'Tenemos conductores que hablan espanol, ingles y frances. Si deseas un conductor hispanohablante, indicalo al reservar y haremos lo posible por asignarte uno.' },
+    ],
+  },
 };
 
 const iconMap = {
@@ -240,15 +297,28 @@ const iconMap = {
 };
 
 const BecomeClient = () => {
-  const { language } = useLanguage();
+  const { language, changeLanguage } = useLanguage();
+  // Force Spanish when accessed via the /es/hazte-cliente URL so the SEO content & SEO meta line up with the route
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/es') && language !== 'es') {
+      changeLanguage('es');
+    }
+  }, [language, changeLanguage]);
   const c = content[language] || content.en;
+  const isEs = typeof window !== 'undefined' && window.location.pathname.startsWith('/es');
+  const canonical = isEs ? 'https://www.zont.cab/es/hazte-cliente' : 'https://www.zont.cab/become-client';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="become-client-page">
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
-        canonical="https://www.zont.cab/become-client"
+        canonical={canonical}
+        hreflang={[
+          { lang: 'en', href: 'https://www.zont.cab/become-client' },
+          { lang: 'es', href: 'https://www.zont.cab/es/hazte-cliente' },
+          { lang: 'x-default', href: 'https://www.zont.cab/become-client' },
+        ]}
         jsonLd={[{
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
