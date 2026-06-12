@@ -18,6 +18,7 @@ export const MULTI_LANG_URLS = {
     fr: '/chauffeur-mis-a-disposition',
     ru: '/voditel-s-avtomobilem',
     hy: '/varorde-tramadrutyamb',
+    es: '/es/chofer-privado-a-disposicion',
   },
   hotels: {
     en: '/hotel-booking-kiosk',
@@ -45,24 +46,28 @@ export const DISPOSAL_VEHICLE_SLUGS = {
     fr: 'mercedes-classe-s',
     ru: 'mercedes-s-class',
     hy: 'mercedes-s-class',
+    es: 'mercedes-clase-s',
   },
   'mercedes-e-class': {
     en: 'mercedes-e-class',
     fr: 'mercedes-classe-e',
     ru: 'mercedes-e-class',
     hy: 'mercedes-e-class',
+    es: 'mercedes-clase-e',
   },
   'mercedes-v-class': {
     en: 'mercedes-v-class',
     fr: 'mercedes-classe-v',
     ru: 'mercedes-v-class',
     hy: 'mercedes-v-class',
+    es: 'mercedes-clase-v',
   },
   'renault-trafic': {
     en: 'renault-trafic',
     fr: 'renault-trafic',
     ru: 'renault-trafic',
     hy: 'renault-trafic',
+    es: 'renault-trafic',
   },
 };
 

@@ -34,7 +34,7 @@ const DisposalVehicle = () => {
 
   // Force language from URL so SEO content always matches the visitor's URL
   const urlMatch = matchPathToLanguage(location.pathname);
-  const lang = urlMatch?.language || (['en', 'fr', 'ru', 'hy'].includes(ctxLanguage) ? ctxLanguage : 'en');
+  const lang = urlMatch?.language || (['en', 'fr', 'ru', 'hy', 'es'].includes(ctxLanguage) ? ctxLanguage : 'en');
 
   useEffect(() => {
     if (urlMatch?.language && urlMatch.language !== ctxLanguage) {

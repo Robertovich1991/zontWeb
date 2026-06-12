@@ -387,10 +387,12 @@ function App() {
                   <Route path="/chauffeur-mis-a-disposition" element={<DriverAtDisposal />} />
                   <Route path="/voditel-s-avtomobilem" element={<DriverAtDisposal />} />
                   <Route path="/varorde-tramadrutyamb" element={<DriverAtDisposal />} />
+                  <Route path="/es/chofer-privado-a-disposicion" element={<DriverAtDisposal />} />
                   <Route path="/driver-at-disposal/:slug" element={<DisposalVehicle />} />
                   <Route path="/chauffeur-mis-a-disposition/:slug" element={<DisposalVehicle />} />
                   <Route path="/voditel-s-avtomobilem/:slug" element={<DisposalVehicle />} />
                   <Route path="/varorde-tramadrutyamb/:slug" element={<DisposalVehicle />} />
+                  <Route path="/es/chofer-privado-a-disposicion/:slug" element={<DisposalVehicle />} />
                   <Route path="/travel-agencies" element={<TravelAgencies />} />
                   <Route path="/tourism-agencies" element={<TourismAgencies />} />
                   <Route path="/hotels" element={<HotelsB2B />} />

@@ -103,6 +103,35 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc>https://www.zont.cab/es/chofer-privado-a-disposicion</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/chofer-privado-a-disposicion"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/driver-at-disposal"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/chauffeur-mis-a-disposition"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/driver-at-disposal"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/chofer-privado-a-disposicion/mercedes-clase-s</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/chofer-privado-a-disposicion/mercedes-clase-e</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/chofer-privado-a-disposicion/mercedes-clase-v</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/chofer-privado-a-disposicion/renault-trafic</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 
   <!-- ==================== PARIS AIRPORT ==================== -->
   <url>

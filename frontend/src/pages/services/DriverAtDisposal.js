@@ -79,7 +79,7 @@ const DriverAtDisposal = () => {
 
   // Force language to match the URL the visitor opened (SEO-correct)
   const urlMatch = matchPathToLanguage(location.pathname);
-  const lang = urlMatch?.language || (['en', 'fr', 'ru', 'hy'].includes(ctxLanguage) ? ctxLanguage : 'en');
+  const lang = urlMatch?.language || (['en', 'fr', 'ru', 'hy', 'es'].includes(ctxLanguage) ? ctxLanguage : 'en');
 
   useEffect(() => {
     if (urlMatch?.language && urlMatch.language !== ctxLanguage) {
