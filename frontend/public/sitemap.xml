@@ -104,6 +104,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://www.zont.cab/es/traslado-aeropuerto-erevan-zvartnots</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-erevan-zvartnots"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/yerevan-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-erevan"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/taksi-iz-aeroporta-erevan"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/erevan-odanavakayani-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/yerevan-airport-transfer"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.zont.cab/es/hazte-cliente</loc>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/hazte-cliente"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/become-client"/>

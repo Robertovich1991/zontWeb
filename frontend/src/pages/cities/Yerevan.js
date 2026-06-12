@@ -123,10 +123,47 @@ const content = {
     otherCitiesBtn: 'Բոլոր ուղղությունները',
     rating: '4.5/5 Tripadvisor',
   },
+  es: {
+    title: 'Traslado aeropuerto Ereván Zvartnots a la ciudad | ZONT',
+    subtitle: 'Reserva un traslado privado desde el aeropuerto de Ereván Zvartnots (EVN) a la ciudad o a los hoteles. Precio fijo, conductor profesional y bienvenida con cartel.',
+    description: 'ZONT ofrece traslados privados desde el aeropuerto internacional de Ereván Zvartnots (EVN) hacia el centro de la ciudad, hoteles, restaurantes y direcciones privadas en Armenia. Servicio comodo, fiable y a precio fijo con conductor profesional bilingue (armenio, ruso, ingles).',
+    description2: 'El conductor te espera en la salida de llegadas con un cartel a tu nombre, te ayuda con el equipaje y te lleva directamente a tu destino. Seguimiento del vuelo en tiempo real para que no haya sorpresas si tu vuelo llega antes o con retraso.',
+    description3: 'El aeropuerto Zvartnots esta a solo 12 km del centro de Ereván, lo que se traduce en un trayecto de aproximadamente 20 minutos. ZONT tambien ofrece traslados hacia Garni, Geghard, lago Sevan, Dilijan y otros destinos turisticos de Armenia.',
+    whyChoose: '\u00bfPor que elegir nuestro traslado desde Ereván Zvartnots?',
+    feature1Title: 'Bienvenida personalizada', feature1Desc: 'El conductor te espera en llegadas con cartel a tu nombre. 60 minutos de espera gratis.',
+    feature2Title: 'Conductor bilingue', feature2Desc: 'Conductores que hablan armenio, ruso, ingles. Espanol bajo solicitud.',
+    feature3Title: 'Vehiculos comodos', feature3Desc: 'Berlinas y minivans climatizados, mantenimiento riguroso, conducción segura.',
+    feature4Title: 'Precios fijos', feature4Desc: 'Precio confirmado al reservar. Sin gastos ocultos. Pago en euros o drams armenios.',
+    sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E equivalente, 1-3 pasajeros',
+    luxury: 'Berlina de Lujo', luxuryDesc: 'Vehiculo de lujo, 1-3 pasajeros',
+    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V o equivalente, hasta 6 pasajeros',
+    minibus: 'Microbus', minibusDesc: 'Para grupos de hasta 8 pasajeros',
+    passengers: 'Pasajeros', luggage: 'Maletas',
+    bookNow: 'RESERVAR', allInclusive: 'Todo incluido',
+    vehiclesTitle: 'Elige tu vehiculo',
+    howItWorks: 'Como funciona',
+    step1: 'Reserva online', step1Desc: 'Introduce vuelo, fecha y direccion en Ereván. Precio instantaneo.',
+    step2: 'Encuentra a tu conductor', step2Desc: 'El conductor te espera en llegadas con cartel a tu nombre.',
+    step3: 'Relajate y disfruta', step3Desc: 'Traslado directo y comodo al centro de Ereván en 20 minutos.',
+    popularRoutesTitle: 'Rutas populares desde Zvartnots', fromLabel: 'Desde',
+    routes: [
+      { name: 'Aeropuerto Zvartnots \u2192 Centro Ereván', price: 15 },
+      { name: 'Aeropuerto Zvartnots \u2192 Hotel Marriott', price: 18 },
+      { name: 'Aeropuerto Zvartnots \u2192 Lago Sevan', price: 60 },
+      { name: 'Aeropuerto Zvartnots \u2192 Dilijan', price: 75 },
+    ],
+    bookingForm: 'Reserva tu traslado desde Zvartnots',
+    pickupLabel: 'Recogida', dropoffLabel: 'Destino', dateLabel: 'Fecha', timeLabel: 'Hora',
+    defaultPickup: 'Aeropuerto Ereván Zvartnots (EVN)',
+    otherCitiesTitle: 'Tambien disponible en 16 ciudades de Europa', otherCitiesBtn: 'Ver todos los destinos',
+    rating: '4.5/5 Tripadvisor',
+    meetDriverTitle: 'Donde encontrar a tu conductor en el aeropuerto Zvartnots',
+    meetDriverText: 'Tras el aterrizaje en Zvartnots (EVN), sigue los carteles Arrivals / Bagaj a la salida del area de equipajes. Tu conductor te espera con un cartel a tu nombre, te saluda en espanol o ingles, te ayuda con las maletas y te acompana hasta el vehiculo. No es necesario buscar taxi ni llamar.',
+  },
 };
 
 const vehiclesPrices = { sedan: 15, luxury: 25, minivan: 35, minibus: 55 };
 
-const seoUrls = { en: '/yerevan-airport-transfer', fr: '/transfert-aeroport-erevan', ru: '/taksi-iz-aeroporta-erevan', hy: '/erevan-odanavakayani-transfer' };
+const seoUrls = { en: '/yerevan-airport-transfer', fr: '/transfert-aeroport-erevan', ru: '/taksi-iz-aeroporta-erevan', hy: '/erevan-odanavakayani-transfer', es: '/es/traslado-aeropuerto-erevan-zvartnots' };
 const YerevanTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default YerevanTransfer;

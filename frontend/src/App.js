@@ -347,6 +347,7 @@ function App() {
                   <Route path="/transfert-aeroport-erevan" element={<YerevanTransfer />} />
                   <Route path="/taksi-iz-aeroporta-erevan" element={<YerevanTransfer />} />
                   <Route path="/erevan-odanavakayani-transfer" element={<YerevanTransfer />} />
+                  <Route path="/es/traslado-aeropuerto-erevan-zvartnots" element={<YerevanTransfer />} />
                   {/* General pages */}
                   <Route path="/car-selection" element={<CarSelection />} />
                   <Route path="/trip-recap" element={<TripRecap />} />
