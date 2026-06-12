@@ -93,7 +93,7 @@ async def seed():
             "slug": {"fr": "/transfert-gare-paris", "en": "/paris-train-station-transfer", "ru": "/transfer-vokzal-parizh", "hy": ""},
             "seo": {
                 "title": {"fr": "Transfert Gare de Paris - Voiture Privee avec Chauffeur | Zont", "en": "Paris Train Station Transfer - Private Car Service | Zont", "ru": "Трансфер с Вокзалов Парижа | Zont", "hy": ""},
-                "meta_description": {"fr": "Chauffeur prive depuis et vers toutes les gares parisiennes. Gare du Nord, Gare de Lyon, Montparnasse.", "en": "Premium private driver to and from all Paris train stations. Fixed prices.", "ru": "Премиум трансфер со всех вокзалов Парижа.", "hy": ""},
+                "meta_description": {"fr": "Chauffeur prive pour transferts depuis et vers toutes les gares parisiennes (Nord, Lyon, Montparnasse). Reservez maintenant: prix fixes, paiement securise, annulation gratuite.", "en": "Premium private driver to and from all Paris train stations: Gare du Nord, Gare de Lyon, Montparnasse. Fixed prices, secure payment, free cancellation.", "ru": "Премиум трансфер со всех вокзалов Парижа: Северный, Лионский, Монпарнас. Фиксированные цены, безопасная оплата, бесплатная отмена.", "hy": ""},
                 "h1": {"fr": "Transfert Gare de Paris - Voiture Privee avec Chauffeur", "en": "Paris Train Station Transfer - Private Car Service", "ru": "Трансфер с Вокзалов Парижа - Частный Автомобиль", "hy": ""},
                 "h2": {}, "canonical": "/transfert-gare-paris", "noindex": False, "og_title": {}, "og_description": {}, "og_image": ""
             },
