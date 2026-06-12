@@ -22,7 +22,7 @@ export const LanguageProvider = ({ children }) => {
       document.documentElement.lang = savedLang;
     } else {
       const browserLang = navigator.language.split('-')[0];
-      if (['en', 'fr', 'ru', 'hy'].includes(browserLang)) {
+      if (['en', 'fr', 'ru', 'hy', 'es'].includes(browserLang)) {
         setLanguage(browserLang);
         document.documentElement.lang = browserLang;
       } else {
@@ -39,17 +39,22 @@ export const LanguageProvider = ({ children }) => {
 
   const t = (key) => {
     const keys = key.split('.');
-    let value = translations[language];
-    
-    for (const k of keys) {
-      if (value && typeof value === 'object') {
-        value = value[k];
-      } else {
-        return key;
+    // Resolve in current language, fallback to English when a key is missing (handy when adding new languages incrementally)
+    const resolve = (root) => {
+      let value = root;
+      for (const k of keys) {
+        if (value && typeof value === 'object') value = value[k];
+        else return undefined;
       }
+      return value;
+    };
+    const v = resolve(translations[language]);
+    if (v !== undefined && v !== null) return v;
+    if (language !== 'en') {
+      const fallback = resolve(translations.en);
+      if (fallback !== undefined && fallback !== null) return fallback;
     }
-    
-    return value || key;
+    return key;
   };
 
   const value = {

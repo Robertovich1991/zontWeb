@@ -140,11 +140,49 @@ const content = {
     otherCitiesTitle: '16 qaghaqner', otherCitiesBtn: 'Bolory',
     rating: '4.5/5 Tripadvisor (29)',
   },
+  es: {
+    title: 'Traslado privado a Disneyland Paris | Desde CDG, Orly y Paris',
+    subtitle: 'Reserva un traslado privado a Disneyland Paris desde aeropuertos, hoteles o Paris. Minivan familiar, sillas infantiles, precio fijo y conductor profesional.',
+    description: 'ZONT ofrece traslados privados a Disneyland Paris desde los aeropuertos CDG, Orly, Beauvais, estaciones de tren, hoteles de Paris y direcciones privadas. Nuestro servicio es ideal para familias, grupos y viajeros con ninos.',
+    description2: 'Disponemos de vehiculos comodos y minivans para pasajeros con equipaje. Bajo solicitud, se pueden anadir sillas infantiles segun disponibilidad. El precio se confirma antes del viaje, sin taximetro ni costes ocultos.',
+    description3: 'El conductor puede recibir a los pasajeros en el aeropuerto con cartel de bienvenida, ayudar con las maletas y llevarlos directamente a Disneyland Paris o a los hoteles cercanos como Disney Hotel New York, Newport Bay Club o Sequoia Lodge. Tras un dia largo en el parque, programa tambien tu traslado de vuelta con la misma comodidad.',
+    whyChoose: '\u00bfPor que elegir nuestro traslado a Disneyland Paris?',
+    feature1Title: 'Vehiculos familiares', feature1Desc: 'Minivans para familias y grupos. Sillas infantiles bajo solicitud.',
+    feature2Title: 'Seguimiento de vuelo', feature2Desc: 'Seguimiento en tiempo real. Sin recargo por retrasos. 60 minutos de espera gratis.',
+    feature3Title: 'Precio fijo', feature3Desc: 'Precio confirmado al reservar, ida y vuelta a la misma tarifa.',
+    feature4Title: 'Conductor profesional', feature4Desc: 'Bilingue. Conoce los hoteles Disney y los puntos de recogida en el parque.',
+    sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E, 1-3 pasajeros',
+    luxury: 'Berlina de Lujo', luxuryDesc: 'Mercedes Clase S o BMW Serie 7',
+    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V, hasta 6 pasajeros',
+    minibus: 'Microbus', minibusDesc: 'Para grupos de hasta 8 pasajeros',
+    passengers: 'Pasajeros', luggage: 'Maletas',
+    bookNow: 'RESERVAR', allInclusive: 'Todo incluido',
+    vehiclesTitle: 'Elige tu vehiculo',
+    howItWorks: 'Como funciona',
+    step1: 'Reserva online', step1Desc: 'Indica origen, destino, fecha y numero de pasajeros. Precio instantaneo.',
+    step2: 'Encuentra a tu conductor', step2Desc: 'El conductor te espera en el lugar indicado con cartel a tu nombre.',
+    step3: 'Llega a Disneyland', step3Desc: 'Traslado directo, comodo y sin estres para empezar la magia.',
+    popularRoutesTitle: 'Rutas populares hacia Disneyland Paris', fromLabel: 'Desde',
+    routes: [
+      { name: 'CDG \u2192 Disneyland Paris', price: 75 },
+      { name: 'Orly \u2192 Disneyland Paris', price: 70 },
+      { name: 'Beauvais \u2192 Disneyland Paris', price: 165 },
+      { name: 'Paris Centro \u2192 Disneyland Paris', price: 85 },
+    ],
+    bookingForm: 'Reserva tu traslado a Disneyland Paris',
+    pickupLabel: 'Recogida', dropoffLabel: 'Destino', dateLabel: 'Fecha', timeLabel: 'Hora',
+    defaultPickup: '',
+    defaultDropoff: 'Disneyland Paris',
+    otherCitiesTitle: 'Tambien disponible desde aeropuertos parisinos', otherCitiesBtn: 'Ver todos los destinos',
+    rating: '4.5/5 Tripadvisor',
+    meetDriverTitle: 'Donde encontrar a tu conductor para Disneyland Paris',
+    meetDriverText: 'El conductor te espera en el lugar indicado al reservar (aeropuerto, hotel o direccion) con un cartel a tu nombre. Te ayuda con el equipaje y te lleva directamente a Disneyland Paris.',
+  },
 };
 
 const vehiclesPrices = { sedan: 59, luxury: 85, minivan: 110, minibus: 160 };
 
-const seoUrls = { en: '/disneyland-paris-transfer', fr: '/transfert-disneyland-paris', ru: '/transfer-disneyland-parizh', hy: '/disneylend-pariz-transfer' };
+const seoUrls = { en: '/disneyland-paris-transfer', fr: '/transfert-disneyland-paris', ru: '/transfer-disneyland-parizh', hy: '/disneylend-pariz-transfer', es: '/es/traslado-disneyland-paris' };
 const DisneylandTransfer = () => (
   <CityTransferPage
     content={content}

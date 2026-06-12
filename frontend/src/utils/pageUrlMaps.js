@@ -6,6 +6,13 @@
 //  - SEO components (canonical + hreflang)
 
 export const MULTI_LANG_URLS = {
+  home: {
+    en: '/',
+    fr: '/fr',
+    ru: '/ru',
+    hy: '/hy',
+    es: '/es',
+  },
   disposal: {
     en: '/driver-at-disposal',
     fr: '/chauffeur-mis-a-disposition',
@@ -65,6 +72,11 @@ export const matchPathToLanguage = (pathname) => {
   if (!pathname) return null;
   const clean = pathname.replace(/\/$/, '') || '/';
 
+  // 0) home pages (per language)
+  for (const [lang, path] of Object.entries(MULTI_LANG_URLS.home)) {
+    if (clean === path || (path === '/' && clean === '')) return { pageKey: 'home', language: lang };
+  }
+
   // 1) disposal main pages
   for (const [lang, path] of Object.entries(MULTI_LANG_URLS.disposal)) {
     if (clean === path) return { pageKey: 'disposal', language: lang };
@@ -106,6 +118,9 @@ export const buildTranslatedUrl = (pathname, targetLang) => {
   if (!match) return null;
   const { pageKey, vehicleId } = match;
 
+  if (pageKey === 'home') {
+    return MULTI_LANG_URLS.home[targetLang] || MULTI_LANG_URLS.home.en;
+  }
   if (pageKey === 'disposal') {
     return MULTI_LANG_URLS.disposal[targetLang] || MULTI_LANG_URLS.disposal.en;
   }

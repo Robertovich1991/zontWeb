@@ -160,6 +160,12 @@ const Loading = () => (
   </div>
 );
 
+// Spanish service pages
+const EsMinivan = lazy(() => import("@/pages/es/EsMinivan"));
+const EsConductorPrivado = lazy(() => import("@/pages/es/EsConductorPrivado"));
+const EsSillaInfantil = lazy(() => import("@/pages/es/EsSillaInfantil"));
+const EsHoteles = lazy(() => import("@/pages/es/EsHoteles"));
+
 // Track FB Pixel PageView on route changes
 function FbPageViewTracker() {
   const location = useLocation();
@@ -196,6 +202,12 @@ function App() {
                   <Route path="/fr" element={<Home />} />
                   <Route path="/ru" element={<Home />} />
                   <Route path="/hy" element={<Home />} />
+                  <Route path="/es" element={<ParisAirportTransfer />} />
+                  {/* Spanish service pages */}
+                  <Route path="/es/minivan-traslado-aeropuerto-paris" element={<EsMinivan />} />
+                  <Route path="/es/conductor-privado-paris" element={<EsConductorPrivado />} />
+                  <Route path="/es/traslado-aeropuerto-paris-silla-infantil" element={<EsSillaInfantil />} />
+                  <Route path="/es/traslados-para-hoteles-paris" element={<EsHoteles />} />
                   {/* Paris */}
                   <Route path="/paris-airport-transfer" element={<ParisAirportTransfer />} />
                   <Route path="/transfert-aeroport-paris" element={<ParisAirportTransfer />} />
@@ -207,21 +219,25 @@ function App() {
                   <Route path="/transfert-aeroport-cdg" element={<CDGTransfer />} />
                   <Route path="/taksi-iz-aeroporta-cdg" element={<CDGTransfer />} />
                   <Route path="/cdg-odanavakayani-transfer" element={<CDGTransfer />} />
+                  <Route path="/es/traslado-aeropuerto-charles-de-gaulle" element={<CDGTransfer />} />
                   {/* Orly */}
                   <Route path="/orly-airport-transfer" element={<OrlyTransfer />} />
                   <Route path="/transfert-aeroport-orly" element={<OrlyTransfer />} />
                   <Route path="/taksi-iz-aeroporta-orli" element={<OrlyTransfer />} />
                   <Route path="/orli-odanavakayani-transfer" element={<OrlyTransfer />} />
+                  <Route path="/es/traslado-aeropuerto-orly" element={<OrlyTransfer />} />
                   {/* Beauvais */}
                   <Route path="/beauvais-airport-transfer" element={<BeauvaisTransfer />} />
                   <Route path="/transfert-aeroport-beauvais" element={<BeauvaisTransfer />} />
                   <Route path="/taksi-iz-aeroporta-bove" element={<BeauvaisTransfer />} />
                   <Route path="/bove-odanavakayani-transfer" element={<BeauvaisTransfer />} />
+                  <Route path="/es/traslado-aeropuerto-beauvais" element={<BeauvaisTransfer />} />
                   {/* Paris Train Station */}
                   <Route path="/paris-train-station-transfer" element={<ParisTrainStationTransfer />} />
                   <Route path="/transfert-gare-paris" element={<ParisTrainStationTransfer />} />
                   <Route path="/transfer-vokzal-parizh" element={<ParisTrainStationTransfer />} />
                   <Route path="/pariz-kayarani-transfer" element={<ParisTrainStationTransfer />} />
+                  <Route path="/es/traslado-estaciones-tren-paris" element={<ParisTrainStationTransfer />} />
                   {/* Individual Train Stations */}
                   <Route path="/gare-de-lyon-transfer" element={<GareDeLyonTransfer />} />
                   <Route path="/transfert-gare-de-lyon" element={<GareDeLyonTransfer />} />
@@ -249,6 +265,7 @@ function App() {
                   <Route path="/transfer-disneylend-parizh" element={<DisneylandTransfer />} />
                   <Route path="/transfer-disneyland-parizh" element={<DisneylandTransfer />} />
                   <Route path="/disneylend-pariz-transfer" element={<DisneylandTransfer />} />
+                  <Route path="/es/traslado-disneyland-paris" element={<DisneylandTransfer />} />
                   {/* Disneyland Paris — Route SEO sub-pages */}
                   <Route path="/cdg-to-disneyland-paris-transfer" element={<DisneyTransferPage routeSlug="cdg-to-disneyland-paris-transfer" />} />
                   <Route path="/orly-to-disneyland-paris-transfer" element={<DisneyTransferPage routeSlug="orly-to-disneyland-paris-transfer" />} />

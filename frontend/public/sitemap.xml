@@ -9,6 +9,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/"/>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -27,6 +28,80 @@
     <loc>https://www.zont.cab/hy</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ==================== Spanish pages (ES) ==================== -->
+  <url>
+    <loc>https://www.zont.cab/es/traslado-aeropuerto-charles-de-gaulle</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-charles-de-gaulle"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/cdg-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-cdg"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/cdg-airport-transfer"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/traslado-aeropuerto-orly</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-orly"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/orly-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-orly"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/orly-airport-transfer"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/traslado-aeropuerto-beauvais</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-beauvais"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/beauvais-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-beauvais"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/beauvais-airport-transfer"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/traslado-disneyland-paris</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-disneyland-paris"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/disneyland-paris-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-disneyland-paris"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/disneyland-paris-transfer"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/traslado-estaciones-tren-paris</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-estaciones-tren-paris"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/paris-train-station-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-gare-paris"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/paris-train-station-transfer"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/minivan-traslado-aeropuerto-paris</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/conductor-privado-paris</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/traslado-aeropuerto-paris-silla-infantil</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/traslados-para-hoteles-paris</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 
   <!-- ==================== PARIS AIRPORT ==================== -->

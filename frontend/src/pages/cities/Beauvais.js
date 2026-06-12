@@ -133,10 +133,47 @@ const content = {
     meetDriverTitle: 'Որtegh handipel varordiin Beauvais odanavakayanum',
     meetDriverText: 'Trichqic heto hetevek odanavakayani nshannerin depi Jamumner / Ely taratsq. Varorduh spasum e dzez anunov tsucanak. Na kognvi dzez arag gtnel meqenan ev kogni bagajov.',
   },
+  es: {
+    title: 'Traslado aeropuerto Beauvais a Paris y Disneyland | ZONT',
+    subtitle: 'Reserva tu traslado privado desde el aeropuerto Beauvais a Paris o Disneyland. Precio fijo, minivan disponible, conductor profesional y reserva online.',
+    description: 'El aeropuerto de Beauvais se encuentra mas lejos de Paris que CDG y Orly, por eso un traslado privado puede ser una solucion comoda para llegar directamente a tu hotel, Disneyland Paris o cualquier direccion. ZONT ofrece traslados privados desde Beauvais con precio fijo, vehiculos comodos y conductores profesionales.',
+    description2: 'El servicio es ideal para familias, grupos y pasajeros con equipaje. Evita cambios de transporte, esperas largas o conexiones complicadas. Reserva tu traslado y viaja directamente desde Beauvais hasta tu destino.',
+    description3: 'Beauvais esta a unos 85 km al norte de Paris, lo que se traduce en un trayecto de aproximadamente 1h15-1h30 en condiciones normales. Nuestros conductores conocen las rutas alternativas para evitar atascos. Tambien ofrecemos traslados directos desde Beauvais a Disneyland Paris (1h45) y otras ciudades de la region.',
+    whyChoose: '\u00bfPor que elegir nuestro traslado desde Beauvais?',
+    feature1Title: 'Recogida en Beauvais', feature1Desc: 'El conductor te espera en llegadas con cartel a tu nombre. 60 minutos de espera gratis.',
+    feature2Title: 'Seguimiento de vuelo', feature2Desc: 'Seguimiento en tiempo real. Sin recargo por retrasos.',
+    feature3Title: 'Vehiculos premium', feature3Desc: 'Mercedes Clase E, BMW Serie 5 y minivans. Limpios, con aire acondicionado.',
+    feature4Title: 'Precios fijos', feature4Desc: 'Precio confirmado al reservar. Sin gastos ocultos.',
+    sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E, 1-3 pasajeros',
+    luxury: 'Berlina de Lujo', luxuryDesc: 'Mercedes Clase S o BMW Serie 7',
+    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V, hasta 6 pasajeros',
+    minibus: 'Microbus', minibusDesc: 'Para grupos de hasta 8 pasajeros',
+    passengers: 'Pasajeros', luggage: 'Maletas',
+    bookNow: 'RESERVAR', allInclusive: 'Todo incluido',
+    vehiclesTitle: 'Elige tu vehiculo',
+    howItWorks: 'Como funciona',
+    step1: 'Reserva online', step1Desc: 'Introduce tu numero de vuelo y direccion en Paris. Precio instantaneo.',
+    step2: 'Encuentra a tu conductor', step2Desc: 'El conductor te espera en llegadas con cartel a tu nombre.',
+    step3: 'Relajate y disfruta', step3Desc: 'Traslado directo y comodo al centro de Paris en 1h15-1h30.',
+    popularRoutesTitle: 'Rutas populares desde Beauvais', fromLabel: 'Desde',
+    routes: [
+      { name: 'Aeropuerto Beauvais \u2192 Centro de Paris', price: 120 },
+      { name: 'Aeropuerto Beauvais \u2192 Disneyland Paris', price: 165 },
+      { name: 'Aeropuerto Beauvais \u2192 CDG', price: 130 },
+      { name: 'Aeropuerto Beauvais \u2192 La Defense', price: 125 },
+    ],
+    bookingForm: 'Reserva tu traslado desde Beauvais',
+    pickupLabel: 'Recogida', dropoffLabel: 'Destino', dateLabel: 'Fecha', timeLabel: 'Hora',
+    defaultPickup: 'Aeropuerto Paris Beauvais',
+    otherCitiesTitle: 'Tambien disponible desde otros aeropuertos parisinos', otherCitiesBtn: 'Ver todos los destinos',
+    rating: '4.5/5 Tripadvisor',
+    meetDriverTitle: 'Donde encontrar a tu conductor en el aeropuerto Beauvais',
+    meetDriverText: 'Tras el aterrizaje en Beauvais, sigue los carteles Llegadas. Tu conductor te espera con un cartel a tu nombre y te ayuda con el equipaje hasta el vehiculo. Sencillo y sin esperas.',
+  },
 };
 
 const vehiclesPrices = { sedan: 120, luxury: 165, minivan: 200, minibus: 280 };
 
-const seoUrls = { en: '/beauvais-airport-transfer', fr: '/transfert-aeroport-beauvais', ru: '/taksi-iz-aeroporta-bove', hy: '/bove-odanavakayani-transfer' };
+const seoUrls = { en: '/beauvais-airport-transfer', fr: '/transfert-aeroport-beauvais', ru: '/taksi-iz-aeroporta-bove', hy: '/bove-odanavakayani-transfer', es: '/es/traslado-aeropuerto-beauvais' };
 const BeauvaisTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/beauvais-driver-meet.webp" pageId="beauvais" />;
 export default BeauvaisTransfer;

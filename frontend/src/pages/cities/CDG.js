@@ -133,10 +133,47 @@ const content = {
     meetDriverTitle: 'Որtegh handipel varordiin CDG odanavakayanum',
     meetDriverText: 'Vayrejqic heto hetevek Jamumner / Ely nshannerin. Varorduh spasum e dzez anunov tsucanak jamumneri taraghum.',
   },
+  es: {
+    title: 'Traslado aeropuerto Charles de Gaulle CDG a Paris | ZONT',
+    subtitle: 'Reserva un traslado privado desde el aeropuerto Charles de Gaulle CDG a Paris, Disneyland u hotel. Precio fijo, bienvenida con cartel y conductor profesional.',
+    description: 'Reserva tu traslado privado desde el aeropuerto Charles de Gaulle CDG hacia Paris, Disneyland Paris, hoteles, estaciones de tren o cualquier direccion de la region parisina. ZONT ofrece un servicio comodo y fiable con precio fijo, conductor profesional y seguimiento del vuelo. El conductor espera al pasajero en la terminal, puede recibirlo con un cartel de bienvenida y ayuda con el equipaje.',
+    description2: 'Si el vuelo llega antes o con retraso, nuestro equipo adapta la recogida segun la informacion del vuelo. Este servicio es ideal para familias, viajeros de negocios, grupos y turistas que quieren evitar esperas, colas de taxi o precios variables. Puedes elegir entre berlina, vehiculo business o minivan segun el numero de pasajeros y equipaje.',
+    description3: 'CDG tambien es el punto de partida para excursiones: Chantilly (20 minutos), Versalles (60 minutos por la A86) e incluso Disneyland Paris (a solo 35 minutos al este). Muchos clientes reservan ida y vuelta: aeropuerto a hotel a la llegada, y hotel a aeropuerto a la salida, con el mismo precio fijo garantizado. Reserva ahora tu traslado CDG y evita el caos del aeropuerto.',
+    whyChoose: '\u00bfPor que elegir nuestro traslado del aeropuerto CDG?',
+    feature1Title: 'Todas las terminales CDG', feature1Desc: 'Cubrimos Terminal 1, 2A-2G y Terminal 3. El conductor te espera en llegadas con cartel a tu nombre.',
+    feature2Title: 'Seguimiento de vuelo', feature2Desc: 'Seguimiento en tiempo real. Sin recargo por retrasos. 60 minutos de espera gratis.',
+    feature3Title: 'Vehiculos premium', feature3Desc: 'Mercedes Clase E, BMW Serie 5. Limpios, con aire acondicionado, de menos de 3 anos.',
+    feature4Title: 'Precios fijos', feature4Desc: 'Precio confirmado al reservar. Sin gastos ocultos ni recargos. Accesible para todos.',
+    sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E, 1-3 pasajeros',
+    luxury: 'Berlina de Lujo', luxuryDesc: 'Mercedes Clase S o BMW Serie 7',
+    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V, hasta 6 pasajeros',
+    minibus: 'Microbus', minibusDesc: 'Para grupos de hasta 8 pasajeros',
+    passengers: 'Pasajeros', luggage: 'Maletas',
+    bookNow: 'RESERVAR', allInclusive: 'Todo incluido',
+    vehiclesTitle: 'Elige tu vehiculo',
+    howItWorks: 'Como funciona',
+    step1: 'Reserva online', step1Desc: 'Introduce tu terminal CDG, numero de vuelo y direccion en Paris. Precio instantaneo.',
+    step2: 'Encuentra a tu conductor', step2Desc: 'El conductor te espera en llegadas de tu terminal CDG con un cartel a tu nombre.',
+    step3: 'Relajate y disfruta', step3Desc: 'Traslado directo y comodo al centro de Paris en 35-50 minutos.',
+    popularRoutesTitle: 'Rutas populares desde CDG', fromLabel: 'Desde',
+    routes: [
+      { name: 'Aeropuerto CDG \u2192 Centro de Paris', price: 65 },
+      { name: 'Aeropuerto CDG \u2192 Campos Eliseos / Arco del Triunfo', price: 65 },
+      { name: 'Aeropuerto CDG \u2192 Disneyland Paris', price: 75 },
+      { name: 'Aeropuerto CDG \u2192 La Defense', price: 70 },
+    ],
+    bookingForm: 'Reserva tu traslado desde CDG',
+    pickupLabel: 'Recogida', dropoffLabel: 'Destino', dateLabel: 'Fecha', timeLabel: 'Hora',
+    defaultPickup: 'Aeropuerto Paris CDG (Terminal 2)',
+    otherCitiesTitle: 'Tambien disponible desde otros aeropuertos parisinos', otherCitiesBtn: 'Ver todos los destinos',
+    rating: '4.5/5 Tripadvisor (29 opiniones)',
+    meetDriverTitle: 'Donde encontrar a tu conductor en el aeropuerto Charles de Gaulle',
+    meetDriverText: 'Tras el aterrizaje, sigue los carteles Llegadas / Salida dentro de la terminal. Tu conductor te espera justo a la salida de la zona de llegadas, con un cartel a tu nombre para que puedas identificarlo facilmente. No es necesario buscar una parada de taxis ni llamar al conductor despues del vuelo. La recogida es sencilla, clara y disenada para que tu llegada al aeropuerto Paris Charles de Gaulle sea fluida, comoda y sin estres.',
+  },
 };
 
 const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 130, minibus: 190 };
 
-const seoUrls = { en: '/cdg-airport-transfer', fr: '/transfert-aeroport-cdg', ru: '/taksi-iz-aeroporta-cdg', hy: '/cdg-odanavakayani-transfer' };
+const seoUrls = { en: '/cdg-airport-transfer', fr: '/transfert-aeroport-cdg', ru: '/taksi-iz-aeroporta-cdg', hy: '/cdg-odanavakayani-transfer', es: '/es/traslado-aeropuerto-charles-de-gaulle' };
 const CDGTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/cdg-driver-meet.webp" pageId="cdg" />;
 export default CDGTransfer;

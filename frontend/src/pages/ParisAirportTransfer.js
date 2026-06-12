@@ -140,6 +140,43 @@ const content = {
     otherCitiesBtn: '\u0532\u043e\u043b\u043e\u0580 \u0578\u0582\u0572\u0572\u0578\u0582\u0569\u0575\u0578\u0582\u0576\u0576\u0565\u0580\u0568',
     rating: '4.5/5 Tripadvisor',
   },
+  es: {
+    title: 'ZONT - Traslados privados en Paris con conductor',
+    subtitle: 'Reserva tu traslado privado en Paris con ZONT: aeropuerto CDG, Orly, Beauvais, Disneyland y hoteles. Precio fijo, conductor profesional y servicio 24/7.',
+    description: 'ZONT ofrece traslados privados en Paris y en toda la region parisina con conductores profesionales, vehiculos comodos y precios fijos. Reservamos traslados desde y hacia los aeropuertos Charles de Gaulle, Orly, Beauvais, Disneyland Paris, estaciones de tren, hoteles y direcciones privadas. Nuestro servicio esta pensado para viajeros, familias, grupos, empresas y hoteles que buscan una solucion fiable, comoda y sencilla.',
+    description2: 'El conductor puede recibir al pasajero con cartel de bienvenida, ayudar con el equipaje y seguir la hora real del vuelo para adaptar la recogida en caso de retraso o llegada anticipada. Con ZONT puedes reservar online en pocos pasos y conocer el precio antes del viaje. Sin sorpresas, sin taximetro y con asistencia disponible para organizar tu traslado en Paris.',
+    stationLinksTitle: 'Traslados a los aeropuertos de Paris',
+    whyChoose: '\u00bfPor que elegir ZONT en Paris?',
+    feature1Title: 'Recogida en aeropuerto', feature1Desc: 'El conductor te espera en llegadas con cartel a tu nombre. 60 minutos de espera gratis.',
+    feature2Title: 'Conductor por horas', feature2Desc: 'Servicio de 4, 8 o 12 horas para tus desplazamientos personalizados.',
+    feature3Title: 'Vehiculos premium', feature3Desc: 'Mercedes Clase E, BMW Serie 5, minivans. Limpios, con aire acondicionado.',
+    feature4Title: 'Precios fijos', feature4Desc: 'Precio confirmado al reservar. Sin gastos ocultos ni recargos.',
+    sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E, 1-3 pasajeros',
+    luxury: 'Berlina de Lujo', luxuryDesc: 'Mercedes Clase S o BMW Serie 7',
+    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V, hasta 6 pasajeros',
+    minibus: 'Microbus', minibusDesc: 'Para grupos de hasta 8 pasajeros',
+    passengers: 'Pasajeros', luggage: 'Maletas',
+    bookNow: 'RESERVAR', allInclusive: 'Todo incluido',
+    vehiclesTitle: 'Elige tu vehiculo',
+    howItWorks: 'Como funciona',
+    step1: 'Reserva online', step1Desc: 'Introduce origen, destino, fecha y numero de pasajeros. Precio instantaneo.',
+    step2: 'Encuentra a tu conductor', step2Desc: 'El conductor te espera en el lugar indicado con cartel a tu nombre.',
+    step3: 'Relajate y disfruta', step3Desc: 'Traslado directo y comodo a tu destino en Paris.',
+    popularRoutesTitle: 'Rutas populares en Paris', fromLabel: 'Desde',
+    routes: [
+      { name: 'CDG \u2192 Centro de Paris', price: 65 },
+      { name: 'Orly \u2192 Centro de Paris', price: 45 },
+      { name: 'Beauvais \u2192 Centro de Paris', price: 120 },
+      { name: 'Paris \u2192 Disneyland Paris', price: 85 },
+    ],
+    bookingForm: 'Reserva tu traslado en Paris',
+    pickupLabel: 'Recogida', dropoffLabel: 'Destino',
+    dateLabel: 'Fecha', timeLabel: 'Hora',
+    defaultPickup: '',
+    otherCitiesTitle: 'Tambien disponible en 16 ciudades de Europa',
+    otherCitiesBtn: 'Ver todos los destinos',
+    rating: '4.5/5 Tripadvisor',
+  },
 };
 
 const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 130, minibus: 190 };
@@ -147,34 +184,34 @@ const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 130, minibus: 190 };
 const airportLinks = [
   {
     name: 'Charles de Gaulle (CDG)',
-    url: { en: '/cdg-airport-transfer', fr: '/transfert-aeroport-cdg', ru: '/taksi-iz-aeroporta-cdg', hy: '/cdg-odanavakayani-transfer' },
-    desc: { en: 'Terminal 1, 2 & 3 - Meet & greet', fr: 'Terminal 1, 2 et 3 - Accueil personnalise', ru: 'Терминалы 1, 2, 3 - Встреча с табличкой', hy: 'Տերdelays 1, 2, 3' },
+    url: { en: '/cdg-airport-transfer', fr: '/transfert-aeroport-cdg', ru: '/taksi-iz-aeroporta-cdg', hy: '/cdg-odanavakayani-transfer', es: '/es/traslado-aeropuerto-charles-de-gaulle' },
+    desc: { en: 'Terminal 1, 2 & 3 - Meet & greet', fr: 'Terminal 1, 2 et 3 - Accueil personnalise', ru: 'Терминалы 1, 2, 3 - Встреча с табличкой', hy: 'Տերdelays 1, 2, 3', es: 'Terminal 1, 2 y 3 - Bienvenida con cartel' },
     image: '/images/cdg-driver-meet.webp',
     price: 65,
   },
   {
     name: 'Orly (ORY)',
-    url: { en: '/orly-airport-transfer', fr: '/transfert-aeroport-orly', ru: '/taksi-iz-aeroporta-orli', hy: '/orli-odanavakayani-transfer' },
-    desc: { en: 'Orly 1, 2, 3 & 4 - 20 min to Paris', fr: 'Orly 1, 2, 3 et 4 - 20 min de Paris', ru: 'Орли 1-4 - 20 мин до центра', hy: 'Orly 1-4' },
+    url: { en: '/orly-airport-transfer', fr: '/transfert-aeroport-orly', ru: '/taksi-iz-aeroporta-orli', hy: '/orli-odanavakayani-transfer', es: '/es/traslado-aeropuerto-orly' },
+    desc: { en: 'Orly 1, 2, 3 & 4 - 20 min to Paris', fr: 'Orly 1, 2, 3 et 4 - 20 min de Paris', ru: 'Орли 1-4 - 20 мин до центра', hy: 'Orly 1-4', es: 'Orly 1, 2, 3 y 4 - 20 min al centro' },
     image: '/images/orly-driver-meet.webp',
     price: 45,
   },
   {
     name: 'Beauvais (BVA)',
-    url: { en: '/beauvais-airport-transfer', fr: '/transfert-aeroport-beauvais', ru: '/taksi-iz-aeroporta-bove', hy: '/bove-odanavakayani-transfer' },
-    desc: { en: 'Direct door-to-door, no shuttle needed', fr: 'Porte-a-porte direct, pas de navette', ru: 'От двери до двери, без автобуса', hy: 'Ուdelays- delays delays' },
+    url: { en: '/beauvais-airport-transfer', fr: '/transfert-aeroport-beauvais', ru: '/taksi-iz-aeroporta-bove', hy: '/bove-odanavakayani-transfer', es: '/es/traslado-aeropuerto-beauvais' },
+    desc: { en: 'Direct door-to-door, no shuttle needed', fr: 'Porte-a-porte direct, pas de navette', ru: 'От двери до двери, без автобуса', hy: 'Ուdelays- delays delays', es: 'Directo puerta a puerta, sin transbordo' },
     image: '/images/beauvais-driver-meet.webp',
     price: 120,
   },
   {
     name: 'Disneyland Paris',
-    url: { en: '/disneyland-paris-transfer', fr: '/transfert-disneyland-paris', ru: '/transfer-disneyland-parizh', hy: '/disneylend-pariz-transfer' },
-    desc: { en: 'CDG, Orly & Paris hotels to Disneyland Paris', fr: 'CDG, Orly et hotels Paris vers Disneyland Paris', ru: 'Из CDG, Orly и отелей Парижа в Disneyland Paris', hy: 'CDG, Orly Disneyland Paris' },
+    url: { en: '/disneyland-paris-transfer', fr: '/transfert-disneyland-paris', ru: '/transfer-disneyland-parizh', hy: '/disneylend-pariz-transfer', es: '/es/traslado-disneyland-paris' },
+    desc: { en: 'CDG, Orly & Paris hotels to Disneyland Paris', fr: 'CDG, Orly et hotels Paris vers Disneyland Paris', ru: 'Из CDG, Orly и отелей Парижа в Disneyland Paris', hy: 'CDG, Orly Disneyland Paris', es: 'Desde CDG, Orly y hoteles de Paris a Disneyland' },
     image: '/images/disneyland.webp',
     price: 75,
   },
 ];
 
-const seoUrls = { en: '/paris-airport-transfer', fr: '/transfert-aeroport-paris', ru: '/transfer-aeroport-parizh', hy: '/pariz-odanavakayani-transfer' };
+const seoUrls = { en: '/paris-airport-transfer', fr: '/transfert-aeroport-paris', ru: '/transfer-aeroport-parizh', hy: '/pariz-odanavakayani-transfer', es: '/es' };
 const ParisAirportTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} stationLinks={airportLinks} pageId="paris-airport" showDisposalCta />;
 export default ParisAirportTransfer;

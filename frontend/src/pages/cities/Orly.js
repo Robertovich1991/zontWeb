@@ -133,10 +133,47 @@ const content = {
     meetDriverTitle: 'Որtegh handipel varordiin Orly odanavakayanum',
     meetDriverText: 'ORLY (ORY) vayrejqic heto hetevek Jamumner / Ely nshannerin. Varorduh spasum e dzez anunov tsucanak.',
   },
+  es: {
+    title: 'Traslado aeropuerto Orly a Paris | Precio fijo | ZONT',
+    subtitle: 'Traslado privado desde el aeropuerto de Orly a Paris, Disneyland y hoteles. Reserva online, precio fijo, conductor profesional y servicio 24/7.',
+    description: 'ZONT ofrece traslados privados desde el aeropuerto de Orly hacia Paris, Disneyland Paris, hoteles, estaciones y direcciones privadas. El servicio incluye precio fijo, reserva online y conductor profesional. El conductor puede esperar al pasajero en la zona de llegadas, ayudar con el equipaje y acompanarlo hasta el vehiculo.',
+    description2: 'Nuestro equipo sigue los vuelos para organizar la recogida de forma comoda y puntual. El traslado privado desde Orly es una solucion practica para familias, grupos y viajeros de negocios que buscan un servicio seguro, comodo y sin sorpresas en el precio.',
+    description3: 'Orly esta a solo 13 km del centro de Paris, lo que lo convierte en el aeropuerto mas cercano. La ruta hacia el centro toma 20-30 minutos por la autopista A6 segun el trafico. Disneyland Paris se encuentra a 45 minutos al este. Reserva ahora tu traslado desde Orly y empieza tu viaje con tranquilidad.',
+    whyChoose: '\u00bfPor que elegir nuestro traslado desde Orly?',
+    feature1Title: 'Todas las terminales Orly', feature1Desc: 'Cubrimos Orly 1, 2, 3 y 4. El conductor te espera en llegadas con cartel a tu nombre.',
+    feature2Title: 'Seguimiento de vuelo', feature2Desc: 'Seguimiento en tiempo real. Sin recargo por retrasos. 60 minutos de espera gratis.',
+    feature3Title: 'Vehiculos premium', feature3Desc: 'Mercedes Clase E, BMW Serie 5. Limpios, con aire acondicionado.',
+    feature4Title: 'Precios fijos', feature4Desc: 'Precio confirmado al reservar. Sin gastos ocultos ni recargos.',
+    sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E, 1-3 pasajeros',
+    luxury: 'Berlina de Lujo', luxuryDesc: 'Mercedes Clase S o BMW Serie 7',
+    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V, hasta 6 pasajeros',
+    minibus: 'Microbus', minibusDesc: 'Para grupos de hasta 8 pasajeros',
+    passengers: 'Pasajeros', luggage: 'Maletas',
+    bookNow: 'RESERVAR', allInclusive: 'Todo incluido',
+    vehiclesTitle: 'Elige tu vehiculo',
+    howItWorks: 'Como funciona',
+    step1: 'Reserva online', step1Desc: 'Introduce tu terminal Orly, numero de vuelo y direccion en Paris. Precio instantaneo.',
+    step2: 'Encuentra a tu conductor', step2Desc: 'El conductor te espera en llegadas de tu terminal Orly con un cartel a tu nombre.',
+    step3: 'Relajate y disfruta', step3Desc: 'Traslado directo y comodo al centro de Paris en 20-30 minutos.',
+    popularRoutesTitle: 'Rutas populares desde Orly', fromLabel: 'Desde',
+    routes: [
+      { name: 'Aeropuerto Orly \u2192 Centro de Paris', price: 45 },
+      { name: 'Aeropuerto Orly \u2192 Campos Eliseos', price: 45 },
+      { name: 'Aeropuerto Orly \u2192 Disneyland Paris', price: 70 },
+      { name: 'Aeropuerto Orly \u2192 La Defense', price: 55 },
+    ],
+    bookingForm: 'Reserva tu traslado desde Orly',
+    pickupLabel: 'Recogida', dropoffLabel: 'Destino', dateLabel: 'Fecha', timeLabel: 'Hora',
+    defaultPickup: 'Aeropuerto Paris Orly',
+    otherCitiesTitle: 'Tambien disponible desde otros aeropuertos parisinos', otherCitiesBtn: 'Ver todos los destinos',
+    rating: '4.5/5 Tripadvisor',
+    meetDriverTitle: 'Donde encontrar a tu conductor en el aeropuerto de Orly',
+    meetDriverText: 'Tras el aterrizaje en Orly, sigue los carteles Llegadas / Salida. Tu conductor te espera justo a la salida con un cartel a tu nombre. No es necesario buscar taxi ni llamar al conductor. Recogida sencilla y sin estres en el aeropuerto Paris Orly.',
+  },
 };
 
 const vehiclesPrices = { sedan: 45, luxury: 70, minivan: 100, minibus: 160 };
 
-const seoUrls = { en: '/orly-airport-transfer', fr: '/transfert-aeroport-orly', ru: '/taksi-iz-aeroporta-orli', hy: '/orli-odanavakayani-transfer' };
+const seoUrls = { en: '/orly-airport-transfer', fr: '/transfert-aeroport-orly', ru: '/taksi-iz-aeroporta-orli', hy: '/orli-odanavakayani-transfer', es: '/es/traslado-aeropuerto-orly' };
 const OrlyTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} meetDriverImage="/images/orly-driver-meet.webp" pageId="orly" />;
 export default OrlyTransfer;

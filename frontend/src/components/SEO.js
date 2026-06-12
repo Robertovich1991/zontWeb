@@ -7,7 +7,7 @@ const SEO = ({ title, description, canonical, jsonLd, ogImage, ogType, hreflang,
   useEffect(() => {
     if (title) document.title = title;
 
-    document.documentElement.lang = language === 'fr' ? 'fr' : language === 'ru' ? 'ru' : language === 'hy' ? 'hy' : 'en';
+    document.documentElement.lang = language === 'fr' ? 'fr' : language === 'ru' ? 'ru' : language === 'hy' ? 'hy' : language === 'es' ? 'es' : 'en';
 
     // Meta description
     let metaDesc = document.querySelector('meta[name="description"]');

@@ -125,6 +125,41 @@ const content = {
     otherCitiesBtn: 'Բոլոր ուղղությունները',
     rating: '4.5/5 Tripadvisor',
   },
+  es: {
+    title: 'Traslado estaciones de tren Paris | Gare du Nord, Lyon, Est',
+    subtitle: 'Reserva un traslado privado desde o hacia las estaciones de tren de Paris: Gare du Nord, Gare de Lyon, Gare de l\'Est, Montparnasse y mas.',
+    description: 'ZONT ofrece traslados privados desde y hacia las principales estaciones de tren de Paris: Gare du Nord, Gare de Lyon, Gare de l\'Est, Gare Montparnasse, Gare Saint-Lazare y otras estaciones. El conductor puede recoger al pasajero en el punto acordado y llevarlo directamente a su hotel, aeropuerto, Disneyland Paris o direccion privada.',
+    description2: 'Este servicio es ideal para viajeros con equipaje, familias y pasajeros que desean continuar su viaje sin complicaciones. Tras un trayecto en TGV, Thalys o Eurostar, evita las colas de taxi y la confusion del transporte publico.',
+    whyChoose: '\u00bfPor que elegir nuestro traslado desde las estaciones de Paris?',
+    feature1Title: 'Recogida en el anden', feature1Desc: 'El conductor te espera en la salida de la estacion con cartel a tu nombre.',
+    feature2Title: 'Todas las estaciones', feature2Desc: 'Gare du Nord, Lyon, Est, Montparnasse, Saint-Lazare, Austerlitz, Bercy.',
+    feature3Title: 'Vehiculos premium', feature3Desc: 'Mercedes Clase E, minivans. Limpios, con aire acondicionado.',
+    feature4Title: 'Precios fijos', feature4Desc: 'Precio confirmado al reservar. Sin gastos ocultos.',
+    sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E, 1-3 pasajeros',
+    luxury: 'Berlina de Lujo', luxuryDesc: 'Mercedes Clase S o BMW Serie 7',
+    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V, hasta 6 pasajeros',
+    minibus: 'Microbus', minibusDesc: 'Para grupos de hasta 8 pasajeros',
+    passengers: 'Pasajeros', luggage: 'Maletas',
+    bookNow: 'RESERVAR', allInclusive: 'Todo incluido',
+    vehiclesTitle: 'Elige tu vehiculo',
+    howItWorks: 'Como funciona',
+    step1: 'Reserva online', step1Desc: 'Indica estacion, destino, fecha y hora. Precio instantaneo.',
+    step2: 'Encuentra a tu conductor', step2Desc: 'El conductor te espera en la salida de la estacion con cartel.',
+    step3: 'Relajate y disfruta', step3Desc: 'Traslado directo y comodo a tu destino en Paris.',
+    popularRoutesTitle: 'Rutas populares desde estaciones', fromLabel: 'Desde',
+    routes: [
+      { name: 'Gare du Nord \u2192 CDG', price: 60 },
+      { name: 'Gare de Lyon \u2192 Disneyland', price: 65 },
+      { name: 'Gare Montparnasse \u2192 Orly', price: 45 },
+    ],
+    bookingForm: 'Reserva tu traslado desde una estacion',
+    pickupLabel: 'Recogida', dropoffLabel: 'Destino',
+    dateLabel: 'Fecha', timeLabel: 'Hora',
+    defaultPickup: '',
+    otherCitiesTitle: 'Tambien disponible en 16 ciudades de Europa',
+    otherCitiesBtn: 'Ver todos los destinos',
+    rating: '4.5/5 Tripadvisor',
+  },
 };
 
 const vehiclesPrices = { sedan: 25, luxury: 45, minivan: 60, minibus: 90 };
@@ -167,6 +202,6 @@ const stationLinks = [
   },
 ];
 
-const seoUrls = { en: '/paris-train-station-transfer', fr: '/transfert-gare-paris', ru: '/transfer-vokzal-parizh', hy: '/pariz-kayarani-transfer' };
+const seoUrls = { en: '/paris-train-station-transfer', fr: '/transfert-gare-paris', ru: '/transfer-vokzal-parizh', hy: '/pariz-kayarani-transfer', es: '/es/traslado-estaciones-tren-paris' };
 const ParisTrainStationTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} stationLinks={stationLinks} pageId="paris-train" />;
 export default ParisTrainStationTransfer;
