@@ -25,6 +25,7 @@ import logging
 import re
 from datetime import datetime, timezone
 from typing import Optional, Any, Dict, Union
+from xml.sax.saxutils import escape as xml_escape
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
@@ -137,8 +138,8 @@ async def blog_sitemap():
     for d in docs:
         lang = (d.get("language_code") or "en").lower()
         prefix = "https://www.zont.cab/es/blog" if lang == "es" else "https://www.zont.cab/blog"
-        loc = f"{prefix}/{d['slug']}"
-        lastmod = d.get("updatedAt") or d.get("createdAt") or ""
+        loc = xml_escape(f"{prefix}/{d['slug']}")
+        lastmod = xml_escape(str(d.get("updatedAt") or d.get("createdAt") or ""))
         urls_xml.append(
             f"  <url><loc>{loc}</loc>"
             f"<lastmod>{lastmod}</lastmod>"

@@ -117,6 +117,9 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Partner Ride Cancellation (waiting for C# team endpoint)
 - SEO Redirections for old URLs (waiting for user confirmation on approach)
 
+## Latest Changes (Feb 2026)
+- **Blog Webhook + Native Blog Pages** (DONE): Updated `POST /api/webhooks/blog` to accept the new flat CMS payload (id, title, slug, metaDescription, content_html, heroImageUrl, content_markdown, jsonLd, faqJsonLd, languageCode, publicUrl, createdAt). Built React routes `/blog`, `/blog/:slug`, `/es/blog`, `/es/blog/:slug` reading from `/api/blog-articles` + `/api/blog-articles/{slug}`. Article pages inject `jsonLd` and `faqJsonLd` for SEO. Added dynamic `/api/sitemap-blog.xml`. 12/12 backend tests pass.
+
 ## Credentials
 - Super Admin: admin@zont.cab / admin123
 - Fleet Admin: Nandetiri1@gmail.com / 12345678
