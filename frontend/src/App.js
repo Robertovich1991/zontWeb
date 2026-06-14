@@ -195,9 +195,8 @@ function App() {
               <SmartAppBanner />
               <Suspense fallback={<Loading />}>
                 <Routes>
-                  {/* /blog/* — redirect to blog subdomain (handled in index.html for direct loads, and here for SPA navigations) */}
-                  <Route path="/blog/*" element={<BlogRedirect />} />
-                  <Route path="/blog" element={<BlogRedirect />} />
+                  {/* /blog/* — reverse proxy to blog.zont.cab handled server-side by FastAPI.
+                      No React route here so React Router lets the request fall through to the server. */}
                   <Route path="/" element={<Home />} />
                   <Route path="/fr" element={<Home />} />
                   <Route path="/ru" element={<Home />} />
