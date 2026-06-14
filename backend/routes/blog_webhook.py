@@ -5,26 +5,26 @@ content platforms (e.g. BabyLoveGrowth.ai) and stores them in MongoDB.
 This lets us host blog content directly on zont.cab/blog/<slug> (sub-folder SEO)
 instead of relying on the external subdomain blog.zont.cab.
 
-Inbound payload schema:
+Inbound payload schema (flat structure):
     {
-      "event": "article.published" | "article.updated",
-      "article": {
-        "id": "<external id>",
-        "title": "...",
-        "slug": "url-friendly-slug",
-        "content": "<html or markdown>",
-        "metaTitle": "...",
-        "metaDescription": "...",
-        "featuredImage": "https://...",
-        "createdAt": "ISO-8601",
-        "updatedAt": "ISO-8601"
-      }
+      "id": 10,
+      "title": "...",
+      "slug": "url-friendly-slug",
+      "metaDescription": "...",
+      "content_html": "<h1>...</h1>",
+      "heroImageUrl": "https://cdn.example.com/hero-image.jpg",
+      "content_markdown": "# ...",
+      "jsonLd": { "@context": "https://schema.org", "@type": "Article" },
+      "faqJsonLd": { "@context": "https://schema.org", "@type": "FAQPage" },
+      "languageCode": "en",
+      "publicUrl": "https://example.com/...",
+      "createdAt": "ISO-8601"
     }
 """
 import logging
 import re
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, Any, Dict, Union
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
@@ -41,21 +41,24 @@ def set_db(database):
     db = database
 
 
-class ArticleIn(BaseModel):
-    id: str
+class BlogWebhookPayload(BaseModel):
+    """Flat payload as sent by BabyLoveGrowth and similar CMS platforms."""
+    id: Union[int, str]
     title: str
     slug: str
-    content: str = ""
-    metaTitle: Optional[str] = None
-    metaDescription: Optional[str] = None
-    featuredImage: Optional[str] = None
+    metaDescription: Optional[str] = ""
+    content_html: Optional[str] = ""
+    content_markdown: Optional[str] = ""
+    heroImageUrl: Optional[str] = ""
+    jsonLd: Optional[Dict[str, Any]] = None
+    faqJsonLd: Optional[Dict[str, Any]] = None
+    languageCode: Optional[str] = "en"
+    publicUrl: Optional[str] = ""
     createdAt: Optional[str] = None
     updatedAt: Optional[str] = None
 
-
-class BlogWebhookPayload(BaseModel):
-    event: str
-    article: ArticleIn
+    class Config:
+        extra = "allow"  # Tolerate unknown future fields without breaking
 
 
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -74,48 +77,94 @@ async def blog_article_webhook(payload: BlogWebhookPayload, request: Request):
     if db is None:
         raise HTTPException(503, "Database not available")
 
-    article = payload.article
-    slug = sanitize_slug(article.slug or article.title)
+    slug = sanitize_slug(payload.slug or payload.title)
     if not slug or not SLUG_PATTERN.match(slug):
         raise HTTPException(400, f"Invalid slug after sanitization: '{slug}'")
 
+    external_id = str(payload.id)
+    now_iso = datetime.now(timezone.utc).isoformat()
+
     doc = {
-        "external_id": article.id,
-        "title": article.title,
+        "external_id": external_id,
+        "title": payload.title,
         "slug": slug,
-        "content": article.content,
-        "meta_title": article.metaTitle or article.title,
-        "meta_description": article.metaDescription or "",
-        "featured_image": article.featuredImage or "",
-        "createdAt": article.createdAt or datetime.now(timezone.utc).isoformat(),
-        "updatedAt": article.updatedAt or datetime.now(timezone.utc).isoformat(),
-        "received_at": datetime.now(timezone.utc).isoformat(),
-        "event": payload.event,
+        "meta_title": payload.title,
+        "meta_description": payload.metaDescription or "",
+        "content_html": payload.content_html or "",
+        "content_markdown": payload.content_markdown or "",
+        "hero_image_url": payload.heroImageUrl or "",
+        "json_ld": payload.jsonLd or None,
+        "faq_json_ld": payload.faqJsonLd or None,
+        "language_code": (payload.languageCode or "en").lower(),
+        "public_url": payload.publicUrl or "",
+        "createdAt": payload.createdAt or now_iso,
+        "updatedAt": payload.updatedAt or now_iso,
+        "received_at": now_iso,
         "source_ip": request.client.host if request.client else None,
     }
 
-    # Upsert by external_id (or slug if external_id missing) so updates replace
-    key = {"external_id": article.id} if article.id else {"slug": slug}
+    # Upsert by external_id (or slug if missing) so re-publishes replace cleanly
+    key = {"external_id": external_id} if external_id else {"slug": slug}
     result = await db.blog_articles.update_one(key, {"$set": doc}, upsert=True)
     is_new = result.upserted_id is not None
-    logger.info(f"Blog webhook {payload.event}: slug='{slug}', new={is_new}")
+    logger.info(f"Blog webhook: slug='{slug}' lang='{doc['language_code']}' new={is_new}")
 
+    # Frontend URL — prefix with /es for Spanish, root /blog/ otherwise
+    lang = doc["language_code"]
+    url_prefix = "/es/blog" if lang == "es" else "/blog"
     return {
         "success": True,
         "slug": slug,
-        "url": f"https://www.zont.cab/blog/{slug}",
+        "language": lang,
+        "url": f"https://www.zont.cab{url_prefix}/{slug}",
         "created": is_new,
-        "event": payload.event,
     }
 
 
-# Public read endpoints — used by the React frontend to render the blog
-@router.get("/blog-articles")
-async def list_articles(limit: int = 50):
+from fastapi.responses import Response
+
+
+# ---------- Dynamic XML sitemap for blog articles ----------
+@router.get("/sitemap-blog.xml")
+async def blog_sitemap():
     if db is None:
         raise HTTPException(503, "Database not available")
     docs = await db.blog_articles.find(
-        {}, {"_id": 0, "content": 0, "source_ip": 0}
+        {}, {"slug": 1, "updatedAt": 1, "createdAt": 1, "language_code": 1, "_id": 0}
+    ).sort("createdAt", -1).limit(2000).to_list(2000)
+
+    urls_xml = []
+    for d in docs:
+        lang = (d.get("language_code") or "en").lower()
+        prefix = "https://www.zont.cab/es/blog" if lang == "es" else "https://www.zont.cab/blog"
+        loc = f"{prefix}/{d['slug']}"
+        lastmod = d.get("updatedAt") or d.get("createdAt") or ""
+        urls_xml.append(
+            f"  <url><loc>{loc}</loc>"
+            f"<lastmod>{lastmod}</lastmod>"
+            f"<changefreq>weekly</changefreq><priority>0.6</priority></url>"
+        )
+
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(urls_xml)
+        + "\n</urlset>"
+    )
+    return Response(content=xml, media_type="application/xml")
+
+
+# ---------- Public read endpoints used by the React frontend ----------
+@router.get("/blog-articles")
+async def list_articles(limit: int = 50, language: Optional[str] = None):
+    if db is None:
+        raise HTTPException(503, "Database not available")
+    query: Dict[str, Any] = {}
+    if language:
+        query["language_code"] = language.lower()
+    docs = await db.blog_articles.find(
+        query,
+        {"_id": 0, "content_html": 0, "content_markdown": 0, "source_ip": 0},
     ).sort("createdAt", -1).limit(min(limit, 100)).to_list(100)
     return {"articles": docs, "total": len(docs)}
 
@@ -124,7 +173,9 @@ async def list_articles(limit: int = 50):
 async def get_article(slug: str):
     if db is None:
         raise HTTPException(503, "Database not available")
-    doc = await db.blog_articles.find_one({"slug": slug}, {"_id": 0, "source_ip": 0})
+    doc = await db.blog_articles.find_one(
+        {"slug": slug}, {"_id": 0, "source_ip": 0}
+    )
     if not doc:
         raise HTTPException(404, "Article not found")
     return doc

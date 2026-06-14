@@ -682,4 +682,8 @@
   <url><loc>https://www.zont.cab/review</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://www.zont.cab/avis</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 
+  <!-- ==================== BLOG ==================== -->
+  <url><loc>https://www.zont.cab/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/es/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
 </urlset>

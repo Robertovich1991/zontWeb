@@ -39,6 +39,10 @@ const LookingForPartners = lazy(() => import("@/pages/LookingForPartners"));
 const ParisAirportTransfer = lazy(() => import("@/pages/ParisAirportTransfer"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
+// Blog
+const BlogIndex = lazy(() => import("@/pages/blog/BlogIndex"));
+const BlogArticle = lazy(() => import("@/pages/blog/BlogArticle"));
+
 // Admin pages (lazy)
 const AdminLogin = lazy(() => import("@/pages/admin/AdminLogin"));
 const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
@@ -195,8 +199,12 @@ function App() {
               <SmartAppBanner />
               <Suspense fallback={<Loading />}>
                 <Routes>
-                  {/* /blog/* — reverse proxy to blog.zont.cab handled server-side by FastAPI.
-                      No React route here so React Router lets the request fall through to the server. */}
+                  {/* Blog (native React) — replaces previous blog.zont.cab reverse proxy */}
+                  <Route path="/blog" element={<BlogIndex language="en" />} />
+                  <Route path="/blog/:slug" element={<BlogArticle language="en" />} />
+                  <Route path="/es/blog" element={<BlogIndex language="es" />} />
+                  <Route path="/es/blog/:slug" element={<BlogArticle language="es" />} />
+
                   <Route path="/" element={<Home />} />
                   <Route path="/fr" element={<Home />} />
                   <Route path="/ru" element={<Home />} />

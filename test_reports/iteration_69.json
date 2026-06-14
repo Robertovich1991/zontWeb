@@ -1,0 +1,54 @@
+{
+  "summary": "Backend testing of the new flat-schema Blog Webhook (POST /api/webhooks/blog) and supporting read endpoints. Created /app/backend/tests/test_blog_webhook.py with 12 pytest test cases covering: webhook create (EN+ES), idempotent update by id (created=false), invalid-slug 400, missing-field 422, list endpoint (with heavy-field exclusion + language filter EN/ES), detail endpoint (full payload + snake_case mapping + 404), and XML sitemap (structure, content-type, EN under /blog/ and ES under /es/blog/, lastmod). All 12 tests PASSED on first run against the public K8s ingress URL.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "POST /api/webhooks/blog",
+        "issue": "Endpoint is fully unauthenticated/unsigned - any caller on the internet can publish or overwrite blog articles. Recommend a shared-secret header (e.g. X-Webhook-Secret) verified server-side."
+      },
+      {
+        "endpoint": "POST /api/webhooks/blog",
+        "issue": "json_ld / faq_json_ld accept arbitrary nested JSON with extra='allow' on the model - no size cap. A malicious sender could store huge documents. Consider a max body-size guard."
+      },
+      {
+        "endpoint": "GET /api/blog-articles",
+        "issue": "Mongo find().limit(min(limit, 100)).to_list(100) ignores the smaller user-provided limit when converting to list (always materialises up to 100). Minor, but limit parameter is partially honoured only at cursor level."
+      },
+      {
+        "endpoint": "GET /api/sitemap-blog.xml",
+        "issue": "URLs/lastmod values are interpolated into XML without escaping. If a slug ever contained `&`, `<` or `>`, the sitemap would become invalid XML. Slugs are sanitized to [a-z0-9-] so currently safe, but lastmod comes straight from the webhook payload and is not validated/escaped."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_blog_webhook.py",
+    "/app/test_reports/pytest/blog_webhook_results.xml"
+  ],
+  "action_items": [
+    "(optional) Add webhook authentication (shared secret header) to POST /api/webhooks/blog before exposing publicly.",
+    "(optional) XML-escape lastmod / loc values in /api/sitemap-blog.xml to harden against malformed payloads.",
+    "(optional) Honour the user-supplied limit in /api/blog-articles list (currently capped to 100 even when caller asks for less in to_list)."
+  ],
+  "critical_code_review_comments": [
+    "blog_webhook.py: Pydantic model uses extra='allow', so unknown fields are silently kept on the request object - fine for forward-compat but means malformed clients won't get clear errors.",
+    "Upsert key falls back to slug when external_id is missing, but external_id is always set to str(payload.id) and `id` is required by the model, so the fallback branch is effectively dead code.",
+    "sanitize_slug + SLUG_PATTERN combination correctly rejects empty/non-kebab-case slugs (verified by test_invalid_slug_returns_400).",
+    "List endpoint correctly excludes content_html/content_markdown/_id/source_ip for performance (verified).",
+    "Detail endpoint correctly returns snake_case fields (hero_image_url, json_ld, faq_json_ld, language_code, public_url) (verified)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_blog_webhook.py (new)"
+  ],
+  "success_rate": {"backend": "100% (12/12)", "frontend": "not tested (per request)"},
+  "test_credentials": "none required - endpoints are public",
+  "seed_data_creation": "Tests inserted 2 transient articles per run (slugs prefixed test-en-article-<run_tag> / test-es-articulo-<run_tag>) and cleaned them up via direct Mongo after the run. Pre-existing id=10 (English) and id=11 (Spanish 'como-reservar-traslado-paris') were preserved untouched.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Reusable pytest suite at /app/backend/tests/test_blog_webhook.py uses unique per-run slugs derived from uuid so it can be re-run safely without collisions. Use REACT_APP_BACKEND_URL from /app/frontend/.env. Pre-existing demo articles (id=10 English, id=11 Spanish slug 'como-reservar-traslado-paris') still exist in DB."
+}
