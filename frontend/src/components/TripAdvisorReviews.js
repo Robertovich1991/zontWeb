@@ -6,79 +6,86 @@ const TRIPADVISOR_URL = {
   fr: 'https://www.tripadvisor.fr/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html',
   en: 'https://www.tripadvisor.com/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html',
   ru: 'https://www.tripadvisor.ru/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html',
+  es: 'https://www.tripadvisor.es/Attraction_Review-g187147-d17154566-Reviews-ZONT_Cab-Paris_Ile_de_France.html',
 };
 
 const REVIEWS = [
   {
     name: 'kgcrouch',
     location: 'Santa Fe, USA',
-    date: { fr: 'Fev. 2026', en: 'Feb 2026', ru: 'Фев 2026' },
+    date: { fr: 'Fev. 2026', en: 'Feb 2026', ru: 'Фев 2026', es: 'Feb 2026' },
     rating: 5,
-    title: { fr: 'Service parfait !', en: 'Perfect service!', ru: 'Идеальный сервис!' },
+    title: { fr: 'Service parfait !', en: 'Perfect service!', ru: 'Идеальный сервис!', es: '¡Servicio perfecto!' },
     text: {
       fr: 'Notre chauffeur est arrive tot et notre voyage a Orly a ete parfait. Je recommande vivement. Tres belle voiture, beaucoup de place pour 4 adultes plus bagages.',
       en: 'Our driver arrived early and our trip to Orly was perfect. Highly recommend. Very nice car, plenty of room for 4 adults plus luggage.',
       ru: 'Водитель приехал рано, поездка в Орли была идеальной. Очень рекомендую.',
+      es: 'Nuestro chófer llegó temprano y nuestro viaje a Orly fue perfecto. Muy recomendable. Coche muy bonito, espacio de sobra para 4 adultos y equipaje.',
     },
   },
   {
     name: 'Kimberley H',
     location: '',
-    date: { fr: 'Nov. 2025', en: 'Nov 2025', ru: 'Ноя 2025' },
+    date: { fr: 'Nov. 2025', en: 'Nov 2025', ru: 'Ноя 2025', es: 'Nov. 2025' },
     rating: 5,
-    title: { fr: 'Impeccable', en: 'Flawless', ru: 'Безупречно' },
+    title: { fr: 'Impeccable', en: 'Flawless', ru: 'Безупречно', es: 'Impecable' },
     text: {
       fr: "Nous avons eu de belles experiences avec les transferts. Les chauffeurs sont a l'heure, efficaces et connaissent les amenagements de l'aeroport. Ca diminue le stress, ca en vaut la peine.",
       en: 'We had great experiences with the transfers. Drivers are on time, efficient and know the airport layout. It reduces stress, totally worth it.',
       ru: 'Отличные впечатления от трансферов. Водители пунктуальны и знают аэропорт.',
+      es: 'Hemos tenido excelentes experiencias con los traslados. Los conductores son puntuales, eficientes y conocen bien el aeropuerto. Reduce el estrés, vale totalmente la pena.',
     },
   },
   {
     name: 'Alonz W',
     location: '',
-    date: { fr: 'Nov. 2025', en: 'Nov 2025', ru: 'Ноя 2025' },
+    date: { fr: 'Nov. 2025', en: 'Nov 2025', ru: 'Ноя 2025', es: 'Nov. 2025' },
     rating: 5,
-    title: { fr: 'Bon transfert a CDG', en: 'Great CDG transfer', ru: 'Отличный трансфер CDG' },
+    title: { fr: 'Bon transfert a CDG', en: 'Great CDG transfer', ru: 'Отличный трансфер CDG', es: 'Excelente traslado a CDG' },
     text: {
       fr: "Le chauffeur est venu a l'heure a notre hotel, a aide avec les bagages. Super experience. Recommande, arrive a temps et de bonne humeur.",
       en: 'Driver came on time to our hotel, helped with luggage. Great experience. Recommended, arrived on time and in a good mood.',
       ru: 'Водитель приехал вовремя, помог с багажом. Отличный опыт.',
+      es: 'El chófer llegó puntual a nuestro hotel y nos ayudó con el equipaje. Gran experiencia. Recomendado, llegó a tiempo y de buen humor.',
     },
   },
   {
     name: 'WILLIAM H',
     location: '',
-    date: { fr: 'Juin 2025', en: 'Jun 2025', ru: 'Июн 2025' },
+    date: { fr: 'Juin 2025', en: 'Jun 2025', ru: 'Июн 2025', es: 'Jun. 2025' },
     rating: 5,
-    title: { fr: "Transfert aeroport a Paris", en: 'Airport transfer in Paris', ru: 'Трансфер из аэропорта' },
+    title: { fr: "Transfert aeroport a Paris", en: 'Airport transfer in Paris', ru: 'Трансфер из аэропорта', es: 'Traslado al aeropuerto en París' },
     text: {
       fr: "Ca ne pouvait pas etre mieux. Notre chauffeur Alex etait genial. Nous allons certainement utiliser ce service a nouveau. Il attendait a notre arrivee et etait un tres bon conducteur.",
       en: "Couldn't have been better. Our driver Alex was great. We will definitely use this service again. He was waiting at our arrival and was an excellent driver.",
       ru: 'Лучше быть не могло. Наш водитель Алекс был великолепен.',
+      es: 'No podría haber sido mejor. Nuestro chófer Alex fue estupendo. Sin duda volveremos a usar este servicio. Esperaba a nuestra llegada y fue un excelente conductor.',
     },
   },
   {
     name: 'BAWN',
     location: 'Hollywood, FL',
-    date: { fr: 'Aout 2024', en: 'Aug 2024', ru: 'Авг 2024' },
+    date: { fr: 'Aout 2024', en: 'Aug 2024', ru: 'Авг 2024', es: 'Ago. 2024' },
     rating: 5,
-    title: { fr: 'Merci Steve !', en: 'Thank you Steve!', ru: 'Спасибо Стив!' },
+    title: { fr: 'Merci Steve !', en: 'Thank you Steve!', ru: 'Спасибо Стив!', es: '¡Gracias Steve!' },
     text: {
       fr: "Apprecie la gentillesse et la patience de Steve. La circulation etait terrible mais il permettait de s'asseoir facilement et d'accueillir tout ce que Paris avait a offrir.",
       en: "Appreciated Steve's kindness and patience. Traffic was terrible but he made it easy to sit back and enjoy everything Paris had to offer.",
       ru: 'Оценил доброту и терпение Стива. Пробки были ужасные, но он все сделал комфортно.',
+      es: 'Apreciamos la amabilidad y paciencia de Steve. El tráfico era terrible pero hizo que fuera fácil relajarse y disfrutar de todo lo que París tiene que ofrecer.',
     },
   },
   {
     name: 'Aza Dil',
     location: '',
-    date: { fr: 'Dec. 2023', en: 'Dec 2023', ru: 'Дек 2023' },
+    date: { fr: 'Dec. 2023', en: 'Dec 2023', ru: 'Дек 2023', es: 'Dic. 2023' },
     rating: 5,
-    title: { fr: 'Vehicule de luxe spacieux', en: 'Spacious luxury vehicle', ru: 'Просторный люкс автомобиль' },
+    title: { fr: 'Vehicule de luxe spacieux', en: 'Spacious luxury vehicle', ru: 'Просторный люкс автомобиль', es: 'Vehículo de lujo espacioso' },
     text: {
       fr: "Notre chauffeur nous attendait malgre notre long retard a la douane. La voiture etait si confortable, propre et spacieuse. Recommande vivement pour les familles avec bagages !",
       en: 'Our driver was waiting despite our long delay at customs. The car was so comfortable, clean and spacious. Highly recommended for families with luggage!',
       ru: 'Водитель ждал нас несмотря на задержку на таможне. Машина была очень комфортной.',
+      es: '¡Nuestro chófer nos estaba esperando a pesar de nuestro largo retraso en aduanas. El coche era muy cómodo, limpio y espacioso. Muy recomendable para familias con equipaje!',
     },
   },
 ];
@@ -93,7 +100,7 @@ const Stars = ({ count }) => (
 
 const TripAdvisorReviews = () => {
   const { language } = useLanguage();
-  const lang = ['fr', 'en', 'ru'].includes(language) ? language : 'en';
+  const lang = ['fr', 'en', 'ru', 'es'].includes(language) ? language : 'en';
   const url = TRIPADVISOR_URL[lang] || TRIPADVISOR_URL.en;
 
   return (
@@ -113,7 +120,7 @@ const TripAdvisorReviews = () => {
           <span className="text-white font-bold text-lg">4.5/5</span>
         </div>
         <p className="text-gray-400 text-sm">
-          {lang === 'fr' ? 'Base sur 29 avis verifies' : lang === 'ru' ? 'На основе 29 проверенных отзывов' : 'Based on 29 verified reviews'}
+          {lang === 'fr' ? 'Base sur 29 avis verifies' : lang === 'ru' ? 'На основе 29 проверенных отзывов' : lang === 'es' ? 'Basado en 29 opiniones verificadas' : 'Based on 29 verified reviews'}
         </p>
       </div>
 
@@ -148,7 +155,7 @@ const TripAdvisorReviews = () => {
           className="inline-flex items-center gap-2 text-[#2ecc71] hover:text-[#27ae60] font-semibold text-sm transition-colors"
           data-testid="tripadvisor-read-all"
         >
-          {lang === 'fr' ? 'Voir les 29 avis sur TripAdvisor' : lang === 'ru' ? 'Все 29 отзывов на TripAdvisor' : 'Read all 29 reviews on TripAdvisor'}
+          {lang === 'fr' ? 'Voir les 29 avis sur TripAdvisor' : lang === 'ru' ? 'Все 29 отзывов на TripAdvisor' : lang === 'es' ? 'Ver las 29 opiniones en TripAdvisor' : 'Read all 29 reviews on TripAdvisor'}
           <ExternalLink className="w-4 h-4" />
         </a>
       </div>

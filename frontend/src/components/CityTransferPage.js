@@ -560,7 +560,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
           <section className="py-10 md:py-14 px-4 bg-[#0f1419]" data-testid="disposal-cta-section">
             <div className="max-w-5xl mx-auto">
               <Link
-                to={language === 'en' ? '/driver-at-disposal' : language === 'ru' ? '/voditel-s-avtomobilem' : language === 'hy' ? '/varorde-tramadrutyamb' : '/chauffeur-mis-a-disposition'}
+                to={language === 'en' ? '/driver-at-disposal' : language === 'ru' ? '/voditel-s-avtomobilem' : language === 'hy' ? '/varorde-tramadrutyamb' : language === 'es' ? '/es/chofer-privado-a-disposicion' : '/chauffeur-mis-a-disposition'}
                 data-testid="disposal-cta-link"
                 className="group block rounded-2xl overflow-hidden border border-[#c8a951]/30 hover:border-[#c8a951] bg-gradient-to-r from-[#11161f] to-[#1a2332] transition-all duration-500"
               >
@@ -568,7 +568,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                   <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[240px] overflow-hidden">
                     <img
                       src="/images/chauffeur-prive-paris-tour-eiffel.webp"
-                      alt={language === 'fr' ? 'Chauffeur privé à disposition — Paris' : language === 'ru' ? 'Водитель в распоряжение — Париж' : language === 'hy' ? 'Վարորդ տրամադրությամբ — Փարիզ' : 'Hourly Driver at Disposal — Paris'}
+                      alt={language === 'fr' ? 'Chauffeur privé à disposition — Paris' : language === 'ru' ? 'Водитель в распоряжение — Париж' : language === 'hy' ? 'Վարորդ տրամադրությամբ — Փարիզ' : language === 'es' ? 'Chófer privado a disposición — París' : 'Hourly Driver at Disposal — Paris'}
                       loading="lazy"
                       width="640"
                       height="480"
@@ -579,13 +579,13 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                   <div className="p-6 md:p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-[10px] uppercase tracking-[0.25em] text-[#c8a951] font-semibold">
-                        {language === 'fr' ? 'Nouveau service' : language === 'ru' ? 'Новый сервис' : language === 'hy' ? 'Նոր ծառայություն' : 'New service'}
+                        {language === 'fr' ? 'Nouveau service' : language === 'ru' ? 'Новый сервис' : language === 'hy' ? 'Նոր ծառայություն' : language === 'es' ? 'Nuevo servicio' : 'New service'}
                       </span>
                       <span className="w-6 h-px bg-[#c8a951]" />
                       <span className="text-[10px] uppercase tracking-wider text-gray-400">4h · 8h · 12h</span>
                     </div>
                     <h3 className="text-xl md:text-2xl font-light tracking-tight text-white mb-2">
-                      {language === 'fr' ? 'Chauffeur Privé Mis à Disposition' : language === 'ru' ? 'Водитель в Распоряжении' : language === 'hy' ? 'Վարորդ Տրամադրությամբ' : 'Hourly Driver at Disposal'}
+                      {language === 'fr' ? 'Chauffeur Privé Mis à Disposition' : language === 'ru' ? 'Водитель в Распоряжении' : language === 'hy' ? 'Վարորդ Տրամադրությամբ' : language === 'es' ? 'Chófer Privado a Disposición' : 'Hourly Driver at Disposal'}
                     </h3>
                     <p className="text-sm text-gray-300 leading-relaxed mb-5 max-w-lg">
                       {language === 'fr'
@@ -594,10 +594,12 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                         ? 'Закажите личного водителя почасово: Mercedes S, E, V-Class или Renault Trafic. Фиксированная цена, всё включено.'
                         : language === 'hy'
                         ? 'Ամրագրեք մասնավոր վարորդ ժամային սկզբունքով՝ Mercedes S, E, V դասի կամ Renault Trafic։'
+                        : language === 'es'
+                        ? 'Reserva un chófer privado por horas: Mercedes Clase S, E, V o Renault Trafic. Tarifa fija, todo incluido, paradas ilimitadas en París.'
                         : 'Hire a private chauffeur by the hour: Mercedes S, E, V-Class or Renault Trafic. Fixed pricing, all included, unlimited stops within Paris.'}
                     </p>
                     <span className="inline-flex items-center gap-2 text-[#c8a951] font-semibold uppercase tracking-wider text-xs group-hover:translate-x-1 transition-transform">
-                      {language === 'fr' ? 'Découvrir nos véhicules' : language === 'ru' ? 'Открыть наш парк' : language === 'hy' ? 'Բացել մեքենաները' : 'Discover our fleet'}
+                      {language === 'fr' ? 'Découvrir nos véhicules' : language === 'ru' ? 'Открыть наш парк' : language === 'hy' ? 'Բացել մեքենաները' : language === 'es' ? 'Descubre nuestra flota' : 'Discover our fleet'}
                       <ChevronRight size={16} />
                     </span>
                   </div>
