@@ -470,6 +470,33 @@ const KioskPage = () => {
     return () => clearInterval(interval);
   }, [paymentIntentId, terminalStatus]);
 
+  // Cancel pending Stripe Terminal payment when the kiosk page is closed / navigated away / refreshed.
+  // Without this, the physical TPE keeps showing the amount and "Tap or insert" forever
+  // until the customer or staff manually clears it on the terminal device.
+  useEffect(() => {
+    const cancelOnExit = () => {
+      const pi = paymentIntentIdRef.current;
+      const status = terminalStatusRef.current;
+      if (pi && status !== 'paid' && status !== 'cancelled') {
+        // keepalive lets the browser dispatch the request even as the page unloads
+        try {
+          fetch(`${API}/api/stripe-terminal/cancel-payment/${pi}`, { method: 'POST', keepalive: true });
+        } catch (e) { /* swallow */ }
+      }
+    };
+    const onVisibility = () => { if (document.visibilityState === 'hidden') cancelOnExit(); };
+    window.addEventListener('beforeunload', cancelOnExit);
+    window.addEventListener('pagehide', cancelOnExit);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('beforeunload', cancelOnExit);
+      window.removeEventListener('pagehide', cancelOnExit);
+      document.removeEventListener('visibilitychange', onVisibility);
+      // Also cancel on React unmount (e.g. user navigates to another route inside the SPA)
+      cancelOnExit();
+    };
+  }, []);
+
   const handleCancelTerminalPayment = async () => {
     if (!paymentIntentId) return;
     try {

@@ -244,11 +244,30 @@ async def get_payment_status(payment_intent_id: str):
     }
 
 
+@router.post("/clear-reader/{hotel_slug}")
+async def clear_reader(hotel_slug: str):
+    """Emergency endpoint — forces the reader linked to a hotel slug to clear its screen
+    (cancel any active action, even when the PaymentIntent is lost/unknown)."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    hotel = await db.kiosk_hotels.find_one({"slug": hotel_slug}, {"_id": 0})
+    reader_id = hotel.get("stripe_terminal_reader_id") if hotel else None
+    if not reader_id:
+        raise HTTPException(404, "Reader not registered for this hotel")
+    try:
+        stripe.terminal.Reader.cancel_action(reader_id)
+        return {"cleared": True, "reader_id": reader_id}
+    except Exception as e:
+        # cancel_action returns 400 when reader has no active action — that's also "clean"
+        return {"cleared": True, "reader_id": reader_id, "note": str(e)}
+
+
 @router.post("/cancel-payment/{payment_intent_id}")
 async def cancel_terminal_payment(payment_intent_id: str):
-    """Called when the customer taps 'Cancel' on the kiosk during card prompt."""
+    """Called when the customer taps 'Cancel' on the kiosk during card prompt,
+    or automatically when the kiosk page closes/refreshes/timeouts."""
+    reader_id = None
     try:
-        # First cancel the action on the reader, then the PI
         pi = stripe.PaymentIntent.retrieve(payment_intent_id)
         reader_id = (pi.metadata or {}).get("reader_id")
         if not reader_id and db is not None:
@@ -256,21 +275,36 @@ async def cancel_terminal_payment(payment_intent_id: str):
             if slug:
                 hotel = await db.kiosk_hotels.find_one({"slug": slug}, {"_id": 0})
                 reader_id = hotel.get("stripe_terminal_reader_id") if hotel else None
-        if reader_id:
-            try:
-                stripe.terminal.Reader.cancel_action(reader_id)
-            except Exception:
-                pass
+    except Exception as e:
+        logger.warning(f"Cancel: PI retrieve failed for {payment_intent_id}: {e}")
+
+    # Always try to clear the reader screen — even if PI lookup failed.
+    # When no reader_id is known we fall back to the first registered hotel reader (single-tenant setup).
+    if not reader_id and db is not None:
+        try:
+            any_hotel = await db.kiosk_hotels.find_one({"stripe_terminal_reader_id": {"$exists": True}}, {"_id": 0, "stripe_terminal_reader_id": 1})
+            if any_hotel:
+                reader_id = any_hotel.get("stripe_terminal_reader_id")
+        except Exception:
+            pass
+    if reader_id:
+        try:
+            stripe.terminal.Reader.cancel_action(reader_id)
+            logger.info(f"Reader {reader_id} action cancelled for PI {payment_intent_id}")
+        except Exception as e:
+            logger.warning(f"Reader.cancel_action failed for {reader_id}: {e}")
+
+    try:
         stripe.PaymentIntent.cancel(payment_intent_id)
     except Exception as e:
-        logger.warning(f"Cancel failed: {e}")
+        logger.warning(f"PI cancel failed for {payment_intent_id}: {e}")
 
     if db is not None:
         await db.kiosk_bookings.update_one(
             {"stripe_payment_intent_id": payment_intent_id},
             {"$set": {"status": "cancelled"}},
         )
-    return {"cancelled": True}
+    return {"cancelled": True, "reader_id": reader_id}
 
 
 @router.get("/reader-status/{hotel_slug}")
