@@ -209,7 +209,8 @@ function App() {
                   <Route path="/fr" element={<Home />} />
                   <Route path="/ru" element={<Home />} />
                   <Route path="/hy" element={<Home />} />
-                  <Route path="/es" element={<ParisAirportTransfer />} />
+                  <Route path="/es" element={<Home />} />
+                  <Route path="/es/traslado-aeropuerto-paris" element={<ParisAirportTransfer />} />
                   {/* Spanish service pages */}
                   <Route path="/es/minivan-traslado-aeropuerto-paris" element={<EsMinivan />} />
                   <Route path="/es/conductor-privado-paris" element={<EsConductorPrivado />} />

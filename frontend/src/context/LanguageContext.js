@@ -15,12 +15,27 @@ export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState('en');
 
   useEffect(() => {
-    // Get language from localStorage or browser
+    // 1. URL prefix takes precedence (for SEO + direct landings from Google).
+    //    `/es...` => es, `/fr...` => fr, etc.
+    const path = (typeof window !== 'undefined' ? window.location.pathname : '/') || '/';
+    const urlLang =
+      path === '/es' || path.startsWith('/es/') ? 'es' :
+      path === '/fr' || path.startsWith('/fr/') ? 'fr' :
+      path === '/ru' || path.startsWith('/ru/') ? 'ru' :
+      path === '/hy' || path.startsWith('/hy/') ? 'hy' :
+      null;
+    if (urlLang) {
+      setLanguage(urlLang);
+      document.documentElement.lang = urlLang;
+      return;
+    }
+    // 2. Otherwise use localStorage saved choice
     const savedLang = localStorage.getItem('language');
     if (savedLang) {
       setLanguage(savedLang);
       document.documentElement.lang = savedLang;
     } else {
+      // 3. Final fallback to browser language
       const browserLang = navigator.language.split('-')[0];
       if (['en', 'fr', 'ru', 'hy', 'es'].includes(browserLang)) {
         setLanguage(browserLang);

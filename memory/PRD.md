@@ -118,8 +118,9 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - SEO Redirections for old URLs (waiting for user confirmation on approach)
 
 ## Latest Changes (Feb 2026)
+- **Routes ES réorganisées** : `/es` est maintenant la **Home espagnole** (auparavant c'était la page Paris transfer). Nouvelle URL `/es/traslado-aeropuerto-paris` créée pour le contenu Paris airport transfer en espagnol. URL detection ajoutée dans `LanguageContext` (URL `/es*` → langue 'es' automatique pour bots Google + visiteurs directs). Home.js enrichie avec `homeContent.es`, `nameEs/urlEs` sur popularDest, `homeSeoUrls.es`, et fallback CMS-vers-hardcoded quand la langue ES manque dans les blocs CMS. Sitemap mis à jour.
 - **Spanish localization fixes (preview only — needs redeploy)** : Disposal CTA block, TripAdvisor reviews (6 reviews + headings + CTA), Footer service labels — all 3 blocks were stuck in EN/FR on `/es`, now fully translated to Spanish.
-- **Blog Webhook + Native Blog Pages** (DONE): Updated `POST /api/webhooks/blog` to accept the new flat CMS payload (id, title, slug, metaDescription, content_html, heroImageUrl, content_markdown, jsonLd, faqJsonLd, languageCode, publicUrl, createdAt). Built React routes `/blog`, `/blog/:slug`, `/es/blog`, `/es/blog/:slug` reading from `/api/blog-articles` + `/api/blog-articles/{slug}`. Article pages inject `jsonLd` and `faqJsonLd` for SEO. Added dynamic `/api/sitemap-blog.xml`. 12/12 backend tests pass.
+- **Blog Webhook + Native Blog Pages** (DONE): Updated `POST /api/webhooks/blog` to accept the new flat CMS payload. Built React routes `/blog`, `/blog/:slug`, `/es/blog`, `/es/blog/:slug` reading from `/api/blog-articles` + `/api/blog-articles/{slug}`. Article pages inject `jsonLd` and `faqJsonLd` for SEO. Added dynamic `/api/sitemap-blog.xml`. 12/12 backend tests pass.
 
 ## Credentials
 - Super Admin: admin@zont.cab / admin123

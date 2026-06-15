@@ -2,6 +2,8 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.zont.cab/sitemap.xml
+Sitemap: https://www.zont.cab/sitemap-index.xml
+Sitemap: https://www.zont.cab/api/sitemap-blog.xml
 
 Disallow: /car-selection
 Disallow: /checkout

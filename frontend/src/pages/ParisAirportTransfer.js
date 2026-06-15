@@ -212,6 +212,6 @@ const airportLinks = [
   },
 ];
 
-const seoUrls = { en: '/paris-airport-transfer', fr: '/transfert-aeroport-paris', ru: '/transfer-aeroport-parizh', hy: '/pariz-odanavakayani-transfer', es: '/es' };
+const seoUrls = { en: '/paris-airport-transfer', fr: '/transfert-aeroport-paris', ru: '/transfer-aeroport-parizh', hy: '/pariz-odanavakayani-transfer', es: '/es/traslado-aeropuerto-paris' };
 const ParisAirportTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} stationLinks={airportLinks} pageId="paris-airport" showDisposalCta />;
 export default ParisAirportTransfer;

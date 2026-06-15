@@ -135,19 +135,50 @@ const homeContent = {
     seoTitle: 'Zont - Պրեմիում Օդանավակայանի Տրանսֆեր Եվրոպայում',
     seoDesc: 'Պրոֆեսիոնալ անձնական վարորդ 16 եվրոպական քաղաքներում: Հաստատ գներ, թռիչքի հետևելում:',
   },
+  es: {
+    heroTitle: 'Traslado Aeropuerto Premium',
+    heroAccent: 'En Toda Europa',
+    heroSub: 'Chóferes privados profesionales en 16 ciudades. Precios fijos, seguimiento de vuelo, recepción personalizada.',
+    bookingTitle: 'Reserva Tu Traslado',
+    pickup: 'Dirección de recogida', dropoff: 'Dirección de destino', date: 'Fecha', time: 'Hora',
+    pickupPh: 'Aeropuerto, hotel, dirección...', dropoffPh: 'Hotel, centro, dirección...',
+    bookNow: 'BUSCAR TRASLADO', searching: 'BUSCANDO...',
+    fixedPrices: 'Precios Fijos', securePay: 'Pago Seguro',
+    stats: { trips: '50K+', tripsLabel: 'Viajes Realizados', cities: '16', citiesLabel: 'Ciudades', available: '24/7', availableLabel: 'Servicio', rating: '4.5/5', ratingLabel: 'Valoración' },
+    trustTitle: '¿Por qué los Viajeros Confían en Zont?',
+    f1Title: 'Recepción Personalizada', f1Desc: 'Tu chófer te espera en llegadas con un cartel con tu nombre. 60 min de espera gratis en caso de retraso.',
+    f2Title: 'Seguimiento de Vuelos', f2Desc: 'Monitorización en tiempo real de tu vuelo. Sin recargo si hay retraso.',
+    f3Title: 'Vehículos Premium', f3Desc: 'Mercedes, BMW. Limpios, con aire acondicionado, menos de 3 años.',
+    f4Title: 'Precios Fijos', f4Desc: 'Precio confirmado al reservar. Sin gastos ocultos, peajes incluidos.',
+    popularTitle: 'Destinos Populares',
+    reviewsTitle: 'Lo Que Dicen Nuestros Clientes',
+    ctaTitle: '¿Listo para Reservar Tu Traslado?', ctaBtn: 'Reservar Ahora',
+    appTitle: 'Sigue Tu Reserva en Tiempo Real', appSubtitle: 'Descarga la app Zont y sigue a tu chófer en directo, recibe notificaciones instantáneas y gestiona tus reservas desde cualquier lugar.',
+    appFeature1: 'Seguimiento del chófer en directo', appFeature2: 'Confirmaciones de reserva instantáneas', appFeature3: 'Gestiona tus reservas en cualquier lugar',
+    howTitle: 'Cómo Funciona',
+    recentTitle: 'Búsquedas Recientes', recentEmpty: 'Sin búsquedas recientes',
+    aiTitle: 'Reserva en 10 segundos con IA', aiPlaceholder: 'Ej: CDG mañana 14h a Hilton Ópera 2 pasajeros', aiBtn: 'AUTO', aiLoading: 'Analizando tu viaje...', aiLow: 'Datos insuficientes. Verifica los campos.',
+    guidedPickup: '¿Desde dónde sales?', guidedDropoff: '¿A dónde vas?', guidedDate: '¿Qué fecha?', guidedTime: '¿A qué hora?',
+    guidedSuggestions: { pickup: ['Paris CDG', 'Paris Orly', 'Nice Aeropuerto', 'Lyon Aeropuerto'], dropoff: ['Centro de París', 'Disneyland', 'Torre Eiffel', 'Hotel'], date: ['Hoy', 'Mañana'], time: ['Mañana (9h)', 'Tarde (14h)', 'Noche (19h)'] },
+    s1: 'Reserva Online', s1d: 'Introduce los datos de tu vuelo y destino. Confirmación de precio instantánea.',
+    s2: 'Encuentra a Tu Chófer', s2d: 'El chófer te espera en llegadas con cartel con tu nombre. Ayuda con equipaje incluida.',
+    s3: 'Disfruta del Viaje', s3d: 'Traslado directo y cómodo en un vehículo premium hasta tu destino.',
+    seoTitle: 'Zont - Traslado Aeropuerto Premium en Europa | Chófer Privado',
+    seoDesc: 'Traslado privado premium en 16+ ciudades de Europa. Precios fijos garantizados, seguimiento de vuelos y recepción personalizada. Reserva online ahora.',
+  },
 };
 
 const popularDest = [
-  { nameEn: 'Paris Airport Transfer', nameFr: 'Paris CDG', nameRu: 'Париж CDG', nameHy: 'Փարիզ CDG', price: 59, urlEn: '/paris-airport-transfer', urlFr: '/transfert-aeroport-paris', urlRu: '/transfer-aeroport-parizh', urlHy: '/pariz-odanavakayan-transfer' },
-  { nameEn: 'Disneyland Paris Transfer', nameFr: 'Disneyland', nameRu: 'Диснейленд', nameHy: 'Disneyland', price: 49, urlEn: '/disneyland-paris-transfer', urlFr: '/transfert-disneyland-paris', urlRu: '/transfer-disneylend-parizh', urlHy: '/disneylend-pariz-transfer' },
-  { nameEn: 'Nice Airport Transfer', nameFr: 'Nice', nameRu: 'Ницца', nameHy: 'Նიցա', price: 35, urlEn: '/nice-airport-transfer', urlFr: '/transfert-aeroport-nice', urlRu: '/transfer-aeroport-nitstsa', urlHy: '/nits-odanavakayan-transfer' },
-  { nameEn: 'Barcelona', nameFr: 'Barcelone', nameRu: 'Барселона', nameHy: 'Բարսելոնա', price: 39, urlEn: '/barcelona-airport-transfer', urlFr: '/transfert-aeroport-barcelone', urlRu: '/transfer-aeroport-barselona', urlHy: '/barselona-odanavakayan-transfer' },
-  { nameEn: 'Rome Airport Transfer', nameFr: 'Rome', nameRu: 'Рим', nameHy: 'Հռոմ', price: 40, urlEn: '/rome-airport-transfer', urlFr: '/transfert-aeroport-rome', urlRu: '/transfer-aeroport-rim', urlHy: '/hrom-odanavakayan-transfer' },
-  { nameEn: 'Berlin Airport Transfer', nameFr: 'Berlin', nameRu: 'Берлин', nameHy: 'Բեռլին', price: 45, urlEn: '/berlin-airport-transfer', urlFr: '/transfert-aeroport-berlin', urlRu: '/transfer-aeroport-berlin', urlHy: '/berlin-odanavakayan-transfer' },
-  { nameEn: 'Monaco Limo Service', nameFr: 'Monaco', nameRu: 'Монако', nameHy: 'Մոնակո', price: 65, urlEn: '/monaco-airport-transfer', urlFr: '/transfert-aeroport-monaco', urlRu: '/transfer-aeroport-monako', urlHy: '/monako-odanavakayan-transfer' },
+  { nameEn: 'Paris Airport Transfer', nameFr: 'Paris CDG', nameRu: 'Париж CDG', nameHy: 'Փարիզ CDG', nameEs: 'Traslado Aeropuerto París', price: 59, urlEn: '/paris-airport-transfer', urlFr: '/transfert-aeroport-paris', urlRu: '/transfer-aeroport-parizh', urlHy: '/pariz-odanavakayan-transfer', urlEs: '/es/traslado-aeropuerto-paris' },
+  { nameEn: 'Disneyland Paris Transfer', nameFr: 'Disneyland', nameRu: 'Диснейленд', nameHy: 'Disneyland', nameEs: 'Disneyland París', price: 49, urlEn: '/disneyland-paris-transfer', urlFr: '/transfert-disneyland-paris', urlRu: '/transfer-disneylend-parizh', urlHy: '/disneylend-pariz-transfer', urlEs: '/es/traslado-disneyland-paris' },
+  { nameEn: 'Nice Airport Transfer', nameFr: 'Nice', nameRu: 'Ницца', nameHy: 'Նიցա', price: 35, urlEn: '/nice-airport-transfer', urlFr: '/transfert-aeroport-nice', urlRu: '/transfer-aeroport-nitstsa', urlHy: '/nits-odanavakayan-transfer', urlEs: '/nice-airport-transfer', nameEs: 'Niza' },
+  { nameEn: 'Barcelona', nameFr: 'Barcelone', nameRu: 'Барселона', nameHy: 'Բարսելոնա', price: 39, urlEn: '/barcelona-airport-transfer', urlFr: '/transfert-aeroport-barcelone', urlRu: '/transfer-aeroport-barselona', urlHy: '/barselona-odanavakayan-transfer', urlEs: '/barcelona-airport-transfer', nameEs: 'Barcelona' },
+  { nameEn: 'Rome Airport Transfer', nameFr: 'Rome', nameRu: 'Рим', nameHy: 'Հռոմ', price: 40, urlEn: '/rome-airport-transfer', urlFr: '/transfert-aeroport-rome', urlRu: '/transfer-aeroport-rim', urlHy: '/hrom-odanavakayan-transfer', urlEs: '/rome-airport-transfer', nameEs: 'Roma' },
+  { nameEn: 'Berlin Airport Transfer', nameFr: 'Berlin', nameRu: 'Берлин', nameHy: 'Բեռլին', price: 45, urlEn: '/berlin-airport-transfer', urlFr: '/transfert-aeroport-berlin', urlRu: '/transfer-aeroport-berlin', urlHy: '/berlin-odanavakayan-transfer', urlEs: '/berlin-airport-transfer', nameEs: 'Berlín' },
+  { nameEn: 'Monaco Limo Service', nameFr: 'Monaco', nameRu: 'Монако', nameHy: 'Մոնակո', price: 65, urlEn: '/monaco-airport-transfer', urlFr: '/transfert-aeroport-monaco', urlRu: '/transfer-aeroport-monako', urlHy: '/monako-odanavakayan-transfer', urlEs: '/monaco-airport-transfer', nameEs: 'Mónaco' },
 ];
 
-const homeSeoUrls = { en: '/', fr: '/fr', ru: '/ru', hy: '/hy' };
+const homeSeoUrls = { en: '/', fr: '/fr', ru: '/ru', hy: '/hy', es: '/es' };
 
 const Home = () => {
   const navigate = useNavigate();
@@ -642,11 +673,11 @@ const Home = () => {
     }
   };
 
-  const getName = (d) => language === 'fr' ? d.nameFr : language === 'ru' ? d.nameRu : language === 'hy' ? (d.nameHy || d.nameEn) : d.nameEn;
-  const getUrl = (d) => language === 'fr' ? d.urlFr : language === 'ru' ? d.urlRu : language === 'hy' ? (d.urlHy || d.urlEn) : d.urlEn;
+  const getName = (d) => language === 'fr' ? d.nameFr : language === 'ru' ? d.nameRu : language === 'hy' ? (d.nameHy || d.nameEn) : language === 'es' ? (d.nameEs || d.nameEn) : d.nameEn;
+  const getUrl = (d) => language === 'fr' ? d.urlFr : language === 'ru' ? d.urlRu : language === 'hy' ? (d.urlHy || d.urlEn) : language === 'es' ? (d.urlEs || d.urlEn) : d.urlEn;
 
   // Localized URL & description for JSON-LD (per language).
-  // English uses the root domain (no /en prefix). French/Russian/Armenian use /fr, /ru, /hy respectively.
+  // English uses the root domain (no /en prefix). French/Russian/Armenian/Spanish use /fr, /ru, /hy, /es respectively.
   const langPath = language === 'en' ? '' : `/${language}`;
   const pageUrl = `https://www.zont.cab${langPath}`;
   const searchUrl = `https://www.zont.cab${langPath}/search?q={search_term_string}`;
@@ -654,6 +685,7 @@ const Home = () => {
     language === 'ru' ? 'Премиум трансфер из аэропорта с частным водителем' :
     language === 'fr' ? 'Transfert aeroport premium avec chauffeur prive' :
     language === 'hy' ? 'Պրեմիում օդանավակայանի տրանսֆեր մասնավոր վարորդով' :
+    language === 'es' ? 'Traslado aeropuerto premium con chófer privado' :
     'Premium airport transfer with private chauffeur'
   );
 
@@ -662,13 +694,14 @@ const Home = () => {
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
-        canonical="https://www.zont.cab"
+        canonical={`https://www.zont.cab${homeSeoUrls[language] || homeSeoUrls.en}`}
         ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
         hreflang={[
           { lang: 'fr', href: 'https://www.zont.cab/' },
           { lang: 'en', href: 'https://www.zont.cab/' },
           { lang: 'ru', href: 'https://www.zont.cab/' },
           { lang: 'hy', href: 'https://www.zont.cab/' },
+          { lang: 'es', href: 'https://www.zont.cab/es' },
         ]}
         jsonLd={[
           {
@@ -678,7 +711,7 @@ const Home = () => {
             "url": pageUrl,
             "logo": "https://www.zont.cab/logo.png",
             "description": c.seoDesc,
-            "contactPoint": { "@type": "ContactPoint", "telephone": "+33783777027", "contactType": "customer service", "availableLanguage": ["French", "English", "Russian", "Armenian"] },
+            "contactPoint": { "@type": "ContactPoint", "telephone": "+33783777027", "contactType": "customer service", "availableLanguage": ["French", "English", "Russian", "Armenian", "Spanish"] },
             "sameAs": ["https://apps.apple.com/am/app/zont-cab/id1468482270", "https://play.google.com/store/apps/details?id=com.zont.rider"]
           },
           {
@@ -732,7 +765,7 @@ const Home = () => {
                 <div className="text-center lg:text-left bg-[#1a2332]/70 backdrop-blur-sm rounded-2xl p-6 lg:p-8">
                   <div className="flex justify-center lg:justify-start mb-4">
                     <button onClick={() => document.getElementById('tripadvisor-reviews')?.scrollIntoView({ behavior: 'smooth' })} className="bg-[#2ecc71]/20 text-[#2ecc71] px-4 py-1.5 rounded-full text-sm font-semibold inline-flex items-center cursor-pointer hover:bg-[#2ecc71]/30 transition-colors" data-testid="home-trust-badge">
-                      <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />4.5/5 Tripadvisor - 29 {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : 'reviews'}
+                      <Star className="w-4 h-4 fill-current mr-1.5" aria-hidden="true" />4.5/5 Tripadvisor - 29 {language === 'fr' ? 'avis' : language === 'ru' ? 'отзывов' : language === 'hy' ? 'կարծիք' : language === 'es' ? 'opiniones' : 'reviews'}
                     </button>
                   </div>
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 leading-tight" data-testid="home-hero-title">
@@ -743,19 +776,26 @@ const Home = () => {
 
                   {/* Trust Stats - Dynamic from CMS */}
                   <div className="grid grid-cols-4 gap-2 mb-6 max-w-md mx-auto lg:mx-0">
-                    {(cmsHomepage?.stats && cmsHomepage.stats.length > 0 ? cmsHomepage.stats.map((s, i) => ({
-                      val: s.value, lbl: (s.label?.[language]) || s.label?.fr || ''
-                    })) : [
-                      { val: c.stats.trips, lbl: c.stats.tripsLabel },
-                      { val: c.stats.cities, lbl: c.stats.citiesLabel },
-                      { val: c.stats.available, lbl: c.stats.availableLabel },
-                      { val: c.stats.rating, lbl: c.stats.ratingLabel },
-                    ]).map((s, i) => (
-                      <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-2.5 text-center">
-                        <div className="text-lg font-bold text-[#2ecc71]">{s.val}</div>
-                        <div className="text-[10px] text-gray-400">{s.lbl}</div>
-                      </div>
-                    ))}
+                    {(() => {
+                      const fallbackStats = [
+                        { val: c.stats.trips, lbl: c.stats.tripsLabel },
+                        { val: c.stats.cities, lbl: c.stats.citiesLabel },
+                        { val: c.stats.available, lbl: c.stats.availableLabel },
+                        { val: c.stats.rating, lbl: c.stats.ratingLabel },
+                      ];
+                      const hasCmsForCurrentLang =
+                        cmsHomepage?.stats?.length > 0 &&
+                        cmsHomepage.stats.every(s => s.label?.[language]);
+                      const items = hasCmsForCurrentLang
+                        ? cmsHomepage.stats.map(s => ({ val: s.value, lbl: s.label[language] }))
+                        : fallbackStats;
+                      return items.map((s, i) => (
+                        <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-2.5 text-center">
+                          <div className="text-lg font-bold text-[#2ecc71]">{s.val}</div>
+                          <div className="text-[10px] text-gray-400">{s.lbl}</div>
+                        </div>
+                      ));
+                    })()}
                   </div>
 
                   {/* Desktop trust */}
@@ -1091,27 +1131,36 @@ const Home = () => {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">{c.trustTitle}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {(cmsTrustBlocks && cmsTrustBlocks.length > 0 ? cmsTrustBlocks.slice(0, 4).map((block, i) => ({
-                icon: block.icon === 'plane' ? <Plane className="w-10 h-10 text-[#2ecc71]" /> :
-                      block.icon === 'clock' ? <Clock className="w-10 h-10 text-[#2ecc71]" /> :
-                      block.icon === 'star' ? <Shield className="w-10 h-10 text-[#2ecc71]" /> :
-                      block.icon === 'shield' ? <CreditCard className="w-10 h-10 text-[#2ecc71]" /> :
-                      block.icon === 'credit-card' ? <CreditCard className="w-10 h-10 text-[#2ecc71]" /> :
-                      <CheckCircle className="w-10 h-10 text-[#2ecc71]" />,
-                t: (block.title && block.title[language]) || block.title?.fr || '',
-                d: (block.text && block.text[language]) || block.text?.fr || '',
-              })) : [
-                { icon: <CheckCircle className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f1Title, d: c.f1Desc },
-                { icon: <Plane className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f2Title, d: c.f2Desc },
-                { icon: <Shield className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f3Title, d: c.f3Desc },
-                { icon: <CreditCard className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f4Title, d: c.f4Desc },
-              ]).map((f, i) => (
-                <div key={i} className="bg-[#1a2332] rounded-xl p-5 border border-gray-700">
-                  <div className="mb-3">{f.icon}</div>
-                  <h3 className="text-lg font-bold text-white mb-2">{f.t}</h3>
-                  <p className="text-gray-400 text-sm">{f.d}</p>
-                </div>
-              ))}
+              {(() => {
+                const fallbackBlocks = [
+                  { icon: <CheckCircle className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f1Title, d: c.f1Desc },
+                  { icon: <Plane className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f2Title, d: c.f2Desc },
+                  { icon: <Shield className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f3Title, d: c.f3Desc },
+                  { icon: <CreditCard className="w-10 h-10 text-[#2ecc71]" aria-hidden="true" />, t: c.f4Title, d: c.f4Desc },
+                ];
+                const hasCmsForCurrentLang =
+                  cmsTrustBlocks?.length > 0 &&
+                  cmsTrustBlocks.slice(0, 4).every(b => b.title?.[language] && b.text?.[language]);
+                const blocks = hasCmsForCurrentLang
+                  ? cmsTrustBlocks.slice(0, 4).map(block => ({
+                      icon: block.icon === 'plane' ? <Plane className="w-10 h-10 text-[#2ecc71]" /> :
+                            block.icon === 'clock' ? <Clock className="w-10 h-10 text-[#2ecc71]" /> :
+                            block.icon === 'star' ? <Shield className="w-10 h-10 text-[#2ecc71]" /> :
+                            block.icon === 'shield' ? <CreditCard className="w-10 h-10 text-[#2ecc71]" /> :
+                            block.icon === 'credit-card' ? <CreditCard className="w-10 h-10 text-[#2ecc71]" /> :
+                            <CheckCircle className="w-10 h-10 text-[#2ecc71]" />,
+                      t: block.title[language],
+                      d: block.text[language],
+                    }))
+                  : fallbackBlocks;
+                return blocks.map((f, i) => (
+                  <div key={i} className="bg-[#1a2332] rounded-xl p-5 border border-gray-700">
+                    <div className="mb-3">{f.icon}</div>
+                    <h3 className="text-lg font-bold text-white mb-2">{f.t}</h3>
+                    <p className="text-gray-400 text-sm">{f.d}</p>
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         </section>

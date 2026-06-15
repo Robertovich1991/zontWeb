@@ -11,6 +11,7 @@
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/"/>
+    <lastmod>2026-02-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -159,12 +160,15 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-paris"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/taksi-iz-aeroporta-parij"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/pariz-odanavakayani-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-paris"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-aeroport-paris"/>
+    <lastmod>2026-02-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url><loc>https://www.zont.cab/transfert-aeroport-paris</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.zont.cab/taksi-iz-aeroporta-parij</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.zont.cab/transfer-aeroport-parizh</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.zont.cab/pariz-odanavakayani-transfer</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
 
   <!-- ==================== CDG AIRPORT ==================== -->
@@ -174,6 +178,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-cdg"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/taksi-iz-aeroporta-cdg"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/cdg-odanavakayani-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-charles-de-gaulle"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-aeroport-cdg"/>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -189,6 +194,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-orly"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/taksi-iz-aeroporta-orli"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/orli-odanavakayani-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-orly"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-aeroport-orly"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -204,6 +210,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-beauvais"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/taksi-iz-aeroporta-bove"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/bove-odanavakayani-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-beauvais"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-aeroport-beauvais"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -219,6 +226,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-gare-paris"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/transfer-vokzal-parizh"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/pariz-kayarani-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-estaciones-tren-paris"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-gare-paris"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -369,6 +377,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-erevan"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/taksi-iz-aeroporta-erevan"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/erevan-odanavakayani-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-erevan-zvartnots"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-aeroport-erevan"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -443,6 +452,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/chauffeur-mis-a-disposition"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/voditel-s-avtomobilem"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/varorde-tramadrutyamb"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/chofer-privado-a-disposicion"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/chauffeur-mis-a-disposition"/>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -520,9 +530,21 @@
 
   <!-- ==================== STATIC PAGES ==================== -->
   <url><loc>https://www.zont.cab/become-driver</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://www.zont.cab/become-client</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url>
+    <loc>https://www.zont.cab/become-client</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/become-client"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/hazte-cliente"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/become-client"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
   <url><loc>https://www.zont.cab/help</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.zont.cab/looking-for-partners</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+
+  <!-- ==================== LEGAL ==================== -->
+  <url><loc>https://www.zont.cab/cgv</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://www.zont.cab/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://www.zont.cab/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 
   <!-- ==================== B2B PAGES ==================== -->
   <url><loc>https://www.zont.cab/partners</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
@@ -542,12 +564,14 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-disneyland-paris"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/transfer-disneylend-parizh"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/disneylend-pariz-transfer"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-disneyland-paris"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/disneyland-paris-transfer"/>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url><loc>https://www.zont.cab/transfert-disneyland-paris</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.zont.cab/transfer-disneylend-parizh</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.zont.cab/transfer-disneyland-parizh</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.zont.cab/disneylend-pariz-transfer</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
 
   <!-- ==================== DISNEYLAND PARIS — ROUTE SEO PAGES ==================== -->
@@ -681,6 +705,32 @@
   <!-- ==================== REVIEW / AVIS ==================== -->
   <url><loc>https://www.zont.cab/review</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://www.zont.cab/avis</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+
+  <!-- Spanish home page (separate URL) -->
+  <url>
+    <loc>https://www.zont.cab/es</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/"/>
+    <lastmod>2026-02-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/traslado-aeropuerto-paris</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-paris"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/paris-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-paris"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/taksi-iz-aeroporta-parij"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/pariz-odanavakayani-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/transfert-aeroport-paris"/>
+    <lastmod>2026-02-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
 
   <!-- ==================== BLOG ==================== -->
   <url><loc>https://www.zont.cab/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
