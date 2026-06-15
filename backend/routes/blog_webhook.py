@@ -24,6 +24,7 @@ Inbound payload schema (flat structure):
 import logging
 import os
 import re
+import asyncio
 from datetime import datetime, timezone
 from typing import Optional, Any, Dict, Union
 from xml.sax.saxutils import escape as xml_escape
@@ -110,6 +111,11 @@ async def blog_article_webhook(payload: BlogWebhookPayload, request: Request):
     result = await db.blog_articles.update_one(key, {"$set": doc}, upsert=True)
     is_new = result.upserted_id is not None
     logger.info(f"Blog webhook: slug='{slug}' lang='{doc['language_code']}' new={is_new}")
+
+    # Auto-translate new EN articles into FR/ES/RU/HY in a background task
+    # (not awaited so the webhook responds immediately to the CMS)
+    if doc["language_code"] == "en" and not doc.get("source_external_id"):
+        asyncio.create_task(_auto_translate_article(doc))
 
     # Frontend URL — prefix by language for SEO sub-folder routing
     lang = doc["language_code"]
@@ -202,3 +208,99 @@ async def delete_article(slug: str, request: Request):
         raise HTTPException(404, "Article not found")
     logger.info(f"Blog article deleted: slug='{slug}'")
     return {"success": True, "deleted": slug}
+
+
+
+# ---------- Auto-translation helpers ----------
+from routes.blog_translator import TARGET_LANGS, translate_article_to_lang  # noqa: E402
+
+
+async def _auto_translate_article(en_doc: dict) -> None:
+    """
+    Background task: translate one English article into FR/ES/RU/HY and upsert
+    each translation. Errors per language are logged but don't fail others.
+    """
+    try:
+        for tl in TARGET_LANGS:
+            try:
+                tdoc = await translate_article_to_lang(en_doc, tl)
+                tdoc["received_at"] = datetime.now(timezone.utc).isoformat()
+                await db.blog_articles.update_one(
+                    {"external_id": tdoc["external_id"]},
+                    {"$set": tdoc},
+                    upsert=True,
+                )
+                logger.info(f"Auto-translated '{en_doc.get('slug')}' -> {tl} (slug={tdoc['slug']})")
+            except Exception as e:
+                logger.error(f"Auto-translate to {tl} failed for '{en_doc.get('slug')}': {e}")
+    except Exception as e:
+        logger.exception(f"Auto-translation pipeline crashed: {e}")
+
+
+# ---------- Backfill endpoint: translate all existing EN articles ----------
+@router.post("/blog-articles/translate-all")
+async def translate_all_existing(request: Request, overwrite: bool = False):
+    """
+    Schedule a background task to translate every English article in the DB into
+    FR/ES/RU/HY. Returns immediately so the ingress doesn't time out.
+    """
+    if db is None:
+        raise HTTPException(503, "Database not available")
+
+    expected_secret = os.environ.get("BLOG_WEBHOOK_SECRET", "").strip()
+    if expected_secret:
+        if request.headers.get("x-webhook-secret", "") != expected_secret:
+            raise HTTPException(403, "Invalid secret")
+
+    en_articles = await db.blog_articles.find(
+        {"language_code": "en", "source_external_id": {"$exists": False}}
+    ).to_list(500)
+
+    if not en_articles:
+        return {"success": True, "scheduled": 0, "message": "No English source articles found."}
+
+    # Schedule background translation
+    async def _run_backfill():
+        for art in en_articles:
+            art_id = art.get("external_id") or art.get("slug")
+            for tl in TARGET_LANGS:
+                target_ext_id = f"{art_id}-{tl}"
+                existing = await db.blog_articles.find_one({"external_id": target_ext_id})
+                if existing and not overwrite:
+                    continue
+                try:
+                    tdoc = await translate_article_to_lang(art, tl)
+                    tdoc["received_at"] = datetime.now(timezone.utc).isoformat()
+                    await db.blog_articles.update_one(
+                        {"external_id": tdoc["external_id"]},
+                        {"$set": tdoc},
+                        upsert=True,
+                    )
+                    logger.info(f"Backfill: '{art.get('slug')}' -> {tl}")
+                except Exception as e:
+                    logger.error(f"Backfill failed {art.get('slug')}->{tl}: {e}")
+
+    asyncio.create_task(_run_backfill())
+
+    return {
+        "success": True,
+        "scheduled": len(en_articles),
+        "target_languages": TARGET_LANGS,
+        "overwrite": overwrite,
+        "message": (
+            f"Translation of {len(en_articles)} article(s) into {len(TARGET_LANGS)} languages "
+            f"scheduled. Check progress via GET /api/blog-articles?language=fr (or es/ru/hy). "
+            f"Each article takes ~30-60s to translate. Backend logs show real-time progress."
+        ),
+    }
+
+
+# ---------- Status endpoint: count articles per language ----------
+@router.get("/blog-translate-status")
+async def translate_status():
+    if db is None:
+        raise HTTPException(503, "Database not available")
+    counts = {}
+    for lang in ["en"] + TARGET_LANGS:
+        counts[lang] = await db.blog_articles.count_documents({"language_code": lang})
+    return {"counts": counts, "expected_per_lang": counts.get("en", 0)}

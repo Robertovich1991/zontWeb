@@ -118,9 +118,11 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - SEO Redirections for old URLs (waiting for user confirmation on approach)
 
 ## Latest Changes (Feb 2026)
-- **Routes ES réorganisées** : `/es` est maintenant la **Home espagnole** (auparavant c'était la page Paris transfer). Nouvelle URL `/es/traslado-aeropuerto-paris` créée pour le contenu Paris airport transfer en espagnol. URL detection ajoutée dans `LanguageContext` (URL `/es*` → langue 'es' automatique pour bots Google + visiteurs directs). Home.js enrichie avec `homeContent.es`, `nameEs/urlEs` sur popularDest, `homeSeoUrls.es`, et fallback CMS-vers-hardcoded quand la langue ES manque dans les blocs CMS. Sitemap mis à jour.
-- **Spanish localization fixes (preview only — needs redeploy)** : Disposal CTA block, TripAdvisor reviews (6 reviews + headings + CTA), Footer service labels — all 3 blocks were stuck in EN/FR on `/es`, now fully translated to Spanish.
-- **Blog Webhook + Native Blog Pages** (DONE): Updated `POST /api/webhooks/blog` to accept the new flat CMS payload. Built React routes `/blog`, `/blog/:slug`, `/es/blog`, `/es/blog/:slug` reading from `/api/blog-articles` + `/api/blog-articles/{slug}`. Article pages inject `jsonLd` and `faqJsonLd` for SEO. Added dynamic `/api/sitemap-blog.xml`. 12/12 backend tests pass.
+- **Blog Auto-Translation Claude Sonnet 4.5** (DONE) : nouveau module `routes/blog_translator.py` qui traduit chaque article EN reçu via webhook en FR/ES/RU/HY automatiquement (background task). Endpoints : `POST /api/blog-articles/translate-all?overwrite=true` (backfill schedulé) et `GET /api/blog-translate-status` (compteurs par langue). Champs traduits : title, meta_description, content_html (HTML préservé), jsonLd, faqJsonLd. Post-processing strict pour title (1 ligne, 120 chars) et meta (160 chars, sans phrases d'auto-correction). Testé : 1 article EN → 4 traductions générées en ~3 min. Coût LLM via Emergent Universal Key.
+- **Routes ES réorganisées** : `/es` est la Home espagnole (auparavant Paris transfer). Nouvelle URL `/es/traslado-aeropuerto-paris`. URL detection ajoutée dans `LanguageContext` (URL `/es*` → langue 'es' automatique).
+- **Spanish localization fixes** : Disposal CTA, TripAdvisor reviews, Footer service labels — tous traduits.
+- **Blog Webhook + Native Blog Pages** : routes `/blog`, `/fr/blog`, `/es/blog`, `/ru/blog`, `/hy/blog` avec UI 100% traduite par langue. Sitemap : 5 URLs blog avec hreflang complet.
+- **Menu Blog** ajouté dans le Header (desktop + mobile), pointe vers la version langue active.
 
 ## Credentials
 - Super Admin: admin@zont.cab / admin123
