@@ -140,6 +140,13 @@ const Header = () => {
                 {t('nav.help')}
               </Link>
               <Link
+                to={language === 'es' ? '/es/blog' : '/blog'}
+                className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
+                data-testid="nav-blog"
+              >
+                Blog
+              </Link>
+              <Link
                 to={language === 'en' ? '/b2b-airport-transfers' : language === 'ru' ? '/b2b-transfery-iz-aeroporta' : language === 'hy' ? '/b2b-odanavakayani-transfer' : '/b2b-transferts-aeroport'}
                 className="text-[#2ecc71] hover:text-[#27ae60] transition-colors text-sm font-semibold"
                 data-testid="nav-partners"
@@ -259,6 +266,14 @@ const Header = () => {
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >
                 {t('nav.help')}
+              </Link>
+              <Link
+                to={language === 'es' ? '/es/blog' : '/blog'}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
+                data-testid="nav-blog-mobile"
+              >
+                Blog
               </Link>
               <Link
                 to={language === 'en' ? '/b2b-airport-transfers' : language === 'ru' ? '/b2b-transfery-iz-aeroporta' : language === 'hy' ? '/b2b-odanavakayani-transfer' : '/b2b-transferts-aeroport'}
