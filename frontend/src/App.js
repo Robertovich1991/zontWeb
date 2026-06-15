@@ -202,8 +202,14 @@ function App() {
                   {/* Blog (native React) — replaces previous blog.zont.cab reverse proxy */}
                   <Route path="/blog" element={<BlogIndex language="en" />} />
                   <Route path="/blog/:slug" element={<BlogArticle language="en" />} />
+                  <Route path="/fr/blog" element={<BlogIndex language="fr" />} />
+                  <Route path="/fr/blog/:slug" element={<BlogArticle language="fr" />} />
                   <Route path="/es/blog" element={<BlogIndex language="es" />} />
                   <Route path="/es/blog/:slug" element={<BlogArticle language="es" />} />
+                  <Route path="/ru/blog" element={<BlogIndex language="ru" />} />
+                  <Route path="/ru/blog/:slug" element={<BlogArticle language="ru" />} />
+                  <Route path="/hy/blog" element={<BlogIndex language="hy" />} />
+                  <Route path="/hy/blog/:slug" element={<BlogArticle language="hy" />} />
 
                   <Route path="/" element={<Home />} />
                   <Route path="/fr" element={<Home />} />

@@ -733,7 +733,21 @@
   </url>
 
   <!-- ==================== BLOG ==================== -->
-  <url><loc>https://www.zont.cab/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://www.zont.cab/es/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url>
+    <loc>https://www.zont.cab/blog</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/blog"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/blog"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/blog"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/blog"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/blog"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/blog"/>
+    <lastmod>2026-02-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url><loc>https://www.zont.cab/fr/blog</loc><lastmod>2026-02-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/es/blog</loc><lastmod>2026-02-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/ru/blog</loc><lastmod>2026-02-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.zont.cab/hy/blog</loc><lastmod>2026-02-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
 
 </urlset>

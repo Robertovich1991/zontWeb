@@ -22,6 +22,7 @@ Inbound payload schema (flat structure):
     }
 """
 import logging
+import os
 import re
 from datetime import datetime, timezone
 from typing import Optional, Any, Dict, Union
@@ -110,9 +111,10 @@ async def blog_article_webhook(payload: BlogWebhookPayload, request: Request):
     is_new = result.upserted_id is not None
     logger.info(f"Blog webhook: slug='{slug}' lang='{doc['language_code']}' new={is_new}")
 
-    # Frontend URL — prefix with /es for Spanish, root /blog/ otherwise
+    # Frontend URL — prefix by language for SEO sub-folder routing
     lang = doc["language_code"]
-    url_prefix = "/es/blog" if lang == "es" else "/blog"
+    lang_prefix = {"fr": "/fr", "es": "/es", "ru": "/ru", "hy": "/hy"}.get(lang, "")
+    url_prefix = f"{lang_prefix}/blog"
     return {
         "success": True,
         "slug": slug,
@@ -135,9 +137,10 @@ async def blog_sitemap():
     ).sort("createdAt", -1).limit(2000).to_list(2000)
 
     urls_xml = []
+    lang_to_prefix = {"fr": "/fr", "es": "/es", "ru": "/ru", "hy": "/hy"}
     for d in docs:
         lang = (d.get("language_code") or "en").lower()
-        prefix = "https://www.zont.cab/es/blog" if lang == "es" else "https://www.zont.cab/blog"
+        prefix = f"https://www.zont.cab{lang_to_prefix.get(lang, '')}/blog"
         loc = xml_escape(f"{prefix}/{d['slug']}")
         lastmod = xml_escape(str(d.get("updatedAt") or d.get("createdAt") or ""))
         urls_xml.append(
@@ -180,3 +183,22 @@ async def get_article(slug: str):
     if not doc:
         raise HTTPException(404, "Article not found")
     return doc
+
+
+
+# ---------- Admin delete endpoint (used to clean up old/test articles) ----------
+# Reuses the same shared header `x-webhook-secret` (or fallback open if not configured).
+@router.delete("/blog-articles/{slug}")
+async def delete_article(slug: str, request: Request):
+    if db is None:
+        raise HTTPException(503, "Database not available")
+    expected_secret = os.environ.get("BLOG_WEBHOOK_SECRET", "").strip()
+    if expected_secret:
+        provided = request.headers.get("x-webhook-secret", "")
+        if provided != expected_secret:
+            raise HTTPException(403, "Invalid secret")
+    result = await db.blog_articles.delete_one({"slug": slug})
+    if result.deleted_count == 0:
+        raise HTTPException(404, "Article not found")
+    logger.info(f"Blog article deleted: slug='{slug}'")
+    return {"success": True, "deleted": slug}

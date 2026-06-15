@@ -7,9 +7,19 @@ import { ChevronRight, BookOpen } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
+const BLOG_LABELS = {
+  en: { breadcrumb: 'Blog', heroBadge: 'Blog', heroTitle: 'Paris transfer tips & mobility insights', heroSub: 'Read our latest articles about private transfers, airports, hotels and corporate travel in Paris.', emptyState: 'No articles published yet. Check back soon.', readArticle: 'Read article', dateLocale: 'en-US' },
+  fr: { breadcrumb: 'Blog', heroBadge: 'Blog', heroTitle: 'Conseils et guides de mobilité à Paris', heroSub: 'Lisez nos derniers articles sur les transferts privés, aéroports, hôtels et voyages d\'affaires à Paris.', emptyState: 'Aucun article publié pour le moment. Revenez bientôt.', readArticle: 'Lire l\'article', dateLocale: 'fr-FR' },
+  es: { breadcrumb: 'Blog', heroBadge: 'Blog', heroTitle: 'Consejos y guías de movilidad en París', heroSub: 'Lee nuestros últimos artículos sobre traslados privados, aeropuertos, hoteles y viajes corporativos en París.', emptyState: 'Aún no hay artículos publicados. Vuelve pronto.', readArticle: 'Leer artículo', dateLocale: 'es-ES' },
+  ru: { breadcrumb: 'Блог', heroBadge: 'Блог', heroTitle: 'Советы и гиды по передвижению в Париже', heroSub: 'Читайте наши последние статьи о частных трансферах, аэропортах, отелях и корпоративных поездках в Париже.', emptyState: 'Статей пока нет. Загляните позже.', readArticle: 'Читать статью', dateLocale: 'ru-RU' },
+  hy: { breadcrumb: 'Բլոգ', heroBadge: 'Բլոգ', heroTitle: 'Տրանսպորտի և տեղափոխման ուղեցույցներ Փարիզում', heroSub: 'Կարդացեք մեր վերջին հոդվածները մասնավոր տրանսֆերների, օդանավակայանների, հյուրանոցների և գործարար ճանապարհորդությունների մասին։', emptyState: 'Հոդվածներ դեռ չեն հրապարակվել։ Վերադարձեք շուտով։', readArticle: 'Կարդալ հոդվածը', dateLocale: 'hy-AM' },
+};
+
+const LANG_PREFIX = { en: '', fr: '/fr', es: '/es', ru: '/ru', hy: '/hy' };
+
 /**
  * Blog index page — lists all articles in a given language.
- * Mounted on /blog (en/fr default) and /es/blog (spanish).
+ * Mounted on /blog, /fr/blog, /es/blog, /ru/blog, /hy/blog.
  */
 const BlogIndex = ({ language = 'en' }) => {
   const [articles, setArticles] = useState([]);
@@ -31,19 +41,18 @@ const BlogIndex = ({ language = 'en' }) => {
     return () => { cancelled = true; };
   }, [language]);
 
-  const isEs = language === 'es';
-  const basePath = isEs ? '/es/blog' : '/blog';
+  const labels = BLOG_LABELS[language] || BLOG_LABELS.en;
+  const basePath = `${LANG_PREFIX[language] || ''}/blog`;
   const canonical = `https://www.zont.cab${basePath}`;
-  const title = isEs
-    ? 'Blog ZONT — Consejos de traslado y movilidad en París'
-    : 'ZONT Blog — Paris transfer tips & mobility insights';
-  const description = isEs
-    ? 'Descubre nuestros consejos, guías y novedades sobre traslados privados en París: aeropuertos, estaciones, hoteles y viajes corporativos.'
-    : 'Practical tips, guides and updates about private transfers in Paris — airports, train stations, hotels and corporate travel.';
+  const title = `${labels.heroTitle} | ZONT`;
+  const description = labels.heroSub;
 
   const hreflang = [
     { lang: 'en', href: 'https://www.zont.cab/blog' },
+    { lang: 'fr', href: 'https://www.zont.cab/fr/blog' },
     { lang: 'es', href: 'https://www.zont.cab/es/blog' },
+    { lang: 'ru', href: 'https://www.zont.cab/ru/blog' },
+    { lang: 'hy', href: 'https://www.zont.cab/hy/blog' },
     { lang: 'x-default', href: 'https://www.zont.cab/blog' },
   ];
 
@@ -85,15 +94,13 @@ const BlogIndex = ({ language = 'en' }) => {
         <section className="bg-gradient-to-b from-[#0b1120] via-[#1a2540] to-[#0b1120] text-white py-16 md:py-24">
           <div className="max-w-5xl mx-auto px-5">
             <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 text-xs font-medium px-3 py-1.5 rounded-full mb-4 backdrop-blur">
-              <BookOpen className="w-3.5 h-3.5" /> {isEs ? 'Blog' : 'Blog'}
+              <BookOpen className="w-3.5 h-3.5" /> {labels.heroBadge}
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight" data-testid="blog-index-h1">
-              {isEs ? 'Consejos y guías de movilidad en París' : 'Paris transfer tips & mobility insights'}
+              {labels.heroTitle}
             </h1>
             <p className="text-gray-300 text-lg mt-4 max-w-3xl">
-              {isEs
-                ? 'Lee nuestros últimos artículos sobre traslados privados, aeropuertos, hoteles y viajes corporativos en París.'
-                : 'Read our latest articles about private transfers, airports, hotels and corporate travel in Paris.'}
+              {labels.heroSub}
             </p>
           </div>
         </section>
@@ -108,7 +115,7 @@ const BlogIndex = ({ language = 'en' }) => {
             </div>
           ) : articles.length === 0 ? (
             <div className="text-center py-16 text-gray-500" data-testid="blog-index-empty">
-              {isEs ? 'Aún no hay artículos publicados. Vuelve pronto.' : 'No articles published yet. Check back soon.'}
+              {labels.emptyState}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="blog-index-grid">
@@ -133,14 +140,14 @@ const BlogIndex = ({ language = 'en' }) => {
                   )}
                   <div className="p-5">
                     <div className="text-xs text-gray-500 mb-2">
-                      {article.createdAt ? new Date(article.createdAt).toLocaleDateString(isEs ? 'es-ES' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                      {article.createdAt ? new Date(article.createdAt).toLocaleDateString(labels.dateLocale, { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
                     </div>
                     <h2 className="text-lg font-bold text-gray-900 group-hover:text-[#2ecc71] line-clamp-2 mb-2">
                       {article.title}
                     </h2>
                     <p className="text-sm text-gray-600 line-clamp-3">{article.meta_description}</p>
                     <div className="mt-4 inline-flex items-center gap-1 text-[#2ecc71] text-sm font-semibold">
-                      {isEs ? 'Leer artículo' : 'Read article'} <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      {labels.readArticle} <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
                 </Link>

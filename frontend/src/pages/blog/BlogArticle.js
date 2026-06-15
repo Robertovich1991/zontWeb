@@ -7,6 +7,16 @@ import { ChevronRight, Calendar, Loader2 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
+const ARTICLE_LABELS = {
+  en: { home: 'Home', dateLocale: 'en-US', notFoundH1: 'Article not found', notFoundText: 'The article you are looking for does not exist or was moved.', seeAll: 'See all articles', ctaTitle: 'Need a private transfer in Paris?', ctaSub: 'Flat fare, professional driver, 24/7 service.', ctaBtn: 'Book a transfer', backToBlog: 'Back to blog' },
+  fr: { home: 'Accueil', dateLocale: 'fr-FR', notFoundH1: 'Article introuvable', notFoundText: 'L\'article recherché n\'existe pas ou a été déplacé.', seeAll: 'Voir tous les articles', ctaTitle: 'Besoin d\'un transfert privé à Paris ?', ctaSub: 'Prix fixe, chauffeur professionnel, service 24/7.', ctaBtn: 'Réserver un transfert', backToBlog: 'Retour au blog' },
+  es: { home: 'Inicio', dateLocale: 'es-ES', notFoundH1: 'Artículo no encontrado', notFoundText: 'El artículo que buscas ya no existe o ha sido movido.', seeAll: 'Ver todos los artículos', ctaTitle: '¿Necesitas un traslado privado en París?', ctaSub: 'Precio fijo, conductor profesional y servicio 24/7.', ctaBtn: 'Reservar un traslado', backToBlog: 'Volver al blog' },
+  ru: { home: 'Главная', dateLocale: 'ru-RU', notFoundH1: 'Статья не найдена', notFoundText: 'Запрашиваемая статья не существует или была перемещена.', seeAll: 'Все статьи', ctaTitle: 'Нужен частный трансфер в Париже?', ctaSub: 'Фиксированная цена, профессиональный водитель, сервис 24/7.', ctaBtn: 'Заказать трансфер', backToBlog: 'Назад в блог' },
+  hy: { home: 'Գլխավոր', dateLocale: 'hy-AM', notFoundH1: 'Հոդվածը չի գտնվել', notFoundText: 'Որոնված հոդվածը գոյություն չունի կամ տեղափոխվել է։', seeAll: 'Տեսնել բոլոր հոդվածները', ctaTitle: 'Փարիզում մասնավոր տրանսֆեր է պետք?', ctaSub: 'Հաստատուն գին, պրոֆեսիոնալ վարորդ, 24/7 ծառայություն։', ctaBtn: 'Ամրագրել տրանսֆեր', backToBlog: 'Վերադառնալ բլոգ' },
+};
+
+const LANG_PREFIX = { en: '', fr: '/fr', es: '/es', ru: '/ru', hy: '/hy' };
+
 /**
  * Single blog article page.
  * Reads /api/blog-articles/:slug and renders the CMS-provided content_html
@@ -37,8 +47,9 @@ const BlogArticle = ({ language = 'en' }) => {
     return () => { cancelled = true; };
   }, [slug]);
 
-  const isEs = language === 'es';
-  const basePath = isEs ? '/es/blog' : '/blog';
+  const labels = ARTICLE_LABELS[language] || ARTICLE_LABELS.en;
+  const basePath = `${LANG_PREFIX[language] || ''}/blog`;
+  const homePath = LANG_PREFIX[language] || '/';
 
   // Inject the article's own jsonLd + faqJsonLd as additional <script> tags
   // (SEO component handles the primary jsonLd; we add the FAQ via effect)
@@ -83,13 +94,13 @@ const BlogArticle = ({ language = 'en' }) => {
         <Header />
         <main className="min-h-screen flex flex-col items-center justify-center bg-white px-5 text-center py-20">
           <h1 className="text-3xl font-bold text-gray-900 mb-3" data-testid="blog-article-404">
-            {isEs ? 'Artículo no encontrado' : 'Article not found'}
+            {labels.notFoundH1}
           </h1>
           <p className="text-gray-600 mb-6">
-            {isEs ? 'El artículo que buscas ya no existe o ha sido movido.' : 'The article you are looking for does not exist or was moved.'}
+            {labels.notFoundText}
           </p>
           <Link to={basePath} className="bg-[#2ecc71] hover:bg-[#27ae60] text-white px-6 py-3 rounded-xl font-bold">
-            {isEs ? 'Ver todos los artículos' : 'See all articles'}
+            {labels.seeAll}
           </Link>
         </main>
         <Footer />
@@ -104,7 +115,7 @@ const BlogArticle = ({ language = 'en' }) => {
   ];
 
   const publishedDate = article.createdAt
-    ? new Date(article.createdAt).toLocaleDateString(isEs ? 'es-ES' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(article.createdAt).toLocaleDateString(labels.dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })
     : '';
 
   return (
@@ -125,7 +136,7 @@ const BlogArticle = ({ language = 'en' }) => {
         <section className="bg-gradient-to-b from-[#0b1120] via-[#1a2540] to-[#0b1120] text-white py-12 md:py-16">
           <div className="max-w-3xl mx-auto px-5">
             <nav className="text-xs text-gray-400 mb-4 flex items-center gap-1.5">
-              <Link to={isEs ? '/es' : '/'} className="hover:text-white">{isEs ? 'Inicio' : 'Home'}</Link>
+              <Link to={homePath} className="hover:text-white">{labels.home}</Link>
               <ChevronRight className="w-3 h-3" />
               <Link to={basePath} className="hover:text-white">Blog</Link>
               <ChevronRight className="w-3 h-3" />
@@ -164,13 +175,13 @@ const BlogArticle = ({ language = 'en' }) => {
         <section className="bg-gray-50 py-12 mt-8">
           <div className="max-w-3xl mx-auto px-5 text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-              {isEs ? '¿Necesitas un traslado privado en París?' : 'Need a private transfer in Paris?'}
+              {labels.ctaTitle}
             </h2>
             <p className="text-gray-600 mb-5">
-              {isEs ? 'Precio fijo, conductor profesional y servicio 24/7.' : 'Flat fare, professional driver, 24/7 service.'}
+              {labels.ctaSub}
             </p>
-            <Link to={isEs ? '/es' : '/'} className="bg-[#2ecc71] hover:bg-[#27ae60] text-white px-7 py-3.5 rounded-xl font-bold inline-flex items-center gap-2" data-testid="blog-article-cta-book">
-              {isEs ? 'Reservar un traslado' : 'Book a transfer'} <ChevronRight className="w-4 h-4" />
+            <Link to={homePath} className="bg-[#2ecc71] hover:bg-[#27ae60] text-white px-7 py-3.5 rounded-xl font-bold inline-flex items-center gap-2" data-testid="blog-article-cta-book">
+              {labels.ctaBtn} <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
         </section>
@@ -178,7 +189,7 @@ const BlogArticle = ({ language = 'en' }) => {
         {/* Back to blog */}
         <div className="max-w-3xl mx-auto px-5 py-10">
           <Link to={basePath} className="inline-flex items-center gap-2 text-[#2ecc71] font-semibold hover:underline" data-testid="blog-article-back">
-            ← {isEs ? 'Volver al blog' : 'Back to blog'}
+            ← {labels.backToBlog}
           </Link>
         </div>
       </main>
