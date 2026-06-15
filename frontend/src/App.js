@@ -166,9 +166,24 @@ const Loading = () => (
 
 // Spanish service pages
 const EsMinivan = lazy(() => import("@/pages/es/EsMinivan"));
+const EsMinibus = lazy(() => import("@/pages/es/EsMinibus"));
 const EsConductorPrivado = lazy(() => import("@/pages/es/EsConductorPrivado"));
 const EsSillaInfantil = lazy(() => import("@/pages/es/EsSillaInfantil"));
 const EsHoteles = lazy(() => import("@/pages/es/EsHoteles"));
+const EsGareDuNord = lazy(() => import("@/pages/es/EsGareDuNord"));
+const EsGareDeLyon = lazy(() => import("@/pages/es/EsGareDeLyon"));
+const EsGareSaintLazare = lazy(() => import("@/pages/es/EsGareSaintLazare"));
+const EsGareMontparnasse = lazy(() => import("@/pages/es/EsGareMontparnasse"));
+const EsGareAusterlitz = lazy(() => import("@/pages/es/EsGareAusterlitz"));
+const EsNice = lazy(() => import("@/pages/es/EsNice"));
+const EsCannes = lazy(() => import("@/pages/es/EsCannes"));
+const EsMonaco = lazy(() => import("@/pages/es/EsMonaco"));
+const EsBarcelona = lazy(() => import("@/pages/es/EsBarcelona"));
+const EsAlicante = lazy(() => import("@/pages/es/EsAlicante"));
+const EsRome = lazy(() => import("@/pages/es/EsRome"));
+const EsMilan = lazy(() => import("@/pages/es/EsMilan"));
+const EsBerlin = lazy(() => import("@/pages/es/EsBerlin"));
+const EsMunich = lazy(() => import("@/pages/es/EsMunich"));
 
 // Track FB Pixel PageView on route changes
 function FbPageViewTracker() {
@@ -219,9 +234,26 @@ function App() {
                   <Route path="/es/traslado-aeropuerto-paris" element={<ParisAirportTransfer />} />
                   {/* Spanish service pages */}
                   <Route path="/es/minivan-traslado-aeropuerto-paris" element={<EsMinivan />} />
+                  <Route path="/es/minibus-8-plazas-traslado-paris" element={<EsMinibus />} />
                   <Route path="/es/conductor-privado-paris" element={<EsConductorPrivado />} />
                   <Route path="/es/traslado-aeropuerto-paris-silla-infantil" element={<EsSillaInfantil />} />
                   <Route path="/es/traslados-para-hoteles-paris" element={<EsHoteles />} />
+                  {/* Spanish train stations */}
+                  <Route path="/es/traslado-estacion-gare-du-nord-paris" element={<EsGareDuNord />} />
+                  <Route path="/es/traslado-estacion-gare-de-lyon-paris" element={<EsGareDeLyon />} />
+                  <Route path="/es/traslado-estacion-gare-saint-lazare-paris" element={<EsGareSaintLazare />} />
+                  <Route path="/es/traslado-estacion-gare-montparnasse-paris" element={<EsGareMontparnasse />} />
+                  <Route path="/es/traslado-estacion-gare-austerlitz-paris" element={<EsGareAusterlitz />} />
+                  {/* Spanish European cities */}
+                  <Route path="/es/traslado-aeropuerto-niza" element={<EsNice />} />
+                  <Route path="/es/traslado-aeropuerto-cannes" element={<EsCannes />} />
+                  <Route path="/es/traslado-aeropuerto-monaco" element={<EsMonaco />} />
+                  <Route path="/es/traslado-aeropuerto-barcelona" element={<EsBarcelona />} />
+                  <Route path="/es/traslado-aeropuerto-alicante" element={<EsAlicante />} />
+                  <Route path="/es/traslado-aeropuerto-roma" element={<EsRome />} />
+                  <Route path="/es/traslado-aeropuerto-milan" element={<EsMilan />} />
+                  <Route path="/es/traslado-aeropuerto-berlin" element={<EsBerlin />} />
+                  <Route path="/es/traslado-aeropuerto-munich" element={<EsMunich />} />
                   {/* Paris */}
                   <Route path="/paris-airport-transfer" element={<ParisAirportTransfer />} />
                   <Route path="/transfert-aeroport-paris" element={<ParisAirportTransfer />} />
