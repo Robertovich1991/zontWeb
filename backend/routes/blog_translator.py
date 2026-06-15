@@ -24,9 +24,66 @@ LANG_NAMES = {
 }
 
 
-def _translate_slug(original_slug: str, target_lang: str) -> str:
-    """Suffix the slug with the target language to keep slugs unique across languages."""
-    return f"{original_slug}-{target_lang}"
+async def translate_slug(en_title: str, target_lang: str) -> str:
+    """
+    Generate a URL-safe kebab-case slug in target_lang by asking the LLM to
+    translate the English title and convert it to an SEO-friendly slug.
+    Russian and Armenian are transliterated to Latin for URL safety.
+    """
+    if not en_title or not en_title.strip():
+        return ""
+
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise RuntimeError("EMERGENT_LLM_KEY missing in environment")
+
+    target_name = LANG_NAMES.get(target_lang, target_lang)
+    transliterate_note = (
+        " Transliterate any non-Latin characters to ASCII Latin (e.g., 'трансфер' -> 'transfer', 'օդանավակայան' -> 'odanavakayan')."
+        if target_lang in ("ru", "hy")
+        else " Strip accents/diacritics (é -> e, à -> a, ñ -> n)."
+    )
+
+    system_prompt = (
+        f"You are an SEO expert. Given an English blog article title, generate ONE URL-safe slug "
+        f"that captures the article's meaning translated to {target_name}.\n"
+        f"STRICT RULES:\n"
+        f"1. Output ONLY the slug, no explanation, no quotes, no markdown.\n"
+        f"2. Lowercase ASCII letters, digits and hyphens only — no spaces, no special chars, no accents.\n"
+        f"3. Maximum 70 characters. 5-9 words ideally.\n"
+        f"4. Include the main SEO keywords in {target_name}.\n"
+        f"5. Keep proper nouns (paris, orly, cdg, zont, beauvais) lowercased.\n"
+        f"6.{transliterate_note}\n"
+        f"7. NEVER include the words 'blog', 'article', 'translation'."
+    )
+
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    chat = (
+        LlmChat(
+            api_key=api_key,
+            session_id=f"slug-{uuid.uuid4()}",
+            system_message=system_prompt,
+        )
+        .with_model("anthropic", "claude-sonnet-4-6")
+    )
+
+    try:
+        response = await chat.send_message(UserMessage(text=en_title))
+        result = (response or "").strip().lower()
+        # Strip code fences
+        result = re.sub(r"^```\w*\s*", "", result)
+        result = re.sub(r"\s*```\s*$", "", result)
+        # Take only first line
+        result = result.splitlines()[0].strip() if result else ""
+        # Aggressive sanitize: only [a-z0-9-]
+        result = re.sub(r"[^a-z0-9\-\s]", "", result)
+        result = re.sub(r"[\s_]+", "-", result)
+        result = re.sub(r"-+", "-", result).strip("-")
+        return result[:70].rstrip("-")
+    except Exception as e:
+        logger.error(f"Slug translation failed ({target_lang}): {e}")
+        # Fallback to original slug suffixed with lang
+        return ""
 
 
 async def translate_text(text: str, target_lang: str, *, preserve_html: bool = False, kind: str = "text") -> str:
@@ -170,7 +227,14 @@ async def translate_article_to_lang(article: Dict[str, Any], target_lang: str) -
 
     translated = dict(article)
     translated["external_id"] = f"{article.get('external_id', article.get('slug'))}-{target_lang}"
-    translated["slug"] = _translate_slug(article.get("slug", ""), target_lang)
+
+    # Translate the slug into a native SEO-friendly kebab-case
+    en_title_for_slug = article.get("title", "") or article.get("slug", "")
+    new_slug = await translate_slug(en_title_for_slug, target_lang)
+    # Safety: if slug translation failed or collided, fall back to original-{lang}
+    if not new_slug or len(new_slug) < 5:
+        new_slug = f"{article.get('slug', '')}-{target_lang}"
+    translated["slug"] = new_slug
     translated["title"] = translated_title
     translated["meta_title"] = translated_title
     translated["meta_description"] = translated_meta
