@@ -37,6 +37,13 @@ export const MULTI_LANG_URLS = {
     fr: '/transport-mice-paris',
     ru: '/mice-transport-parij',
   },
+  blog: {
+    en: '/blog',
+    fr: '/fr/blog',
+    ru: '/ru/blog',
+    hy: '/hy/blog',
+    es: '/es/blog',
+  },
 };
 
 // Vehicle sub-slug maps for the disposal pages (used to build full sub-paths).
@@ -113,6 +120,19 @@ export const matchPathToLanguage = (pathname) => {
   // legacy /partners — default to FR
   if (clean === '/partners') return { pageKey: 'partners', language: 'fr' };
 
+  // 5) blog index pages
+  for (const [lang, path] of Object.entries(MULTI_LANG_URLS.blog)) {
+    if (clean === path) return { pageKey: 'blog', language: lang };
+  }
+
+  // 6) blog article pages (e.g. /blog/my-slug, /fr/blog/mon-article)
+  const blogArticleMatch = clean.match(/^(?:\/(fr|es|ru|hy))?\/blog\/([^/]+)$/);
+  if (blogArticleMatch) {
+    const lang = blogArticleMatch[1] || 'en';
+    const slug = blogArticleMatch[2];
+    return { pageKey: 'blogArticle', language: lang, slug };
+  }
+
   return null;
 };
 
@@ -139,6 +159,16 @@ export const buildTranslatedUrl = (pathname, targetLang) => {
   }
   if (pageKey === 'partners') {
     return MULTI_LANG_URLS.partners[targetLang] || MULTI_LANG_URLS.partners.en;
+  }
+  if (pageKey === 'blog') {
+    return MULTI_LANG_URLS.blog[targetLang] || MULTI_LANG_URLS.blog.en;
+  }
+  if (pageKey === 'blogArticle') {
+    // For an individual article we don't have per-language slug mapping in memory.
+    // Best-effort: bring the user to the blog index of the target language.
+    // The article slugs differ per language (e.g. -fr / -es suffix) so a direct
+    // jump would 404. The blog index is a graceful landing page.
+    return MULTI_LANG_URLS.blog[targetLang] || MULTI_LANG_URLS.blog.en;
   }
   return null;
 };
