@@ -42,6 +42,7 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 // Blog
 const BlogIndex = lazy(() => import("@/pages/blog/BlogIndex"));
 const BlogArticle = lazy(() => import("@/pages/blog/BlogArticle"));
+const BlogAdmin = lazy(() => import("@/pages/admin/BlogAdmin"));
 
 // Admin pages (lazy)
 const AdminLogin = lazy(() => import("@/pages/admin/AdminLogin"));
@@ -225,6 +226,7 @@ function App() {
                   <Route path="/ru/blog/:slug" element={<BlogArticle language="ru" />} />
                   <Route path="/hy/blog" element={<BlogIndex language="hy" />} />
                   <Route path="/hy/blog/:slug" element={<BlogArticle language="hy" />} />
+                  <Route path="/admin/blog" element={<BlogAdmin />} />
 
                   <Route path="/" element={<Home />} />
                   <Route path="/fr" element={<Home />} />
