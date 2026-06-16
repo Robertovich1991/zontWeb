@@ -289,8 +289,9 @@ const Header = () => {
               <div className="py-2">
                 <select
                   value={language}
-                  onChange={(e) => changeLanguage(e.target.value)}
+                  onChange={(e) => { handleLanguageChange(e.target.value); setMobileMenuOpen(false); }}
                   className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 text-sm"
+                  data-testid="mobile-language-select"
                 >
                   {languages.map((lang) => (
                     <option key={lang.code} value={lang.code}>
