@@ -754,44 +754,64 @@ async def proxy_delete_card(card_id: str, request: Request):
 
 
 @router.post("/booking/create")
-async def proxy_create_booking(req: AuctionAddRequest, request: Request):
-    """Create a new booking dispatch or auction transaction with destination parsing logic."""
+async def proxy_create_booking(request: Request):
+    """Create a booking on C# /api/Auction/addAuction. Forwards body unchanged and returns C# error JSON."""
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         raise HTTPException(status_code=401, detail="Authorization credentials missing")
 
+    # Parse raw body — do NOT filter fields so hourly (timing), transfer, disposal all pass through
     try:
-        payload = req.dict(exclude_none=True)
-        
-        # Enforce C# distance matching conventions
-        if payload.get("tripType") in ("Transfer", "Hourly", "transfer", "hourly"):
-            payload["tripType"] = "distance"
-            
+        payload = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="Body must be a JSON object")
+
+    trip_type = str(payload.get("tripType", "")).lower()
+
+    # Only rewrite legacy transfer/hourly aliases → "distance". Keep "timing" (hourly) untouched.
+    if trip_type in ("transfer", "hourly"):
+        payload["tripType"] = "distance"
+
+    # For "distance" trips, convert address destination → "lat,lng" string as C# expects
+    if payload.get("tripType") == "distance":
         dest = payload.get("destination", "")
         end_lat = payload.pop("endPointLatitude", None)
         end_lng = payload.pop("endPointLongitude", None)
-        
-        # Validate if string is an address instead of precise structural coordinate string mapping
-        if dest and not all(c in "0123456789.,-+ " for c in dest):
-            if end_lat and end_lng:
+        if dest and not all(c in "0123456789.,-+ " for c in str(dest)):
+            if end_lat is not None and end_lng is not None:
                 payload["destination"] = f"{end_lat},{end_lng}"
-                
-        logger.info(f"C# addAuction execution context initialized")
-        
-        # Long-lived timeout handling to catch delayed asynchronous transaction locks
+
+    logger.info(f"C# addAuction forward tripType={payload.get('tripType')} carType={payload.get('carType')}")
+
+    try:
         resp = await (await get_http_client()).post(
-            "/api/Auction/addAuction", 
-            json=payload, 
-            headers={"Authorization": auth_header},
-            timeout=45.0
+            "/api/Auction/addAuction",
+            json=payload,
+            headers={
+                "Authorization": auth_header,
+                "Content-Type": "application/json",
+                "Origin": "https://zont.cab",
+                "Referer": "https://zont.cab/",
+            },
+            timeout=45.0,
         )
-        if resp.status_code in (200, 201):
-            return resp.json() if resp.text else {"success": True}
-        raise HTTPException(status_code=resp.status_code, detail=resp.json() if resp.text else "Dispatch execution error rejected by core backend")
-    except HTTPException: raise
     except Exception as e:
-        logger.error(f"Booking pipeline validation system failure: {e}")
-        raise HTTPException(status_code=502, detail="Dispatch execution engine unreached")
+        logger.error(f"Booking proxy connection error: {e}")
+        raise HTTPException(status_code=502, detail={"error": "backend_unreachable", "message": str(e)})
+
+    if resp.status_code in (200, 201):
+        return resp.json() if resp.text else {"success": True}
+
+    # Surface the real C# error body so the client can see what went wrong
+    try:
+        err_body = resp.json() if resp.text else {"message": "Empty response"}
+    except (json.JSONDecodeError, ValueError):
+        err_body = {"message": resp.text or "Unknown error"}
+    logger.warning(f"C# addAuction rejected status={resp.status_code} body={err_body}")
+    raise HTTPException(status_code=resp.status_code, detail=err_body)
 
 
 

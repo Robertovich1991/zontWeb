@@ -1,0 +1,33 @@
+{
+  "summary": "Verified booking proxy fixes for hourly (timing) integration. Backend forwards raw payload unchanged to C# /api/Auction/addAuction, preserves tripType='timing' (not converted to 'distance'), returns proper 4xx status with structured detail from C#, no longer swallows errors as 'Something went wrong'. 5/5 backend pytest cases pass. Frontend payload construction verified via code review (Playwright cannot fully exercise submit because AuthContext requires real login and account under test has no saved card).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "verified_behavior": {
+    "backend_proxy": [
+      "POST /api/proxy/booking/create with no Authorization -> 401 with {detail: 'Authorization credentials missing'}",
+      "POST with malformed JSON body -> 400 {detail: 'Invalid JSON body'}",
+      "POST with tripType='timing' + fake Bearer -> C# returns 401, proxy forwards status=401 with structured detail body (e.g. {'detail': {'message': 'Empty response'}}) — NOT the old generic 'Something went wrong' string.",
+      "POST with tripType='Transfer' -> proxy still converts to 'distance' server-side (legacy behavior kept). Verified via server-side code (line 775 in csharp_proxy.py) and integration test.",
+      "Extra/unknown fields in payload are NOT dropped (Pydantic filtering removed) — payload forwarded unchanged."
+    ],
+    "frontend_payload_shape": "Code review of /app/frontend/src/pages/HourlyBooking.js lines 123-137 confirms: startPointLatitude/startPointLongitude are Number(pickup.lat/lng), tripType='timing', duration=hours*3600 (seconds), utcOffset=-localDT.getTimezoneOffset() (minutes), paymentType='card', startDate in DD/MM/YYYY HH:mm:ss format. Error handling (lines 149-156) parses body.detail as string or object (message/title/error keys) for hourly-error display.",
+    "frontend_ui": "Page /hourly-booking renders correctly: PlacesAutocomplete picks up 'Aéroport de Paris-Charles de Gaulle', 4 car options load (Luxury Sedan 160€, Luxury Van 150€, Standard Car 121€, Standard Minivan 138€), hours selector, date/time inputs, comment, terminal, price=160€ shown. Submit button is disabled when unauthenticated (correct behavior)."
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_booking_proxy.py",
+    "/app/test_reports/pytest/booking_proxy.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "csharp_proxy.py handles empty C# response body (401 with no body) as {'message': 'Empty response'} — this is acceptable but the frontend error display will show the literal 'Empty response' string. Consider mapping 401 from C# to a user-friendly 'Session expired, please sign in again' at the frontend if this scenario is user-facing.",
+    "csharp_proxy.py line 803: on connection failure returns {'error':'backend_unreachable', 'message': str(e)} — good, structured detail preserved.",
+    "Frontend cannot show hourly-error for full flow validation because the test account (garikgalstyan@gmail.com) has no saved card — main agent should either seed a card or accept curl-level backend validation as sufficient."
+  ],
+  "updated_files": ["/app/backend/tests/test_booking_proxy.py"],
+  "success_rate": {"backend": "100% (5/5 pytest)", "frontend": "verified via code review + UI render"},
+  "test_credentials": "garikgalstyan@gmail.com / 12345678 (has no saved card — full 200 OK submit not exercisable)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Booking proxy fix (raw-body forward + real C# error surfacing) is verified. If future task requires full 200 OK e2e verification, a client account with a saved payment card must be provisioned in C# via /api/Client/addCard flow."
+}

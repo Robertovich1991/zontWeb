@@ -117,7 +117,8 @@ const HourlyBooking = () => {
     const nowPlus3h = new Date(Date.now() + 3 * 60 * 60 * 1000);
     if (localDT < nowPlus3h) { setErrorMsg(t.errorTime); return; }
     const startDate = `${pad(localDT.getDate())}/${pad(localDT.getMonth() + 1)}/${localDT.getFullYear()} ${pad(localDT.getHours())}:${pad(localDT.getMinutes())}:00`;
-    const utcOffset = -localDT.getTimezoneOffset() / 60;
+    // C# expects utcOffset in MINUTES (Paris UTC+2 = 120, Yerevan UTC+4 = 240)
+    const utcOffset = -localDT.getTimezoneOffset();
 
     const payload = {
       tripType: 'timing',
@@ -129,8 +130,8 @@ const HourlyBooking = () => {
       utcOffset,
       paymentType: 'card',
       startAddress: pickup.address,
-      startLatitude: String(pickup.lat),
-      startLongitude: String(pickup.lng),
+      startPointLatitude: Number(pickup.lat),
+      startPointLongitude: Number(pickup.lng),
       additionalComments: comment || '',
       terminal: terminal || '',
     };
@@ -146,7 +147,13 @@ const HourlyBooking = () => {
         setSuccessMsg(t.successText);
       } else {
         const body = await resp.json().catch(() => ({}));
-        setErrorMsg(body.message || body.title || t.errorGeneric);
+        // Surface the real C# error (detail may be object or string)
+        const detail = body.detail;
+        let msg;
+        if (typeof detail === 'string') msg = detail;
+        else if (detail && typeof detail === 'object') msg = detail.message || detail.title || detail.error || JSON.stringify(detail);
+        else msg = body.message || body.title || t.errorGeneric;
+        setErrorMsg(msg);
       }
     } catch (_) {
       setErrorMsg(t.errorGeneric);
