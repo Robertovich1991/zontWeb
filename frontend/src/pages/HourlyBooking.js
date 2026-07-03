@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
+import transferService from '@/services/api';
 import { Clock, MapPin, Calendar, CreditCard, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -171,7 +172,7 @@ const HourlyBooking = () => {
       />
       <Header />
 
-      <main className="bg-gray-50 min-h-screen py-10 px-4">
+      <main className="bg-gray-50 min-h-screen pt-24 md:pt-28 pb-10 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
             <Clock className="w-8 h-8 text-[#2ecc71]" />
@@ -226,21 +227,35 @@ const HourlyBooking = () => {
                         const baseFare = Number(car.baseFare || 0);
                         const minP = Number(car.minimum || car.minAmount || 0);
                         const carPrice = Math.max(perMin * hours * 60 + baseFare, minP);
+                        const imgUrl = transferService.getVehicleImageUrl(car.imagePath);
                         return (
                           <button
                             key={key}
                             type="button"
                             onClick={() => setSelectedCar(car)}
-                            className={`text-left p-4 border-2 rounded-xl transition ${isSelected ? 'border-[#2ecc71] bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}
+                            className={`text-left border-2 rounded-xl transition overflow-hidden ${isSelected ? 'border-[#2ecc71] bg-green-50 shadow-md' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
                             data-testid={`car-${key}`}
                           >
-                            <div className="flex items-start justify-between gap-3">
+                            <div className="w-full h-28 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+                              {imgUrl ? (
+                                <img
+                                  src={imgUrl}
+                                  alt={car.name || key}
+                                  className="max-h-full max-w-full object-contain drop-shadow-sm"
+                                  loading="lazy"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              ) : (
+                                <div className="text-gray-300 text-xs">—</div>
+                              )}
+                            </div>
+                            <div className="p-3 flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900">{car.name || key}</div>
-                                <div className="text-xs text-gray-500 mt-1">{t.minPrice}: {minP}€ · {(perMin * 60).toFixed(0)}€/h</div>
+                                <div className="font-semibold text-gray-900 text-sm truncate">{car.name || key}</div>
+                                <div className="text-[11px] text-gray-500 mt-0.5">{t.minPrice}: {minP}€ · {(perMin * 60).toFixed(0)}€/h</div>
                               </div>
                               <div className="text-right shrink-0">
-                                <div className="text-lg font-bold text-[#2ecc71]">{carPrice.toFixed(0)}€</div>
+                                <div className="text-base font-bold text-[#2ecc71] leading-tight">{carPrice.toFixed(0)}€</div>
                                 <div className="text-[10px] text-gray-500 uppercase">{hours}h</div>
                               </div>
                             </div>
