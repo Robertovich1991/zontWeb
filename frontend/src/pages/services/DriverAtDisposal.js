@@ -176,6 +176,14 @@ const DriverAtDisposal = () => {
                 >
                   {ui.bookNow}
                 </button>
+                <button
+                  onClick={() => navigate('/hourly-booking')}
+                  data-testid="hero-hourly-booking-btn"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-[#2ecc71] hover:bg-[#27ae60] text-white font-semibold uppercase tracking-wider text-sm transition-all"
+                >
+                  {lang === 'fr' ? 'Réserver à l\'heure' : lang === 'es' ? 'Reservar por horas' : lang === 'ru' ? 'Заказать по часам' : lang === 'hy' ? 'Ամրագրել ժամով' : 'Book hourly ride'}
+                  <ChevronRight size={18} />
+                </button>
               </div>
             </div>
           </div>

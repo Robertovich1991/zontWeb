@@ -140,6 +140,13 @@ const Header = () => {
                 {t('nav.help')}
               </Link>
               <Link
+                to="/hourly-booking"
+                className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
+                data-testid="nav-hourly"
+              >
+                {language === 'fr' ? 'À l\'heure' : language === 'es' ? 'Por horas' : language === 'ru' ? 'По часам' : language === 'hy' ? 'Ժամով' : 'Hourly'}
+              </Link>
+              <Link
                 to={language === 'es' ? '/es/blog' : language === 'fr' ? '/fr/blog' : language === 'ru' ? '/ru/blog' : language === 'hy' ? '/hy/blog' : '/blog'}
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
                 data-testid="nav-blog"
@@ -266,6 +273,14 @@ const Header = () => {
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >
                 {t('nav.help')}
+              </Link>
+              <Link
+                to="/hourly-booking"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
+                data-testid="nav-hourly-mobile"
+              >
+                {language === 'fr' ? 'À l\'heure' : language === 'es' ? 'Por horas' : language === 'ru' ? 'По часам' : language === 'hy' ? 'Ժամով' : 'Hourly'}
               </Link>
               <Link
                 to={language === 'es' ? '/es/blog' : language === 'fr' ? '/fr/blog' : language === 'ru' ? '/ru/blog' : language === 'hy' ? '/hy/blog' : '/blog'}
