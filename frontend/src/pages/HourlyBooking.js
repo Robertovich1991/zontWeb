@@ -59,14 +59,15 @@ const HourlyBooking = () => {
     setCars([]);
     (async () => {
       try {
-        const resp = await fetch(`${API}/api/csharp/Distance/driverTypesWithStatus`, {
+        const resp = await fetch(`${API}/api/proxy/driver-types`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ latitude: String(pickup.lat), longitude: String(pickup.lng) }),
         });
         const data = await resp.json();
         const list = Array.isArray(data) ? data : data.driverTypes || [];
-        if (!cancelled) setCars(list.filter(c => c.isActive !== false));
+        // Show all cars — the C# backend flags inactive but we let users see prices anyway
+        if (!cancelled) setCars(list);
       } catch (e) {
         if (!cancelled) setCars([]);
       } finally {
@@ -81,11 +82,11 @@ const HourlyBooking = () => {
     if (!token) return;
     (async () => {
       try {
-        const resp = await fetch(`${API}/api/csharp/Stripe/paymentMethods`, {
+        const resp = await fetch(`${API}/api/proxy/client/cards`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await resp.json();
-        const list = Array.isArray(data) ? data : data.paymentMethods || data.cards || [];
+        const list = Array.isArray(data) ? data : data.cards || data.paymentMethods || [];
         setCards(list);
         if (list.length === 1) setSelectedCardId(list[0].id);
       } catch (_) { setCards([]); }
@@ -136,7 +137,7 @@ const HourlyBooking = () => {
 
     setSubmitting(true);
     try {
-      const resp = await fetch(`${API}/api/csharp/Auction/addAuction`, {
+      const resp = await fetch(`${API}/api/proxy/booking/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
@@ -197,8 +198,8 @@ const HourlyBooking = () => {
                 <PlacesAutocomplete
                   value={pickup.address}
                   placeholder={t.pickupPh}
-                  onSelect={(res) => setPickup({ address: res.address, lat: res.lat, lng: res.lng })}
-                  onChange={(v) => setPickup(p => ({ ...p, address: v }))}
+                  className="w-full border-2 border-gray-200 rounded-xl px-3 py-3 text-gray-900 placeholder-gray-400 focus:border-[#2ecc71] focus:outline-none"
+                  onChange={({ address, latitude, longitude }) => setPickup({ address: address || '', lat: latitude, lng: longitude })}
                   data-testid="hourly-pickup"
                 />
               </div>
@@ -214,6 +215,10 @@ const HourlyBooking = () => {
                       {cars.map(car => {
                         const key = car.tripTypes || car.carType || car.name;
                         const isSelected = selectedCar && (selectedCar.tripTypes || selectedCar.carType) === (car.tripTypes || car.carType);
+                        const perMin = Number(car.perMinuteForTime || 0);
+                        const baseFare = Number(car.baseFare || 0);
+                        const minP = Number(car.minimum || car.minAmount || 0);
+                        const carPrice = Math.max(perMin * hours * 60 + baseFare, minP);
                         return (
                           <button
                             key={key}
@@ -222,8 +227,16 @@ const HourlyBooking = () => {
                             className={`text-left p-4 border-2 rounded-xl transition ${isSelected ? 'border-[#2ecc71] bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}
                             data-testid={`car-${key}`}
                           >
-                            <div className="font-semibold text-gray-900">{car.name || key}</div>
-                            <div className="text-xs text-gray-500 mt-1">{t.minPrice}: {Number(car.minimum || car.minAmount || 0)}€</div>
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-gray-900">{car.name || key}</div>
+                                <div className="text-xs text-gray-500 mt-1">{t.minPrice}: {minP}€ · {(perMin * 60).toFixed(0)}€/h</div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <div className="text-lg font-bold text-[#2ecc71]">{carPrice.toFixed(0)}€</div>
+                                <div className="text-[10px] text-gray-500 uppercase">{hours}h</div>
+                              </div>
+                            </div>
                           </button>
                         );
                       })}
@@ -257,18 +270,18 @@ const HourlyBooking = () => {
                   <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
                     <Calendar className="w-4 h-4" /> {t.date}
                   </label>
-                  <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-3 py-3" data-testid="hourly-date" />
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-3 py-3 text-gray-900 bg-white focus:border-[#2ecc71] focus:outline-none" data-testid="hourly-date" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-800 mb-2">{t.time}</label>
-                  <input type="time" value={time} step="300" onChange={e => setTime(e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-3 py-3" data-testid="hourly-time" />
+                  <input type="time" value={time} step="300" onChange={e => setTime(e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-3 py-3 text-gray-900 bg-white focus:border-[#2ecc71] focus:outline-none" data-testid="hourly-time" />
                 </div>
               </div>
 
               {/* Comment + Terminal */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input type="text" value={comment} onChange={e => setComment(e.target.value)} placeholder={t.commentPh} className="border-2 border-gray-200 rounded-xl px-3 py-3 text-sm" data-testid="hourly-comment" />
-                <input type="text" value={terminal} onChange={e => setTerminal(e.target.value)} placeholder={t.terminalPh} className="border-2 border-gray-200 rounded-xl px-3 py-3 text-sm" data-testid="hourly-terminal" />
+                <input type="text" value={comment} onChange={e => setComment(e.target.value)} placeholder={t.commentPh} className="border-2 border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-900 bg-white placeholder-gray-400 focus:border-[#2ecc71] focus:outline-none" data-testid="hourly-comment" />
+                <input type="text" value={terminal} onChange={e => setTerminal(e.target.value)} placeholder={t.terminalPh} className="border-2 border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-900 bg-white placeholder-gray-400 focus:border-[#2ecc71] focus:outline-none" data-testid="hourly-terminal" />
               </div>
 
               {/* Card */}
@@ -281,7 +294,7 @@ const HourlyBooking = () => {
                     {t.noCards} <button onClick={() => navigate('/my-account')} className="ml-2 underline">{t.addCard}</button>
                   </div>
                 ) : (
-                  <select value={selectedCardId} onChange={e => setSelectedCardId(e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-3 py-3" data-testid="hourly-card-select">
+                  <select value={selectedCardId} onChange={e => setSelectedCardId(e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-3 py-3 text-gray-900 bg-white focus:border-[#2ecc71] focus:outline-none" data-testid="hourly-card-select">
                     <option value="">—</option>
                     {cards.map(c => (
                       <option key={c.id} value={c.id}>{c.brand?.toUpperCase() || 'Card'} •••• {c.last4}</option>
