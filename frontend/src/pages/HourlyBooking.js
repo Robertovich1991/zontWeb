@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import Header from '@/components/layout/Header';
@@ -26,13 +26,30 @@ const HourlyBooking = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const t = T[language] || T.en;
 
-  const [pickup, setPickup] = useState({ address: '', lat: null, lng: null });
+  // Prefill from URL params (?pickup=&lat=&lng=&date=&time=&hours=)
+  const initialPickup = useMemo(() => {
+    const addr = searchParams.get('pickup') || '';
+    const lat = parseFloat(searchParams.get('lat'));
+    const lng = parseFloat(searchParams.get('lng'));
+    return {
+      address: addr,
+      lat: Number.isFinite(lat) ? lat : null,
+      lng: Number.isFinite(lng) ? lng : null,
+    };
+  }, [searchParams]);
+  const initialHours = useMemo(() => {
+    const h = parseInt(searchParams.get('hours'), 10);
+    return [2, 3, 4, 5, 6].includes(h) ? h : 2;
+  }, [searchParams]);
+
+  const [pickup, setPickup] = useState(initialPickup);
   const [cars, setCars] = useState([]);
   const [loadingCars, setLoadingCars] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
-  const [hours, setHours] = useState(2);
+  const [hours, setHours] = useState(initialHours);
   // Default date+time = "now + 4 hours" rounded up to next 5-min
   const initDateTime = useMemo(() => {
     const d = new Date(Date.now() + 4 * 60 * 60 * 1000);
@@ -40,8 +57,10 @@ const HourlyBooking = () => {
     return d;
   }, []);
   const pad = n => String(n).padStart(2, '0');
-  const [date, setDate] = useState(`${initDateTime.getFullYear()}-${pad(initDateTime.getMonth() + 1)}-${pad(initDateTime.getDate())}`);
-  const [time, setTime] = useState(`${pad(initDateTime.getHours())}:${pad(initDateTime.getMinutes())}`);
+  const urlDate = searchParams.get('date');
+  const urlTime = searchParams.get('time');
+  const [date, setDate] = useState(urlDate || `${initDateTime.getFullYear()}-${pad(initDateTime.getMonth() + 1)}-${pad(initDateTime.getDate())}`);
+  const [time, setTime] = useState(urlTime || `${pad(initDateTime.getHours())}:${pad(initDateTime.getMinutes())}`);
   const [comment, setComment] = useState('');
   const [terminal, setTerminal] = useState('');
   const [cards, setCards] = useState([]);

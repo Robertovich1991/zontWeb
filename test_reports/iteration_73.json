@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend-only testing of the new Home Book-Your-Transfer tab switch (Transfer vs Driver-at-disposal) and prefill of /hourly-booking via URL params. All requested flows PASS.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results": {
+    "tab_switch_visible": "PASS - mode-transfer-tab and mode-disposal-tab render above form title",
+    "default_transfer_mode": "PASS - dropoff visible, hours block hidden, submit label 'SEARCH TRANSFER'",
+    "disposal_mode_toggle": "PASS - dropoff hidden, home-hours-block visible with buttons home-hours-2..6, submit label switches to 'DRIVER AT DISPOSAL'",
+    "empty_pickup_validation": "PASS - submit with empty pickup does not navigate (toast library uses a non-standard container so toast text was not captured, but navigation was correctly blocked)",
+    "disposal_submit_redirect": "PASS - navigated to /hourly-booking?pickup=...&lat=49.0078827&lng=2.5507855&date=2026-06-15&time=14:30&hours=3 (all 6 params present and correct)",
+    "hourly_booking_prefill": "PASS - hourly-pickup input prefilled with 'Aéroport de Paris-Charles de Gaulle, 95700 Roissy-en-France, France', hourly-date=2026-06-15, hourly-time=14:30, hours-3 button shows active state (green border+bg), and cars loading was triggered from passed lat/lng",
+    "regression_back_to_transfer": "PASS - switching back to Transfer tab restores dropoff input and hides hours block",
+    "i18n_keys": "PASS (source-verified) - Home.js contains tabTransfer/tabDisposal/hoursLabel keys in EN/FR/ES/RU/HY exactly matching spec (Transfer/Driver at disposal, Transfert/Chauffeur à disposition, Traslado/Chófer a disposición, Трансфер/Водитель в распоряжение, Տրանսֆեր/Վարորդ տրամադրության տակ). UI language dropdown click was not exercisable via the tested selectors, but code inspection confirms all 5 translations are wired to the c object rendered inside the tab labels."
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Toast error notifications in disposal-mode validation could not be located via .Toastify__toast selector - main agent may want to verify the react-hot-toast/sonner container is actually mounted so error toasts surface (navigation is correctly blocked either way).",
+    "Home.js is 1351 lines — consider splitting the language i18n map and the booking form into separate modules for maintainability."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "test_credentials": "not required (no login flow tested)",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Tab switch, disposal mode navigation, and /hourly-booking URL-param prefill all verified end-to-end using Google Places autocomplete on 'Charles de Gaulle Airport'. Test URL produced: /hourly-booking?pickup=A%C3%A9roport+de+Paris-Charles+de+Gaulle...&lat=49.0078827&lng=2.5507855&date=2026-06-15&time=14:30&hours=3."
+}

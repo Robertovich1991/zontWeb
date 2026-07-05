@@ -27,6 +27,7 @@ const homeContent = {
     heroAccent: 'Across Europe',
     heroSub: 'Professional private drivers in 16 cities. Fixed prices, flight tracking, meet & greet.',
     bookingTitle: 'Book Your Transfer',
+    tabTransfer: 'Transfer', tabDisposal: 'Driver at disposal', hoursLabel: 'How many hours?',
     pickup: 'Pick up address', dropoff: 'Drop off address', date: 'Date', time: 'Time',
     pickupPh: 'Airport, hotel, address...', dropoffPh: 'Hotel, city center, address...',
     bookNow: 'SEARCH TRANSFER', searching: 'SEARCHING...',
@@ -56,6 +57,7 @@ const homeContent = {
     heroAccent: 'Partout en Europe',
     heroSub: 'Chauffeurs privés professionnels dans 16 villes. Prix fixes, suivi de vol, accueil personnalisé.',
     bookingTitle: 'Réservez Votre Transfert',
+    tabTransfer: 'Transfert', tabDisposal: 'Chauffeur à disposition', hoursLabel: 'Combien d\'heures ?',
     pickup: 'Adresse de départ', dropoff: 'Adresse d\'arrivée', date: 'Date', time: 'Heure',
     pickupPh: 'Aéroport, hôtel, adresse...', dropoffPh: 'Hôtel, centre-ville, adresse...',
     bookNow: 'RECHERCHER UN TRANSFERT', searching: 'RECHERCHE...',
@@ -85,6 +87,7 @@ const homeContent = {
     heroAccent: 'По Всей Европе',
     heroSub: 'Профессиональные частные водители в 16 городах. Фиксированные цены, отслеживание рейсов.',
     bookingTitle: 'Забронируйте Трансфер',
+    tabTransfer: 'Трансфер', tabDisposal: 'Водитель в распоряжение', hoursLabel: 'Сколько часов?',
     pickup: 'Адрес отправления', dropoff: 'Адрес назначения', date: 'Дата', time: 'Время',
     pickupPh: 'Аэропорт, отель, адрес...', dropoffPh: 'Отель, центр города...',
     bookNow: 'НАЙТИ ТРАНСФЕР', searching: 'ПОИСК...',
@@ -114,6 +117,7 @@ const homeContent = {
     heroAccent: 'Ամբողջ Եվրոպայում',
     heroSub: 'Պրոֆեսիոնալ անձնական վարորդներ 16 քաղաքներում: Հաստատ գներ, թռիչքի հետևելում, անհատական դիմավորում:',
     bookingTitle: 'Ամրագրեք Ձեր Տրանսֆերը',
+    tabTransfer: 'Տրանսֆեր', tabDisposal: 'Վարորդ տրամադրության տակ', hoursLabel: 'Քանի՞ ժամ',
     pickup: 'Վերցնելու հասցե', dropoff: 'Իջնելու հասցե', date: 'Ամսաթիվ', time: 'Ժամ',
     pickupPh: 'Օդանավակայան, հյուրանոց, հասցե...', dropoffPh: 'Հյուրանոց, կենտրոն, հասցե...',
     bookNow: 'ՈՌՈՆԵԼ ՏՌԱՆՍՖԵՌ', searching: 'ՈՌՈՆՈՒՄ...',
@@ -140,6 +144,7 @@ const homeContent = {
     heroAccent: 'En Toda Europa',
     heroSub: 'Chóferes privados profesionales en 16 ciudades. Precios fijos, seguimiento de vuelo, recepción personalizada.',
     bookingTitle: 'Reserva Tu Traslado',
+    tabTransfer: 'Traslado', tabDisposal: 'Chófer a disposición', hoursLabel: '¿Cuántas horas?',
     pickup: 'Dirección de recogida', dropoff: 'Dirección de destino', date: 'Fecha', time: 'Hora',
     pickupPh: 'Aeropuerto, hotel, dirección...', dropoffPh: 'Hotel, centro, dirección...',
     bookNow: 'BUSCAR TRASLADO', searching: 'BUSCANDO...',
@@ -191,6 +196,8 @@ const Home = () => {
   const [dropoff, setDropoff] = useState({ address: '', latitude: null, longitude: null });
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [mode, setMode] = useState('transfer'); // 'transfer' | 'disposal' (hourly)
+  const [hours, setHours] = useState(2);
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
   const [cmsHomepage, setCmsHomepage] = useState(null);
   const langSyncRef = useRef(false);
@@ -307,6 +314,41 @@ const Home = () => {
 
     const pickupAddr = pickup.address || document.getElementById('h-pickup')?.value || '';
     const dropoffAddr = dropoff.address || document.getElementById('h-dropoff')?.value || '';
+
+    // ─── Driver at disposal (hourly) mode ───
+    if (mode === 'disposal') {
+      if (!pickupAddr) {
+        toast.error(language === 'fr' ? 'Veuillez indiquer l\'adresse de prise en charge' : 'Please enter a pickup address');
+        setLoading(false);
+        return;
+      }
+      if (!date || !time) {
+        toast.error(language === 'fr' ? 'Veuillez sélectionner la date et l\'heure' : 'Please select date and time');
+        setLoading(false);
+        return;
+      }
+      let pickupCoords = null;
+      if (pickupSafeRef.current.latitude != null) pickupCoords = { latitude: pickupSafeRef.current.latitude, longitude: pickupSafeRef.current.longitude };
+      else if (pickup.latitude != null) pickupCoords = { latitude: pickup.latitude, longitude: pickup.longitude };
+      try {
+        if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickupSafeRef.current.placeId || pickup.placeId);
+      } catch {
+        toast.error(language === 'fr' ? 'Adresse introuvable. Veuillez réessayer.' : 'Address not found. Please try again.');
+        setLoading(false);
+        return;
+      }
+      const params = new URLSearchParams({
+        pickup: pickupAddr,
+        lat: String(pickupCoords.latitude),
+        lng: String(pickupCoords.longitude),
+        date,
+        time,
+        hours: String(hours),
+      });
+      setLoading(false);
+      navigate(`/hourly-booking?${params.toString()}`);
+      return;
+    }
 
     if (!pickupAddr || !dropoffAddr) {
       toast.error(language === 'fr' ? 'Veuillez remplir les adresses' : 'Please fill in both addresses');
@@ -817,7 +859,30 @@ const Home = () => {
                 {/* Right: Booking Form */}
                 <div ref={bookingRef} className="w-full max-w-md mx-auto lg:mx-0">
                   <div className="bg-white rounded-2xl p-5 md:p-6 shadow-2xl" data-testid="home-booking-card">
-                    <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-1 text-center">{c.bookingTitle}</h2>
+                    <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-3 text-center">{c.bookingTitle}</h2>
+                    {/* Mode switch: Transfer vs Driver at disposal */}
+                    <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100 rounded-lg mb-3" role="tablist" aria-label="Booking mode">
+                      <button
+                        type="button"
+                        onClick={() => setMode('transfer')}
+                        className={`py-2 rounded-md text-xs md:text-sm font-semibold transition-all ${mode === 'transfer' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        role="tab"
+                        aria-selected={mode === 'transfer'}
+                        data-testid="mode-transfer-tab"
+                      >
+                        {c.tabTransfer}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMode('disposal')}
+                        className={`py-2 rounded-md text-xs md:text-sm font-semibold transition-all ${mode === 'disposal' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        role="tab"
+                        aria-selected={mode === 'disposal'}
+                        data-testid="mode-disposal-tab"
+                      >
+                        {c.tabDisposal}
+                      </button>
+                    </div>
                     <p className="text-xs text-gray-500 text-center mb-4">{c.fixedPrices} - {c.securePay}</p>
                     <form onSubmit={handleSubmit} className="space-y-3" data-testid="home-booking-form" role="form" aria-label={c.bookingTitle}>
                       <div>
@@ -844,7 +909,7 @@ const Home = () => {
                           </div>
                         )}
                       </div>
-                      <div>
+                      <div className={mode === 'disposal' ? 'hidden' : ''}>
                         <label htmlFor="h-dropoff" className="block text-gray-700 font-medium text-sm mb-1">{c.dropoff}</label>
                         <PlacesAutocomplete
                           id="h-dropoff"
@@ -868,6 +933,24 @@ const Home = () => {
                           </div>
                         )}
                       </div>
+                      {mode === 'disposal' && (
+                        <div data-testid="home-hours-block">
+                          <label className="block text-gray-700 font-medium text-sm mb-1">{c.hoursLabel}</label>
+                          <div className="grid grid-cols-5 gap-2">
+                            {[2, 3, 4, 5, 6].map(h => (
+                              <button
+                                key={h}
+                                type="button"
+                                onClick={() => setHours(h)}
+                                className={`py-3 rounded-lg border-2 font-bold text-sm transition ${hours === h ? 'border-[#2ecc71] bg-green-50 text-[#2ecc71]' : 'border-gray-200 hover:border-gray-300 text-gray-700'}`}
+                                data-testid={`home-hours-${h}`}
+                              >
+                                {h}h
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label htmlFor="h-date" className="block text-gray-700 font-medium text-sm mb-1">{c.date}</label>
@@ -884,7 +967,7 @@ const Home = () => {
                       <button type="submit" disabled={loading}
                         className="w-full bg-[#2ecc71] text-white py-3.5 rounded-lg font-bold text-base hover:bg-[#27ae60] transition-colors uppercase tracking-wide shadow-lg shadow-[#2ecc71]/30"
                         data-testid="home-submit-btn">
-                        {loading ? c.searching : c.bookNow}
+                        {loading ? c.searching : (mode === 'disposal' ? c.tabDisposal : c.bookNow)}
                       </button>
                     </form>
                     <div className="flex items-center justify-center space-x-3 mt-3 pt-3 border-t border-gray-100">
