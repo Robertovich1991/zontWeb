@@ -167,9 +167,44 @@ const content = {
     seoDesc: 'Պրեմիում տրանսպորտ բիզնես գործընկերների համար:',
     relatedTitle: 'Կապված Էջեր',
   },
+  es: {
+    heroTitle: 'Para Socios Comerciales',
+    heroSub: 'Simplifica el transporte de tu empresa con Zont. Programa dedicado para agencias, tour operadores, empresas y hoteles.',
+    heroBtn: 'Solicitar Propuesta',
+    ctaPartner: 'Convertirse en socio',
+    ctaQuote: 'Solicitar propuesta',
+    benefits: [
+      { title: 'Servicio dedicado', desc: 'Ofrece a tus clientes un traslado premium en todas las ciudades donde operamos.' },
+      { title: 'Vehículos premium', desc: 'Mercedes, BMW, furgonetas y minibuses con chóferes profesionales.' },
+      { title: 'Integración API sencilla', desc: 'Automatiza tus reservas mediante nuestra API. Sincronización en tiempo real.' },
+      { title: 'Comisión preferente', desc: 'Tarifas negociadas y comisión personalizada según volumen.' },
+    ],
+    trustTitle: 'Una red digna de unirse', trustSub: '',
+    trustPoints: [
+      { value: '16', label: 'Ciudades' },
+      { value: '1000+', label: 'Socios' },
+      { value: '15+', label: 'Países' },
+      { value: '2M EUR+', label: 'Ingresos de socios/año' },
+    ],
+    contactTitle: 'Construyamos juntos',
+    contactSub: 'Cuéntanos sobre tu negocio y tu visión de colaboración.',
+    formSubmit: 'Iniciar la conversación',
+    backToPartners: 'Volver a todas las soluciones',
+    seoTitle: 'Socios Comerciales | Zont Transport Corporativo',
+    seoDesc: 'Programa de socios comerciales Zont: agencias, tour operadores, empresas y hoteles. Vehículos premium, integración API, tarifas negociadas.',
+    relatedTitle: 'Otras soluciones',
+    formTitle: 'Solicitar Propuesta',
+    formSub: 'Rellena el formulario a continuación y te contactamos en menos de 24 horas.',
+    name: 'Nombre *', company: 'Empresa *', email: 'Email *', phone: 'Teléfono *',
+    message: 'Mensaje',
+    messagePh: 'Cuéntanos tus necesidades...',
+    submit: 'Enviar la solicitud', sending: 'Enviando...',
+    successTitle: '¡Mensaje enviado!',
+    successDesc: 'Nuestro equipo se pondrá en contacto contigo pronto.',
+  },
 };
 
-const seoUrls = { en: '/business-partners', fr: '/business-partners', ru: '/business-partners' };
+const seoUrls = { en: '/business-partners', fr: '/business-partners', ru: '/business-partners', hy: '/business-partners', es: '/es/socios-comerciales' };
 const relatedPages = [
   { path: '/corporate-clients', name: 'Corporate Clients', tagline: 'Business travel services' },
   { path: '/travel-agencies', name: 'Travel Agencies', tagline: 'Airport transfer partnership' },

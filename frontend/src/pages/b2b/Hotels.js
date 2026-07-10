@@ -245,6 +245,65 @@ const content = {
     formMessage: 'Սենյակների քանակ, տեղակայում, ցանկալի ժամ...',
     backToPartners: 'Վերադառնալ բոլոր լուծումներին',
   },
+  es: {
+    seoTitle: 'Terminal de reservas ZONT para hoteles — VTC, Taxi y Chófer Privado',
+    seoDesc: 'Transforma tu hotel con un terminal de reservas ZONT. Tableta interactiva 24/7 para traslados de aeropuerto, chófer privado y VTC. Instalación gratuita, comisión 10-20%.',
+    badge: 'Terminal ZONT en Hotel',
+    heroTitle: 'Transforma tu hotel con un terminal de reservas ZONT',
+    heroSub: 'Ofrece a tus clientes un servicio premium de chófer privado directamente desde tu recepción. Instalación gratuita, autónoma 24/7, multilingüe.',
+    ctaPartner: 'Convertirse en socio ZONT',
+    ctaQuote: 'Solicitar una instalación',
+
+    benefitsTitle: 'Lo que ofrecemos',
+    benefitsSub: 'Un terminal interactivo llave en mano, 100% gestionado por nuestros equipos',
+    benefits: [
+      { title: 'Instalación gratuita', desc: 'Una tableta o terminal interactivo instalado y configurado gratuitamente por nuestra empresa.' },
+      { title: 'Disponible 24/7', desc: 'Solución moderna y autónoma que funciona sin parar, incluso cuando tu recepción está cerrada.' },
+      { title: 'Reserva sencilla y rápida', desc: 'Tus clientes reservan en pocos clics sus traslados de aeropuerto y chóferes privados.' },
+      { title: 'Interfaz multilingüe', desc: 'Francés, Inglés, Ruso, Armenio, Español — adaptada a tu clientela internacional.' },
+      { title: 'Seguimiento y mantenimiento', desc: 'Nuestro equipo asegura el seguimiento del servicio, el mantenimiento y las actualizaciones en remoto.' },
+      { title: 'Sin costes ocultos', desc: 'Sin suscripción, sin gastos de instalación. Recibes una comisión sobre cada reserva.' },
+    ],
+
+    servicesTitle: 'Las ventajas para tu hotel',
+    servicesSub: 'Más ingresos, mayor satisfacción del cliente, cero limitaciones',
+    services: [
+      { title: 'Más ingresos por chófer', desc: 'Aumento de las solicitudes de traslados y servicios de chófer desde tu vestíbulo.' },
+      { title: 'Experiencia premium desde la llegada', desc: 'Tus clientes viven una acogida moderna y premium desde el momento en que cruzan la puerta.' },
+      { title: 'Complemento a tu recepción', desc: 'Servicio moderno y autónomo instalado junto a la recepción, sin implicar a tu personal.' },
+      { title: 'Comisión 10% al 20%', desc: 'Recibes una comisión del 10% al 20% según el servicio reservado por el cliente.' },
+      { title: 'Tarificación adaptada', desc: 'Tarifas ajustadas al standing y a la gama de tu hotel — boutique, 4★, 5★, palace.' },
+      { title: 'Imagen de marca reforzada', desc: 'Asocia tu hotel a un servicio VTC premium reconocido — un verdadero elemento diferenciador.' },
+    ],
+
+    howTitle: 'Servicios reservables desde el terminal',
+    howSteps: [
+      { title: 'Traslados de aeropuerto', desc: 'CDG, Orly, Beauvais — Meet & Greet incluido.' },
+      { title: 'Disneyland® Paris', desc: 'Ida y vuelta al parque, hoteles Disney y alrededores.' },
+      { title: 'Chófer a disposición', desc: '4h / 8h / 12h — Mercedes S, E, V y Renault Trafic.' },
+      { title: 'Familias y grupos', desc: 'Vehículos 7-8 plazas + seguimiento de vuelos en tiempo real.' },
+    ],
+
+    trustTitle: 'Nuestro equipo se ocupa de todo',
+    trustSub: 'Instalación, configuración, formación de tu personal y seguimiento continuo — no tienes que hacer nada.',
+    trustPoints: [
+      { value: '0€', label: 'Coste de instalación' },
+      { value: '24/7', label: 'Servicio autónomo' },
+      { value: '10–20%', label: 'Comisión' },
+      { value: '< 7 días', label: 'Puesta en marcha' },
+    ],
+
+    relatedTitle: 'Otras soluciones',
+    contactTitle: 'Contáctanos para convertirte en socio ZONT',
+    contactSub: 'Rellena los datos de tu hotel a continuación. Nuestro equipo te contactará en menos de 24 horas.',
+    formSubmit: 'Solicitar la instalación gratuita',
+    formName: 'Tu nombre',
+    formCompany: 'Nombre del hotel',
+    formEmail: 'Email',
+    formPhone: 'Teléfono',
+    formMessage: 'Número de habitaciones, ubicación, horario deseado...',
+    backToPartners: 'Volver a todas las soluciones',
+  },
 };
 
 const seoUrls = {
@@ -252,6 +311,7 @@ const seoUrls = {
   fr: '/borne-reservation-hotel',
   ru: '/terminal-bronirovaniya-otel',
   hy: '/hyuranots-kropak',
+  es: '/es/quiosco-reserva-hotel',
 };
 
 const relatedPages = [

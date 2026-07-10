@@ -347,6 +347,8 @@ function App() {
                   <Route path="/mice-transportation-paris" element={<MICETransportation />} />
                   <Route path="/transport-mice-paris" element={<MICETransportation />} />
                   <Route path="/mice-transport-parij" element={<MICETransportation />} />
+                  <Route path="/mice-transport-pariz-hy" element={<MICETransportation />} />
+                  <Route path="/es/transporte-mice-paris" element={<MICETransportation />} />
                   {/* Nice */}
                   <Route path="/nice-airport-transfer" element={<NiceTransfer />} />
                   <Route path="/transfert-aeroport-nice" element={<NiceTransfer />} />
@@ -430,10 +432,12 @@ function App() {
                   <Route path="/vtc-8-seats" element={<VTC8Places />} />
                   <Route path="/vtc-8-mest" element={<VTC8Places />} />
                   <Route path="/vtc-8-tegh" element={<VTC8Places />} />
+                  <Route path="/es/vtc-8-plazas" element={<VTC8Places />} />
                   <Route path="/vtc-7-places" element={<VTC7Places />} />
                   <Route path="/vtc-7-seats" element={<VTC7Places />} />
                   <Route path="/vtc-7-mest" element={<VTC7Places />} />
                   <Route path="/vtc-7-tegh" element={<VTC7Places />} />
+                  <Route path="/es/vtc-7-plazas" element={<VTC7Places />} />
                   {/* Driver at Disposal — Mise a disposition */}
                   <Route path="/driver-at-disposal" element={<DriverAtDisposal />} />
                   <Route path="/chauffeur-mis-a-disposition" element={<DriverAtDisposal />} />
@@ -452,10 +456,12 @@ function App() {
                   <Route path="/borne-reservation-hotel" element={<HotelsB2B />} />
                   <Route path="/terminal-bronirovaniya-otel" element={<HotelsB2B />} />
                   <Route path="/hyuranots-kropak" element={<HotelsB2B />} />
+                  <Route path="/es/quiosco-reserva-hotel" element={<HotelsB2B />} />
                   <Route path="/concierge-services" element={<ConciergeServices />} />
                   <Route path="/event-agencies" element={<EventAgencies />} />
                   <Route path="/corporate-clients" element={<CorporateClients />} />
                   <Route path="/business-partners" element={<BusinessPartners />} />
+                  <Route path="/es/socios-comerciales" element={<BusinessPartners />} />
                   <Route path="/tour-operators" element={<TourOperators />} />
                   {/* Admin Panel */}
                   <Route path="/admin/login" element={<AdminAuthProvider><AdminLogin /></AdminAuthProvider>} />

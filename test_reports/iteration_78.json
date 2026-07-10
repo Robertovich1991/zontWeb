@@ -1,0 +1,46 @@
+{
+  "summary": "Frontend testing of 5 new Spanish (ES) feature pages + 1 new Armenian (HY) MICE slug. Verified rendering, content localization, hreflang tags, sitemap.xml validity, and regression across en/fr/ru/hy for existing routes. All new /es/... routes load without 404 and render in Spanish. Sitemap.xml is well-formed and contains all 6 new URLs with proper hreflang alternates.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "MICE Transportation hreflang tags in <head>",
+        "issue": "/es/transporte-mice-paris (and other MICE language variants) do NOT emit <link rel='alternate' hreflang='...'> tags in the document <head>. Sitemap.xml has them correctly, but the page-level hreflang metadata (which search engines also crawl) is absent. CityTransferPage-based pages (VTC7/8, Hotels, BusinessPartners) correctly emit all 6 hreflang links (en, fr, ru, hy, es, x-default). Pre-existing gap in MICETransportation.js, but worth adding a Helmet/SEOHead block. Note: comment on line 495 says 'URL MAP (for language switcher + canonical/hreflang)' but no head emission uses it.",
+        "affected_selectors": ["link[rel=alternate][hreflang]"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "OPTIONAL: Add <link rel='alternate' hreflang='...'> tags to MICETransportation.js document head using react-helmet-async (import { Helmet }) so all 5 language variants emit hreflang links (en/fr/ru/hy/es + x-default). Sitemap.xml already lists them.",
+    "OPTIONAL: content.hy MICE has no metaTitle/metaDescription — only title/description are localized. Verify if that is intentional."
+  ],
+  "critical_code_review_comments": [
+    "MICETransportation.js is 800+ lines — consider splitting content dictionaries into a separate module to keep the component under 700 LOC.",
+    "MICETransportation.js lacks any react-helmet/SEOHead emission for hreflang/canonical/og:image meta, unlike CityTransferPage-based pages. Pre-existing.",
+    "LanguageProvider initial useState('en') causes a brief render in English before URL prefix detection swaps to /es/ language on mount — may cause SEO/FOUC concerns for crawlers that don't run JS. Consider SSR-safe initialisation from window.location.pathname directly in useState."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only test)", "frontend": "100% for new routes + regression; 1 SEO gap on MICE hreflang head tags"},
+  "test_credentials": "N/A",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All 6 new routes work: /es/vtc-7-plazas, /es/vtc-8-plazas, /es/quiosco-reserva-hotel, /es/socios-comerciales, /es/transporte-mice-paris, /mice-transport-pariz-hy. First test run had a language-caching artifact because LanguageContext starts with useState('en') and switches to 'es' only on mount effect; clearing localStorage then reloading produces clean Spanish render. This is expected behaviour. Verified with clean state - all pages fully Spanish/Armenian. Regression on /vtc-7-seats (en), /vtc-7-places (fr), /mice-transportation-paris (en), /transport-mice-paris (fr), /mice-transport-parij (ru) passes. Sitemap.xml validated with ElementTree — well-formed XML with all 6 new URL entries and hreflang alternates.",
+  "detailed_verification": {
+    "es_vtc_7_plazas": {"url": "/es/vtc-7-plazas", "html_lang": "es", "h1": "VTC 7 Plazas - Furgoneta con Chófer Privado en París y Île-de-France | Zont.cab", "btn": "RESERVAR AHORA", "hreflang_head_tags": ["en", "fr", "ru", "hy", "es", "x-default"], "status": "PASS"},
+    "es_vtc_8_plazas": {"url": "/es/vtc-8-plazas", "h1": "VTC 8 Plazas", "renault_trafic_present": true, "btn": "RESERVAR AHORA", "hreflang": "present", "status": "PASS"},
+    "es_quiosco_reserva_hotel": {"url": "/es/quiosco-reserva-hotel", "title": "Terminal de reservas ZONT para hoteles — VTC, Taxi y Chófer Privado", "content_es_present": ["Transforma tu hotel", "socio ZONT", "Instalación gratuita", "24/7"], "hreflang": "present", "status": "PASS"},
+    "es_socios_comerciales": {"url": "/es/socios-comerciales", "title": "Socios Comerciales | Zont Transport Corporativo", "content_es_present": ["Socios Comerciales", "Solicitar"], "hreflang": "present", "status": "PASS"},
+    "es_transporte_mice_paris": {"url": "/es/transporte-mice-paris", "h1": "Transporte MICE en París", "title": "Transporte MICE París | Servicios de Chófer y Transporte para Eventos | ZONT", "formName_in_placeholder": "Tu nombre (verified in source line 481)", "formSubmit": "Enviar la solicitud", "hreflang_head_tags": "MISSING (see integration_issues)", "status": "PASS (SEO gap noted)"},
+    "hy_mice_transport_pariz": {"url": "/mice-transport-pariz-hy", "h1": "MICE Տրանսպորտ Փարիզում", "title": "MICE Տրանսպորտ Փարիզ | Վարորդի ծառայություններ և միջոցառումների տրանսպորտ | ZONT", "status": "PASS"},
+    "regression_en_mice": {"url": "/mice-transportation-paris", "title_en": "MICE Transportation Paris ...", "status": "PASS"},
+    "regression_fr_mice": {"url": "/transport-mice-paris", "title_fr": "Transport MICE Paris ...", "status": "PASS"},
+    "regression_ru_mice": {"url": "/mice-transport-parij", "title_ru": "MICE Транспорт Париж ...", "status": "PASS"},
+    "regression_en_vtc7": {"url": "/vtc-7-seats", "h1": "7-Seat Minivan Transfer ...", "btn": "BOOK NOW", "status": "PASS"},
+    "regression_fr_vtc7": {"url": "/vtc-7-places", "h1": "Taxi / VTC 7 Places ...", "btn": "RESERVER MAINTENANT", "status": "PASS"},
+    "sitemap_xml": {"well_formed": true, "new_urls_present": 6, "new_hreflang_alternates_present": 5, "status": "PASS"}
+  }
+}
