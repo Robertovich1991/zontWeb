@@ -433,11 +433,13 @@ function App() {
                   <Route path="/vtc-8-mest" element={<VTC8Places />} />
                   <Route path="/vtc-8-tegh" element={<VTC8Places />} />
                   <Route path="/es/vtc-8-plazas" element={<VTC8Places />} />
+                  <Route path="/es/minibus-8-plazas" element={<VTC8Places />} />
                   <Route path="/vtc-7-places" element={<VTC7Places />} />
                   <Route path="/vtc-7-seats" element={<VTC7Places />} />
                   <Route path="/vtc-7-mest" element={<VTC7Places />} />
                   <Route path="/vtc-7-tegh" element={<VTC7Places />} />
                   <Route path="/es/vtc-7-plazas" element={<VTC7Places />} />
+                  <Route path="/es/minivan-7-plazas" element={<VTC7Places />} />
                   {/* Driver at Disposal — Mise a disposition */}
                   <Route path="/driver-at-disposal" element={<DriverAtDisposal />} />
                   <Route path="/chauffeur-mis-a-disposition" element={<DriverAtDisposal />} />

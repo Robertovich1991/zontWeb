@@ -125,26 +125,26 @@ const content = {
     rating: '4.5/5 Tripadvisor',
   },
   es: {
-    title: 'VTC 8 Plazas - Minibús con Chófer Privado en París | Zont.cab',
+    title: 'Minibús 8 Plazas - con Chófer Privado en París | Zont.cab',
     subtitle: 'Minibús 8 plazas con chófer privado en París y toda Île-de-France. Renault Trafic, Mercedes Vito o Ford Tourneo Custom para grandes grupos, familias numerosas y transporte corporativo.',
-    description: 'Cuando el grupo supera las 7 personas, el VTC 8 plazas se convierte en la solución ideal. Renault Trafic, Mercedes Vito o Ford Tourneo Custom con 8 asientos individuales, aire acondicionado, Wi-Fi a bordo y espacio de maletero para todos los equipajes. Un chófer profesional licenciado VTC se ocupa de la logística mientras vuestro grupo — familia numerosa, seminario de empresa, boda o excursión turística — viaja unido en un solo vehículo. Precio fijo confirmado antes del embarque, sin taxímetro, sin sorpresas.',
+    description: 'Cuando el grupo supera las 7 personas, el minibús 8 plazas se convierte en la solución ideal. Renault Trafic, Mercedes Vito o Ford Tourneo Custom con 8 asientos individuales, aire acondicionado, Wi-Fi a bordo y espacio de maletero para todos los equipajes. Un chófer profesional se ocupa de la logística mientras vuestro grupo — familia numerosa, seminario de empresa, boda o excursión turística — viaja unido en un solo vehículo. Precio fijo confirmado antes del embarque, sin taxímetro, sin sorpresas.',
     description2: 'Dividido entre 8 pasajeros, el coste por persona resulta más económico que un Uber o dos taxis. Ideal para traslados de aeropuerto (CDG, Orly, Beauvais), excursiones a Versalles, Giverny, Champaña, los castillos del Loira, transporte MICE, seminarios de empresa, bodas y despedidas.',
-    whyChoose: '¿Por qué elegir nuestro VTC 8 plazas?',
+    whyChoose: '¿Por qué elegir nuestro minibús 8 plazas?',
     feature1Title: 'Recibimiento personalizado', feature1Desc: 'El chófer te espera con un cartel con tu nombre. 60 minutos de espera gratuita en el aeropuerto.',
     feature2Title: 'Seguimiento de vuelo', feature2Desc: 'Seguimiento del vuelo en tiempo real. Sin cargo adicional por retrasos.',
     feature3Title: 'Vehículos premium', feature3Desc: 'Renault Trafic, Mercedes Vito o Ford Tourneo Custom. Limpios, con aire acondicionado y Wi-Fi.',
     feature4Title: 'Tarifa fija', feature4Desc: 'Precio confirmado en la reserva. Sin costes ocultos, peajes y aparcamiento incluidos.',
     sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E, 1-3 pasajeros',
     luxury: 'Berlina de Lujo', luxuryDesc: 'Mercedes Clase S o BMW Serie 7',
-    minivan: 'Furgoneta', minivanDesc: 'Mercedes Clase V, hasta 6 pasajeros',
+    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V, hasta 6 pasajeros',
     minibus: 'Minibús 8 plazas', minibusDesc: 'Renault Trafic o similar, 8 pasajeros',
     passengers: 'Pasajeros', luggage: 'Equipaje', bookNow: 'RESERVAR AHORA', allInclusive: 'Todo incluido',
-    vehiclesTitle: 'Nuestra flota VTC 8 plazas',
-    howItWorks: 'Cómo reservar tu VTC 8 plazas', step1: 'Reserva online', step1Desc: 'Indica dirección de recogida, destino y hora. Recibe un presupuesto instantáneo.',
+    vehiclesTitle: 'Nuestra flota de minibuses 8 plazas',
+    howItWorks: 'Cómo reservar tu minibús 8 plazas', step1: 'Reserva online', step1Desc: 'Indica dirección de recogida, destino y hora. Recibe un presupuesto instantáneo.',
     step2: 'Chófer asignado', step2Desc: 'Un chófer profesional te espera con un cartel con tu nombre.',
     step3: 'Disfruta del viaje', step3Desc: 'Viaje cómodo en un minibús premium para todo tu grupo.',
-    popularRoutesTitle: 'Trayectos populares en VTC 8 plazas', fromLabel: 'Desde',
-    bookingForm: 'Reserva tu VTC 8 plazas',
+    popularRoutesTitle: 'Trayectos populares en minibús 8 plazas', fromLabel: 'Desde',
+    bookingForm: 'Reserva tu minibús 8 plazas',
     pickupLabel: 'Dirección de recogida', dropoffLabel: 'Destino',
     dateLabel: 'Fecha', timeLabel: 'Hora',
     defaultPickup: '',
@@ -155,7 +155,7 @@ const content = {
 };
 
 const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 150, minibus: 190 };
-const seoUrls = { en: '/vtc-8-seats', fr: '/vtc-8-places', ru: '/vtc-8-mest', hy: '/vtc-8-tegh', es: '/es/vtc-8-plazas' };
+const seoUrls = { en: '/vtc-8-seats', fr: '/vtc-8-places', ru: '/vtc-8-mest', hy: '/vtc-8-tegh', es: '/es/minibus-8-plazas' };
 
 const VTC8Places = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default VTC8Places;

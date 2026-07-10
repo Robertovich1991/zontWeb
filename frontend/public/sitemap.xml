@@ -393,7 +393,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/vtc-7-places"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/vtc-7-mest"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/vtc-7-tegh"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/vtc-7-plazas"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/minivan-7-plazas"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/vtc-7-places"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -401,7 +401,7 @@
   <url><loc>https://www.zont.cab/vtc-7-places</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/vtc-7-mest</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/vtc-7-tegh</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.zont.cab/es/vtc-7-plazas</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/es/minivan-7-plazas</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
   <url>
     <loc>https://www.zont.cab/vtc-8-seats</loc>
@@ -409,7 +409,7 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/vtc-8-places"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/vtc-8-mest"/>
     <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/vtc-8-tegh"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/vtc-8-plazas"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/minibus-8-plazas"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/vtc-8-places"/>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -417,7 +417,7 @@
   <url><loc>https://www.zont.cab/vtc-8-places</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/vtc-8-mest</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/vtc-8-tegh</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://www.zont.cab/es/vtc-8-plazas</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/es/minibus-8-plazas</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
   <!-- ==================== B2B AIRPORT TRANSFERS (Partners) ==================== -->
   <url>

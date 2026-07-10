@@ -132,26 +132,26 @@ const content = {
     rating: '4.5/5 Tripadvisor',
   },
   es: {
-    title: 'VTC 7 Plazas - Furgoneta con Chófer Privado en París y Île-de-France | Zont.cab',
-    subtitle: 'Servicio VTC 7 plazas para familias, grupos y traslados de aeropuerto desde París y toda Île-de-France. Mercedes Clase V, Volkswagen Caravelle o similar con chófer profesional.',
-    description: 'Viajar en grupo no debería significar renunciar al confort. Nuestro traslado VTC 7 plazas está diseñado para familias que rechazan dividirse en dos taxis con maletas desbordantes, grupos de amigos que llegan a CDG y quieren compartir el mismo vehículo, o equipos profesionales de camino a un seminario. El Mercedes Clase V, con sus puertas correderas eléctricas, interior en piel y más de 5 metros de longitud, transforma un simple traslado en un auténtico momento de relajación. Cada asiento dispone de ventilación propia, puertos USB para cargar teléfonos y tabletas, y el maletero traga fácilmente 7 maletas rígidas sin comprometer la comodidad de los pasajeros. Un chófer privado licenciado VTC conduce mientras vuestro grupo charla, planifica la velada o simplemente respira tras un largo vuelo.',
-    description2: 'Más allá del aeropuerto, el VTC 7 plazas se ha convertido en el vehículo preferido para usos que muchos viajeros no imaginan. Las familias reconstituidas llevan a niños y abuelos un fin de semana a Deauville o al Mont-Saint-Michel — sin alquilar dos coches. Los organizadores de despedidas de soltero y soltera reservan una furgoneta para recorrer los viñedos de Champaña con un conductor sobrio. Las empresas envían delegaciones desde CDG a la Porte de Versailles para ferias comerciales. En cada caso, el precio fijo confirmado en la reserva elimina las discusiones y los taxímetros: sabes exactamente lo que cuesta el trayecto antes de subir a bordo.',
-    description3: 'Nuestros vehículos VTC 7 plazas están también equipados con sillas infantiles y elevadores disponibles gratuitamente bajo petición — un detalle que transforma un traslado aeroportuario con niños pequeños de una prueba agotadora en un paseo tranquilo. El chófer os espera con un cartel con vuestro nombre, instala las sillas infantiles antes de vuestra salida del aeropuerto, y carga carritos y equipaje en el maletero mientras vosotros aseguráis a vuestros hijos. Desde la terminal CDG 2E hasta vuestro apartamento Airbnb en Le Marais, del TGV Gare de Lyon a vuestro hotel en Fontainebleau, o de Orly a una boda en Sologne: el VTC 7 plazas os lleva allí sin compromisos. Reserva en dos minutos, paga en línea, y deja que el chófer se ocupe del resto.',
-    meetDriverTitle: 'VTC 7 plazas en Île-de-France',
-    meetDriverText: 'Ofrecemos traslados de aeropuerto y vacaciones en furgoneta 7 plazas desde París y todas las grandes ciudades de Île-de-France: Boulogne-Billancourt, Saint-Denis, Argenteuil, Montreuil, Nanterre, Créteil, Versailles, Courbevoie, Colombes, Asnières-sur-Seine, Rueil-Malmaison, Aubervilliers, Vitry-sur-Seine, Levallois-Perret, Issy-les-Moulineaux, Neuilly-sur-Seine, Cergy, Saint-Maur-des-Fossés, Ivry-sur-Seine, Aulnay-sous-Bois, Clamart, Pantin, Meaux, Chelles, Evry-Courcouronnes, Sarcelles, Drancy, Noisy-le-Grand, Antony, Clichy, Villejuif y muchas otras localidades de la región parisina.',
-    whyChoose: '¿Por qué elegir un VTC 7 plazas?',
-    feature1Title: 'Confort para 7 pasajeros', feature1Desc: 'Furgoneta amplia tipo Mercedes Clase V. Asientos en piel, amplio espacio para las piernas y gran maletero.',
+    title: 'Minivan 7 Plazas - Furgoneta con Chófer Privado en París y Île-de-France | Zont.cab',
+    subtitle: 'Servicio de minivan 7 plazas para familias, grupos y traslados de aeropuerto desde París y toda Île-de-France. Mercedes Clase V, Volkswagen Caravelle o similar con chófer profesional.',
+    description: 'Viajar en grupo no debería significar renunciar al confort. Nuestro traslado en minivan 7 plazas está diseñado para familias que rechazan dividirse en dos taxis con maletas desbordantes, grupos de amigos que llegan a CDG y quieren compartir el mismo vehículo, o equipos profesionales de camino a un seminario. El Mercedes Clase V, con sus puertas correderas eléctricas, interior en piel y más de 5 metros de longitud, transforma un simple traslado en un auténtico momento de relajación. Cada asiento dispone de ventilación propia, puertos USB para cargar teléfonos y tabletas, y el maletero traga fácilmente 7 maletas rígidas sin comprometer la comodidad de los pasajeros. Un chófer privado profesional conduce mientras vuestro grupo charla, planifica la velada o simplemente respira tras un largo vuelo.',
+    description2: 'Más allá del aeropuerto, la minivan 7 plazas se ha convertido en el vehículo preferido para usos que muchos viajeros no imaginan. Las familias reconstituidas llevan a niños y abuelos un fin de semana a Deauville o al Mont-Saint-Michel — sin alquilar dos coches. Los organizadores de despedidas de soltero y soltera reservan una furgoneta para recorrer los viñedos de Champaña con un conductor sobrio. Las empresas envían delegaciones desde CDG a la Porte de Versailles para ferias comerciales. En cada caso, el precio fijo confirmado en la reserva elimina las discusiones y los taxímetros: sabes exactamente lo que cuesta el trayecto antes de subir a bordo.',
+    description3: 'Nuestras minivans 7 plazas están también equipadas con sillas infantiles y elevadores disponibles gratuitamente bajo petición — un detalle que transforma un traslado aeroportuario con niños pequeños de una prueba agotadora en un paseo tranquilo. El chófer os espera con un cartel con vuestro nombre, instala las sillas infantiles antes de vuestra salida del aeropuerto, y carga carritos y equipaje en el maletero mientras vosotros aseguráis a vuestros hijos. Desde la terminal CDG 2E hasta vuestro apartamento Airbnb en Le Marais, del TGV Gare de Lyon a vuestro hotel en Fontainebleau, o de Orly a una boda en Sologne: la minivan 7 plazas os lleva allí sin compromisos. Reserva en dos minutos, paga en línea, y deja que el chófer se ocupe del resto.',
+    meetDriverTitle: 'Minivan 7 plazas en Île-de-France',
+    meetDriverText: 'Ofrecemos traslados de aeropuerto y vacaciones en minivan 7 plazas desde París y todas las grandes ciudades de Île-de-France: Boulogne-Billancourt, Saint-Denis, Argenteuil, Montreuil, Nanterre, Créteil, Versailles, Courbevoie, Colombes, Asnières-sur-Seine, Rueil-Malmaison, Aubervilliers, Vitry-sur-Seine, Levallois-Perret, Issy-les-Moulineaux, Neuilly-sur-Seine, Cergy, Saint-Maur-des-Fossés, Ivry-sur-Seine, Aulnay-sous-Bois, Clamart, Pantin, Meaux, Chelles, Evry-Courcouronnes, Sarcelles, Drancy, Noisy-le-Grand, Antony, Clichy, Villejuif y muchas otras localidades de la región parisina.',
+    whyChoose: '¿Por qué elegir una minivan 7 plazas?',
+    feature1Title: 'Confort para 7 pasajeros', feature1Desc: 'Minivan amplia tipo Mercedes Clase V. Asientos en piel, amplio espacio para las piernas y gran maletero.',
     feature2Title: 'Ideal para familias', feature2Desc: 'Sillas de bebé y elevadores disponibles bajo petición. Perfecto para viajar con niños con total seguridad.',
-    feature3Title: 'Chófer licenciado VTC', feature3Desc: 'Chóferes profesionales, experimentados y puntuales. Recibimiento personalizado con cartel en el aeropuerto.',
+    feature3Title: 'Chófer profesional', feature3Desc: 'Chóferes profesionales, experimentados y puntuales. Recibimiento personalizado con cartel en el aeropuerto.',
     feature4Title: 'Tarifa fija todo incluido', feature4Desc: 'Precio confirmado en la reserva sin suplementos. Peajes, aparcamiento y espera en el aeropuerto incluidos.',
     sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E, 1-3 pasajeros', luxury: 'Berlina de Lujo', luxuryDesc: 'Mercedes Clase S o BMW Serie 7',
-    minivan: 'Furgoneta 7 plazas', minivanDesc: 'Mercedes Clase V, hasta 7 pasajeros', minibus: 'Minibús 8 plazas', minibusDesc: 'Renault Trafic o similar, 8 pasajeros',
+    minivan: 'Minivan 7 plazas', minivanDesc: 'Mercedes Clase V, hasta 7 pasajeros', minibus: 'Minibús 8 plazas', minibusDesc: 'Renault Trafic o similar, 8 pasajeros',
     passengers: 'Pasajeros', luggage: 'Equipaje', bookNow: 'RESERVAR AHORA', allInclusive: 'Todo incluido',
-    vehiclesTitle: 'Nuestra flota VTC 7 plazas',
-    howItWorks: 'Cómo reservar tu VTC 7 plazas', step1: 'Reserva online', step1Desc: 'Indica tu dirección de recogida, destino, fecha y hora deseadas. Recibe un presupuesto instantáneo.',
+    vehiclesTitle: 'Nuestra flota de minivans 7 plazas',
+    howItWorks: 'Cómo reservar tu minivan 7 plazas', step1: 'Reserva online', step1Desc: 'Indica tu dirección de recogida, destino, fecha y hora deseadas. Recibe un presupuesto instantáneo.',
     step2: 'Chófer asignado', step2Desc: 'Un chófer profesional te es asignado y te contacta para confirmar los detalles del trayecto.',
-    step3: 'Disfruta del viaje', step3Desc: 'Instálate cómodamente en tu furgoneta 7 plazas. Relájate y disfruta del viaje con tu grupo.',
-    popularRoutesTitle: 'Trayectos populares en VTC 7 plazas', fromLabel: 'Desde',
+    step3: 'Disfruta del viaje', step3Desc: 'Instálate cómodamente en tu minivan 7 plazas. Relájate y disfruta del viaje con tu grupo.',
+    popularRoutesTitle: 'Trayectos populares en minivan 7 plazas', fromLabel: 'Desde',
     routes: [
       { name: 'Aeropuerto CDG → Centro de París (7 plazas)', price: 130 },
       { name: 'Aeropuerto Orly → Centro de París (7 plazas)', price: 110 },
@@ -159,16 +159,16 @@ const content = {
       { name: 'París → Palacio de Versalles (7 plazas)', price: 125 },
       { name: 'París → Aeropuerto Beauvais (7 plazas)', price: 220 },
     ],
-    bookingForm: 'Reserva tu VTC 7 plazas',
+    bookingForm: 'Reserva tu minivan 7 plazas',
     pickupLabel: 'Dirección de recogida', dropoffLabel: 'Destino', dateLabel: 'Fecha', timeLabel: 'Hora',
     defaultPickup: '',
-    otherCitiesTitle: '¿Necesitas más plazas? Descubre nuestro VTC 8 plazas', otherCitiesBtn: 'Ver todos nuestros destinos',
+    otherCitiesTitle: '¿Necesitas más plazas? Descubre nuestro minibús 8 plazas', otherCitiesBtn: 'Ver todos nuestros destinos',
     rating: '4.5/5 Tripadvisor (29 reseñas)',
   },
 };
 
 const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 130, minibus: 190 };
-const seoUrls = { en: '/vtc-7-seats', fr: '/vtc-7-places', ru: '/vtc-7-mest', hy: '/vtc-7-tegh', es: '/es/vtc-7-plazas' };
+const seoUrls = { en: '/vtc-7-seats', fr: '/vtc-7-places', ru: '/vtc-7-mest', hy: '/vtc-7-tegh', es: '/es/minivan-7-plazas' };
 
 const VTC7Places = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} heroImage="/images/taxi-cab-transfer-7-places.webp" ogImage="/images/taxi-cab-transfer-7-places.webp" meetDriverImage="/images/taxi-cab-transfer-7-places.webp" />;
 export default VTC7Places;
