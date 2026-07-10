@@ -569,6 +569,14 @@ const MICETransportation = () => {
         description={t.metaDesc}
         canonical={`https://www.zont.cab${currentPath}`}
         jsonLd={[schema]}
+        hreflang={[
+          { lang: 'en', href: `https://www.zont.cab${URLS.en}` },
+          { lang: 'fr', href: `https://www.zont.cab${URLS.fr}` },
+          { lang: 'ru', href: `https://www.zont.cab${URLS.ru}` },
+          { lang: 'hy', href: `https://www.zont.cab${URLS.hy}` },
+          { lang: 'es', href: `https://www.zont.cab${URLS.es}` },
+          { lang: 'x-default', href: `https://www.zont.cab${URLS.en}` },
+        ]}
       />
       <Header />
 
