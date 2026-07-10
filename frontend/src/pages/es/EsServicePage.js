@@ -145,7 +145,7 @@ const EsServicePage = ({
 
           {/* Mid-page CTA */}
           <div className="bg-[#2ecc71]/10 border border-[#2ecc71]/30 rounded-3xl p-6 md:p-8 my-10 text-center">
-            <p className="text-gray-700 mb-4">\u00bfListo para reservar tu traslado privado en Paris?</p>
+            <p className="text-gray-700 mb-4">¿Listo para reservar tu traslado privado en Paris?</p>
             <Link to="/es" className="bg-[#2ecc71] hover:bg-[#27ae60] text-white px-8 py-4 rounded-xl font-bold inline-flex items-center gap-2">
               Reservar ahora <ChevronRight className="w-4 h-4" />
             </Link>
