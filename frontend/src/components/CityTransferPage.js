@@ -260,9 +260,11 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         ogImage={ogImage ? (ogImage.startsWith('http') ? ogImage : `https://www.zont.cab${ogImage}`) : (heroImage ? (heroImage.startsWith('http') ? heroImage : `https://www.zont.cab${heroImage}`) : "https://www.zont.cab/images/hero.webp")}
         hreflang={seoUrls ? [
           { lang: 'en', href: `https://www.zont.cab${seoUrls.en}` },
-          { lang: 'fr', href: `https://www.zont.cab${seoUrls.fr}` },
-          { lang: 'ru', href: `https://www.zont.cab${seoUrls.ru}` },
+          { lang: 'fr', href: `https://www.zont.cab${seoUrls.fr || seoUrls.en}` },
+          { lang: 'ru', href: `https://www.zont.cab${seoUrls.ru || seoUrls.en}` },
           { lang: 'hy', href: `https://www.zont.cab${seoUrls.hy || seoUrls.en}` },
+          { lang: 'es', href: `https://www.zont.cab${seoUrls.es || seoUrls.en}` },
+          { lang: 'x-default', href: `https://www.zont.cab${seoUrls.en}` },
         ] : undefined}
         jsonLd={[
           {
@@ -780,6 +782,35 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
 
       {/* EXTRA SECTIONS — page-specific SEO blocks (e.g. Disneyland hotels grid) */}
       {extraSections}
+
+      {/* MULTILINGUAL INTERNAL LINKS — helps Google discover Russian/Armenian/Spanish variants
+           (crawled but not indexed pages benefit from having real <a href> internal links) */}
+      {seoUrls && (
+        <section className="bg-[#0f1419] border-t border-gray-800 py-6" aria-label="Available languages">
+          <div className="max-w-5xl mx-auto px-4">
+            <p className="text-xs uppercase tracking-wider text-gray-500 mb-3 text-center">
+              {language === 'ru' ? 'Также доступно на:' : language === 'fr' ? 'Également disponible en :' : language === 'hy' ? 'Հասանելի է նաև' : language === 'es' ? 'También disponible en:' : 'Also available in:'}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+              {seoUrls.en && language !== 'en' && (
+                <a href={seoUrls.en} hrefLang="en" className="text-[#2ecc71] hover:text-[#27ae60] underline-offset-2 hover:underline" data-testid="lang-alt-en">English</a>
+              )}
+              {seoUrls.fr && language !== 'fr' && (
+                <a href={seoUrls.fr} hrefLang="fr" className="text-[#2ecc71] hover:text-[#27ae60] underline-offset-2 hover:underline" data-testid="lang-alt-fr">Français</a>
+              )}
+              {seoUrls.ru && language !== 'ru' && (
+                <a href={seoUrls.ru} hrefLang="ru" className="text-[#2ecc71] hover:text-[#27ae60] underline-offset-2 hover:underline" data-testid="lang-alt-ru">Русский</a>
+              )}
+              {seoUrls.hy && language !== 'hy' && (
+                <a href={seoUrls.hy} hrefLang="hy" className="text-[#2ecc71] hover:text-[#27ae60] underline-offset-2 hover:underline" data-testid="lang-alt-hy">Հայերեն</a>
+              )}
+              {seoUrls.es && language !== 'es' && (
+                <a href={seoUrls.es} hrefLang="es" className="text-[#2ecc71] hover:text-[#27ae60] underline-offset-2 hover:underline" data-testid="lang-alt-es">Español</a>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* STICKY MOBILE CTA */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#1a2332] border-t border-gray-700 p-3 z-40 safe-area-bottom" data-testid="mobile-sticky-cta">

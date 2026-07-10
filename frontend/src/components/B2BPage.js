@@ -70,6 +70,8 @@ const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) =>
           { lang: 'fr', href: `https://www.zont.cab${seoUrls.fr || seoUrls.en}` },
           { lang: 'ru', href: `https://www.zont.cab${seoUrls.ru || seoUrls.en}` },
           { lang: 'hy', href: `https://www.zont.cab${seoUrls.hy || seoUrls.en}` },
+          { lang: 'es', href: `https://www.zont.cab${seoUrls.es || seoUrls.en}` },
+          { lang: 'x-default', href: `https://www.zont.cab${seoUrls.en}` },
         ] : undefined}
         jsonLd={{
           "@context": "https://schema.org",

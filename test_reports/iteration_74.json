@@ -1,0 +1,35 @@
+{
+  "summary": "SEO structural audit for Russian pages indexation issue. All checks PASS: sitemap contains all required RU/FR/EN/HY/ES URLs, hreflang tags (6 including x-default) render correctly on /taksi-iz-aeroporta-cdg, /cdg-airport-transfer, /transfert-aeroport-cdg, canonical/robots/html-lang/meta-description all correct, and the new 'Also available in:' block renders with the right per-language testids and hrefs.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results": {
+    "sitemap_xml_ru_urls": "PASS - All 24 required Russian/localized paths present in /sitemap.xml (14 city RU URLs + parizh route variants + gar-de-lion/dyu-nor/monparnas/osterlits/sen-lazar + mice-transport-parij + voditel-s-avtomobilem). File served with HTTP 200 from public path.",
+    "ru_cdg_page_seo": "PASS - /taksi-iz-aeroporta-cdg: canonical=https://www.zont.cab/taksi-iz-aeroporta-cdg, <html lang>='ru', robots='index, follow', meta description in Russian ('Трансфер из аэропорта Шарль-де-Голль...'), 6 hreflang link tags (en/fr/ru/hy/es + x-default), x-default points to English URL /cdg-airport-transfer.",
+    "ru_cdg_language_alternates_block": "PASS - 'Также доступно на:' block visible at bottom with data-testid=lang-alt-en (/cdg-airport-transfer), lang-alt-fr (/transfert-aeroport-cdg), lang-alt-hy (/cdg-odanavakayani-transfer), lang-alt-es (/es/traslado-aeropuerto-charles-de-gaulle). lang-alt-ru correctly ABSENT (current language filtered out).",
+    "en_cdg_page_regression": "PASS - /cdg-airport-transfer: canonical=English URL, 6 hreflang tags including es, x-default=English URL, 'Also available in:' block shows lang-alt-fr/ru/hy/es (lang-alt-en correctly absent).",
+    "fr_cdg_page_regression": "PASS - /transfert-aeroport-cdg: canonical=French URL, <html lang>='fr', 6 hreflang tags, x-default=English URL, 'Également disponible en :' block shows lang-alt-en/ru/hy/es (lang-alt-fr correctly absent).",
+    "no_functional_regression": "PASS - Booking form renders correctly on all 3 pages, city hero title ('Transfert Aeroport CDG - Chauffeur Prive des 59€' on FR) and description visible, pickup autocomplete input present.",
+    "seo_effect_client_side": "NOTE - SEO tags injected via useEffect (~1-2s after DOM load) as documented. This is fine for Googlebot which executes JS, but a truly server-rendered <head> would be even more robust; not required for this task."
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "SEO tags are injected client-side via useEffect. Googlebot renders JS so hreflang/canonical will be picked up, but for maximum indexing reliability (especially for freshly crawled pages) consider SSR/pre-render (react-snap or Next.js) so tags are in the initial HTML.",
+    "Sitemap referenced host is https://www.zont.cab (production) but the preview backend URL is different. That is expected for SEO (canonical must always be production), just noting it.",
+    "The request mentioned Russian URL /transfer-disneyland-parizh but the sitemap uses BOTH /transfer-disneyland-parizh AND /transfer-disneylend-parizh. Extra alias is fine; hreflang for the canonical Disney RU page in sitemap points to /transfer-disneylend-parizh - main agent should verify this matches what CityTransferPage.js emits at runtime for the Disney page to avoid a canonical-vs-hreflang mismatch (out of scope for the specific tests requested, but flagging).",
+    "Non-blocking React warning: 'Invalid DOM property fetchpriority. Did you mean fetchPriority?' from some <img>/<link> attribute. Cosmetic dev-mode warning only.",
+    "Non-blocking: Google Maps loaded without loading=async (deprecation notice) and uses google.maps.places.Autocomplete (deprecated for new customers). Not in scope for SEO audit."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "test_credentials": "not required",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "SEO structural audit fully passed on iteration 74. On any *CityTransferPage route, the head contains 6 hreflang link tags (en/fr/ru/hy/es + x-default), canonical points to the current language's URL, and a visible <section aria-label='Available languages'> block near the bottom shows real <a href> links to all other language variants (data-testid=lang-alt-{en|fr|ru|hy|es}). x-default always points to the English URL. If future tests need to check similar pages (Orly, Beauvais, Paris, Yerevan, etc.), same pattern applies via CityTransferPage.js line 261-268 (hreflang) and 786-813 (language alternates block).",
+  "rca_of_the_issue": "N/A - no bug found. The applied fixes (adding es + explicit x-default to hreflang arrays, honoring caller-supplied x-default in SEO.js, and rendering a visible 'Also available in' block with real <a href> internal links) all work correctly and should give Google stronger discovery/indexation signals for Russian variants."
+}

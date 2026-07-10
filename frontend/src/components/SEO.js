@@ -114,15 +114,18 @@ const SEO = ({ title, description, canonical, jsonLd, ogImage, ogType, hreflang,
         link.setAttribute('data-seo', 'hreflang');
         document.head.appendChild(link);
       });
-      // Add x-default
-      const defaultLink = hreflang.find(h => h.lang === 'fr') || hreflang[0];
-      if (defaultLink) {
-        const xDefault = document.createElement('link');
-        xDefault.setAttribute('rel', 'alternate');
-        xDefault.setAttribute('hreflang', 'x-default');
-        xDefault.setAttribute('href', defaultLink.href);
-        xDefault.setAttribute('data-seo', 'hreflang');
-        document.head.appendChild(xDefault);
+      // Auto-add x-default only if caller didn't provide one explicitly
+      const hasXDefault = hreflang.some(h => h.lang === 'x-default');
+      if (!hasXDefault) {
+        const defaultLink = hreflang.find(h => h.lang === 'en') || hreflang.find(h => h.lang === 'fr') || hreflang[0];
+        if (defaultLink) {
+          const xDefault = document.createElement('link');
+          xDefault.setAttribute('rel', 'alternate');
+          xDefault.setAttribute('hreflang', 'x-default');
+          xDefault.setAttribute('href', defaultLink.href);
+          xDefault.setAttribute('data-seo', 'hreflang');
+          document.head.appendChild(xDefault);
+        }
       }
     }
 
