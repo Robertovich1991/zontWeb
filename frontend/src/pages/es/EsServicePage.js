@@ -4,7 +4,8 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { useLanguage } from '@/context/LanguageContext';
-import { ChevronRight, CheckCircle, Phone, MessageCircle } from 'lucide-react';
+import { ChevronRight, CheckCircle, Phone, MessageCircle, MapPin } from 'lucide-react';
+import { getRelatedRoutes, RELATED_TITLES, resolvePageIdFromUrl } from '@/data/relatedRoutes';
 
 /**
  * Reusable Spanish service page (minivan, conductor privado, silla infantil, hoteles).
@@ -150,7 +151,7 @@ const EsServicePage = ({
             </Link>
           </div>
 
-          {/* Related */}
+          {/* Related — curated (author-picked) block */}
           {relatedLinks.length > 0 && (
             <section className="mt-14">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Tambien te puede interesar</h2>
@@ -164,6 +165,32 @@ const EsServicePage = ({
               </div>
             </section>
           )}
+
+          {/* Related — registry-driven cross-linking (auto-detected pageId, 7 Spanish links) */}
+          {(() => {
+            const pageId = resolvePageIdFromUrl(url);
+            const routes = pageId ? getRelatedRoutes(pageId, 'es', 8) : [];
+            if (routes.length === 0) return null;
+            return (
+              <section className="mt-10" aria-label="Related transfer routes">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{RELATED_TITLES.es}</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {routes.map((r) => (
+                    <a
+                      key={r.pageId}
+                      href={r.url}
+                      hrefLang="es"
+                      className="group flex items-center gap-2 bg-white hover:bg-[#2ecc71]/5 border border-gray-200 hover:border-[#2ecc71]/50 rounded-lg px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+                      data-testid={`related-route-${r.pageId}`}
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-[#2ecc71] shrink-0" aria-hidden="true" />
+                      <span className="truncate">{r.label}</span>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
         </article>
 
         {/* Bottom call block */}

@@ -158,3 +158,17 @@ export function resolvePageId(explicitPageId, seoUrls) {
   }
   return null;
 }
+
+/**
+ * Reverse-lookup: given a localized URL (any language), find the matching pageId in the registry.
+ * Used by Spanish bespoke pages (EsServicePage) that only know their own /es/... URL.
+ */
+export function resolvePageIdFromUrl(url) {
+  if (!url) return null;
+  for (const [id, entry] of Object.entries(CITY_ROUTES)) {
+    for (const langUrl of Object.values(entry.urls)) {
+      if (langUrl === url) return id;
+    }
+  }
+  return null;
+}
