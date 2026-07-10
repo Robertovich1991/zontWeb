@@ -11,6 +11,7 @@ import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import LastMinuteWarning from '@/components/LastMinuteWarning';
 import { trackSearch } from '@/utils/fbPixel';
+import { getRelatedRoutes, RELATED_TITLES, resolvePageId } from '@/data/relatedRoutes';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
 
 const IMAGES = {
@@ -782,6 +783,37 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
 
       {/* EXTRA SECTIONS — page-specific SEO blocks (e.g. Disneyland hotels grid) */}
       {extraSections}
+
+      {/* RELATED ROUTES — same-language internal linking block (SEO indexation).
+           Renders 6-8 links to related city/station transfer pages in the current language. */}
+      {(() => {
+        const effectivePageId = resolvePageId(pageId, seoUrls);
+        const related = effectivePageId ? getRelatedRoutes(effectivePageId, language, 8) : [];
+        if (related.length === 0) return null;
+        return (
+          <section className="bg-[#111827] border-t border-gray-800 py-8" aria-label="Related transfer routes">
+            <div className="max-w-5xl mx-auto px-4">
+              <h2 className="text-lg md:text-xl font-bold text-white mb-4 text-center">
+                {RELATED_TITLES[language] || RELATED_TITLES.en}
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {related.map((r) => (
+                  <a
+                    key={r.pageId}
+                    href={r.url}
+                    hrefLang={language}
+                    className="group flex items-center gap-2 bg-[#1a2332] hover:bg-[#232f45] border border-gray-700 hover:border-[#2ecc71]/50 rounded-lg px-3 py-2.5 text-sm text-gray-200 hover:text-white transition-colors"
+                    data-testid={`related-route-${r.pageId}`}
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-[#2ecc71] shrink-0" aria-hidden="true" />
+                    <span className="truncate">{r.label}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* MULTILINGUAL INTERNAL LINKS — helps Google discover Russian/Armenian/Spanish variants
            (crawled but not indexed pages benefit from having real <a href> internal links) */}
