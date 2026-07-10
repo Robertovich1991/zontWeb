@@ -61,14 +61,21 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   useEffect(() => {
     if (!seoUrls) return;
     const currentPath = location.pathname;
+    let matched = false;
     for (const [lang, url] of Object.entries(seoUrls)) {
       if (currentPath === url) {
         if (lang !== language) {
           langSyncRef.current = true;
           changeLanguage(lang);
         }
+        matched = true;
         break;
       }
+    }
+    // Fallback: paths under /es/... (backward-compat aliases like /es/vtc-7-plazas) force Spanish
+    if (!matched && currentPath.startsWith('/es/') && language !== 'es') {
+      langSyncRef.current = true;
+      changeLanguage('es');
     }
   }, [location.pathname, seoUrls]); // eslint-disable-line react-hooks/exhaustive-deps
 
