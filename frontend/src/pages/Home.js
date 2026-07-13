@@ -959,35 +959,43 @@ const Home = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label htmlFor="h-date" className="block text-gray-700 font-medium text-sm mb-1">{c.date}</label>
-                          <input
-                            type={date ? 'date' : 'text'}
-                            id="h-date"
-                            name="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            onFocus={(e) => { e.currentTarget.type = 'date'; try { e.currentTarget.showPicker && e.currentTarget.showPicker(); } catch {} }}
-                            onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = 'text'; }}
-                            placeholder={c.datePh || 'DD / MM / YYYY'}
-                            required
-                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm placeholder-gray-400"
-                            data-testid="home-date-input"
-                          />
+                          <div className="relative">
+                            <input
+                              type="date"
+                              id="h-date"
+                              name="date"
+                              value={date}
+                              onChange={(e) => setDate(e.target.value)}
+                              required
+                              className={`w-full px-3 py-3 bg-gray-50 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm ${date ? 'text-gray-900' : 'text-transparent'} caret-gray-900 date-native`}
+                              data-testid="home-date-input"
+                            />
+                            {!date && (
+                              <span className="pointer-events-none absolute inset-0 flex items-center px-3 text-sm text-gray-400" aria-hidden="true">
+                                {c.datePh || 'Select a date'}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div>
                           <label htmlFor="h-time" className="block text-gray-700 font-medium text-sm mb-1">{c.time}</label>
-                          <input
-                            type={time ? 'time' : 'text'}
-                            id="h-time"
-                            name="time"
-                            value={time}
-                            onChange={(e) => setTime(e.target.value)}
-                            onFocus={(e) => { e.currentTarget.type = 'time'; try { e.currentTarget.showPicker && e.currentTarget.showPicker(); } catch {} }}
-                            onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = 'text'; }}
-                            placeholder={c.timePh || 'HH : MM'}
-                            required
-                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm placeholder-gray-400"
-                            data-testid="home-time-input"
-                          />
+                          <div className="relative">
+                            <input
+                              type="time"
+                              id="h-time"
+                              name="time"
+                              value={time}
+                              onChange={(e) => setTime(e.target.value)}
+                              required
+                              className={`w-full px-3 py-3 bg-gray-50 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm ${time ? 'text-gray-900' : 'text-transparent'} caret-gray-900 date-native`}
+                              data-testid="home-time-input"
+                            />
+                            {!time && (
+                              <span className="pointer-events-none absolute inset-0 flex items-center px-3 text-sm text-gray-400" aria-hidden="true">
+                                {c.timePh || 'Select a time'}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <LastMinuteWarning date={date} time={time} />

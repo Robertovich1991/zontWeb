@@ -1,3 +1,25 @@
+
+/* --- Custom placeholder overlay for date/time inputs ---
+   When the input value is empty (class .text-transparent added via React),
+   hide the browser's native "jj/mm/aaaa" or "hh:mm" placeholder text so our
+   overlay span is the only visible label. */
+.date-native.text-transparent::-webkit-datetime-edit,
+.date-native.text-transparent::-webkit-datetime-edit-fields-wrapper,
+.date-native.text-transparent::-webkit-datetime-edit-text,
+.date-native.text-transparent::-webkit-datetime-edit-month-field,
+.date-native.text-transparent::-webkit-datetime-edit-day-field,
+.date-native.text-transparent::-webkit-datetime-edit-year-field,
+.date-native.text-transparent::-webkit-datetime-edit-hour-field,
+.date-native.text-transparent::-webkit-datetime-edit-minute-field,
+.date-native.text-transparent::-webkit-datetime-edit-ampm-field {
+  color: transparent;
+}
+/* Keep the date/time picker icon visible and clickable */
+.date-native::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
