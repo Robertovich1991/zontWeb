@@ -53,7 +53,7 @@ const labels = {
     selectedCard: 'Selected',
     deleteCard: 'Delete',
     passengerTitle: 'Passenger Details',
-    firstName: 'First Name', lastName: 'Last Name',
+    firstName: 'First Name', lastName: 'Last Name', fullName: 'Full Name',
     email: 'Email', phone: 'Phone',
     password: 'Password', passwordHint: 'To manage your booking',
     loggedAs: 'Logged in as',
@@ -95,7 +95,7 @@ const labels = {
     selectedCard: 'Sélectionnée',
     deleteCard: 'Supprimer',
     passengerTitle: 'Informations Passager',
-    firstName: 'Prénom', lastName: 'Nom',
+    firstName: 'Prénom', lastName: 'Nom', fullName: 'Nom complet',
     email: 'Email', phone: 'Téléphone',
     password: 'Mot de passe', passwordHint: 'Pour gérer votre réservation',
     loggedAs: 'Connecté en tant que',
@@ -137,7 +137,7 @@ const labels = {
     selectedCard: 'Выбрана',
     deleteCard: 'Удалить',
     passengerTitle: 'Данные Пассажира',
-    firstName: 'Имя', lastName: 'Фамилия',
+    firstName: 'Имя', lastName: 'Фамилия', fullName: 'Полное имя',
     email: 'Email', phone: 'Телефон',
     password: 'Пароль', passwordHint: 'Для управления бронированием',
     loggedAs: 'Вы вошли как',
@@ -170,7 +170,7 @@ const labels = {
     bookingError: 'delays.',
     pastDateError: 'delays.',
     passengerTitle: 'delays',
-    firstName: 'delays', lastName: 'delays',
+    firstName: 'delays', lastName: 'delays', fullName: 'delays',
     email: 'Email', phone: 'delays',
     password: 'delays', passwordHint: 'delays',
     loggedAs: 'delays',
@@ -335,7 +335,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
-    firstName: '', lastName: '', email: '', phone: '', password: '',
+    firstName: '', lastName: '', fullName: '', email: '', phone: '', password: '',
   });
 
   // Pre-fill form fields from authenticated user profile (fixes empty phone bug)
@@ -462,17 +462,38 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       errors[field] ? 'border-red-500 focus:ring-red-500' : 'border-gray-600 focus:ring-[#2ecc71]'
     }`;
 
+  // Split "Full Name" into first / last for backend registration.
+  // - "" → firstName="", lastName=""
+  // - "Ana"  → firstName="Ana", lastName="Ana"          (single word → duplicated)
+  // - "Ana Perez"        → firstName="Ana",  lastName="Perez"
+  // - "Ana Maria Perez"  → firstName="Ana",  lastName="Maria Perez"
+  const splitFullName = (raw) => {
+    const trimmed = (raw || '').trim().replace(/\s+/g, ' ');
+    if (!trimmed) return { firstName: '', lastName: '' };
+    const parts = trimmed.split(' ');
+    if (parts.length === 1) return { firstName: parts[0], lastName: parts[0] };
+    return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
+  };
+
+  // Cryptographically random password used silently for guest signup (user never sees this)
+  const generateRandomPassword = () => {
+    const bytes = new Uint8Array(12);
+    (window.crypto || window.msCrypto).getRandomValues(bytes);
+    return 'Zx' + Array.from(bytes).map(b => b.toString(36)).join('').slice(0, 14) + '!9';
+  };
+
   const validateForm = () => {
     const errs = {};
     if (authMode === 'signup') {
-      if (!form.firstName.trim()) errs.firstName = 'Requis';
-      if (!form.lastName.trim()) errs.lastName = 'Requis';
+      if (!form.fullName.trim()) errs.fullName = 'Requis';
       if (!form.phone.trim()) errs.phone = 'Requis';
     }
     if (!form.email.trim()) errs.email = 'Requis';
     else if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Email invalide';
-    if (!form.password) errs.password = 'Requis';
-    else if (authMode === 'signup' && form.password.length < 6) errs.password = 'Minimum 6 caracteres';
+    // Password only required on sign-IN. Signup uses an auto-generated password.
+    if (authMode === 'signin') {
+      if (!form.password) errs.password = 'Requis';
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -514,15 +535,17 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       if (!isAuthenticated) {
         if (authMode === 'signup') {
           const formatted = formatPhone(form.phone, phoneCountry);
+          const { firstName, lastName } = splitFullName(form.fullName);
+          const generatedPassword = generateRandomPassword();
           await authService.register({
-            firstName: form.firstName,
-            lastName: form.lastName,
+            firstName,
+            lastName,
             email: form.email,
             phoneNumber: formatted,
-            password: form.password,
+            password: generatedPassword,
             gender: 'male',
           });
-          const loginResult = await authService.login({ email: form.email, password: form.password });
+          const loginResult = await authService.login({ email: form.email, password: generatedPassword });
           onLoginDirect(loginResult.user);
         } else {
           const loginResult = await authService.login({ email: form.email, password: form.password });
@@ -744,18 +767,12 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                 <span className="text-xs text-gray-500 uppercase">{c.or || 'ou'}</span>
                 <div className="flex-1 h-px bg-white/10" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.firstName} *</label>
-                  <input type="text" name="firstName" value={form.firstName} onChange={handleChange}
-                    placeholder={c.firstName} className={inputCls('firstName')} data-testid="passenger-firstname" />
-                  {errors.firstName && <p className="text-xs text-red-400 mt-1">{errors.firstName}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.lastName} *</label>
-                  <input type="text" name="lastName" value={form.lastName} onChange={handleChange}
-                    placeholder={c.lastName} className={inputCls('lastName')} data-testid="passenger-lastname" />
-                  {errors.lastName && <p className="text-xs text-red-400 mt-1">{errors.lastName}</p>}
+                  <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">{c.fullName} *</label>
+                  <input type="text" name="fullName" value={form.fullName} onChange={handleChange}
+                    placeholder={c.fullName} className={inputCls('fullName')} data-testid="passenger-fullname" autoComplete="name" />
+                  {errors.fullName && <p className="text-xs text-red-400 mt-1">{errors.fullName}</p>}
                 </div>
               </div>
               <div>
@@ -775,14 +792,6 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                 />
                 <p className="text-xs text-gray-500 mt-1.5">{c.phoneHint || 'Your driver may need to contact you upon arrival.'}</p>
                 {errors.phone && <p className="text-xs text-red-400 mt-1">{errors.phone}</p>}
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">
-                  {c.password} * <span className="text-gray-500 font-normal normal-case">({c.passwordHint})</span>
-                </label>
-                <input type="password" name="password" value={form.password} onChange={handleChange}
-                  placeholder="Minimum 6 caracteres" className={inputCls('password')} data-testid="passenger-password" />
-                {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password}</p>}
               </div>
             </div>
           ) : (
