@@ -3,6 +3,18 @@
    When the input value is empty (class .text-transparent added via React),
    hide the browser's native "jj/mm/aaaa" or "hh:mm" placeholder text so our
    overlay span is the only visible label. */
+.date-native {
+  /* Prevent iOS Safari from auto-sizing the input to its intrinsic content width
+     when a value is present (bug: input overflows the parent container). */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: block;
+}
 .date-native.text-transparent::-webkit-datetime-edit,
 .date-native.text-transparent::-webkit-datetime-edit-fields-wrapper,
 .date-native.text-transparent::-webkit-datetime-edit-text,
@@ -18,6 +30,11 @@
 .date-native::-webkit-calendar-picker-indicator {
   opacity: 0.55;
   cursor: pointer;
+}
+/* iOS Safari specific: constrain the internal datetime edit wrapper */
+.date-native::-webkit-date-and-time-value {
+  text-align: left;
+  min-width: 0;
 }
 
 @tailwind base;
