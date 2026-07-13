@@ -940,11 +940,11 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                 label={`Zont ${selectedCar.name || 'transfer'}`}
                 onPaymentMethod={async (pm) => {
                   try {
-                    // Same flow as CardElement — attach wallet PaymentMethod to the SetupIntent
+                    const token = localStorage.getItem('auth_token');
+                    if (!token) return { success: false };
                     const setupData = await new Promise((resolve, reject) => {
-                      const token = localStorage.getItem('token');
                       const xhr = new XMLHttpRequest();
-                      xhr.open('POST', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/setup-intent/create`);
+                      xhr.open('POST', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`);
                       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
                       xhr.setRequestHeader('Content-Type', 'application/json');
                       xhr.onload = () => { try { resolve(JSON.parse(xhr.responseText)); } catch { reject(new Error('bad json')); } };

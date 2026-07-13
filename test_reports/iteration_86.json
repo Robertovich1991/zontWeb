@@ -1,0 +1,32 @@
+{
+  "summary": "Retest of 3 fixes from iteration_85: (1) Kiosk booking Stripe integration, (2) Apple domain-association file, (3) Checkout.js wallet handler auth_token/endpoint fix. All 3 fixes VERIFIED. No regressions.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/kiosk/book", "issue": "Response uses 'paymentUrl' + 'booking.stripeSessionId' (pre-existing schema) rather than top-level 'stripeSessionUrl'+'stripeSessionId' mentioned in the review request. Non-breaking; frontend already consumes paymentUrl. Field 'booking.stripe_session_id' (snake_case) is null while 'booking.stripeSessionId' holds value — mild inconsistency."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "verification_results": {
+    "kiosk_book_endpoint": "HTTP 200. reference=ZK-USH9B, paymentUrl=https://checkout.stripe.com/c/pay/cs_live_a1QZFW0imJb5lJnOLkIHOKik8EyVAvuHb0fKX7CYfYdzoMpjucVJdCMvZe... No 'parameter_unknown' error. Stripe Checkout session created successfully with Dashboard-configured payment methods.",
+    "apple_domain_file": "HTTP 200 at /.well-known/apple-developer-merchantid-domain-association with placeholder content 'PLACEHOLDER-REPLACE-WITH-STRIPE-DOMAIN-ASSOCIATION-FILE'.",
+    "checkout_js_code_inspection": "Line 943: localStorage.getItem('auth_token') ✅. Line 947: POST to /api/proxy/booking/setup-intent ✅. Matches card flow at line 559/562.",
+    "checkout_page_load": "GET /checkout loads cleanly (HTTP 200, title 'Complete Your Booking - Zont'). Shows 'No booking data found' fallback since no booking in session (expected). No React runtime errors, no pageerrors from app code. Only third-party CookieYes 403 warnings (unrelated).",
+    "kiosk_regression": "Response schema preserved: {reference, paymentUrl, qrCode, booking{...}}. No breaking changes."
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Optional cleanup: field 'booking.stripe_session_id' (snake_case) is null while 'booking.stripeSessionId' has value — remove one to avoid confusion."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "None. Created one live Stripe test booking (ref ZK-USH9B) with awaiting_payment status.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All 3 iteration_85 bugs verified fixed. UI-level Apple/Google Pay wallet button testing is not possible in chromium (button hides when wallet unavailable — expected)."
+}

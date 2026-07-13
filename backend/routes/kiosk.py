@@ -360,8 +360,9 @@ async def create_kiosk_booking(req: KioskBookingRequest):
     frontend_url = os.environ.get("FRONTEND_URL", "https://www.zont.cab")
     try:
         session = stripe.checkout.Session.create(
-            # Enable Apple Pay + Google Pay + card automatically based on user's device/browser
-            automatic_payment_methods={"enabled": True},
+            # Payment methods are configured in Stripe Dashboard → Payment Methods
+            # (card + Apple Pay + Google Pay enabled). Do not pass payment_method_types
+            # or automatic_payment_methods here — let Stripe honor Dashboard settings.
             line_items=[{
                 "price_data": {
                     "currency": "eur",
