@@ -29,6 +29,7 @@ const homeContent = {
     bookingTitle: 'Book Your Transfer',
     tabTransfer: 'Transfer', tabDisposal: 'Driver at disposal', hoursLabel: 'How many hours?',
     pickup: 'Pick up address', dropoff: 'Drop off address', date: 'Date', time: 'Time',
+    datePh: 'Select a date', timePh: 'Select a time',
     pickupPh: 'Airport, hotel, address...', dropoffPh: 'Hotel, city center, address...',
     bookNow: 'SEARCH TRANSFER', searching: 'SEARCHING...',
     fixedPrices: 'Fixed Prices', securePay: 'Secure Payment',
@@ -59,6 +60,7 @@ const homeContent = {
     bookingTitle: 'Réservez Votre Transfert',
     tabTransfer: 'Transfert', tabDisposal: 'Chauffeur à disposition', hoursLabel: 'Combien d\'heures ?',
     pickup: 'Adresse de départ', dropoff: 'Adresse d\'arrivée', date: 'Date', time: 'Heure',
+    datePh: 'Choisir une date', timePh: 'Choisir une heure',
     pickupPh: 'Aéroport, hôtel, adresse...', dropoffPh: 'Hôtel, centre-ville, adresse...',
     bookNow: 'RECHERCHER UN TRANSFERT', searching: 'RECHERCHE...',
     fixedPrices: 'Prix Fixes', securePay: 'Paiement Sécurisé',
@@ -89,6 +91,7 @@ const homeContent = {
     bookingTitle: 'Забронируйте Трансфер',
     tabTransfer: 'Трансфер', tabDisposal: 'Водитель в распоряжение', hoursLabel: 'Сколько часов?',
     pickup: 'Адрес отправления', dropoff: 'Адрес назначения', date: 'Дата', time: 'Время',
+    datePh: 'Выберите дату', timePh: 'Выберите время',
     pickupPh: 'Аэропорт, отель, адрес...', dropoffPh: 'Отель, центр города...',
     bookNow: 'НАЙТИ ТРАНСФЕР', searching: 'ПОИСК...',
     fixedPrices: 'Фиксированные Цены', securePay: 'Безопасная Оплата',
@@ -119,6 +122,7 @@ const homeContent = {
     bookingTitle: 'Ամրագրեք Ձեր Տրանսֆերը',
     tabTransfer: 'Տրանսֆեր', tabDisposal: 'Վարորդ տրամադրության տակ', hoursLabel: 'Քանի՞ ժամ',
     pickup: 'Վերցնելու հասցե', dropoff: 'Իջնելու հասցե', date: 'Ամսաթիվ', time: 'Ժամ',
+    datePh: 'Ընտրեք ամսաթիվ', timePh: 'Ընտրեք ժամ',
     pickupPh: 'Օդանավակայան, հյուրանոց, հասցե...', dropoffPh: 'Հյուրանոց, կենտրոն, հասցե...',
     bookNow: 'ՈՌՈՆԵԼ ՏՌԱՆՍՖԵՌ', searching: 'ՈՌՈՆՈՒՄ...',
     fixedPrices: 'Հաստատ Գներ', securePay: 'Ապահով Վճարում',
@@ -146,6 +150,7 @@ const homeContent = {
     bookingTitle: 'Reserva Tu Traslado',
     tabTransfer: 'Traslado', tabDisposal: 'Chófer a disposición', hoursLabel: '¿Cuántas horas?',
     pickup: 'Dirección de recogida', dropoff: 'Dirección de destino', date: 'Fecha', time: 'Hora',
+    datePh: 'Elige una fecha', timePh: 'Elige una hora',
     pickupPh: 'Aeropuerto, hotel, dirección...', dropoffPh: 'Hotel, centro, dirección...',
     bookNow: 'BUSCAR TRASLADO', searching: 'BUSCANDO...',
     fixedPrices: 'Precios Fijos', securePay: 'Pago Seguro',
@@ -954,13 +959,35 @@ const Home = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label htmlFor="h-date" className="block text-gray-700 font-medium text-sm mb-1">{c.date}</label>
-                          <input type="date" id="h-date" name="date" value={date} onChange={(e) => setDate(e.target.value)} required
-                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-date-input" />
+                          <input
+                            type={date ? 'date' : 'text'}
+                            id="h-date"
+                            name="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            onFocus={(e) => { e.currentTarget.type = 'date'; try { e.currentTarget.showPicker && e.currentTarget.showPicker(); } catch {} }}
+                            onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = 'text'; }}
+                            placeholder={c.datePh || 'DD / MM / YYYY'}
+                            required
+                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm placeholder-gray-400"
+                            data-testid="home-date-input"
+                          />
                         </div>
                         <div>
                           <label htmlFor="h-time" className="block text-gray-700 font-medium text-sm mb-1">{c.time}</label>
-                          <input type="time" id="h-time" name="time" value={time} onChange={(e) => setTime(e.target.value)} required
-                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm" data-testid="home-time-input" />
+                          <input
+                            type={time ? 'time' : 'text'}
+                            id="h-time"
+                            name="time"
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                            onFocus={(e) => { e.currentTarget.type = 'time'; try { e.currentTarget.showPicker && e.currentTarget.showPicker(); } catch {} }}
+                            onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = 'text'; }}
+                            placeholder={c.timePh || 'HH : MM'}
+                            required
+                            className="w-full px-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm placeholder-gray-400"
+                            data-testid="home-time-input"
+                          />
                         </div>
                       </div>
                       <LastMinuteWarning date={date} time={time} />
