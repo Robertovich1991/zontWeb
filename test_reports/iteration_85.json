@@ -1,0 +1,64 @@
+{
+  "summary": "Tested Apple Pay / Google Pay integration (Stripe). Domain association file OK, Checkout frontend loads without runtime errors and WalletPaymentButton hides itself on desktop chromium (no wallet) — as expected. CRITICAL: /api/kiosk/book returns HTTP 502 because Stripe API rejects `automatic_payment_methods` on Checkout Session with error 'Received unknown parameter: automatic_payment_methods'.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/kiosk/book",
+        "issue": "Stripe returns 400 'Received unknown parameter: automatic_payment_methods' → backend returns 502 'Payment service unavailable'. Booking flow is BROKEN. Reproduced with payload {hotelSlug: 'bristol', destination: 'CDG Airport', date: '2026-08-15', time: '10:00', vehicleType: 'sedan', price: 95, clientName: 'TEST User', clientPhone: '+33612345678'}. Stripe log: 'error_code=parameter_unknown error_param=automatic_payment_methods'. Root cause: the Stripe account's pinned API version is older than 2023-08-16 (when automatic_payment_methods was added to Checkout Sessions), and stripe-python 14.3.0 does NOT override that pin. Fix options: (a) upgrade the account's default API version in Stripe Dashboard → Developers → API version; (b) set `stripe.api_version = '2024-06-20'` (or later) in routes/kiosk.py; (c) simplest: REMOVE the automatic_payment_methods param entirely (and don't set payment_method_types) — Checkout will fall back to Dashboard-configured payment methods, which already include Apple Pay & Google Pay once the domain is verified. This is critical because it also blocks the pre-existing Kiosk booking flow, which is now a regression.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results": {
+    "domain_association_file": {
+      "url": "/.well-known/apple-developer-merchantid-domain-association",
+      "http_status": 200,
+      "body": "PLACEHOLDER-REPLACE-WITH-STRIPE-DOMAIN-ASSOCIATION-FILE",
+      "status": "PASS"
+    },
+    "kiosk_booking_automatic_payment_methods": {
+      "http_status": 502,
+      "stripe_error": "parameter_unknown: automatic_payment_methods",
+      "status": "FAIL — regression, blocks payment"
+    },
+    "checkout_frontend_load": {
+      "route": "/checkout (no booking context)",
+      "empty_state_rendered": true,
+      "page_errors": "none (only pre-existing 403 on a favicon-like resource; unrelated)",
+      "wallet_btn_visible_desktop_chromium": false,
+      "expected_wallet_hidden": true,
+      "status": "PASS — WalletPaymentButton import does not break the page, and correctly renders null when wallet unsupported"
+    },
+    "wallet_button_component_review": {
+      "renders_null_when_amount_zero": "PASS (cents<=0 → paymentRequest=null → returns null)",
+      "renders_null_when_canMakePayment_false": "PASS",
+      "shows_divider_or_pay_by_card_when_canPay_true": "PASS (code inspected)",
+      "requires_stripe_loaded": "PASS (guards on !stripe)",
+      "note": "Cannot test the actual Apple Pay / Google Pay UI in Chromium (browser has neither wallet). PaymentRequestButtonElement iframe only mounts when canMakePayment() resolves truthy."
+    }
+  },
+  "critical_code_review_comments": [
+    "routes/kiosk.py:362 — Even if automatic_payment_methods worked, please also pass currency at the session level or verify — currently ok because it is inside line_items.price_data. No change needed.",
+    "routes/kiosk.py — dispatch_to_csharp has hardcoded creds `Nandetiri1@gmail.com/12345678` (line 495). Please move to env vars — same secret is already loaded elsewhere via CSHARP_COMPANY_USERNAME/PASSWORD.",
+    "Checkout.js:945 — the wallet onPaymentMethod handler reads `localStorage.getItem('token')` but the rest of the file uses `localStorage.getItem('auth_token')`. This will send an EMPTY Authorization header for the SetupIntent call in the wallet flow → 401. Fix: change to 'auth_token'.",
+    "Checkout.js:947 — wallet flow calls POST /api/proxy/setup-intent/create while the card flow (line 562) calls POST /api/proxy/booking/setup-intent. Confirm the /setup-intent/create endpoint exists on backend, otherwise wallet payment will fail with 404 even when a device supports Apple/Google Pay."
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "URGENT: Fix Kiosk 502. Recommended: replace `automatic_payment_methods={'enabled': True}` with either (a) `stripe.api_version = '2024-06-20'` set once at module load AND keep the param, or (b) simply remove BOTH `automatic_payment_methods` and `payment_method_types` so Stripe uses Dashboard-configured methods (this is Stripe's official recommendation for Checkout).",
+    "Fix Checkout.js wallet onPaymentMethod: use `localStorage.getItem('auth_token')` (not 'token') so the SetupIntent call is authenticated.",
+    "Verify (or create) backend endpoint `/api/proxy/setup-intent/create` — Checkout wallet flow calls it but the card flow uses `/api/proxy/booking/setup-intent`. Endpoint mismatch will silently break Apple/Google Pay on Checkout."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "50% (1/2 — kiosk broken)", "frontend": "100% (page loads, component renders null as expected)"},
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Kiosk booking is currently blocked by Stripe API rejecting automatic_payment_methods. Reproduce with: curl -X POST $URL/api/kiosk/book -H 'Content-Type: application/json' -d '{\"hotelSlug\":\"bristol\",\"clientName\":\"TEST\",\"clientPhone\":\"+33612345678\",\"destination\":\"CDG Airport\",\"destinationAddress\":\"CDG\",\"date\":\"2026-08-15\",\"time\":\"10:00\",\"vehicleType\":\"sedan\",\"price\":95}'. Stripe log confirms: 'error_code=parameter_unknown error_param=automatic_payment_methods'. The frontend Checkout page loaded fine and WalletPaymentButton import did NOT crash the module — good regression signal. Two Checkout.js wallet-flow bugs also flagged in critical_code_review_comments (wrong localStorage key + endpoint mismatch)."
+}

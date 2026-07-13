@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import WalletPaymentButton from '@/components/WalletPaymentButton';
 
 const GOOGLE_CLIENT_ID = '71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com';
 const FACEBOOK_APP_ID = '1783544712624133';
@@ -930,6 +931,40 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         {/* New Card form (always shown if no saved cards, or when "new card" selected) — hide when card already verified */}
         {!verifiedCardId && (useNewCard || savedCards.length === 0) && (
           <>
+            {/* Apple Pay / Google Pay button — only visible on supported devices */}
+            {selectedCar?.price > 0 && (
+              <WalletPaymentButton
+                amountCents={Math.round(Number(selectedCar.price) * 100)}
+                currency="eur"
+                country="FR"
+                label={`Zont ${selectedCar.name || 'transfer'}`}
+                onPaymentMethod={async (pm) => {
+                  try {
+                    // Same flow as CardElement — attach wallet PaymentMethod to the SetupIntent
+                    const setupData = await new Promise((resolve, reject) => {
+                      const token = localStorage.getItem('token');
+                      const xhr = new XMLHttpRequest();
+                      xhr.open('POST', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/setup-intent/create`);
+                      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+                      xhr.setRequestHeader('Content-Type', 'application/json');
+                      xhr.onload = () => { try { resolve(JSON.parse(xhr.responseText)); } catch { reject(new Error('bad json')); } };
+                      xhr.onerror = () => reject(new Error('network'));
+                      xhr.send();
+                    });
+                    if (!setupData.clientSecret) return { success: false };
+                    const { error, setupIntent } = await stripe.confirmCardSetup(setupData.clientSecret, { payment_method: pm.id });
+                    if (error || !setupIntent) return { success: false };
+                    setVerifiedCardId(setupIntent.payment_method);
+                    setCardAddedBrand(pm.card?.wallet?.type || pm.card?.brand || 'wallet');
+                    toast.success(c.cardVerified || 'Payment verified');
+                    return { success: true };
+                  } catch {
+                    return { success: false };
+                  }
+                }}
+                testId="checkout-wallet-btn"
+              />
+            )}
             <div className="bg-[#0f1a28] rounded-lg p-4 border border-white/5">
               <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} />
             </div>
