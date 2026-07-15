@@ -634,7 +634,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   };
 
   // Step 2: Submit booking with verified card
-  const handlePayWithCard = async (cardId) => {
+  const handlePayWithCard = async (cardId, override = {}) => {
     setLoading(true);
     try {
       const dropoffCoords = searchData.dropoffCoords;
@@ -657,7 +657,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         utcOffset: new Date().getTimezoneOffset() * -1,
         endPointLatitude: dropoffCoords?.latitude,
         endPointLongitude: dropoffCoords?.longitude,
-        email: form.email,
+        email: override.email || form.email,
       };
 
       const result = await transferService.submitBooking(bookingPayload);
@@ -966,8 +966,11 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                     setVerifiedCardId(setupIntent.payment_method);
                     setCardAddedBrand(pm.card?.wallet?.type || pm.card?.brand || 'wallet');
                     toast.success(c.cardVerified || 'Payment verified');
-                    // Immediately submit the booking with the wallet-verified card — true one-tap wallet checkout
-                    handlePayWithCard(setupIntent.payment_method);
+                    // Immediately submit the booking with the wallet-verified card — true one-tap wallet checkout.
+                    // Pass billing_details as override so guest users don't hit the setForm race condition.
+                    handlePayWithCard(setupIntent.payment_method, {
+                      email: pm?.billing_details?.email,
+                    });
                     return { success: true };
                   } catch {
                     return { success: false };
