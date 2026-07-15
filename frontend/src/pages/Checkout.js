@@ -939,18 +939,51 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                 label={`Zont ${selectedCar.name || 'transfer'}`}
                 onPaymentMethod={async (pm) => {
                   try {
-                    // Auto-fill passenger form from wallet billing_details (guest users bypass typing)
-                    if (pm?.billing_details) {
-                      const bd = pm.billing_details;
-                      setForm(prev => ({
-                        ...prev,
-                        fullName: prev.fullName || bd.name || '',
-                        email: prev.email || bd.email || '',
-                        phone: prev.phone || (bd.phone || '').replace(/^\+/, ''),
-                      }));
+                    const bd = pm?.billing_details || {};
+                    // Auto-fill passenger form from wallet billing_details (only fills empty fields)
+                    setForm(prev => ({
+                      ...prev,
+                      fullName: prev.fullName || bd.name || '',
+                      email: prev.email || bd.email || '',
+                      phone: prev.phone || (bd.phone || '').replace(/^\+/, ''),
+                    }));
+
+                    // Guest user? auto-register+login using wallet billing_details.
+                    // This is required so the SetupIntent proxy has a valid Bearer token.
+                    let token = localStorage.getItem('auth_token');
+                    if (!token) {
+                      if (!bd.email) {
+                        toast.error('Wallet payment requires an email — please fill the form and try card payment.');
+                        return { success: false };
+                      }
+                      const rawName = (bd.name || '').trim();
+                      const parts = rawName ? rawName.split(/\s+/) : ['Guest'];
+                      const firstName = parts[0];
+                      const lastName = parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
+                      const generatedPassword = 'Zx' + Math.random().toString(36).slice(2, 14) + '!9';
+                      const phoneClean = (bd.phone || '').replace(/\s+/g, '');
+                      try {
+                        await authService.register({
+                          firstName, lastName,
+                          email: bd.email,
+                          phoneNumber: phoneClean,
+                          password: generatedPassword,
+                          gender: 'male',
+                        });
+                      } catch {
+                        /* email likely already registered — ignore and try login */
+                      }
+                      try {
+                        const loginResult = await authService.login({ email: bd.email, password: generatedPassword });
+                        onLoginDirect(loginResult.user);
+                        token = localStorage.getItem('auth_token');
+                      } catch {
+                        toast.error('Please sign in first — this email is already registered.');
+                        return { success: false };
+                      }
+                      if (!token) return { success: false };
                     }
-                    const token = localStorage.getItem('auth_token');
-                    if (!token) return { success: false };
+
                     const setupData = await new Promise((resolve, reject) => {
                       const xhr = new XMLHttpRequest();
                       xhr.open('POST', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/booking/setup-intent`);
@@ -960,16 +993,22 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                       xhr.onerror = () => reject(new Error('network'));
                       xhr.send();
                     });
-                    if (!setupData.clientSecret) return { success: false };
+                    if (!setupData.clientSecret) {
+                      toast.error(setupData.detail || setupData.message || 'Setup intent failed');
+                      return { success: false };
+                    }
                     const { error, setupIntent } = await stripe.confirmCardSetup(setupData.clientSecret, { payment_method: pm.id });
-                    if (error || !setupIntent) return { success: false };
+                    if (error || !setupIntent) {
+                      toast.error(error?.message || 'Card verification failed');
+                      return { success: false };
+                    }
                     setVerifiedCardId(setupIntent.payment_method);
                     setCardAddedBrand(pm.card?.wallet?.type || pm.card?.brand || 'wallet');
                     toast.success(c.cardVerified || 'Payment verified');
                     // Immediately submit the booking with the wallet-verified card — true one-tap wallet checkout.
                     // Pass billing_details as override so guest users don't hit the setForm race condition.
                     handlePayWithCard(setupIntent.payment_method, {
-                      email: pm?.billing_details?.email,
+                      email: bd.email,
                     });
                     return { success: true };
                   } catch {

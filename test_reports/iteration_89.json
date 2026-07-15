@@ -1,0 +1,40 @@
+{
+  "summary": "Code-review verification of the wallet (Apple/Google Pay) guest auto-register+login fix in Checkout.js onPaymentMethod callback. Frontend smoke-tested (home page renders). Real wallet E2E is not possible in headless Chromium; verification is by code inspection as noted in the review request.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "code_review_findings": {
+    "guest_branch_present": true,
+    "billing_details_autofill": "setForm merges bd.name/email/phone into empty fields (lines 944-949) ✓",
+    "guest_no_email_abort": "toast.error + return {success:false} when !bd.email (lines 955-958) ✓",
+    "name_split": "rawName.trim().split(/\\s+/); single-word name → firstName == lastName (dup) (lines 960-962) ✓",
+    "random_password": "'Zx' + base36 + '!9' generated per attempt (line 963) ✓",
+    "register_call": "authService.register({firstName,lastName,email:bd.email,phoneNumber:phoneClean,password,gender:'male'}) ✓ matches signup path",
+    "register_error_swallowed": "try/catch around register with empty catch — already-registered emails do not block flow ✓",
+    "login_after_register": "authService.login({email,password}); onLoginDirect(loginResult.user); token refreshed from localStorage ✓",
+    "login_error_surfaced": "toast.error('Please sign in first — this email is already registered.') + return {success:false} on login failure (lines 980-983) ✓",
+    "setup_intent_error_toast": "toast.error(setupData.detail || message || 'Setup intent failed') + return {success:false} (lines 996-999) ✓",
+    "confirmCardSetup_error_toast": "toast.error(error?.message || 'Card verification failed') + return {success:false} (lines 1001-1004) ✓",
+    "authenticated_regression": "The guest block is fully gated by `if (!token)` (line 954); an authenticated user with auth_token in localStorage skips the whole register/login block and proceeds directly to setup-intent XHR ✓",
+    "existing_card_flow_regression": "CardElement + handlePayWithCard path is outside the WalletPaymentButton subtree and untouched ✓",
+    "authService_signatures_match": "api.js authService.register (line 163) accepts arbitrary userData JSON; authService.login (line 195) accepts {email,password} and maps to username/password on the wire — signatures compatible with the new call sites ✓"
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Minor: the outer try/catch (line 1014) swallows exceptions with an empty catch and returns {success:false} without a toast — if any of the awaited XHRs throw a network error before reaching the specific error branches, the user sees Stripe's generic 'Payment not completed' with no toast. Consider adding a fallback toast.error('Wallet payment failed — please try again.') in the outer catch.",
+    "Minor: single-word wallet names (e.g. 'Cher') result in firstName == lastName which will look odd in receipts / bookings. Acceptable per current review request but worth flagging.",
+    "Minor: `bd.phone` autofill strips leading '+' when saving to setForm (line 948) but sends the raw-cleaned phone (with '+') to register — inconsistency is harmless but noted.",
+    "The generatedPassword is not stored anywhere accessible to the user. For UX, consider triggering a password-reset email so guest wallet users can later access the account created on their behalf."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only request)", "frontend": "code review passed 100%"},
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Wallet flow cannot be E2E tested in headless Chromium (PaymentRequest.canMakePayment returns null). To simulate, one could stub window.PaymentRequest and directly invoke the onPaymentMethod prop of WalletPaymentButton with a fake pm object — but that requires deeper instrumentation. Code inspection is sufficient here per the review request. All 6 fix requirements verified present and correct in /app/frontend/src/pages/Checkout.js lines 940-1017.",
+  "rca of the issue": "Original bug: wallet onPaymentMethod returned {success:false} early when localStorage.auth_token was missing (guest wallet checkout), causing Stripe PaymentRequestButton to display generic 'Payment not completed'. Fix (verified): guest branch now auto-registers using wallet billing_details, then logs in to obtain auth_token, before proceeding to setup-intent → confirmCardSetup → booking. Additionally, each failure path now surfaces a specific toast.error so silent failures no longer mask real problems."
+}
