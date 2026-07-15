@@ -1011,7 +1011,10 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                       email: bd.email,
                     });
                     return { success: true };
-                  } catch {
+                  } catch (err) {
+                    // eslint-disable-next-line no-console
+                    console.error('Wallet payment flow error:', err);
+                    toast.error('Wallet payment failed — please try again or use a card.');
                     return { success: false };
                   }
                 }}
