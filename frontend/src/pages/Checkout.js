@@ -55,6 +55,7 @@ const labels = {
     deleteCard: 'Delete',
     passengerTitle: 'Passenger Details',
     firstName: 'First Name', lastName: 'Last Name', fullName: 'Full Name',
+    walletHint: 'Fill your Full name, Email and Phone above to enable Apple Pay / Google Pay.',
     email: 'Email', phone: 'Phone',
     password: 'Password', passwordHint: 'To manage your booking',
     loggedAs: 'Logged in as',
@@ -97,6 +98,7 @@ const labels = {
     deleteCard: 'Supprimer',
     passengerTitle: 'Informations Passager',
     firstName: 'Prénom', lastName: 'Nom', fullName: 'Nom complet',
+    walletHint: 'Renseignez Nom complet, Email et Téléphone ci-dessus pour activer Apple Pay / Google Pay.',
     email: 'Email', phone: 'Téléphone',
     password: 'Mot de passe', passwordHint: 'Pour gérer votre réservation',
     loggedAs: 'Connecté en tant que',
@@ -139,6 +141,7 @@ const labels = {
     deleteCard: 'Удалить',
     passengerTitle: 'Данные Пассажира',
     firstName: 'Имя', lastName: 'Фамилия', fullName: 'Полное имя',
+    walletHint: 'Заполните Полное имя, Email и Телефон выше, чтобы включить Apple Pay / Google Pay.',
     email: 'Email', phone: 'Телефон',
     password: 'Пароль', passwordHint: 'Для управления бронированием',
     loggedAs: 'Вы вошли как',
@@ -930,9 +933,23 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         {/* New Card form (always shown if no saved cards, or when "new card" selected) — hide when card already verified */}
         {!verifiedCardId && (useNewCard || savedCards.length === 0) && (
           <>
-            {/* Apple Pay / Google Pay button — only visible on supported devices */}
-            {selectedCar?.price > 0 && (
-              <WalletPaymentButton
+            {/* Apple Pay / Google Pay button.
+                Rules:
+                - For guests: only show when fullName + email + phone are filled (so we can register+book with those exact values).
+                - For authenticated users: always show when supported by the device. */}
+            {(() => {
+              if (!(selectedCar?.price > 0)) return null;
+              const guestReady = !!(form.fullName?.trim() && form.email?.trim() && form.phone?.trim());
+              const walletAllowed = isAuthenticated || guestReady;
+              if (!walletAllowed) {
+                return (
+                  <div className="mb-3 p-3 rounded-lg border border-white/10 bg-[#0f1a28]/60 text-xs text-gray-400 text-center" data-testid="wallet-locked-hint">
+                    {c.walletHint || 'Fill your Full name, Email and Phone above to enable Apple Pay / Google Pay.'}
+                  </div>
+                );
+              }
+              return (
+                <WalletPaymentButton
                 amountCents={Math.round(Number(selectedCar.price) * 100)}
                 currency="eur"
                 country="FR"
@@ -940,32 +957,27 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                 onPaymentMethod={async (pm) => {
                   try {
                     const bd = pm?.billing_details || {};
-                    // Auto-fill passenger form from wallet billing_details (only fills empty fields)
-                    setForm(prev => ({
-                      ...prev,
-                      fullName: prev.fullName || bd.name || '',
-                      email: prev.email || bd.email || '',
-                      phone: prev.phone || (bd.phone || '').replace(/^\+/, ''),
-                    }));
+                    // Prefer the user-entered form values; fall back to billing_details from the wallet.
+                    const nameToUse = (form.fullName?.trim() || bd.name || '').trim();
+                    const emailToUse = (form.email?.trim() || bd.email || '').trim();
+                    const phoneToUse = (form.phone?.trim() || (bd.phone || '').replace(/^\+/, '')).trim();
 
-                    // Guest user? auto-register+login using wallet billing_details.
-                    // This is required so the SetupIntent proxy has a valid Bearer token.
+                    // Guest user? auto-register+login using the resolved passenger identity.
                     let token = localStorage.getItem('auth_token');
                     if (!token) {
-                      if (!bd.email) {
-                        toast.error('Wallet payment requires an email — please fill the form and try card payment.');
+                      if (!emailToUse) {
+                        toast.error('Please fill your email above before paying.');
                         return { success: false };
                       }
-                      const rawName = (bd.name || '').trim();
-                      const parts = rawName ? rawName.split(/\s+/) : ['Guest'];
+                      const parts = nameToUse ? nameToUse.split(/\s+/) : ['Guest'];
                       const firstName = parts[0];
                       const lastName = parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
                       const generatedPassword = 'Zx' + Math.random().toString(36).slice(2, 14) + '!9';
-                      const phoneClean = (bd.phone || '').replace(/\s+/g, '');
+                      const phoneClean = phoneToUse ? formatPhone(phoneToUse, phoneCountry) : '';
                       try {
                         await authService.register({
                           firstName, lastName,
-                          email: bd.email,
+                          email: emailToUse,
                           phoneNumber: phoneClean,
                           password: generatedPassword,
                           gender: 'male',
@@ -974,11 +986,11 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                         /* email likely already registered — ignore and try login */
                       }
                       try {
-                        const loginResult = await authService.login({ email: bd.email, password: generatedPassword });
+                        const loginResult = await authService.login({ email: emailToUse, password: generatedPassword });
                         onLoginDirect(loginResult.user);
                         token = localStorage.getItem('auth_token');
                       } catch {
-                        toast.error('Please sign in first — this email is already registered.');
+                        toast.error('This email is already registered — please sign in first.');
                         return { success: false };
                       }
                       if (!token) return { success: false };
@@ -1006,9 +1018,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                     setCardAddedBrand(pm.card?.wallet?.type || pm.card?.brand || 'wallet');
                     toast.success(c.cardVerified || 'Payment verified');
                     // Immediately submit the booking with the wallet-verified card — true one-tap wallet checkout.
-                    // Pass billing_details as override so guest users don't hit the setForm race condition.
                     handlePayWithCard(setupIntent.payment_method, {
-                      email: bd.email,
+                      email: emailToUse,
                     });
                     return { success: true };
                   } catch (err) {
@@ -1020,7 +1031,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                 }}
                 testId="checkout-wallet-btn"
               />
-            )}
+              );
+            })()}
             <div className="bg-[#0f1a28] rounded-lg p-4 border border-white/5">
               <CardElement options={cardStyle} onChange={(e) => setCardComplete(e.complete)} />
             </div>
