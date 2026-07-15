@@ -1,0 +1,31 @@
+{
+  "summary": "Frontend-only verification of the defensive React-child crash fix in /app/frontend/src/pages/Checkout.js (handleCardSetup catch + handlePayWithCard catch + errors.general render-site coercion). Playwright intercepted POST /api/proxy/auth/register (which surfaces err.response.data.detail into the handleCardSetup catch since xhrRequest rejects with {response:{data}}) with five different error-body shapes. In EVERY scenario: (a) no 'Objects are not valid as a React child' pageerror was thrown; (b) errors.general / errors.email are always coerced to primitive strings before render; (c) the errors.general red banner (bg-red-500/10) renders correctly. Additionally, the toStr helper was verified in-page via evaluate() against 8 input shapes and behaved per spec.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Checkout.js lines 620-625 (handleCardSetup catch) and 703-708 (handlePayWithCard catch) both define the same recursive `toStr` helper — consider hoisting to module scope to DRY (non-blocking).",
+    "handlePayWithCard catch will almost never hit the object-detail branch because api.js submitBooking (line 121) rejects with `new Error(errorMsg)` — plain Error has no `.response.data.detail`. The defensive toStr code there is still valid as a safety net but is effectively unreachable via the current submitBooking implementation. If the intent is to surface field-level C# errors from booking/create, submitBooking would need to reject with {response:{data}} like xhrRequest does. Non-blocking for THIS fix but worth flagging.",
+    "Render-site defense at line 831 (`typeof errors.general === 'string' ? errors.general : (errors.general?.message || errors.general?.error || JSON.stringify(errors.general))`) is correct and prevents any residual React child crash even if state was mis-set.",
+    "toStr correctly handles all specified cases: string → as-is; array → recursive join with ', '; object with .message/.error/.detail → returns that string; other objects → JSON.stringify; primitives → String()."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a", "frontend": "100%"},
+  "seed_data_creation": "sessionStorage.zont_booking with searchData(date=2026-12-25, time=10:30, valid pickup/dropoff coords) + selectedCar(price=65). Stripe CardElement iframe filled with 4242 4242 4242 4242 / 12/34 / 123 to enable the Pay button.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "To exercise handleCardSetup catch's object-detail branch, intercept POST /api/proxy/auth/register (or /api/proxy/auth/login) — NOT /api/proxy/booking/create — because api.js xhrRequest rejects with {response:{data},status} while submitBooking rejects with plain new Error(msg). The Pay button requires cardComplete=true, so fill the Stripe iframe (input[name=cardnumber], exp-date, cvc). Confirmed: no 'Objects are not valid as a React child' errors under any tested error body shape (nested object arrays, plain string detail, Email string, Email array, deeply nested objects).",
+  "scenarios_tested": [
+    {"body": "{detail: {SomeField: [{error: 'Something failed'}]}}", "result": "errors.general div = 'Something failed'; no React crash"},
+    {"body": "{detail: {Email: 'Invalid email format'}}", "result": "inline email error = 'Invalid email format'; no React crash"},
+    {"body": "{detail: {Email: ['Format invalid', 'Already used']}}", "result": "inline email error = 'Format invalid, Already used'; no React crash"},
+    {"body": "{detail: 'plain string error from server'}", "result": "else branch, toast fired with plain string; no React crash"},
+    {"body": "{detail: {Something: [{nested: {deep: 'value'}}, 'second']}}", "result": "errors.general div = '{\"nested\":{\"deep\":\"value\"}}, second' via JSON.stringify fallback; no React crash"}
+  ],
+  "rca of the issue": "Original bug: prior code did `v = Array.isArray(val) ? val[0] : val` — when val was an array whose first item was an object like {error:'msg'}, that object was assigned into apiErrors.general and later rendered as a JSX child, which React refuses (throws 'Objects are not valid as a React child'). Fix (verified): recursive toStr() helper always coerces to a string before assigning to apiErrors.*, plus a defensive coercion at the render site (line 831) so any residual object state cannot crash React."
+}

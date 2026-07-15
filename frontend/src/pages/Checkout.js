@@ -617,8 +617,14 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       const msg = err?.response?.data?.detail;
       if (typeof msg === 'object' && msg !== null) {
         const apiErrors = {};
+        const toStr = (x) => {
+          if (typeof x === 'string') return x;
+          if (Array.isArray(x)) return x.map(toStr).join(', ');
+          if (x && typeof x === 'object') return x.message || x.error || x.detail || JSON.stringify(x);
+          return String(x);
+        };
         for (const [key, val] of Object.entries(msg)) {
-          const v = Array.isArray(val) ? val[0] : (typeof val === 'string' ? val : JSON.stringify(val));
+          const v = toStr(val);
           if (key.includes('Email') || key.includes('UserName')) apiErrors.email = v;
           else if (key.includes('Phone')) apiErrors.phone = v;
           else if (key.includes('Password')) apiErrors.password = v;
@@ -694,8 +700,14 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       const msg = err?.response?.data?.detail;
       if (typeof msg === 'object' && msg !== null) {
         const apiErrors = {};
+        const toStr = (x) => {
+          if (typeof x === 'string') return x;
+          if (Array.isArray(x)) return x.map(toStr).join(', ');
+          if (x && typeof x === 'object') return x.message || x.error || x.detail || JSON.stringify(x);
+          return String(x);
+        };
         for (const [key, val] of Object.entries(msg)) {
-          const v = Array.isArray(val) ? val[0] : (typeof val === 'string' ? val : JSON.stringify(val));
+          const v = toStr(val);
           if (key.includes('Email') || key.includes('UserName')) apiErrors.email = v;
           else if (key.includes('Phone')) apiErrors.phone = v;
           else if (key.includes('Password')) apiErrors.password = v;
@@ -816,7 +828,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
 
           {errors.general && (
             <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm text-red-400">
-              {errors.general}
+              {typeof errors.general === 'string' ? errors.general : (errors.general?.message || errors.general?.error || JSON.stringify(errors.general))}
             </div>
           )}
         </div>
