@@ -966,6 +966,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                     setVerifiedCardId(setupIntent.payment_method);
                     setCardAddedBrand(pm.card?.wallet?.type || pm.card?.brand || 'wallet');
                     toast.success(c.cardVerified || 'Payment verified');
+                    // Immediately submit the booking with the wallet-verified card — true one-tap wallet checkout
+                    handlePayWithCard(setupIntent.payment_method);
                     return { success: true };
                   } catch {
                     return { success: false };

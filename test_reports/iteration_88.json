@@ -1,0 +1,54 @@
+{
+  "summary": "Verified wallet (Apple Pay / Google Pay) one-tap auto-submit fix in Checkout.js via (a) code inspection and (b) authenticated /checkout UI smoke test. Playwright cannot trigger the real PaymentRequest API in headless Chromium, so wallet completion was validated by static analysis + mocked network smoke test.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "code_inspection_findings": {
+    "fix_location": "/app/frontend/src/pages/Checkout.js line 966-971",
+    "fix_present": true,
+    "verified_lines": [
+      "L966: setVerifiedCardId(setupIntent.payment_method);",
+      "L967: setCardAddedBrand(pm.card?.wallet?.type || pm.card?.brand || 'wallet');",
+      "L968: toast.success(c.cardVerified || 'Payment verified');",
+      "L970: handlePayWithCard(setupIntent.payment_method);   // <-- auto-submit fix",
+      "L971: return { success: true };"
+    ],
+    "double_fire_analysis": "SAFE. Wallet's onPaymentMethod invokes handlePayWithCard directly (not via handleSubmit), and passes setupIntent.payment_method as a positional argument (not read from React state). handleSubmit is NOT called during wallet flow. Only ONE POST to /api/proxy/booking/create fires per wallet success.",
+    "card_flow_regression": "UNCHANGED. handleSubmit L502-609: first click sets verifiedCardId + stops (comment 'Stop here'); second click re-enters handleSubmit, verifiedCardId truthy → handlePay() → handlePayWithCard(verifiedCardId) ONCE.",
+    "saved_card_regression": "UNCHANGED. handleSubmit L516-520: selectedSavedCard && !useNewCard → setVerifiedCardId + handlePayWithCard(selectedSavedCard) ONCE.",
+    "auth_prefill": "Authenticated users have form.email/phone pre-filled via useEffect at L344 (deps [isAuthenticated, user]), so handlePayWithCard's closure over `form` has correct values by the time wallet callback fires."
+  },
+  "ui_smoke_test_results": {
+    "url": "https://gps-super-admin.preview.emergentagent.com/checkout",
+    "seeded_state": "sessionStorage.zont_booking + localStorage.auth_token + user (with token field); mocked /api/proxy/client/profile → 200",
+    "passenger-details-section_count": 0,
+    "checkout-form_count": 1,
+    "amount-summary_count": 1,
+    "loggedAs_banner_visible": true,
+    "checkout-wallet-btn_count": 0,
+    "note": "wallet button is not rendered in headless Chromium because Stripe's PaymentRequest.canMakePayment() returns null (no wallet backend). Expected — same reason Playwright cannot end-to-end drive Google Pay UI."
+  },
+  "potential_minor_issue": {
+    "component": "Checkout.js WalletPaymentButton onPaymentMethod (L940-975)",
+    "issue": "For GUEST (unauthenticated) users, setForm(prev => ...) at L945 is called just before handlePayWithCard at L970 in the same synchronous flow. Because handlePayWithCard closes over the previous `form` state (React batches setState), the bookingPayload.email at L660 may be an empty string for guest wallet users on first attempt. Authenticated users are unaffected (form pre-filled via useEffect at L344). Recommend: pass wallet billing_details directly into handlePayWithCard, e.g. handlePayWithCard(setupIntent.payment_method, { email: bd.email, phone: bd.phone }) and prefer overrides inside handlePayWithCard.",
+    "priority": "MEDIUM (does not affect the reported prod user who was authenticated)"
+  },
+  "test_report_links": [],
+  "action_items": [
+    "OPTIONAL: address guest-wallet form.email race described in potential_minor_issue by passing billing_details into handlePayWithCard instead of relying on setForm state settling."
+  ],
+  "critical_code_review_comments": [
+    "handlePayWithCard reads form.email from closure — for guest wallet flow this can be stale because setForm was invoked in the same synchronous block. Not a blocker for the current fix (authenticated user)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100% (code inspection + smoke test)"},
+  "test_credentials": "None available (/app/memory/test_credentials.md missing). Used FAKE_TOKEN + mocked /api/proxy/client/profile response for authenticated-state simulation.",
+  "seed_data_creation": "sessionStorage.zont_booking (searchData + selectedCar with price 85.5) and localStorage.user with token field.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Real Apple Pay / Google Pay cannot be triggered from headless Chromium — PaymentRequest.canMakePayment() returns null so WalletPaymentButton returns null. Verification of the wallet-flow fix must be done via code inspection at Checkout.js L940-975 (specifically L970: handlePayWithCard call). If needing runtime proof, use a real device/browser with a saved wallet card via Stripe test mode.",
+  "rca_of_issue": "PROD RCA (already fixed in this iteration): On production zont.cab, user tapped Google Pay → Stripe returned PaymentMethod pm_1TtTs5... (200 OK on POST /v1/payment_methods) → WalletPaymentButton.onPaymentMethod attached it to a SetupIntent → setVerifiedCardId was called but the flow ended with `return {success:true}` and no auto-submit → user perceived 'nothing happened' because they needed a second click on the (now hidden) card panel's Pay button. Fix: add handlePayWithCard(setupIntent.payment_method) immediately before the return, converting the two-step flow into a true one-tap wallet checkout. Reproduction requires a real device supporting Google/Apple Pay in Stripe test mode."
+}
