@@ -503,6 +503,10 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
     e.preventDefault();
     if (!stripe || !elements) return;
 
+    // Enforce passenger identity for guest users on EVERY submission path
+    // (previously this was skipped when verifiedCardId was set → allowed booking without name/email/phone).
+    if (!isAuthenticated && !validateForm()) return;
+
     // If card already verified → proceed to payment (Step 2)
     if (verifiedCardId) {
       return handlePay();
@@ -523,11 +527,6 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         toast.error(c.pastDateError);
         return;
       }
-    }
-
-    // If not authenticated, validate and register/login first
-    if (!isAuthenticated) {
-      if (!validateForm()) return;
     }
 
     setLoading(true);
@@ -940,6 +939,16 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                 label={`Zont ${selectedCar.name || 'transfer'}`}
                 onPaymentMethod={async (pm) => {
                   try {
+                    // Auto-fill passenger form from wallet billing_details (guest users bypass typing)
+                    if (pm?.billing_details) {
+                      const bd = pm.billing_details;
+                      setForm(prev => ({
+                        ...prev,
+                        fullName: prev.fullName || bd.name || '',
+                        email: prev.email || bd.email || '',
+                        phone: prev.phone || (bd.phone || '').replace(/^\+/, ''),
+                      }));
+                    }
                     const token = localStorage.getItem('auth_token');
                     if (!token) return { success: false };
                     const setupData = await new Promise((resolve, reject) => {
