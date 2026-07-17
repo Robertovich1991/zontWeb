@@ -21,7 +21,7 @@ const content = {
     faqs: [
       { q: 'How do I book a ride?', a: 'You can book directly on zont.cab or via our mobile app (iOS/Android). Enter your pickup and drop-off locations, choose your vehicle, and confirm. You\'ll receive driver details 3 hours before your trip.' },
       { q: 'Can I book in advance?', a: 'Absolutely! You can book your transfer days, weeks or even months in advance. The price is locked at booking with no surge pricing. Early booking guarantees availability.' },
-      { q: 'What payment methods do you accept?', a: 'We accept Visa, Mastercard, PayPal and Apple Pay. All payments are processed securely with encryption. You can also pay in cash to the driver.' },
+      { q: 'What payment methods do you accept?', a: 'We accept Visa, Mastercard and Apple Pay. All payments are processed securely with encryption. You can also pay in cash to the driver.' },
       { q: 'Can I cancel my booking?', a: 'Yes, free cancellation is available up to 24 hours before your scheduled transfer. After that, cancellation fees may apply depending on the vehicle type.' },
       { q: 'What happens if my flight is delayed?', a: 'We track all flights in real-time. If your flight is delayed, your driver automatically adjusts their arrival time at no extra cost. We include 60 minutes of free waiting time.' },
       { q: 'How are your drivers verified?', a: 'All drivers undergo thorough background checks, have valid professional licenses, and are continuously rated by passengers. We only work with the highest-rated drivers.' },
@@ -55,7 +55,7 @@ const content = {
     faqs: [
       { q: 'Comment reserver une course ?', a: 'Reservez directement sur zont.cab ou via notre appli mobile (iOS/Android). Entrez vos lieux de depart et d\'arrivee, choisissez votre vehicule et confirmez. Vous recevrez les details du chauffeur 3 heures avant votre trajet.' },
       { q: 'Puis-je reserver a l\'avance ?', a: 'Absolument ! Vous pouvez reserver votre transfert des jours, semaines ou meme des mois a l\'avance. Le prix est verrouille a la reservation sans majoration. La reservation anticipee garantit la disponibilite.' },
-      { q: 'Quels modes de paiement acceptez-vous ?', a: 'Nous acceptons Visa, Mastercard, PayPal et Apple Pay. Tous les paiements sont traites de maniere securisee avec chiffrement. Vous pouvez egalement payer en especes au chauffeur.' },
+      { q: 'Quels modes de paiement acceptez-vous ?', a: 'Nous acceptons Visa, Mastercard et Apple Pay. Tous les paiements sont traites de maniere securisee avec chiffrement. Vous pouvez egalement payer en especes au chauffeur.' },
       { q: 'Puis-je annuler ma reservation ?', a: 'Oui, l\'annulation gratuite est disponible jusqu\'a 24 heures avant votre transfert. Apres ce delai, des frais d\'annulation peuvent s\'appliquer selon le type de vehicule.' },
       { q: 'Que se passe-t-il si mon vol est en retard ?', a: 'Nous suivons tous les vols en temps reel. Si votre vol est retarde, votre chauffeur ajuste automatiquement son heure d\'arrivee sans frais supplementaires. Nous incluons 60 minutes d\'attente gratuite.' },
       { q: 'Comment sont verifies vos chauffeurs ?', a: 'Tous les chauffeurs passent des verifications approfondies, possedent des licences professionnelles valides et sont notes en continu par les passagers. Nous ne travaillons qu\'avec les chauffeurs les mieux notes.' },
@@ -89,7 +89,7 @@ const content = {
     faqs: [
       { q: 'Как забронировать поездку?', a: 'Забронируйте на zont.cab или через мобильное приложение (iOS/Android). Введите места отправления и прибытия, выберите автомобиль и подтвердите. Данные водителя вы получите за 3 часа до поездки.' },
       { q: 'Можно ли забронировать заранее?', a: 'Конечно! Вы можете забронировать за дни, недели или даже месяцы. Цена фиксируется при бронировании без наценок.' },
-      { q: 'Какие способы оплаты вы принимаете?', a: 'Мы принимаем Visa, Mastercard, PayPal и Apple Pay. Все платежи обрабатываются безопасно с шифрованием.' },
+      { q: 'Какие способы оплаты вы принимаете?', a: 'Мы принимаем Visa, Mastercard и Apple Pay. Все платежи обрабатываются безопасно с шифрованием.' },
       { q: 'Могу ли я отменить бронирование?', a: 'Да, бесплатная отмена доступна за 24 часа до трансфера. После этого могут применяться штрафы.' },
       { q: 'Что если рейс задерживается?', a: 'Мы отслеживаем все рейсы. Водитель автоматически корректирует время без доплаты. 60 минут бесплатного ожидания.' },
       { q: 'Как проверяются водители?', a: 'Все водители проходят тщательную проверку, имеют лицензии и постоянно оцениваются пассажирами.' },
@@ -123,7 +123,7 @@ const content = {
     faqs: [
       { q: 'Inchpes amragrel ughevorut yun?', a: 'Amragreq zont.cab-um kam mobil havelvatsov (iOS/Android). Mtuqagreq vercnelu ev ijneluvayrery, yntrreq mequenay ev hastatreq.' },
       { q: 'Karogh em arach amragrel?', a: 'Ayo! Karoq eq amragrel orery, shabatnery kam amis arach. Giny hastatvum e amragman pahin.' },
-      { q: 'Inch vcharman yeghanakner eq yndunum?', a: 'Menq yndunumenq Visa, Mastercard, PayPal ev Apple Pay. Bolorvcharumnery apahov en.' },
+      { q: 'Inch vcharman yeghanakner eq yndunum?', a: 'Menq yndunumenq Visa, Mastercard ev Apple Pay. Bolorvcharumnery apahov en.' },
       { q: 'Karogh em chegarkrel amragrumy?', a: 'Ayo, anvchar chegarkum 24 zham arach. Dranits heto vcharner karogh en kirarvel.' },
       { q: 'Inch klini yete trchqs ushanum e?', a: 'Menq hetevm enq boloр trchqnery. Varordy avtomatikorun harmonvum e. 60 rope anvchar spasum.' },
       { q: 'Inchpes en stugvum varorднery?', a: 'Boloр varorднery stugvats en, litsenziavorvats ev gnaatvats en ughevorнerov.' },

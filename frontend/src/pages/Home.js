@@ -848,7 +848,7 @@ const Home = () => {
                   {/* Desktop trust */}
                   <div className="hidden lg:grid grid-cols-2 gap-4 mt-6">
                     {[
-                      { icon: <CreditCard className="w-7 h-7 text-[#2ecc71]" aria-hidden="true" />, t: c.securePay, d: 'Visa, Mastercard, PayPal' },
+                      { icon: <CreditCard className="w-7 h-7 text-[#2ecc71]" aria-hidden="true" />, t: c.securePay, d: 'Visa, Mastercard, Apple Pay' },
                       { icon: <Shield className="w-7 h-7 text-[#2ecc71]" aria-hidden="true" />, t: c.f1Title, d: c.f1Desc.substring(0, 50) + '...' },
                       { icon: <Plane className="w-7 h-7 text-[#2ecc71]" aria-hidden="true" />, t: c.f2Title, d: c.f2Desc.substring(0, 50) + '...' },
                       { icon: <Clock className="w-7 h-7 text-[#2ecc71]" aria-hidden="true" />, t: c.fixedPrices, d: c.f4Desc.substring(0, 50) + '...' },
@@ -1009,7 +1009,6 @@ const Home = () => {
                       <Shield className="w-4 h-4 text-gray-400" aria-hidden="true" />
                       <span className="text-xs text-gray-400">Visa</span>
                       <span className="text-xs text-gray-400">Mastercard</span>
-                      <span className="text-xs text-gray-400">PayPal</span>
                       <span className="text-xs text-gray-400">Apple Pay</span>
                     </div>
 
@@ -1150,7 +1149,7 @@ const Home = () => {
         <section className="lg:hidden py-6 px-4 bg-[#0f1419]">
           <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
             {[
-              { icon: <CreditCard className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.securePay, d: 'Visa, MC, PayPal' },
+              { icon: <CreditCard className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.securePay, d: 'Visa, MC, Apple Pay' },
               { icon: <Shield className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.f1Title, d: language === 'fr' ? 'Chauffeurs agrees' : language === 'hy' ? 'Ստուգված վարորդներ' : 'Verified drivers' },
               { icon: <Plane className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.f2Title, d: language === 'fr' ? 'Temps reel' : language === 'hy' ? 'Իրական ժամանակ' : 'Real-time' },
               { icon: <Clock className="w-6 h-6 text-[#2ecc71]" aria-hidden="true" />, t: c.fixedPrices, d: language === 'fr' ? 'Sans surprises' : language === 'hy' ? 'Անակնկալներ չկան' : 'No surprises' },

@@ -462,7 +462,6 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                       <Shield className="w-4 h-4 text-gray-400" aria-hidden="true" />
                       <span className="text-xs text-gray-400">Visa</span>
                       <span className="text-xs text-gray-400">Mastercard</span>
-                      <span className="text-xs text-gray-400">PayPal</span>
                       <span className="text-xs text-gray-400">Apple Pay</span>
                     </div>
                   </div>

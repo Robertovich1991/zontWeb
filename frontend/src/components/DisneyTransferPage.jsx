@@ -72,7 +72,7 @@ const DisneyTransferPage = ({ hotelSlug = null, routeSlug = null }) => {
     { q: 'How long is the journey?', a: `The journey usually takes around ${entity.duration} depending on traffic.` },
     { q: 'Is flight tracking included?', a: 'Yes, we monitor your flight in real-time and adjust pickup automatically in case of delay.' },
     { q: 'Do you provide child seats?', a: 'Yes, child seats are available on request. Please mention this during booking.' },
-    { q: 'Can I pay with my card?', a: 'Yes, secure online payment with Visa, Mastercard, Apple Pay, Google Pay or PayPal.' },
+    { q: 'Can I pay with my card?', a: 'Yes, secure online payment with Visa, Mastercard, Apple Pay or Google Pay.' },
   ];
 
   // Airport transfer cards (shown on hotel pages)
@@ -281,7 +281,7 @@ const DisneyTransferPage = ({ hotelSlug = null, routeSlug = null }) => {
                 { icon: Plane, title: 'Flight tracking', desc: 'Automatic adjustment for delays' },
                 { icon: Users, title: 'Family vehicles', desc: 'Space for luggage and strollers' },
                 { icon: MapPin, title: 'Meet & greet', desc: 'Driver waits with a name sign' },
-                { icon: Shield, title: 'Secure payment', desc: 'Visa, Mastercard, PayPal, Apple Pay' },
+                { icon: Shield, title: 'Secure payment', desc: 'Visa, Mastercard, Apple Pay' },
                 { icon: CheckCircle2, title: 'Door-to-door', desc: 'No shared rides, no detours' },
               ].map((b, i) => (
                 <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-[#2ecc71]/30 transition-colors">
