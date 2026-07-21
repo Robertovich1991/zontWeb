@@ -712,25 +712,63 @@ async def proxy_client_profile(request: Request):
         raise HTTPException(status_code=502, detail="Data layer unreachable")
 
 
+def _normalize_client_cards(payload):
+    """Normalize C# /api/Client/cards response into a flat list of dicts."""
+    if isinstance(payload, list):
+        return payload
+    if isinstance(payload, dict):
+        for key in ("data", "cards", "paymentMethods", "PaymentMethods", "result"):
+            value = payload.get(key)
+            if isinstance(value, list):
+                return value
+    return []
+
+
+def _client_card_id(card: dict) -> Optional[str]:
+    """Stripe payment method id used by mobile DELETE /api/Client/cards/{cardId}."""
+    if not isinstance(card, dict):
+        return None
+    nested = card.get("card") if isinstance(card.get("card"), dict) else {}
+    for key in ("id", "Id", "paymentMethodId", "payment_method_id", "PaymentMethodId"):
+        value = card.get(key) or nested.get(key)
+        if value:
+            return str(value)
+    return None
+
+
 @router.get("/client/cards")
 async def proxy_client_cards(request: Request):
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         raise HTTPException(status_code=401, detail="Authorization credentials missing")
     try:
-        resp = await (await get_http_client()).get("/api/Client/cards", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
+        resp = await (await get_http_client()).get(
+            "/api/Client/cards",
+            headers={
+                "Authorization": auth_header,
+                "Accept": "application/json",
+                "Origin": "https://zont.cab",
+                "Referer": "https://zont.cab/",
+            },
+        )
         if resp.status_code == 200:
-            cards_raw = resp.json()
-            return [
-                {
-                    "id": c.get("id"),
-                    "brand": c.get("card", {}).get("brand", "unknown"),
-                    "last4": c.get("card", {}).get("last4", "****"),
-                    "exp_month": c.get("card", {}).get("exp_month"),
-                    "exp_year": c.get("card", {}).get("exp_year"),
-                }
-                for c in cards_raw
-            ]
+            cards_raw = _normalize_client_cards(resp.json())
+            mapped = []
+            for c in cards_raw:
+                if not isinstance(c, dict):
+                    continue
+                card_info = c.get("card") if isinstance(c.get("card"), dict) else {}
+                card_id = _client_card_id(c)
+                if not card_id:
+                    continue
+                mapped.append({
+                    "id": card_id,
+                    "brand": card_info.get("brand") or card_info.get("Brand") or c.get("brand") or "unknown",
+                    "last4": card_info.get("last4") or card_info.get("Last4") or c.get("last4") or "****",
+                    "exp_month": card_info.get("exp_month") or card_info.get("ExpMonth") or c.get("exp_month"),
+                    "exp_year": card_info.get("exp_year") or card_info.get("ExpYear") or c.get("exp_year"),
+                })
+            return mapped
         return []
     except Exception as e:
         logger.error(f"Saved card profile mapping lookup failed: {e}")
@@ -739,15 +777,44 @@ async def proxy_client_cards(request: Request):
 
 @router.delete("/client/cards/{card_id}")
 async def proxy_delete_card(card_id: str, request: Request):
+    """Proxy mobile delete: DELETE https://api.zont.cab/api/Client/cards/{cardId}"""
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         raise HTTPException(status_code=401, detail="Authorization credentials missing")
+    if not card_id or not card_id.strip():
+        raise HTTPException(status_code=400, detail="cardId is required")
     try:
-        resp = await (await get_http_client()).delete(f"/api/Client/cards/{card_id}", headers={"Authorization": auth_header, "Origin": "https://zont.cab", "Referer": "https://zont.cab/"})
-        if resp.status_code in (200, 204):
+        # Match mobile app headers exactly (Content-Type required by C# API)
+        headers = {
+            "Authorization": auth_header,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Origin": "https://zont.cab",
+            "Referer": "https://zont.cab/",
+        }
+        resp = await (await get_http_client()).request(
+            "DELETE",
+            f"/api/Client/cards/{card_id}",
+            headers=headers,
+            content=b"",
+        )
+        if resp.status_code in (200, 201, 204):
             return {"ok": True}
-        raise HTTPException(status_code=resp.status_code, detail="Unable to drop specified payment profile")
-    except HTTPException: raise
+        detail = "Unable to delete payment card"
+        try:
+            body = resp.json()
+            if isinstance(body, dict):
+                detail = body.get("detail") or body.get("message") or body.get("title") or detail
+            elif isinstance(body, str) and body.strip():
+                detail = body.strip()
+        except Exception:
+            text = (resp.text or "").strip()
+            if text:
+                detail = text[:300]
+        logger.error(f"C# delete card failed status={resp.status_code} card_id={card_id} detail={detail}")
+        raise HTTPException(status_code=resp.status_code, detail=detail)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Card disposal exception: {e}")
         raise HTTPException(status_code=502, detail="Financial gateway interface offline")

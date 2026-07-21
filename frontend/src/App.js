@@ -20,6 +20,7 @@ import Home from "@/pages/Home";
 const BecomeDriver = lazy(() => import("@/pages/BecomeDriver"));
 const BecomeClient = lazy(() => import("@/pages/BecomeClient"));
 const Help = lazy(() => import("@/pages/Help"));
+const About = lazy(() => import("@/pages/About"));
 const Countries = lazy(() => import("@/pages/Countries"));
 const CarSelection = lazy(() => import("@/pages/CarSelection"));
 const TripRecap = lazy(() => import("@/pages/TripRecap"));
@@ -417,6 +418,7 @@ function App() {
                   <Route path="/become-client" element={<BecomeClient />} />
                   <Route path="/es/hazte-cliente" element={<BecomeClient />} />
                   <Route path="/help" element={<Help />} />
+                  <Route path="/about" element={<About />} />
                   <Route path="/countries" element={<Countries />} />
                   {/* B2B Pages */}
                   <Route path="/partners" element={<Partners />} />

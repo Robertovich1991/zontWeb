@@ -35,9 +35,9 @@ const Footer = () => {
             <h3 className="text-base font-semibold mb-3 text-gray-300">{t('footer.quickLinks')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="/about" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/about" className="text-gray-400 hover:text-white transition-colors">
                   {t('footer.aboutUs')}
-                </a>
+                </Link>
               </li>
               <li>
                 <Link to="/become-driver" className="text-gray-400 hover:text-white transition-colors" data-testid="footer-become-driver">

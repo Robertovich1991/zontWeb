@@ -306,8 +306,10 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       const token = localStorage.getItem('auth_token');
       await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open('DELETE', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/client/cards/${cardId}`);
+        xhr.open('DELETE', `${process.env.REACT_APP_BACKEND_URL}/api/proxy/client/cards/${encodeURIComponent(cardId)}`);
         xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Accept', 'application/json');
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setSavedCards(prev => prev.filter(c2 => c2.id !== cardId));
@@ -323,11 +325,17 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
             toast.success(c.deleteCard + ' OK');
             resolve();
           } else {
+            let detail = 'Impossible de supprimer cette carte';
+            try {
+              const body = JSON.parse(xhr.responseText || '{}');
+              if (typeof body?.detail === 'string') detail = body.detail;
+            } catch {}
+            toast.error(detail);
             reject();
           }
         };
         xhr.onerror = () => reject();
-        xhr.send();
+        xhr.send(null);
       });
     } catch {}
     setDeletingCard(null);

@@ -218,18 +218,36 @@ const MyAccount = () => {
   }, [isAuthenticated, authLoading, navigate]);
 
   const handleDeleteCard = async (cardId) => {
+    if (!cardId) {
+      toast.error('ID de carte introuvable');
+      return;
+    }
     if (!window.confirm('Supprimer cette carte ?')) return;
     setDeletingCard(cardId);
     try {
-      const res = await xhr('DELETE', `${API}/api/proxy/client/cards/${cardId}`, { Authorization: `Bearer ${token}` });
+      const res = await xhr(
+        'DELETE',
+        `${API}/api/proxy/client/cards/${encodeURIComponent(cardId)}`,
+        {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      );
       if (res.ok) {
         setCards(prev => prev.filter(c => c.id !== cardId));
         toast.success('Carte supprimee');
       } else {
-        toast.error('Impossible de supprimer cette carte');
+        const detail = typeof res.data?.detail === 'string'
+          ? res.data.detail
+          : (res.data?.message || 'Impossible de supprimer cette carte');
+        toast.error(detail);
       }
-    } catch { toast.error('Erreur'); }
-    finally { setDeletingCard(null); }
+    } catch {
+      toast.error('Erreur reseau');
+    } finally {
+      setDeletingCard(null);
+    }
   };
 
   const handleCardAdded = () => { setShowAddCard(false); fetchCards(); };
@@ -444,21 +462,29 @@ const MyAccount = () => {
                       <div key={card.id}
                         className="relative overflow-hidden bg-gradient-to-br from-[#1a2332] to-[#0f1419] border border-white/10 rounded-2xl p-5 group hover:border-[#c8a951]/30 transition-colors duration-300"
                         data-testid={`card-${card.last4}`}>
-                        {/* Decorative chip */}
-                        <div className="absolute top-5 right-5 w-10 h-7 bg-gradient-to-tr from-[#e0c065] to-[#c8a951] rounded-md opacity-60" />
+                        {/* Decorative chip — must not block the delete button */}
+                        <div className="absolute top-5 right-5 w-10 h-7 bg-gradient-to-tr from-[#e0c065] to-[#c8a951] rounded-md opacity-40 pointer-events-none" aria-hidden="true" />
 
-                        <div className="flex items-center gap-4">
-                          <div className={`w-12 h-8 bg-gradient-to-br ${brand.gradient} rounded-lg flex items-center justify-center shadow-lg`}>
+                        <div className="relative z-10 flex items-center gap-3">
+                          <div className={`w-12 h-8 bg-gradient-to-br ${brand.gradient} rounded-lg flex items-center justify-center shadow-lg flex-shrink-0`}>
                             <span className="text-white text-[9px] font-bold tracking-wider">{brand.label}</span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-white font-medium text-sm tracking-wide font-mono">**** **** **** {card.last4}</p>
                             <p className="text-slate-500 text-xs mt-0.5">Expire {card.exp_month?.toString().padStart(2, '0')}/{card.exp_year}</p>
                           </div>
-                          <button onClick={() => handleDeleteCard(card.id)} disabled={deletingCard === card.id}
-                            className="p-2.5 rounded-xl text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors duration-300"
-                            data-testid={`delete-card-${card.last4}`}>
-                            {deletingCard === card.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" strokeWidth={1.5} />}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteCard(card.id)}
+                            disabled={deletingCard === card.id || !card.id}
+                            className="relative z-20 flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 active:bg-red-500/30 transition-colors duration-200 disabled:opacity-50 min-h-[44px]"
+                            data-testid={`delete-card-${card.last4}`}
+                            aria-label={`Supprimer la carte se terminant par ${card.last4}`}
+                          >
+                            {deletingCard === card.id
+                              ? <Loader2 className="w-4 h-4 animate-spin" />
+                              : <Trash2 className="w-4 h-4" strokeWidth={1.5} />}
+                            <span className="text-xs font-medium">Supprimer</span>
                           </button>
                         </div>
                       </div>
