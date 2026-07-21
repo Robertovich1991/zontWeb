@@ -83,3 +83,17 @@ frontend/node_modules/.cache/default-development/0.pack
 # Environment files
 *.env
 *.env.*
+frontend/node_modules/.cache/default-development/5.pack
+-e 
+# Environment files
+*.env
+*.env.*
+frontend/node_modules/.cache/default-development/8.pack
+frontend/node_modules/.cache/default-development/10.pack
+frontend/node_modules/.cache/default-development/14.pack
+frontend/node_modules/.cache/default-development/104.pack
+.env
+.env.*
+credentials.json
+*.key
+.credentials
