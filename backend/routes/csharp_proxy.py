@@ -8,6 +8,8 @@ import logging
 import json
 import os
 import stripe as stripe_lib
+import jwt
+from jwt import PyJWKClient
 
 logger = logging.getLogger(__name__)
 
