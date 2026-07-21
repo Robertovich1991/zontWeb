@@ -2,31 +2,37 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDriverAuth } from './DriverAuthContext';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, MapPin, Car, DollarSign, User, Plane, Calendar, Navigation, Clock, Route } from 'lucide-react';
+import { ArrowLeft, Loader2, MapPin, Car, DollarSign, User, Plane, Calendar, Clock, Route, CreditCard, Shield, Plus, CheckCircle } from 'lucide-react';
+import { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 
 const API = process.env.REACT_APP_BACKEND_URL;
+
+const brandLabels = { visa: 'Visa', mastercard: 'Mastercard', amex: 'Amex', discover: 'Discover', unknown: 'Carte' };
 
 const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
   const inputRef = useRef(null);
   const autocompleteRef = useRef(null);
 
   useEffect(() => {
-    if (!window.google?.maps?.places || !inputRef.current) return;
-    if (autocompleteRef.current) return;
-    const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['geocode', 'establishment'],
+    let cancelled = false;
+    loadGoogleMaps().then(() => {
+      if (cancelled || !inputRef.current || autocompleteRef.current) return;
+      const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ['geocode', 'establishment'],
+      });
+      ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if (place?.geometry) {
+          onChange({
+            address: place.formatted_address || place.name,
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          });
+        }
+      });
+      autocompleteRef.current = ac;
     });
-    ac.addListener('place_changed', () => {
-      const place = ac.getPlace();
-      if (place?.formatted_address) {
-        onChange({
-          address: place.formatted_address,
-          lat: place.geometry?.location?.lat() || null,
-          lng: place.geometry?.location?.lng() || null,
-        });
-      }
-    });
-    autocompleteRef.current = ac;
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -34,6 +40,7 @@ const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
       <label className="block text-xs text-gray-400 mb-1">{label}</label>
       <input
         ref={inputRef}
+        type="text"
         defaultValue={value}
         onChange={(e) => onChange({ address: e.target.value, lat: null, lng: null })}
         placeholder={placeholder}
@@ -44,6 +51,22 @@ const AddressInput = ({ label, placeholder, value, onChange, testId }) => {
   );
 };
 
+// XHR wrapper to avoid Stripe.js body stream conflict
+const xhrRequest = (method, url, headers, body) => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
+    xhr.onload = () => {
+      let data;
+      try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
+      resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, data });
+    };
+    xhr.onerror = () => reject(new Error('Erreur reseau'));
+    xhr.send(body || null);
+  });
+};
+
 const CreateRide = () => {
   const { token } = useDriverAuth();
   const navigate = useNavigate();
@@ -52,25 +75,28 @@ const CreateRide = () => {
   const [loadingCat, setLoadingCat] = useState(true);
   const [routeInfo, setRouteInfo] = useState(null);
   const [calculatingRoute, setCalculatingRoute] = useState(false);
+  const [savedCards, setSavedCards] = useState([]);
+  const [loadingCards, setLoadingCards] = useState(true);
+  const [selectedCard, setSelectedCard] = useState('');
   const [form, setForm] = useState({
     pickup_address: '', pickup_lat: null, pickup_lng: null,
     dropoff_address: '', dropoff_lat: null, dropoff_lng: null,
-    vehicle_category_id: '', vehicle_category_name: '',
+    vehicle_category: '', vehicle_category_id: '', vehicle_category_name: '',
     proposed_price: '', currency: 'EUR',
     passenger_name: '', passenger_phone: '',
     pickup_datetime: '', notes: '', flight_number: '',
   });
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await fetch(`${API}/api/partner/vehicle-categories`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setCategories(await res.json());
-      } catch {} finally { setLoadingCat(false); }
-    };
-    fetchCategories();
+    const headers = { Authorization: `Bearer ${token}` };
+    Promise.all([
+      fetch(`${API}/api/partner/vehicle-categories`, { headers }).then(r => r.ok ? r.json() : []),
+      fetch(`${API}/api/partner/cards`, { headers }).then(r => r.ok ? r.json() : []),
+    ]).then(([cats, cards]) => {
+      setCategories(cats);
+      setSavedCards(cards);
+      if (cards.length > 0) setSelectedCard(cards[0].pm_id);
+    }).catch(() => {}).finally(() => { setLoadingCat(false); setLoadingCards(false); });
   }, [token]);
 
   const calculateRoute = useCallback(async (pickup, dropoff) => {
@@ -84,9 +110,7 @@ const CreateRide = () => {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.status === 'ok') {
-          setRouteInfo(data);
-        }
+        if (data.status === 'ok') setRouteInfo(data);
       }
     } catch {} finally { setCalculatingRoute(false); }
   }, [token]);
@@ -104,7 +128,12 @@ const CreateRide = () => {
   const handleCategoryChange = (e) => {
     const id = e.target.value;
     const cat = categories.find(c => String(c.id) === id);
-    setForm(prev => ({ ...prev, vehicle_category_id: id, vehicle_category_name: cat?.name || id }));
+    setForm(prev => ({
+      ...prev,
+      vehicle_category_id: id,
+      vehicle_category_name: cat?.name || id,
+      vehicle_category: cat?.name || id,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -131,15 +160,23 @@ const CreateRide = () => {
       const payload = {
         ...form,
         proposed_price: parseFloat(form.proposed_price),
+        card_id: selectedCard,
+        distance_km: routeInfo?.distance_meters ? routeInfo.distance_meters / 1000 : null,
+        duration_min: routeInfo?.duration_seconds ? routeInfo.duration_seconds / 60 : null,
         notes: form.notes + (routeInfo ? ` | Distance: ${routeInfo.distance}, Duree: ${routeInfo.duration}` : ''),
       };
-      const res = await fetch(`${API}/api/partner/rides`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        toast.success('Course proposee avec succes !');
+
+      const rideResp = await xhrRequest('POST', `${API}/api/partner/rides`, {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }, JSON.stringify(payload));
+
+      if (rideResp.ok) {
+        if (rideResp.data.csharp_submitted) {
+          toast.success('Course envoyee au dispatch avec succes !');
+        } else {
+          toast.success('Course proposee ! En attente de validation.');
+        }
         navigate('/driver');
       } else {
         toast.error(rideResp.data.detail || 'Erreur lors de la creation');
@@ -152,53 +189,20 @@ const CreateRide = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f1419] flex flex-col" data-testid="create-ride-page">
-      <header className="bg-[#1a2332] border-b border-gray-800 px-4 py-3 flex items-center gap-3 sticky top-0 z-20">
-        <button onClick={() => navigate('/driver')} className="text-gray-400 hover:text-white transition" data-testid="back-btn">
+    <div className="min-h-screen bg-[#0f1923] text-white">
+      <div className="sticky top-0 z-10 bg-[#1a2332] border-b border-gray-800 px-4 py-3 flex items-center gap-3">
+        <button onClick={() => navigate('/driver')} className="p-2 hover:bg-white/10 rounded-lg" data-testid="back-btn">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-lg font-bold">Proposer une Course</h1>
       </div>
 
-      <div className="flex-1 px-4 py-5 space-y-4 pb-24">
+      <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-lg mx-auto pb-24">
         {/* Addresses */}
-        <div className="bg-[#1a2332] rounded-xl p-4 border border-gray-800 space-y-3">
-          <h3 className="text-white font-semibold text-sm flex items-center gap-2"><MapPin className="w-4 h-4 text-[#2ecc71]" /> Trajet</h3>
-          <AddressInput label="Adresse de depart *" placeholder="Ex: Aeroport CDG, Terminal 2"
-            value={form.pickup_address} onChange={handlePickupChange} testId="pickup-address" />
-          <AddressInput label="Adresse d'arrivee *" placeholder="Ex: 15 Rue de Rivoli, Paris"
-            value={form.dropoff_address} onChange={handleDropoffChange} testId="dropoff-address" />
-
-          {/* Route Info */}
-          {calculatingRoute && (
-            <div className="flex items-center gap-2 text-[#2ecc71] text-sm py-2">
-              <Loader2 className="w-4 h-4 animate-spin" /> Calcul de l'itineraire...
-            </div>
-          )}
-          {routeInfo && !calculatingRoute && (
-            <div className="bg-[#2ecc71]/10 border border-[#2ecc71]/30 rounded-xl p-3 space-y-2" data-testid="route-info">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Navigation className="w-4 h-4 text-[#2ecc71]" />
-                  <span className="text-white font-semibold text-sm">{routeInfo.distance}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#2ecc71]" />
-                  <span className="text-white font-semibold text-sm">{routeInfo.duration}</span>
-                </div>
-              </div>
-              <div className="text-xs text-gray-400">
-                <div className="flex items-start gap-2 mb-1">
-                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-1 flex-shrink-0" />
-                  <span>{routeInfo.start_address}</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-red-400 rounded-full mt-1 flex-shrink-0" />
-                  <span>{routeInfo.end_address}</span>
-                </div>
-              </div>
-            </div>
-          )}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-[#2ecc71]"><MapPin className="w-4 h-4" /> <span className="text-sm font-medium">Itineraire</span></div>
+          <AddressInput label="Adresse de depart *" placeholder="Adresse de depart" value={form.pickup_address} onChange={handlePickupChange} testId="pickup-input" />
+          <AddressInput label="Adresse d'arrivee *" placeholder="Adresse d'arrivee" value={form.dropoff_address} onChange={handleDropoffChange} testId="dropoff-input" />
         </div>
 
         {/* Route info */}
@@ -214,38 +218,25 @@ const CreateRide = () => {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-[#2ecc71]"><Car className="w-4 h-4" /> <span className="text-sm font-medium">Vehicule & Prix</span></div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Categorie de vehicule *</label>
-            {loadingCat ? (
-              <div className="flex items-center gap-2 text-gray-400 text-sm py-3"><Loader2 className="w-4 h-4 animate-spin" /> Chargement...</div>
-            ) : (
-              <select value={form.vehicle_category_id} onChange={handleCategoryChange} required
-                className={`${inputCls} appearance-none`} data-testid="vehicle-category">
-                <option value="">Selectionner une categorie</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name || `Cat ${cat.id}`}</option>
-                ))}
-              </select>
-            )}
+            <label className="block text-xs text-gray-400 mb-1">Categorie de vehicule</label>
+            <select value={form.vehicle_category_id} onChange={handleCategoryChange}
+              className="w-full px-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]"
+              data-testid="category-select">
+              <option value="">Selectionner</option>
+              {loadingCat ? <option>Chargement...</option> : categories.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Prix propose * ({form.currency})</label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-3.5 w-4 h-4 text-gray-500" />
-                <input type="number" step="0.01" min="1" value={form.proposed_price}
-                  onChange={e => setForm({...form, proposed_price: e.target.value})}
-                  placeholder="0.00" className={`${inputCls} pl-10`} required data-testid="proposed-price" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Devise</label>
-              <select value={form.currency} onChange={e => setForm({...form, currency: e.target.value})}
-                className={`${inputCls} appearance-none`} data-testid="currency">
-                <option value="EUR">EUR</option>
-                <option value="USD">USD</option>
-                <option value="GBP">GBP</option>
-                <option value="AMD">AMD</option>
-              </select>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Prix propose (EUR) *</label>
+            <div className="relative">
+              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input type="number" step="0.01" min="1" value={form.proposed_price}
+                onChange={(e) => setForm(prev => ({ ...prev, proposed_price: e.target.value }))}
+                placeholder="Ex: 85.00"
+                className="w-full pl-10 pr-4 py-3.5 bg-[#1a2332] border border-gray-700 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#2ecc71]"
+                data-testid="price-input" />
             </div>
           </div>
         </div>
@@ -335,14 +326,7 @@ const CreateRide = () => {
             {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Traitement...</> : <>Proposer - {form.proposed_price || '0'} EUR</>}
           </button>
         </div>
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0f1419] border-t border-gray-800 px-4 py-4 z-30">
-        <button onClick={handleSubmit} disabled={loading} data-testid="submit-ride"
-          className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-semibold text-sm hover:bg-[#27ae60] transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-[#2ecc71]/20">
-          {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Envoi en cours...</> : 'Proposer la Course'}
-        </button>
-      </div>
+      </form>
     </div>
   );
 };

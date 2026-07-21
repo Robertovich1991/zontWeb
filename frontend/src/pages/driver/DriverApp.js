@@ -2,9 +2,9 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { DriverAuthProvider, useDriverAuth } from './DriverAuthContext';
 import DriverLogin from './DriverLogin';
-import DriverDashboard from './DriverDashboard';
-import CreateRide from './CreateRide';
-import RideDetail from './RideDetail';
+import DriverLayout from './DriverLayout';
+import DriverMissions from './DriverMissions';
+import DriverHistory from './DriverHistory';
 import DriverProfile from './DriverProfile';
 
 const DriverGuard = ({ children }) => {
@@ -22,11 +22,13 @@ const DriverApp = () => (
   <DriverAuthProvider>
     <Routes>
       <Route path="/login" element={<DriverLogin />} />
-      <Route path="/" element={<DriverGuard><DriverDashboard /></DriverGuard>} />
-      <Route path="/new-ride" element={<DriverGuard><CreateRide /></DriverGuard>} />
-      <Route path="/ride/:id" element={<DriverGuard><RideDetail /></DriverGuard>} />
-      <Route path="/profile" element={<DriverGuard><DriverProfile /></DriverGuard>} />
-      <Route path="*" element={<Navigate to="/driver" replace />} />
+      <Route path="/" element={<DriverGuard><DriverLayout /></DriverGuard>}>
+        <Route index element={<Navigate to="/driver/missions" replace />} />
+        <Route path="missions" element={<DriverMissions />} />
+        <Route path="history" element={<DriverHistory />} />
+        <Route path="profile" element={<DriverProfile />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/driver/missions" replace />} />
     </Routes>
   </DriverAuthProvider>
 );

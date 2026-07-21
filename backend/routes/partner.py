@@ -307,7 +307,112 @@ async def calculate_route(req: RouteRequest, request: Request):
         raise HTTPException(status_code=502, detail="Failed to calculate route")
 
 
-# ---- Rides CRUD ----
+# ---- Cards Management ----
+
+@router.post("/cards/setup-intent")
+async def card_setup_intent(request: Request):
+    """Get a Stripe SetupIntent from C# to add a new card (0 EUR verification)."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+    partner = await db.partners.find_one({"id": user["sub"]}, {"_id": 0})
+    csharp_token = partner.get("csharp_token") if partner else None
+    if not csharp_token:
+        raise HTTPException(status_code=400, detail="Compte C# non connecte. Reconnectez-vous.")
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Client/addCard",
+                headers={"Authorization": f"Bearer {csharp_token}", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+            body = resp.text
+            data = json.loads(body) if body.strip() else {}
+            if resp.status_code == 200 and data.get("client_secret"):
+                return {"clientSecret": data["client_secret"]}
+            raise HTTPException(status_code=resp.status_code, detail=data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Card SetupIntent error: {e}")
+        raise HTTPException(status_code=502, detail="Erreur SetupIntent")
+
+
+@router.post("/cards/save")
+async def save_card(req: SaveCardRequest, request: Request):
+    """Save a card after successful 3DS confirmation."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+
+    card_doc = {
+        "id": str(uuid.uuid4()),
+        "pm_id": req.pm_id,
+        "brand": req.brand,
+        "added_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    await db.partners.update_one(
+        {"id": user["sub"]},
+        {
+            "$push": {"saved_cards": card_doc},
+            "$set": {"has_card": True, "card_added_at": card_doc["added_at"]},
+        }
+    )
+    return card_doc
+
+
+@router.get("/cards")
+async def list_cards(request: Request):
+    """List partner's saved cards."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+    partner = await db.partners.find_one({"id": user["sub"]}, {"_id": 0})
+    return partner.get("saved_cards", [])
+
+
+@router.delete("/cards/{card_id}")
+async def delete_card(card_id: str, request: Request):
+    """Remove a saved card."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+    await db.partners.update_one(
+        {"id": user["sub"]},
+        {"$pull": {"saved_cards": {"id": card_id}}}
+    )
+    # Check if any cards left
+    partner = await db.partners.find_one({"id": user["sub"]}, {"_id": 0})
+    remaining = partner.get("saved_cards", [])
+    if not remaining:
+        await db.partners.update_one({"id": user["sub"]}, {"$set": {"has_card": False}})
+    return {"ok": True}
+
+
+# ---- Legacy setup-intent (kept for backward compat) ----
+
+@router.post("/booking/setup-intent")
+async def partner_setup_intent(request: Request):
+    """Get a Stripe SetupIntent for 3DS card authentication."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+    partner = await db.partners.find_one({"id": user["sub"]}, {"_id": 0})
+    csharp_token = partner.get("csharp_token") if partner else None
+    if not csharp_token:
+        raise HTTPException(status_code=400, detail="Compte C# non connecte. Reconnectez-vous.")
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.get(
+                f"{CSHARP_API}/api/Client/addCard",
+                headers={"Authorization": f"Bearer {csharp_token}", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+            body = resp.text
+            data = json.loads(body) if body.strip() else {}
+            if resp.status_code == 200 and data.get("client_secret"):
+                return {"clientSecret": data["client_secret"]}
+            raise HTTPException(status_code=resp.status_code, detail=data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Partner SetupIntent error: {e}")
+        raise HTTPException(status_code=502, detail="Erreur SetupIntent")
+
 
 @router.post("/rides")
 async def create_ride(ride: RideCreate, request: Request):
@@ -433,6 +538,23 @@ async def get_ride(ride_id: str, request: Request):
     if not ride:
         raise HTTPException(status_code=404, detail="Ride not found")
     return ride
+
+
+@router.post("/rides/{ride_id}/cancel")
+async def cancel_ride(ride_id: str, request: Request):
+    """Cancel a ride if it hasn't been accepted yet."""
+    user = await get_current_partner(request)
+    db = request.app.state.db
+    ride = await db.partner_rides.find_one({"id": ride_id, "partner_id": user["sub"]}, {"_id": 0})
+    if not ride:
+        raise HTTPException(status_code=404, detail="Course introuvable")
+    if ride["status"] not in ("pending", "submitted_csharp"):
+        raise HTTPException(status_code=400, detail="Cette course ne peut plus etre annulee")
+    await db.partner_rides.update_one(
+        {"id": ride_id},
+        {"$set": {"status": "cancelled", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"ok": True, "status": "cancelled"}
 
 
 @router.get("/available-rides")
