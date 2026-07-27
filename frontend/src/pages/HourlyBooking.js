@@ -234,11 +234,11 @@ const HourlyBooking = () => {
               {/* Car type */}
               {pickup.lat && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-800 mb-2">{t.carType}</label>
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">{t.carType}</label>
                   {loadingCars ? (
                     <div className="text-sm text-gray-500 flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> {t.loadingCars}</div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-4">
                       {cars.map(car => {
                         const key = car.tripTypes || car.carType || car.name;
                         const isSelected = selectedCar && (selectedCar.tripTypes || selectedCar.carType) === (car.tripTypes || car.carType);
@@ -253,32 +253,59 @@ const HourlyBooking = () => {
                             key={key}
                             type="button"
                             onClick={() => setSelectedCar(car)}
-                            className={`text-left border-2 rounded-xl transition overflow-hidden ${isSelected ? 'border-[#2ecc71] bg-green-50 shadow-md' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                            className={`group relative text-left w-full rounded-2xl border-2 overflow-hidden transition-all duration-300 ${
+                              isSelected
+                                ? 'border-[#2ecc71] bg-white shadow-lg shadow-[#2ecc71]/15 ring-2 ring-[#2ecc71]/20'
+                                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
+                            }`}
                             data-testid={`car-${key}`}
                           >
-                            <div className="w-full h-28 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+                            {/* Large vehicle image — PNGs have transparent padding, so we scale up aggressively */}
+                            <div className="relative w-full h-52 sm:h-64 md:h-72 bg-gradient-to-b from-[#f4f6f8] via-[#eef1f4] to-[#e8ecf0] flex items-center justify-center overflow-hidden">
                               {imgUrl ? (
                                 <img
                                   src={imgUrl}
                                   alt={car.name || key}
-                                  className="max-h-full max-w-full object-contain drop-shadow-sm"
+                                  className="relative z-10 w-full h-full object-contain scale-[1.65] sm:scale-[1.55] drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.72] sm:group-hover:scale-[1.62]"
                                   loading="lazy"
                                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                 />
                               ) : (
-                                <div className="text-gray-300 text-xs">—</div>
+                                <div className="text-gray-300 text-sm">—</div>
+                              )}
+                              {/* Hourly price badge */}
+                              <div
+                                className={`absolute top-3 right-3 z-20 rounded-2xl px-3.5 py-2.5 shadow-lg backdrop-blur-sm ${
+                                  isSelected ? 'bg-[#2ecc71] text-white' : 'bg-white/95 text-gray-900 border border-gray-100'
+                                }`}
+                                data-testid={`car-hour-price-${key}`}
+                              >
+                                <div className="text-[10px] font-semibold uppercase tracking-wider opacity-70 leading-none mb-1">1h</div>
+                                <div className="text-2xl sm:text-3xl font-bold leading-none tabular-nums">
+                                  {hourPrice.toFixed(0)}€
+                                  <span className="text-sm font-semibold opacity-80 ml-0.5">{t.perHour}</span>
+                                </div>
+                              </div>
+                              {isSelected && (
+                                <div className="absolute top-3 left-3 z-20 w-8 h-8 rounded-full bg-[#2ecc71] text-white flex items-center justify-center shadow-md">
+                                  <CheckCircle className="w-5 h-5" strokeWidth={2.5} />
+                                </div>
                               )}
                             </div>
-                            <div className="p-3 flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-gray-900 text-sm truncate">{car.name || key}</div>
-                                <div className="text-[11px] text-gray-500 mt-0.5">{hours}h · {totalPrice.toFixed(0)}€ {t.priceSummary?.toLowerCase?.() || 'total'}</div>
-                              </div>
-                              <div className="text-right shrink-0">
-                                <div className="text-base font-bold text-[#2ecc71] leading-tight" data-testid={`car-hour-price-${key}`}>
-                                  {hourPrice.toFixed(0)}€{t.perHour}
+
+                            {/* Info bar */}
+                            <div className="px-4 py-4 sm:px-5 flex items-center justify-between gap-4">
+                              <div className="min-w-0">
+                                <div className="font-bold text-gray-900 text-base sm:text-lg truncate">{car.name || key}</div>
+                                <div className="text-sm text-gray-500 mt-1">
+                                  {hours}h · <span className="font-semibold text-gray-700">{totalPrice.toFixed(0)}€</span> {t.priceSummary?.toLowerCase?.() || 'total'}
                                 </div>
-                                <div className="text-[10px] text-gray-500 uppercase">1h</div>
+                              </div>
+                              <div className={`shrink-0 text-right rounded-xl px-3 py-2 ${isSelected ? 'bg-[#2ecc71]/10' : 'bg-gray-50'}`}>
+                                <div className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">{t.priceSummary}</div>
+                                <div className={`text-xl font-bold tabular-nums ${isSelected ? 'text-[#2ecc71]' : 'text-gray-900'}`}>
+                                  {totalPrice.toFixed(0)}€
+                                </div>
                               </div>
                             </div>
                           </button>
@@ -349,16 +376,17 @@ const HourlyBooking = () => {
 
               {/* Price */}
               {selectedCar && (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
+                <div className="bg-white border-2 border-[#2ecc71]/30 rounded-2xl p-5 space-y-3 shadow-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600 text-sm">1h</span>
-                    <span className="text-sm font-semibold text-gray-800" data-testid="hourly-rate">
-                      {(Number(selectedCar.perMinuteForTime || 0) * 60).toFixed(0)}€{t.perHour}
+                    <span className="text-gray-600 text-sm font-medium">1h</span>
+                    <span className="text-xl sm:text-2xl font-bold text-[#2ecc71] tabular-nums" data-testid="hourly-rate">
+                      {(Number(selectedCar.perMinuteForTime || 0) * 60).toFixed(0)}€
+                      <span className="text-sm font-semibold text-[#2ecc71]/80 ml-0.5">{t.perHour}</span>
                     </span>
                   </div>
-                  <div className="flex items-center justify-between border-t border-gray-200 pt-2">
-                    <span className="text-gray-700 font-medium">{t.priceSummary} ({hours}h)</span>
-                    <span className="text-2xl font-bold text-gray-900" data-testid="hourly-price">{price.toFixed(2)} €</span>
+                  <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+                    <span className="text-gray-800 font-semibold">{t.priceSummary} ({hours}h)</span>
+                    <span className="text-3xl font-bold text-gray-900 tabular-nums" data-testid="hourly-price">{price.toFixed(0)}€</span>
                   </div>
                 </div>
               )}

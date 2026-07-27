@@ -5,10 +5,14 @@ let googleMapsPromise = null;
 function loadGoogleMaps() {
   if (window.google?.maps?.places) return Promise.resolve();
   if (googleMapsPromise) return googleMapsPromise;
+  const key = process.env.REACT_APP_GOOGLE_MAPS_KEY;
+  if (!key) {
+    console.error('[PlacesAutocomplete] REACT_APP_GOOGLE_MAPS_KEY is missing. Add it to frontend/.env and restart yarn start.');
+    return Promise.reject(new Error('REACT_APP_GOOGLE_MAPS_KEY missing'));
+  }
   googleMapsPromise = new Promise((resolve, reject) => {
-    const key = process.env.REACT_APP_GOOGLE_MAPS_KEY;
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = resolve;
