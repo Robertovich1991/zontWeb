@@ -261,7 +261,7 @@ async def proxy_google_login(req: GoogleLoginRequest):
 
     default_headers = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
 
-    # Step 1: Try native C# googleLogin
+    # Step 1: Try native C# googleLogin (links existing email accounts passwordlessly)
     try:
         resp = await (await get_http_client()).post("/api/Client/googleLogin", json={"idToken": req.idToken}, headers=default_headers)
         if resp.status_code == 200:
@@ -279,10 +279,17 @@ async def proxy_google_login(req: GoogleLoginRequest):
                 except Exception:
                     data["firstName"], data["lastName"] = first_name, last_name
                 return data
+        else:
+            logger.warning(f"C# googleLogin returned {resp.status_code}: {resp.text[:300]}")
     except Exception as e:
         logger.warning(f"C# googleLogin failed, using fallback: {e}")
 
-    # Step 2: Check if we have a stored Google password for this user
+    async def _enrich_and_return(login_data: dict) -> dict:
+        login_data["firstName"] = login_data.get("firstName") or first_name
+        login_data["lastName"] = login_data.get("lastName") or last_name
+        return login_data
+
+    # Step 2: Check if we have a stored Google password for this user (legacy proxy accounts)
     if _google_db is not None:
         stored = await _google_db.google_auth.find_one({"email": email}, {"_id": 0})
         if stored and stored.get("password"):
@@ -292,12 +299,9 @@ async def proxy_google_login(req: GoogleLoginRequest):
                 headers=default_headers,
             )
             if login_resp.status_code == 200:
-                data = login_resp.json()
-                data["firstName"] = first_name
-                data["lastName"] = last_name
-                return data
+                return await _enrich_and_return(login_resp.json())
 
-    # Step 3: Try register (new user)
+    # Step 3: Try register (new user) with a secure dummy password for the legacy C# model
     random_pass = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$") for _ in range(16))
     reg_resp = await (await get_http_client()).post(
         "/api/Client",
@@ -308,7 +312,6 @@ async def proxy_google_login(req: GoogleLoginRequest):
         headers=default_headers,
     )
     if reg_resp.status_code == 200:
-        # Store password in MongoDB for future Google logins
         if _google_db is not None:
             await _google_db.google_auth.update_one(
                 {"email": email},
@@ -321,14 +324,27 @@ async def proxy_google_login(req: GoogleLoginRequest):
             headers=default_headers,
         )
         if login_resp.status_code == 200:
-            data = login_resp.json()
-            data["firstName"], data["lastName"] = first_name, last_name
-            return data
+            return await _enrich_and_return(login_resp.json())
 
-    # Step 4: Email exists in C# but no stored password — cannot auto-login
+    # Step 4: Email already exists in C# — Google ownership is verified, retry native googleLogin
+    # (C# links ExternalUserId and returns JWT; never force password form)
+    try:
+        retry = await (await get_http_client()).post(
+            "/api/Client/googleLogin",
+            json={"idToken": req.idToken},
+            headers=default_headers,
+        )
+        if retry.status_code == 200:
+            data = retry.json()
+            if data.get("accessToken"):
+                return await _enrich_and_return(data)
+        logger.error(f"Google passwordless link retry failed {retry.status_code}: {retry.text[:300]}")
+    except Exception as e:
+        logger.error(f"Google passwordless link retry error: {e}")
+
     raise HTTPException(
-        status_code=400,
-        detail="This email is already registered. Please sign in with your email and password."
+        status_code=502,
+        detail="Google sign-in succeeded but account linking failed. Please try again.",
     )
 
 
