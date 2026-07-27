@@ -202,7 +202,7 @@ const Home = () => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [mode, setMode] = useState('transfer'); // 'transfer' | 'disposal' (hourly)
-  const [hours, setHours] = useState(2);
+  const [hours, setHours] = useState(4);
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
   const [cmsHomepage, setCmsHomepage] = useState(null);
   const langSyncRef = useRef(false);
@@ -942,7 +942,7 @@ const Home = () => {
                         <div data-testid="home-hours-block">
                           <label className="block text-gray-700 font-medium text-sm mb-1">{c.hoursLabel}</label>
                           <div className="grid grid-cols-5 gap-2">
-                            {[2, 3, 4, 5, 6].map(h => (
+                            {[4, 6, 8, 10, 12].map(h => (
                               <button
                                 key={h}
                                 type="button"
