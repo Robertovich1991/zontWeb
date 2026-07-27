@@ -294,7 +294,11 @@ const CarSelection = () => {
     );
   }
 
-  const vehicles = vehicleResults || [];
+  const rawVehicles = vehicleResults || [];
+  // Keep the first vehicle (API-recommended) as-is, sort the rest by price ascending (low → high)
+  const vehicles = rawVehicles.length > 1
+    ? [rawVehicles[0], ...rawVehicles.slice(1).sort((a, b) => (a.minAmount || 0) - (b.minAmount || 0))]
+    : rawVehicles;
   const duration = vehicles.length > 0 ? vehicles[0].duration : null;
   const distance = vehicles.length > 0 ? vehicles[0].distance : null;
 
