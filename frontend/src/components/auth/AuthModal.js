@@ -7,6 +7,7 @@ import PhoneInput from '@/components/PhoneInput';
 
 const GOOGLE_CLIENT_ID = '71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com';
 const FACEBOOK_APP_ID = '1783544712624133';
+const SHOW_FACEBOOK_LOGIN = false; // hide until Meta Login is fully configured
 
 // Map C# API error keys to French messages
 const errorTranslations = {
@@ -529,7 +530,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
           {mode === 'signin' && step === 'form' && (
             <>
               <GoogleSignInButton onSuccess={handleGoogleSuccess} disabled={loading} />
-              <FacebookLoginButton disabled={loading} />
+              {SHOW_FACEBOOK_LOGIN && <FacebookLoginButton disabled={loading} />}
               <OrDivider />
               <form onSubmit={handleSignIn} className="space-y-4" data-testid="signin-form">
                 <div>
@@ -591,7 +592,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
 
               {/* Google Sign-In */}
               <GoogleSignInButton onSuccess={handleGoogleSuccess} disabled={loading} />
-              <FacebookLoginButton disabled={loading} />
+              {SHOW_FACEBOOK_LOGIN && <FacebookLoginButton disabled={loading} />}
               <OrDivider />
               <form onSubmit={handleSignUp} className="space-y-3" data-testid="signup-form">
                 <div className="grid grid-cols-2 gap-3">

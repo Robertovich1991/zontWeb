@@ -21,6 +21,7 @@ import WalletPaymentButton from '@/components/WalletPaymentButton';
 
 const GOOGLE_CLIENT_ID = '71410638404-lnkcacu3k26efkhd76us4jp1ha1dahtf.apps.googleusercontent.com';
 const FACEBOOK_APP_ID = '1783544712624133';
+const SHOW_FACEBOOK_LOGIN = false; // hide until Meta Login is fully configured
 const STRIPE_PK = 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO';
 const stripePromise = loadStripe(STRIPE_PK);
 
@@ -769,7 +770,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                   </div>
                 )}
               </div>
-              {/* Facebook Login */}
+              {/* Facebook Login — hidden until Meta Login is ready */}
+              {SHOW_FACEBOOK_LOGIN && (
               <button
                 type="button"
                 onClick={handleFacebookLogin}
@@ -784,6 +786,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
                 )}
                 Continue with Facebook
               </button>
+              )}
               {/* Separator */}
               <div className="flex items-center gap-3 my-1">
                 <div className="flex-1 h-px bg-white/10" />
