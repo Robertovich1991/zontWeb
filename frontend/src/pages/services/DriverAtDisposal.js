@@ -8,7 +8,7 @@ import { VEHICLES, VEHICLE_SLUGS, DISPOSAL_BASE_PATH, UI, DURATIONS } from './di
 import { matchPathToLanguage } from '@/utils/pageUrlMaps';
 import { Clock, Users, Briefcase, Check, ChevronRight, Award, Sparkles } from 'lucide-react';
 
-const SITE = 'https://zont.cab';
+const SITE = 'https://www.zont.cab';
 
 const VehicleCard = ({ vehicle, lang, ui }) => {
   const slug = VEHICLE_SLUGS[vehicle.id][lang];

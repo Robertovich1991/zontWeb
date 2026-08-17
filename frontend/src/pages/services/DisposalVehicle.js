@@ -15,7 +15,7 @@ import {
 import { matchPathToLanguage } from '@/utils/pageUrlMaps';
 import { Clock, Users, Briefcase, Check, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
-const SITE = 'https://zont.cab';
+const SITE = 'https://www.zont.cab';
 
 // Find vehicle by its slug (in any language).
 const findVehicleBySlug = (slug) => {

@@ -131,3 +131,8 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Hotel Admin: admin@bristol.fr / hotel123
 - GPS Admin: gps@zont.cab / gpsadmin123
 - Test Client: garikgalstyan@gmail.com / 12345678
+
+### Session Jun 2026 — Fix GSC "Page en double avec balise canonique correcte"
+- Root cause 1: `SITE = 'https://zont.cab'` (non-www) in `DriverAtDisposal.js` + `DisposalVehicle.js` → canonicals/hreflang pointed to non-www (301 redirect) → Google excluded all disposal pages (FR/EN/RU/HY/ES). Fixed to `https://www.zont.cab`.
+- Root cause 2: `/cgv` hardcoded canonical to `/terms`. Fixed: `/cgv` now forces FR content + own canonical `https://www.zont.cab/cgv`, `/terms` keeps `/terms`, added hreflang fr↔en + x-default in `TermsOfUse.js`.
+- Verified via Playwright: canonicals + hreflang correct on both page types.
