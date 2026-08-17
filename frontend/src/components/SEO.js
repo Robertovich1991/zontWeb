@@ -15,14 +15,23 @@ const SEO = ({ title, description, canonical, jsonLd, ogImage, ogType, hreflang,
       metaDesc.setAttribute('content', description || '');
     }
 
-    // Meta robots
+    // Meta robots / googlebot — public pages must stay indexable
+    const robotsContent = noindex ? 'noindex, nofollow' : 'index, follow';
     let metaRobots = document.querySelector('meta[name="robots"]');
     if (!metaRobots) {
       metaRobots = document.createElement('meta');
       metaRobots.setAttribute('name', 'robots');
       document.head.appendChild(metaRobots);
     }
-    metaRobots.setAttribute('content', noindex ? 'noindex, nofollow' : 'index, follow');
+    metaRobots.setAttribute('content', robotsContent);
+
+    let metaGooglebot = document.querySelector('meta[name="googlebot"]');
+    if (!metaGooglebot) {
+      metaGooglebot = document.createElement('meta');
+      metaGooglebot.setAttribute('name', 'googlebot');
+      document.head.appendChild(metaGooglebot);
+    }
+    metaGooglebot.setAttribute('content', robotsContent);
 
     // OG title
     let ogTitle = document.querySelector('meta[property="og:title"]');
@@ -60,17 +69,6 @@ const SEO = ({ title, description, canonical, jsonLd, ogImage, ogType, hreflang,
     }
     ogTypeEl.setAttribute('content', ogType || 'website');
 
-    // OG url
-    if (canonical) {
-      let ogUrl = document.querySelector('meta[property="og:url"]');
-      if (!ogUrl) {
-        ogUrl = document.createElement('meta');
-        ogUrl.setAttribute('property', 'og:url');
-        document.head.appendChild(ogUrl);
-      }
-      ogUrl.setAttribute('content', canonical);
-    }
-
     // OG image
     if (ogImage) {
       let ogImg = document.querySelector('meta[property="og:image"]');
@@ -91,16 +89,23 @@ const SEO = ({ title, description, canonical, jsonLd, ogImage, ogType, hreflang,
     }
     ogSiteName.setAttribute('content', 'Zont');
 
-    // Canonical
-    if (canonical) {
-      let link = document.querySelector('link[rel="canonical"]');
-      if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'canonical');
-        document.head.appendChild(link);
-      }
-      link.setAttribute('href', canonical);
+    // Canonical — default to current path so SPA pages are not stuck on homepage canonical
+    const resolvedCanonical = canonical || `https://www.zont.cab${window.location.pathname || '/'}`;
+    let link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
     }
+    link.setAttribute('href', resolvedCanonical);
+
+    let ogUrl = document.querySelector('meta[property="og:url"]');
+    if (!ogUrl) {
+      ogUrl = document.createElement('meta');
+      ogUrl.setAttribute('property', 'og:url');
+      document.head.appendChild(ogUrl);
+    }
+    ogUrl.setAttribute('content', resolvedCanonical);
 
     // Hreflang tags
     // Remove old hreflang links

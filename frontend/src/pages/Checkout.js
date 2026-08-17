@@ -24,6 +24,7 @@ const FACEBOOK_APP_ID = '1783544712624133';
 const SHOW_FACEBOOK_LOGIN = false; // hide until Meta Login is fully configured
 const STRIPE_PK = 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO';
 const stripePromise = loadStripe(STRIPE_PK);
+const PAYMENT_COOLDOWN_SECONDS = 30;
 
 const labels = {
   en: {
@@ -68,6 +69,7 @@ const labels = {
     afterConfirmation: 'charged upon booking confirmation',
     or: 'or',
     phoneHint: 'Your driver may need to contact you upon arrival.',
+    waitPaymentCooldown: 'Please wait {seconds}s before trying again.',
   },
   fr: {
     title: 'Finalisez Votre Réservation',
@@ -111,6 +113,7 @@ const labels = {
     afterConfirmation: 'debite des la confirmation',
     or: 'ou',
     phoneHint: 'Votre chauffeur pourra vous contacter en cas de besoin a votre arrivee.',
+    waitPaymentCooldown: 'Veuillez patienter {seconds}s avant de reessayer.',
   },
   ru: {
     title: 'Завершите Бронирование',
@@ -154,6 +157,7 @@ const labels = {
     afterConfirmation: 'списание при подтверждении',
     or: 'или',
     phoneHint: 'Водитель свяжется с вами при необходимости по прибытии.',
+    waitPaymentCooldown: 'Пожалуйста, подождите {seconds}с перед повторной попыткой.',
   },
   hy: {
     title: 'Ամրագրdelays',
@@ -185,6 +189,7 @@ const labels = {
     orSimilar: 'delays',
     amountCharged: 'delays',
     afterConfirmation: 'delays',
+    waitPaymentCooldown: 'Խնդրում ենք սպասել {seconds}վ, ապա կրկին փորձել։',
   },
 };
 
@@ -256,6 +261,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const [selectedSavedCard, setSelectedSavedCard] = useState(null);
   const [useNewCard, setUseNewCard] = useState(false);
   const [deletingCard, setDeletingCard] = useState(null);
+  const [payCooldownUntil, setPayCooldownUntil] = useState(0);
+  const [payCooldownRemaining, setPayCooldownRemaining] = useState(0);
 
   // Two-step flow: 1) Add card (0€ 3DS) → 2) Pay
   const [verifiedCardId, setVerifiedCardId] = useState(null);
@@ -267,6 +274,23 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
 
   // Facebook Login on checkout
   const [fbLoading, setFbLoading] = useState(false);
+
+  useEffect(() => {
+    const updateCooldown = () => {
+      const remainingMs = payCooldownUntil - Date.now();
+      const nextRemaining = remainingMs > 0 ? Math.ceil(remainingMs / 1000) : 0;
+      setPayCooldownRemaining(nextRemaining);
+      if (nextRemaining === 0 && payCooldownUntil !== 0) {
+        setPayCooldownUntil(0);
+      }
+    };
+
+    updateCooldown();
+    if (!payCooldownUntil) return undefined;
+
+    const intervalId = setInterval(updateCooldown, 1000);
+    return () => clearInterval(intervalId);
+  }, [payCooldownUntil]);
 
   // Fetch saved cards when authenticated
   // Uses XHR instead of fetch to avoid Stripe.js intercepting the body stream
@@ -514,6 +538,10 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!stripe || !elements) return;
+    if (payCooldownRemaining > 0) {
+      toast.error((c.waitPaymentCooldown || labels.en.waitPaymentCooldown).replace('{seconds}', payCooldownRemaining));
+      return;
+    }
 
     // Enforce passenger identity for guest users on EVERY submission path
     // (previously this was skipped when verifiedCardId was set → allowed booking without name/email/phone).
@@ -653,6 +681,14 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
 
   // Step 2: Submit booking with verified card
   const handlePayWithCard = async (cardId, override = {}) => {
+    const remainingMs = payCooldownUntil - Date.now();
+    const remainingSeconds = remainingMs > 0 ? Math.ceil(remainingMs / 1000) : 0;
+    if (remainingSeconds > 0) {
+      toast.error((c.waitPaymentCooldown || labels.en.waitPaymentCooldown).replace('{seconds}', remainingSeconds));
+      return;
+    }
+    setPayCooldownUntil(Date.now() + PAYMENT_COOLDOWN_SECONDS * 1000);
+    setPayCooldownRemaining(PAYMENT_COOLDOWN_SECONDS);
     setLoading(true);
     try {
       const dropoffCoords = searchData.dropoffCoords;
@@ -1094,7 +1130,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       {/* Submit — changes based on step */}
       <button
         type="submit"
-        disabled={loading || !stripe || (!verifiedCardId && (useNewCard || savedCards.length === 0) && !cardComplete) || (!verifiedCardId && savedCards.length > 0 && !useNewCard && !selectedSavedCard)}
+        disabled={loading || payCooldownRemaining > 0 || !stripe || (!verifiedCardId && (useNewCard || savedCards.length === 0) && !cardComplete) || (!verifiedCardId && savedCards.length > 0 && !useNewCard && !selectedSavedCard)}
         className={`w-full text-white py-4 rounded-xl font-bold text-base transition-all disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg ${
           verifiedCardId ? 'bg-[#2ecc71] hover:bg-[#27ae60] shadow-green-500/20' : 'bg-[#3498db] hover:bg-[#2980b9] shadow-blue-500/20'
         }`}
@@ -1102,6 +1138,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
       >
         {loading ? (
           <><Loader2 className="w-5 h-5 animate-spin" /> {c.processing}</>
+        ) : payCooldownRemaining > 0 ? (
+          <><Clock className="w-5 h-5" /> {(c.waitPaymentCooldown || labels.en.waitPaymentCooldown).replace('{seconds}', payCooldownRemaining)}</>
         ) : verifiedCardId ? (
           <><Lock className="w-5 h-5" /> {c.payNow || 'Payer'} {selectedCar.price}&euro;</>
         ) : selectedSavedCard && !useNewCard ? (
@@ -1110,6 +1148,11 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
           <><CreditCard className="w-5 h-5" /> {c.payBtn}</>
         )}
       </button>
+      {payCooldownRemaining > 0 && (
+        <p className="text-xs text-amber-300 text-center">
+          {(c.waitPaymentCooldown || labels.en.waitPaymentCooldown).replace('{seconds}', payCooldownRemaining)}
+        </p>
+      )}
     </form>
   );
 };

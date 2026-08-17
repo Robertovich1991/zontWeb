@@ -264,6 +264,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
       <SEO
         title={seoTitle}
         description={seoDesc}
+        noindex={!!cmsPage?.seo?.noindex}
         canonical={seoUrls ? `https://www.zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
         ogImage={ogImage ? (ogImage.startsWith('http') ? ogImage : `https://www.zont.cab${ogImage}`) : (heroImage ? (heroImage.startsWith('http') ? heroImage : `https://www.zont.cab${heroImage}`) : "https://www.zont.cab/images/hero.webp")}
         hreflang={seoUrls ? [

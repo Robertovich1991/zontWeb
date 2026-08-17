@@ -138,6 +138,7 @@
             })();
         </script>
         <meta name="robots" content="index, follow" />
+        <meta name="googlebot" content="index, follow" />
         <meta name="author" content="Zont" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Zont - Transfert Aeroport Premium en Europe" />
@@ -151,6 +152,39 @@
         <link rel="preload" as="image" href="/images/hero-800.webp" type="image/webp" media="(max-width: 800px)" fetchpriority="high" />
         <link rel="preload" as="image" href="/images/hero.webp" type="image/webp" media="(min-width: 801px)" fetchpriority="high" />
         <meta property="og:url" content="https://www.zont.cab" />
+        <script>
+            // Fix SPA crawl signals BEFORE React loads:
+            // 1) self-canonical for the current path (was always homepage — hurts indexing)
+            // 2) noindex only for private booking/account paths; public pages stay indexable
+            (function () {
+                try {
+                    var path = (window.location.pathname || '/').split('?')[0];
+                    if (!path) path = '/';
+                    var privatePrefixes = [
+                        '/car-selection', '/checkout', '/booking-confirmation', '/trip-recap',
+                        '/my-bookings', '/my-account', '/reset-password', '/forgetpassword',
+                        '/admin', '/fleet', '/hotel', '/driver', '/gps-admin'
+                    ];
+                    var isPrivate = false;
+                    for (var i = 0; i < privatePrefixes.length; i++) {
+                        if (path === privatePrefixes[i] || path.indexOf(privatePrefixes[i] + '/') === 0) {
+                            isPrivate = true;
+                            break;
+                        }
+                    }
+                    var robotsContent = isPrivate ? 'noindex, nofollow' : 'index, follow';
+                    var robots = document.querySelector('meta[name="robots"]');
+                    if (robots) robots.setAttribute('content', robotsContent);
+                    var googlebot = document.querySelector('meta[name="googlebot"]');
+                    if (googlebot) googlebot.setAttribute('content', robotsContent);
+                    var canonicalUrl = 'https://www.zont.cab' + (path === '/' ? '' : path);
+                    var canonical = document.querySelector('link[rel="canonical"]');
+                    if (canonical) canonical.setAttribute('href', canonicalUrl);
+                    var ogUrl = document.querySelector('meta[property="og:url"]');
+                    if (ogUrl) ogUrl.setAttribute('content', canonicalUrl);
+                } catch (e) {}
+            })();
+        </script>
         <script>if(window.location.hostname==='zont.cab'){window.location.replace('https://www.zont.cab'+window.location.pathname+window.location.search)}</script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
