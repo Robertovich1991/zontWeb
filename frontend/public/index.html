@@ -146,12 +146,28 @@
         <meta property="og:image" content="https://www.zont.cab/icon-512.png" />
         <meta property="fb:app_id" content="1783544712624133" />
         <link rel="canonical" href="https://www.zont.cab" />
+        <meta property="og:url" content="https://www.zont.cab" />
+        <script>
+        /* Dynamic canonical / og:url so SPA shell doesn't tell crawlers everything is the homepage.
+           Runs synchronously before React mounts. React's SEO.js may further refine per-page. */
+        !function(){try{
+          var origin=window.location.origin;
+          var pathname=window.location.pathname||'/';
+          /* strip trailing slash except for root */
+          if(pathname.length>1&&pathname.slice(-1)==='/')pathname=pathname.slice(0,-1);
+          var canonicalUrl=origin+pathname;
+          var c=document.querySelector('link[rel="canonical"]');
+          if(c)c.setAttribute('href',canonicalUrl);
+          var og=document.querySelector('meta[property="og:url"]');
+          if(og)og.setAttribute('content',canonicalUrl);
+        }catch(e){}}();
+        </script>
+        <script>if(window.location.hostname==='zont.cab'){window.location.replace('https://www.zont.cab'+window.location.pathname+window.location.search)}</script>
 
         <!-- Preload hero image (used by all CityTransferPages) for fast LCP -->
         <link rel="preload" as="image" href="/images/hero-800.webp" type="image/webp" media="(max-width: 800px)" fetchpriority="high" />
         <link rel="preload" as="image" href="/images/hero.webp" type="image/webp" media="(min-width: 801px)" fetchpriority="high" />
-        <meta property="og:url" content="https://www.zont.cab" />
-        <script>if(window.location.hostname==='zont.cab'){window.location.replace('https://www.zont.cab'+window.location.pathname+window.location.search)}</script>
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link rel="preconnect" href="https://api.zont.cab" crossorigin />

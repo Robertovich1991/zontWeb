@@ -75,9 +75,13 @@ const BlogArticle = ({ language = 'en' }) => {
     };
   }, [article]);
 
+  const basePathForCanonical = `${LANG_PREFIX[language] || ''}/blog`;
+  const canonicalForCurrentSlug = `https://www.zont.cab${basePathForCanonical}/${slug}`;
+
   if (loading) {
     return (
       <>
+        <SEO title="Loading article…" canonical={canonicalForCurrentSlug} />
         <Header />
         <main className="min-h-screen flex items-center justify-center bg-white">
           <Loader2 className="w-8 h-8 animate-spin text-[#2ecc71]" />
@@ -90,7 +94,10 @@ const BlogArticle = ({ language = 'en' }) => {
   if (notFound || !article) {
     return (
       <>
-        <SEO title="404 — Article not found" description="" noindex />
+        {/* Do NOT emit noindex here: transient API failures on real articles
+            were causing 28 pages to be flagged in GSC. Real 404s have no
+            content anyway, and Google will drop them naturally. */}
+        <SEO title="404 — Article not found" description="" canonical={canonicalForCurrentSlug} />
         <Header />
         <main className="min-h-screen flex flex-col items-center justify-center bg-white px-5 text-center py-20">
           <h1 className="text-3xl font-bold text-gray-900 mb-3" data-testid="blog-article-404">
