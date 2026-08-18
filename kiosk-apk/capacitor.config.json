@@ -3,9 +3,10 @@
   "appName": "Zont Kiosk",
   "webDir": "www",
   "server": {
-    "url": "https://zont.cab/kiosk/bristol",
+    "url": "https://www.zont.cab/kiosk/bristol",
     "cleartext": false,
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "allowNavigation": ["www.zont.cab", "zont.cab"]
   },
   "android": {
     "allowMixedContent": false,

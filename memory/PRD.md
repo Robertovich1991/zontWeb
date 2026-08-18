@@ -142,3 +142,8 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Ajout endpoint `POST /api/stripe-terminal/link-reader {hotelSlug, readerId}` — lie un reader déjà enregistré chez Stripe sans code de pairing. Testé OK sur preview (reader tmr_GiSbzAmuecR6pP online).
 - APK kiosk déjà en ligne : https://www.zont.cab/downloads/zont-kiosk.apk (pointe vers https://zont.cab/kiosk/bristol).
 - EN ATTENTE : après redéploiement prod, exécuter: curl -X POST https://www.zont.cab/api/stripe-terminal/link-reader -H "Content-Type: application/json" -d '{"hotelSlug":"bristol","readerId":"tmr_GiSbzAmuecR6pP"}'
+
+### Session Jun 2026 — APK Kiosk corrigé (s'ouvrait dans le navigateur)
+- Cause : server.url pointait sur zont.cab (sans www) ; le site redirige vers www.zont.cab que Capacitor considérait comme domaine externe → ouverture dans Chrome.
+- Fix : capacitor.config.json → url https://www.zont.cab/kiosk/bristol + allowNavigation [www.zont.cab, zont.cab]. APK rebuild (Java 17 + Android SDK 34 réinstallés, aapt2 ARM64 via Commit451/android-arm-build-tools, override -Pandroid.aapt2FromMavenOverride=/opt/android-sdk/aapt2-arm/aapt2).
+- Nouvel APK copié dans /app/frontend/public/downloads/zont-kiosk.apk. Lien après deploy : https://www.zont.cab/downloads/zont-kiosk.apk
