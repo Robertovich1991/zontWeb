@@ -136,3 +136,9 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Root cause 1: `SITE = 'https://zont.cab'` (non-www) in `DriverAtDisposal.js` + `DisposalVehicle.js` → canonicals/hreflang pointed to non-www (301 redirect) → Google excluded all disposal pages (FR/EN/RU/HY/ES). Fixed to `https://www.zont.cab`.
 - Root cause 2: `/cgv` hardcoded canonical to `/terms`. Fixed: `/cgv` now forces FR content + own canonical `https://www.zont.cab/cgv`, `/terms` keeps `/terms`, added hreflang fr↔en + x-default in `TermsOfUse.js`.
 - Verified via Playwright: canonicals + hreflang correct on both page types.
+
+### Session Jun 2026 — Terminal Stripe en production (kiosk Bristol)
+- Cause QR code en prod : le lien terminal↔hôtel n'existe que dans la DB preview ; la prod a sa propre DB (deploy = code, pas données).
+- Ajout endpoint `POST /api/stripe-terminal/link-reader {hotelSlug, readerId}` — lie un reader déjà enregistré chez Stripe sans code de pairing. Testé OK sur preview (reader tmr_GiSbzAmuecR6pP online).
+- APK kiosk déjà en ligne : https://www.zont.cab/downloads/zont-kiosk.apk (pointe vers https://zont.cab/kiosk/bristol).
+- EN ATTENTE : après redéploiement prod, exécuter: curl -X POST https://www.zont.cab/api/stripe-terminal/link-reader -H "Content-Type: application/json" -d '{"hotelSlug":"bristol","readerId":"tmr_GiSbzAmuecR6pP"}'

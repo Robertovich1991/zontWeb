@@ -45,6 +45,11 @@ class CreateTerminalPaymentRequest(BaseModel):
     bookingReference: str  # Reference of a previously created kiosk booking
 
 
+class LinkReaderRequest(BaseModel):
+    hotelSlug: str
+    readerId: str  # Existing Stripe reader id, e.g. tmr_xxx
+
+
 # ============ Helpers ============
 
 async def get_or_create_location(req: RegisterReaderRequest) -> str:
@@ -129,6 +134,47 @@ async def register_reader(req: RegisterReaderRequest):
         "device_type": reader.device_type,
         "location_id": location_id,
         "status": reader.status,
+    }
+
+
+@router.post("/link-reader")
+async def link_reader(req: LinkReaderRequest):
+    """Link an ALREADY-registered Stripe Terminal reader to a hotel (no pairing code needed).
+
+    Used to link the reader in a new environment (e.g. production DB) where the
+    reader is already registered on the Stripe account but not stored on the hotel doc.
+    """
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    if not stripe.api_key:
+        raise HTTPException(500, "Stripe is not configured")
+
+    hotel = await db.kiosk_hotels.find_one({"slug": req.hotelSlug}, {"_id": 0, "slug": 1})
+    if not hotel:
+        raise HTTPException(404, f"Hotel '{req.hotelSlug}' not found")
+
+    try:
+        reader = stripe.terminal.Reader.retrieve(req.readerId.strip())
+    except stripe.error.InvalidRequestError:
+        raise HTTPException(404, f"Reader '{req.readerId}' introuvable sur ce compte Stripe")
+
+    await db.kiosk_hotels.update_one(
+        {"slug": req.hotelSlug},
+        {"$set": {
+            "stripe_terminal_reader_id": reader.id,
+            "stripe_terminal_reader_label": reader.label,
+            "stripe_terminal_location_id": reader.location,
+            "stripe_terminal_registered_at": datetime.now(timezone.utc).isoformat(),
+        }},
+    )
+
+    return {
+        "success": True,
+        "reader_id": reader.id,
+        "label": reader.label,
+        "device_type": reader.device_type,
+        "status": reader.status,
+        "location_id": reader.location,
     }
 
 
