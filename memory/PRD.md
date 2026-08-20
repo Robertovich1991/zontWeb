@@ -160,3 +160,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 ### Session Jun 2026 — Traductions Checkout (bouton "nouvelle carte" + blocs complets)
 - Bloc hy (arménien) de Checkout.js était corrompu ("delays" partout) → réécrit intégralement en arménien correct (dont addNewCard, savedCards, payNow).
 - Bloc es (espagnol) inexistant → ajouté complet. Vérifié via Playwright (titres + boutons en es/hy).
+
+### Session Jun 2026 — Header russe : retours à la ligne corrigés
+- Header.js desktop nav : whitespace-nowrap + gaps responsives (gap-x-3/5/6), ml-6 vs logo, salutation "Здравствуйте, X" visible seulement ≥2xl, numéro téléphone texte visible seulement ≥xl (icône WhatsApp seule en lg).
+- Vérifié Playwright connecté en RU à 1024/1280/1440/1920 px : tout tient sur une ligne.
