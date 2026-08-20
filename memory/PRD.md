@@ -156,3 +156,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ### Session Jun 2026 — Numéro de téléphone → WhatsApp
 - Header (mobile + desktop) et Footer : lien tel:+33783777027 remplacé par https://wa.me/33783777027 (target _blank). Vérifié via Playwright.
+
+### Session Jun 2026 — Traductions Checkout (bouton "nouvelle carte" + blocs complets)
+- Bloc hy (arménien) de Checkout.js était corrompu ("delays" partout) → réécrit intégralement en arménien correct (dont addNewCard, savedCards, payNow).
+- Bloc es (espagnol) inexistant → ajouté complet. Vérifié via Playwright (titres + boutons en es/hy).
