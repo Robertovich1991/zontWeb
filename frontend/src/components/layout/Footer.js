@@ -61,7 +61,7 @@ const Footer = () => {
           <div>
             <h3 className="text-base font-semibold mb-3 text-gray-300">{language === 'en' ? 'Contact' : language === 'ru' ? 'Контакты' : language === 'hy' ? 'Կապ' : language === 'es' ? 'Contacto' : 'Contact'}</h3>
             <div className="mb-4">
-              <a href="tel:+33783777027" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm" data-testid="footer-phone">
+              <a href="https://wa.me/33783777027" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm" data-testid="footer-phone">
                 <Phone size={16} className="flex-shrink-0" />
                 +33 7 83 77 70 27
               </a>

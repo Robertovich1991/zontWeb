@@ -71,7 +71,9 @@ const Header = () => {
 
             {/* Phone number — always visible */}
             <a
-              href="tel:+33783777027"
+              href="https://wa.me/33783777027"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-[#25D366] hover:text-[#20bd5a] transition-colors lg:hidden"
               data-testid="header-phone-mobile"
             >
@@ -163,7 +165,9 @@ const Header = () => {
 
               {/* Phone — Desktop */}
               <a
-                href="tel:+33783777027"
+                href="https://wa.me/33783777027"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1.5 text-[#25D366] hover:text-[#20bd5a] transition-colors"
                 data-testid="header-phone-desktop"
               >

@@ -153,3 +153,6 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Checkout.js : détection IN_IFRAME (exclut *.emergentagent.com), bannière multilingue + bouton "Ouvrir le paiement dans le navigateur" (Telegram.WebApp.openLink → top.location → window.open).
 - Transfert d'état : /checkout?resume=<base64url {searchData,selectedCar}> — décodé au mount, restauré via startBooking/selectCar, URL nettoyée. Testé OK via Playwright.
 - CSP : aucune CSP définie côté site — rien à changer.
+
+### Session Jun 2026 — Numéro de téléphone → WhatsApp
+- Header (mobile + desktop) et Footer : lien tel:+33783777027 remplacé par https://wa.me/33783777027 (target _blank). Vérifié via Playwright.
