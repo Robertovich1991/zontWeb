@@ -25,6 +25,45 @@ const SHOW_FACEBOOK_LOGIN = false; // hide until Meta Login is fully configured
 const STRIPE_PK = 'pk_live_lX3FXPqGIJLP5NgXomcdpcWO';
 const stripePromise = loadStripe(STRIPE_PK);
 
+// ───── Iframe / WebView payment fallback (Telegram WebApp, third-party embeds) ─────
+// Stripe Elements injects iframes from js.stripe.com; some containers (Telegram Desktop
+// WebView notably) refuse to render nested iframes → the card form never appears.
+const IN_IFRAME = (() => { try { return window.self !== window.top; } catch { return true; } })();
+// Emergent preview also renders the app in an iframe — don't show the fallback there.
+const IS_EMBEDDED = IN_IFRAME && !window.location.hostname.endsWith('emergentagent.com');
+
+const decodeResume = () => {
+  try {
+    const raw = new URLSearchParams(window.location.search).get('resume');
+    if (!raw) return null;
+    const json = decodeURIComponent(escape(atob(raw.replace(/-/g, '+').replace(/_/g, '/'))));
+    const data = JSON.parse(json);
+    if (data?.searchData && data?.selectedCar) return data;
+  } catch {}
+  return null;
+};
+
+const buildStandaloneUrl = (searchData, selectedCar) => {
+  const json = JSON.stringify({ searchData, selectedCar });
+  const b64 = btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return `${window.location.origin}/checkout?resume=${b64}`;
+};
+
+const openStandaloneCheckout = (url) => {
+  const tg = window.Telegram?.WebApp;
+  if (tg?.openLink) { tg.openLink(url); return; }
+  try { window.top.location.href = url; return; } catch {}
+  window.open(url, '_blank', 'noopener');
+};
+
+const iframeLabels = {
+  en: { msg: 'Secure payment may be blocked inside this embedded window. Open the payment page in your browser to continue safely.', btn: 'Open payment in browser' },
+  fr: { msg: 'Le paiement sécurisé peut être bloqué dans cette fenêtre intégrée. Ouvrez la page de paiement dans votre navigateur pour continuer en toute sécurité.', btn: 'Ouvrir le paiement dans le navigateur' },
+  ru: { msg: 'Безопасная оплата может быть заблокирована внутри этого встроенного окна. Откройте страницу оплаты в браузере, чтобы продолжить.', btn: 'Открыть оплату в браузере' },
+  hy: { msg: 'Անվտանգ վճարումը կարող է արգելափակվել այս ներկառուցված պատուհանում: Բացեք վճարման էջը ձեր դիտարկիչում:', btn: 'Բացել վճարումը դիտարկիչում' },
+  es: { msg: 'El pago seguro puede estar bloqueado dentro de esta ventana integrada. Abra la página de pago en su navegador para continuar.', btn: 'Abrir el pago en el navegador' },
+};
+
 const labels = {
   en: {
     title: 'Complete Your Booking',
@@ -1116,10 +1155,24 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { searchData, selectedCar } = useBooking();
+  const { searchData: ctxSearchData, selectedCar: ctxSelectedCar, startBooking, selectCar } = useBooking();
   const { isAuthenticated, user, loginDirect } = useAuth();
   const { language } = useLanguage();
   const c = labels[language] || labels.en;
+
+  // Restore booking passed through ?resume= (breakout from iframe/WebView into a real browser)
+  const resumeData = React.useMemo(decodeResume, []);
+  const searchData = ctxSearchData || resumeData?.searchData || null;
+  const selectedCar = ctxSelectedCar || resumeData?.selectedCar || null;
+
+  useEffect(() => {
+    if (resumeData) {
+      if (!ctxSearchData) startBooking(resumeData.searchData);
+      if (!ctxSelectedCar) selectCar(resumeData.selectedCar);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -1195,6 +1248,19 @@ const Checkout = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-white mb-6" data-testid="checkout-title">
             {c.title}
           </h1>
+
+          {IS_EMBEDDED && (
+            <div className="mb-6 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4" data-testid="iframe-payment-warning">
+              <p className="text-amber-200 text-sm mb-3">{(iframeLabels[language] || iframeLabels.en).msg}</p>
+              <button
+                onClick={() => openStandaloneCheckout(buildStandaloneUrl(searchData, selectedCar))}
+                className="bg-amber-500 text-black px-4 py-2.5 rounded-lg font-bold text-sm hover:bg-amber-400 transition-colors inline-flex items-center gap-2"
+                data-testid="open-standalone-checkout-btn"
+              >
+                {(iframeLabels[language] || iframeLabels.en).btn} <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             {/* Left: Trip Summary (sticky on desktop) */}

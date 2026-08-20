@@ -147,3 +147,9 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Cause : server.url pointait sur zont.cab (sans www) ; le site redirige vers www.zont.cab que Capacitor considérait comme domaine externe → ouverture dans Chrome.
 - Fix : capacitor.config.json → url https://www.zont.cab/kiosk/bristol + allowNavigation [www.zont.cab, zont.cab]. APK rebuild (Java 17 + Android SDK 34 réinstallés, aapt2 ARM64 via Commit451/android-arm-build-tools, override -Pandroid.aapt2FromMavenOverride=/opt/android-sdk/aapt2-arm/aapt2).
 - Nouvel APK copié dans /app/frontend/public/downloads/zont-kiosk.apk. Lien après deploy : https://www.zont.cab/downloads/zont-kiosk.apk
+
+### Session Jun 2026 — Fallback paiement en iframe (Telegram WebApp)
+- Contexte : Stripe Elements bloqué dans les WebView qui ne rendent pas les iframes (Telegram Desktop).
+- Checkout.js : détection IN_IFRAME (exclut *.emergentagent.com), bannière multilingue + bouton "Ouvrir le paiement dans le navigateur" (Telegram.WebApp.openLink → top.location → window.open).
+- Transfert d'état : /checkout?resume=<base64url {searchData,selectedCar}> — décodé au mount, restauré via startBooking/selectCar, URL nettoyée. Testé OK via Playwright.
+- CSP : aucune CSP définie côté site — rien à changer.
