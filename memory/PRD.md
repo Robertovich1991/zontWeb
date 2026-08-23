@@ -164,3 +164,8 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 ### Session Jun 2026 — Header russe : retours à la ligne corrigés
 - Header.js desktop nav : whitespace-nowrap + gaps responsives (gap-x-3/5/6), ml-6 vs logo, salutation "Здравствуйте, X" visible seulement ≥2xl, numéro téléphone texte visible seulement ≥xl (icône WhatsApp seule en lg).
 - Vérifié Playwright connecté en RU à 1024/1280/1440/1920 px : tout tient sur une ligne.
+
+### Session Jun 2026 — Kiosk : aéroports + tarifs mise à disposition
+- Aéroports : POPULAR_DESTINATIONS → Charles de Gaulle (CDG), Orly (ORY), Beauvais (BVA) + gares/Disney. Nouvel endpoint POST /api/kiosk/{slug}/reset-destinations (utilitaire admin). Appliqué sur preview. À FAIRE APRÈS DEPLOY PROD: curl -X POST https://www.zont.cab/api/kiosk/bristol/reset-destinations
+- Tarifs disposal/hourly : /hourly-price réécrit pour utiliser l'API C# PUBLIQUE /api/Distance/driverTypesWithStatus (comme /hourly-booking du site) au lieu de TripsPrice (auth company cassée — mdp Nandetiri1@gmail.com changé). Testé: 4h=193€, 12h=577€ Standard Car. Tri par prix croissant, images incluses.
+- RESTE BLOQUÉ sur mdp company C#: dispatch_to_csharp (envoi des réservations kiosk payées vers C#) + admin reservations. Demander le nouveau mot de passe.

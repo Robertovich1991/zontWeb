@@ -57,9 +57,9 @@ def gen_reference():
 
 
 POPULAR_DESTINATIONS = [
-    {"name": "CDG Terminal 1", "address": "Aeroport Charles de Gaulle T1, 95700 Roissy-en-France", "lat": 49.0097, "lng": 2.5479, "icon": "plane"},
-    {"name": "CDG Terminal 2", "address": "Aeroport Charles de Gaulle T2, 95700 Roissy-en-France", "lat": 49.0036, "lng": 2.5710, "icon": "plane"},
-    {"name": "Orly Aeroport", "address": "Aeroport d'Orly, 94390 Orly", "lat": 48.7262, "lng": 2.3652, "icon": "plane"},
+    {"name": "Charles de Gaulle (CDG)", "address": "Aeroport Charles de Gaulle (CDG), 95700 Roissy-en-France", "lat": 49.0097, "lng": 2.5479, "icon": "plane"},
+    {"name": "Orly (ORY)", "address": "Aeroport d'Orly, 94390 Orly", "lat": 48.7262, "lng": 2.3652, "icon": "plane"},
+    {"name": "Beauvais (BVA)", "address": "Aeroport de Beauvais-Tille, 60000 Tille", "lat": 49.4544, "lng": 2.1128, "icon": "plane"},
     {"name": "Gare de Lyon", "address": "Gare de Lyon, 75012 Paris", "lat": 48.8443, "lng": 2.3743, "icon": "train"},
     {"name": "Gare du Nord", "address": "Gare du Nord, 75010 Paris", "lat": 48.8809, "lng": 2.3553, "icon": "train"},
     {"name": "Disneyland Paris", "address": "Disneyland Paris, 77700 Marne-la-Vallee", "lat": 48.8674, "lng": 2.7836, "icon": "star"},
@@ -85,6 +85,20 @@ async def ensure_demo_hotel():
 
 
 # ---------- Endpoints ----------
+
+@router.post("/{slug}/reset-destinations")
+async def reset_kiosk_destinations(slug: str):
+    """Reset a hotel's destination list to the current defaults (admin utility)."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    result = await db.kiosk_hotels.update_one(
+        {"slug": slug},
+        {"$set": {"destinations": POPULAR_DESTINATIONS}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(404, f"Hotel '{slug}' not found")
+    return {"success": True, "destinations": POPULAR_DESTINATIONS}
+
 
 @router.get("/{slug}/manifest.json")
 async def get_kiosk_manifest(slug: str):
@@ -222,11 +236,10 @@ async def fetch_csharp_trips_price():
 
 @router.post("/{slug}/hourly-price")
 async def get_kiosk_hourly_price(slug: str, req: KioskHourlyPriceRequest):
-    """Compute disposal (chauffeur-by-hour) pricing from C# TripsPrice grid.
+    """Compute disposal (chauffeur-by-hour) pricing from the public C# driverTypesWithStatus API.
 
-    Formula: price = baseFare + (perMinuteForTime * hours * 60)
-    Bounded by minimum amount.
-    Image paths are enriched from /driverTypesTwo (which does include imagePath).
+    Same source as the main site's /hourly-booking page (no auth required).
+    Formula: price = baseFare + (perMinuteForTime * hours * 60), bounded by minimum.
     """
     if db is None:
         raise HTTPException(500, "Database not available")
@@ -236,32 +249,21 @@ async def get_kiosk_hourly_price(slug: str, req: KioskHourlyPriceRequest):
     if not hotel:
         raise HTTPException(404, "Hotel not found")
 
-    grid = await fetch_csharp_trips_price()
-
-    # Fetch imagePath from driverTypesTwo (Paris route as reference)
-    image_map = {}
-    try:
-        hotel_coords = {"latitude": hotel["lat"], "longitude": hotel["lng"]}
-        paris_coords = {"latitude": 48.8566, "longitude": 2.3522}
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            r = await client.post(
-                f"{CSHARP_API}/api/PreorderDistance/driverTypesTwo",
-                json=[hotel_coords, paris_coords],
-            )
-            if r.status_code == 200:
-                for v in r.json() or []:
-                    tt = (v.get("tripType") or "").strip()
-                    if tt and v.get("imagePath"):
-                        image_map[tt] = v["imagePath"]
-    except Exception as e:
-        logger.warning(f"imagePath enrichment failed: {e}")
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+        resp = await client.post(
+            f"{CSHARP_API}/api/Distance/driverTypesWithStatus",
+            json={"latitude": hotel["lat"], "longitude": hotel["lng"]},
+            headers={"Content-Type": "application/json"},
+        )
+        if resp.status_code != 200:
+            raise HTTPException(502, "C# driverTypes unreachable")
+        grid = resp.json() or []
 
     minutes = req.hours * 60
-    DISPLAY_ORDER = ["Standard Car", "Shuttle private 8 pers.", "Luxury Sedan", "Luxury Van"]
     vehicles = []
     for v in grid:
         trip_type = (v.get("tripTypes") or "").strip()
-        if trip_type not in DISPLAY_ORDER:
+        if not trip_type:
             continue
         base = float(v.get("baseFare") or 0)
         per_min = float(v.get("perMinuteForTime") or 0)
@@ -277,10 +279,10 @@ async def get_kiosk_hourly_price(slug: str, req: KioskHourlyPriceRequest):
             "distance": 0,
             "passenger": v.get("passenger", 0),
             "luggage": v.get("luggage", 0),
-            "imagePath": image_map.get(trip_type, "") or "",
+            "imagePath": v.get("imagePath", "") or "",
             "description": v.get("description", "") or "",
         })
-    vehicles.sort(key=lambda x: DISPLAY_ORDER.index(x["tripType"]) if x["tripType"] in DISPLAY_ORDER else 99)
+    vehicles.sort(key=lambda x: x["minAmount"])
 
     return {
         "name": f"Chauffeur a disposition ({req.hours}h)",
