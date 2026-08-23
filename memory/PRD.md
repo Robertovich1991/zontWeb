@@ -169,3 +169,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Aéroports : POPULAR_DESTINATIONS → Charles de Gaulle (CDG), Orly (ORY), Beauvais (BVA) + gares/Disney. Nouvel endpoint POST /api/kiosk/{slug}/reset-destinations (utilitaire admin). Appliqué sur preview. À FAIRE APRÈS DEPLOY PROD: curl -X POST https://www.zont.cab/api/kiosk/bristol/reset-destinations
 - Tarifs disposal/hourly : /hourly-price réécrit pour utiliser l'API C# PUBLIQUE /api/Distance/driverTypesWithStatus (comme /hourly-booking du site) au lieu de TripsPrice (auth company cassée — mdp Nandetiri1@gmail.com changé). Testé: 4h=193€, 12h=577€ Standard Car. Tri par prix croissant, images incluses.
 - RESTE BLOQUÉ sur mdp company C#: dispatch_to_csharp (envoi des réservations kiosk payées vers C#) + admin reservations. Demander le nouveau mot de passe.
+
+### Session Jun 2026 — Compte C# entreprise rétabli
+- Nandetiri1@gmail.com / 12345678 fonctionne à nouveau (HTTP 200). Ajouté dans backend/.env (CSHARP_COMPANY_USERNAME/PASSWORD), backend redémarré.
+- Testé: GET /api/admin/reservations → 200, 59 réservations. dispatch_to_csharp (kiosk) débloqué aussi. Issue P0 admin reservations RÉSOLUE.
