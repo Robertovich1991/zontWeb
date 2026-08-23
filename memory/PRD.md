@@ -173,3 +173,6 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 ### Session Jun 2026 — Compte C# entreprise rétabli
 - Nandetiri1@gmail.com / 12345678 fonctionne à nouveau (HTTP 200). Ajouté dans backend/.env (CSHARP_COMPANY_USERNAME/PASSWORD), backend redémarré.
 - Testé: GET /api/admin/reservations → 200, 59 réservations. dispatch_to_csharp (kiosk) débloqué aussi. Issue P0 admin reservations RÉSOLUE.
+
+### Session Jun 2026 — Auto-migration destinations kiosk
+- /prices : si l'hôtel a encore les anciennes entrées "CDG Terminal 1/2", elles sont remplacées automatiquement par la nouvelle liste (CDG/Orly/Beauvais/gares/Disney) au premier chargement. Plus besoin d'action manuelle en prod après deploy. Testé preview OK.

@@ -150,6 +150,12 @@ async def get_kiosk_prices(slug: str):
     if not hotel:
         raise HTTPException(404, "Hotel not found")
 
+    # One-time auto-migration: replace legacy "CDG Terminal 1/2" entries with the new airport list
+    if any((d.get("name") or "").startswith("CDG Terminal") for d in hotel.get("destinations", [])):
+        await db.kiosk_hotels.update_one({"slug": slug}, {"$set": {"destinations": POPULAR_DESTINATIONS}})
+        hotel["destinations"] = POPULAR_DESTINATIONS
+        logger.info(f"Kiosk '{slug}': legacy destinations migrated to new airport list")
+
     hotel_coords = {"latitude": hotel["lat"], "longitude": hotel["lng"]}
     results = []
 
