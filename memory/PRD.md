@@ -176,3 +176,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ### Session Jun 2026 — Auto-migration destinations kiosk
 - /prices : si l'hôtel a encore les anciennes entrées "CDG Terminal 1/2", elles sont remplacées automatiquement par la nouvelle liste (CDG/Orly/Beauvais/gares/Disney) au premier chargement. Plus besoin d'action manuelle en prod après deploy. Testé preview OK.
+
+### Session Jun 2026 — Fix GSC "Excluded by noindex tag" /fr/search?q={search_term_string}
+- Cause : JSON-LD SearchAction (Sitelinks Searchbox) dans Home.js annonçait /search?q=... alors qu'aucune route /search n'existe → Google crawlait le placeholder → 404 noindex.
+- Fix : potentialAction/SearchAction supprimé du schéma WebSite. Sitemap ✅ (aucune URL search), noindex ✅ (uniquement 404/confirmation/admin). Vérifié Playwright : plus de SearchAction dans le DOM.

@@ -727,7 +727,6 @@ const Home = () => {
   // English uses the root domain (no /en prefix). French/Russian/Armenian/Spanish use /fr, /ru, /hy, /es respectively.
   const langPath = language === 'en' ? '' : `/${language}`;
   const pageUrl = `https://www.zont.cab${langPath}`;
-  const searchUrl = `https://www.zont.cab${langPath}/search?q={search_term_string}`;
   const serviceTypeLocalized = (
     language === 'ru' ? 'Премиум трансфер из аэропорта с частным водителем' :
     language === 'fr' ? 'Transfert aeroport premium avec chauffeur prive' :
@@ -766,8 +765,7 @@ const Home = () => {
             "@type": "WebSite",
             "name": "Zont",
             "url": pageUrl,
-            "inLanguage": language,
-            "potentialAction": { "@type": "SearchAction", "target": searchUrl, "query-input": "required name=search_term_string" }
+            "inLanguage": language
           },
           {
             "@context": "https://schema.org",
