@@ -180,3 +180,8 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 ### Session Jun 2026 — Fix GSC "Excluded by noindex tag" /fr/search?q={search_term_string}
 - Cause : JSON-LD SearchAction (Sitelinks Searchbox) dans Home.js annonçait /search?q=... alors qu'aucune route /search n'existe → Google crawlait le placeholder → 404 noindex.
 - Fix : potentialAction/SearchAction supprimé du schéma WebSite. Sitemap ✅ (aucune URL search), noindex ✅ (uniquement 404/confirmation/admin). Vérifié Playwright : plus de SearchAction dans le DOM.
+
+### Session Jun 2026 — My Account : annulation de réservation
+- BUG corrigé : canCancelBooking/shouldShowContactMessage utilisaient new Date() sur le format C# DD/MM/YYYY → dates invalides/inversées → message "Moins de 24h" affiché à tort. Passés sur parseCSharpDate + fallback date+time.
+- UI : bouton "Annuler la réservation" toujours visible ; grisé/désactivé (cursor-not-allowed) sous le message amber quand <24h du départ. data-testid: cancel-booking-{i} / cancel-booking-disabled-{i}.
+- Logique validée par tests node (48h→annulable, 10h→non, jour>12 ok). Client test sans réservations pour test UI complet.

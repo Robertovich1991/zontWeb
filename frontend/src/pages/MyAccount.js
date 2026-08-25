@@ -160,11 +160,14 @@ const MyAccount = () => {
     } catch {}
   };
 
+  const getRideDate = (booking) => {
+    const raw = booking.startDate || (booking.time ? `${booking.date} ${booking.time}` : booking.date);
+    return raw ? parseCSharpDate(raw) : null;
+  };
+
   const canCancelBooking = (booking) => {
-    const dateStr = booking.startDate || booking.date;
-    if (!dateStr) return false;
-    const rideDate = new Date(dateStr);
-    if (isNaN(rideDate.getTime())) return false;
+    const rideDate = getRideDate(booking);
+    if (!rideDate) return false;
     const now = new Date();
     return (rideDate.getTime() - now.getTime()) / (1000 * 60 * 60) > 24;
   };
@@ -172,10 +175,8 @@ const MyAccount = () => {
   const shouldShowContactMessage = (booking) => {
     const isCancelled = [4, 'Cancelled'].includes(booking.status) || [4, 'Cancelled'].includes(booking.auctionStatus);
     if (isCancelled) return false;
-    const dateStr = booking.startDate || booking.date;
-    if (!dateStr) return true; // No date = show contact message as fallback
-    const rideDate = new Date(dateStr);
-    if (isNaN(rideDate.getTime())) return true; // Invalid date = show contact message
+    const rideDate = getRideDate(booking);
+    if (!rideDate) return true; // No/invalid date = show contact message as fallback
     const now = new Date();
     const diff = (rideDate.getTime() - now.getTime()) / (1000 * 60 * 60);
     return diff > 0 && diff <= 24; // Less than 24h
@@ -431,10 +432,19 @@ const MyAccount = () => {
                             Annuler la reservation
                           </button>
                         ) : (
-                          <div className="w-full py-2.5 bg-amber-500/8 text-amber-400 rounded-xl text-xs border border-amber-500/15 flex items-center justify-center gap-2"
-                            data-testid={`cancel-contact-${i}`}>
-                            <PhoneCall className="w-3.5 h-3.5" strokeWidth={1.5} />
-                            Moins de 24h — contactez le service client pour annuler
+                          <div className="space-y-2">
+                            <div className="w-full py-2.5 bg-amber-500/8 text-amber-400 rounded-xl text-xs border border-amber-500/15 flex items-center justify-center gap-2"
+                              data-testid={`cancel-contact-${i}`}>
+                              <PhoneCall className="w-3.5 h-3.5" strokeWidth={1.5} />
+                              Moins de 24h — contactez le service client pour annuler
+                            </div>
+                            <button disabled
+                              data-testid={`cancel-booking-disabled-${i}`}
+                              title="Annulation en ligne indisponible a moins de 24h du depart"
+                              className="w-full py-2.5 bg-white/[0.03] text-slate-500 rounded-full text-xs font-medium border border-white/5 flex items-center justify-center gap-2 cursor-not-allowed opacity-60">
+                              <XCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
+                              Annuler la reservation
+                            </button>
                           </div>
                         )}
                       </div>
