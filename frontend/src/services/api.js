@@ -14,7 +14,7 @@ export const transferService = {
           { latitude: pickupCoords.latitude, longitude: pickupCoords.longitude },
           { latitude: dropoffCoords.latitude, longitude: dropoffCoords.longitude },
         ],
-        radius: 50,
+        radius: 50000,
       }),
     });
     if (!resp.ok) throw new Error('Failed to calculate price');

@@ -213,7 +213,7 @@ const CarSelection = () => {
     setLoading(true);
     setError(null);
     try {
-      const results = await transferService.calculatePreorderPrice(
+      const results = await transferService.calculatePrice(
         searchData.pickupCoords,
         searchData.dropoffCoords
       );

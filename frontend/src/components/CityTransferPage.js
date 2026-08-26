@@ -217,7 +217,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
       if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickupSafeRef.current.placeId || pickup.placeId);
       if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoffSafeRef.current.placeId || dropoff.placeId);
 
-      const vehicles = await transferService.calculatePreorderPrice(pickupCoords, dropoffCoords);
+      const vehicles = await transferService.calculatePrice(pickupCoords, dropoffCoords);
       setVehicleResults(vehicles);
       startBooking({
         pickup: pickupAddr,

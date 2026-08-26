@@ -192,3 +192,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - kiosk.py : champ "cheapest" (prix "À PARTIR DE") calculé sur maxAmount.
 - HourlyBooking inchangé (utilise perMinuteForTime/baseFare).
 - Vérifié Playwright : Bristol→Strasbourg affiche 801€ (max) au lieu de 834€ (min), tri croissant OK.
+
+### Session Jun 2026 — Pricing web = mobile (Distance + maxAmount)
+- api.js calculatePrice : radius 50 → 50000 (comme mobile). Callers transfert (CarSelection, Home ×2, CityTransferPage) basculés de calculatePreorderPrice → calculatePrice (/api/proxy/distance → C# /api/Distance). calculatePreorderPrice conservé (kiosk backend l'utilise côté serveur).
+- Vérifié Playwright : CDG→Beauvais Luxury Sedan = 187€ (fourchette mobile 185-197) au lieu de ~171€. Hourly/disposal inchangés.

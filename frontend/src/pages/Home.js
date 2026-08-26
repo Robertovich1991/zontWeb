@@ -408,7 +408,7 @@ const Home = () => {
     } catch { /* localStorage full or unavailable */ }
 
     try {
-      const vehicles = await transferService.calculatePreorderPrice(pickupCoords, dropoffCoords);
+      const vehicles = await transferService.calculatePrice(pickupCoords, dropoffCoords);
       setVehicleResults(vehicles);
       startBooking({
         pickup: pickupAddr,
@@ -702,7 +702,7 @@ const Home = () => {
     if (!search.pickupCoords?.latitude || !search.dropoffCoords?.latitude) return;
     setLoading(true);
     try {
-      const vehicles = await transferService.calculatePreorderPrice(search.pickupCoords, search.dropoffCoords);
+      const vehicles = await transferService.calculatePrice(search.pickupCoords, search.dropoffCoords);
       setVehicleResults(vehicles);
       startBooking({
         pickup: search.pickup,
