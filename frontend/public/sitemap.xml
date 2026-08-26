@@ -280,6 +280,21 @@
   <url><loc>https://www.zont.cab/taksi-iz-aeroporta-kanny</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/kann-odanavakayani-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
+  <!-- ==================== MARSEILLE ==================== -->
+  <url>
+    <loc>https://www.zont.cab/marseille</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/marseille"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/marseille"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/marseille"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/marseille"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/marseille"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url><loc>https://www.zont.cab/fr/marseille</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/ru/marseille</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/es/marseille</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
   <!-- ==================== BERLIN ==================== -->
   <url>
     <loc>https://www.zont.cab/berlin-airport-transfer</loc>

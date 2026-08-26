@@ -31,7 +31,7 @@ const trustLabels = {
   es: { trips: 'Viajes Realizados', available: 'Disponible', fixed: 'Precios Fijos', rating: 'Valoración', reviews: 'opiniones', trustTitle: 'La confianza de miles de viajeros', paySecure: 'Pago Seguro', payDesc: 'Todas las tarjetas aceptadas', verifiedDriver: 'Conductores Verificados', verifiedDesc: 'Profesionales con licencia', flightTrack: 'Seguimiento de Vuelo', flightDesc: 'Monitoreo en tiempo real', freeCancel: 'Cancelación Gratuita', cancelDesc: 'Hasta 24h antes' },
 };
 
-const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage, pageId, showDisposalCta, ogImage, extraSections }) => {
+const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage, pageId, showDisposalCta, ogImage, extraSections, hidePrices }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { startBooking, setVehicleResults } = useBooking();
@@ -298,6 +298,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             ...(() => {
               // Build offers only when at least one numeric price is available
               // (avoid Google "missing lowPrice/highPrice" warnings caused by Infinity/NaN serialized as null)
+              if (hidePrices) return {};
               const fallbackPrices = { sedan: 65, luxury: 95, minivan: 120, minibus: 180 };
               const source = (vehiclesPrices && Object.keys(vehiclesPrices).length > 0) ? vehiclesPrices : fallbackPrices;
               const validPrices = Object.values(source).filter((p) => typeof p === 'number' && isFinite(p) && p > 0);
@@ -644,10 +645,12 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                         <h3 className="text-lg font-bold text-gray-900">{v.name}</h3>
                         <p className="text-gray-500 text-sm">{v.desc}</p>
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-gray-900">{v.price}&euro;</div>
-                        <p className="text-xs text-gray-400">{c.allInclusive}</p>
-                      </div>
+                      {!hidePrices && (
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-gray-900">{v.price}&euro;</div>
+                          <p className="text-xs text-gray-400">{c.allInclusive}</p>
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center space-x-4 text-gray-600 text-sm mb-3">
                       <span className="flex items-center"><Users size={14} className="mr-1" aria-hidden="true" />{v.passengers} {c.passengers}</span>
@@ -672,13 +675,13 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
               <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">{c.popularRoutesTitle}</h2>
               <div className="space-y-3">
                 {routes.map((route, i) => (
-                  <button key={i} onClick={() => scrollToBooking(null)} className="w-full bg-[#1a2332] rounded-lg p-4 flex items-center justify-between border border-gray-700 hover:border-[#2ecc71] transition-colors group text-left" data-testid={`route-${i}`} aria-label={`${route.name} - ${c.fromLabel} ${route.price} euros`}>
+                  <button key={i} onClick={() => scrollToBooking(null)} className="w-full bg-[#1a2332] rounded-lg p-4 flex items-center justify-between border border-gray-700 hover:border-[#2ecc71] transition-colors group text-left" data-testid={`route-${i}`} aria-label={route.price ? `${route.name} - ${c.fromLabel} ${route.price} euros` : route.name}>
                     <div className="flex items-center">
                       <MapPin className="w-5 h-5 text-[#2ecc71] mr-3 flex-shrink-0" aria-hidden="true" />
                       <span className="text-white text-sm md:text-base">{route.name}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-[#2ecc71] font-bold text-lg">{c.fromLabel} {route.price}&euro;</span>
+                      {route.price ? <span className="text-[#2ecc71] font-bold text-lg">{c.fromLabel} {route.price}&euro;</span> : null}
                       <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-[#2ecc71]" aria-hidden="true" />
                     </div>
                   </button>

@@ -8,6 +8,7 @@ import { MapPin, Plane, ArrowRight, Star, Search, Shield, Clock, CreditCard } fr
 import { citiesData, countriesList } from '@/data/cities';
 
 const cityImages = {
+  marseille: 'https://images.unsplash.com/photo-1566838217578-1903568a76d9?w=600&q=75&auto=format',
   paris: 'https://images.unsplash.com/photo-1642947392578-b37fbd9a4d45?w=600&q=75&auto=format',
   cdg: 'https://images.unsplash.com/photo-1689772640958-7c186dbdfe26?w=600&q=75&auto=format',
   orly: 'https://images.unsplash.com/photo-1689772640958-7c186dbdfe26?w=600&q=75&auto=format',
@@ -126,7 +127,7 @@ const Countries = () => {
   const getCityUrl = (cityId) => {
     const city = citiesData[cityId];
     if (!city) return '#';
-    return language === 'fr' ? city.urlFr : language === 'ru' ? city.urlRu : language === 'hy' ? (city.urlHy || city.urlEn) : city.urlEn;
+    return language === 'fr' ? city.urlFr : language === 'ru' ? city.urlRu : language === 'es' ? (city.urlEs || city.urlEn) : language === 'hy' ? (city.urlHy || city.urlEn) : city.urlEn;
   };
 
   const filteredCountries = countriesList.map(country => ({
@@ -239,7 +240,7 @@ const Countries = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center text-gray-400 text-xs">
                               <MapPin className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
-                              <span>{city.airports.slice(0, 2).join(', ')}{city.airports.length > 2 ? '...' : ''}</span>
+                              <span>{city.desc || `${city.airports.slice(0, 2).join(', ')}${city.airports.length > 2 ? '...' : ''}`}</span>
                             </div>
                             <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-[#2ecc71] transition-colors" aria-hidden="true" />
                           </div>

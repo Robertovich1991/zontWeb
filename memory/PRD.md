@@ -196,3 +196,10 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 ### Session Jun 2026 — Pricing web = mobile (Distance + maxAmount)
 - api.js calculatePrice : radius 50 → 50000 (comme mobile). Callers transfert (CarSelection, Home ×2, CityTransferPage) basculés de calculatePreorderPrice → calculatePrice (/api/proxy/distance → C# /api/Distance). calculatePreorderPrice conservé (kiosk backend l'utilise côté serveur).
 - Vérifié Playwright : CDG→Beauvais Luxury Sedan = 187€ (fourchette mobile 185-197) au lieu de ~171€. Hourly/disposal inchangés.
+
+### Session Jun 2026 — Landing page Marseille (SEO 4 langues)
+- Nouvelle page /pages/cities/Marseille.js via CityTransferPage : URLs /marseille (EN), /fr/marseille, /ru/marseille, /es/marseille. H1 uniques par langue, canonicals auto-référentes, hreflang en/fr/ru/es/x-default, meta descriptions dédiées.
+- FAQ 7 questions traduites + JSON-LD FAQPage + BreadcrumbList (injectés via extraSections). LocalBusiness/Product sans notes/prix inventés.
+- CityTransferPage : nouveau prop hidePrices (masque prix véhicules + offers JSON-LD) + prix de routes optionnels (route.price facultatif). Aucun prix inventé (pricing C# ne couvre pas Marseille : /api/proxy/distance renvoie une erreur pour MRS).
+- /countries : Marseille ajouté (cities.js + countriesList France), desc "Transfer company Marseille", image Vieux-Port, support urlEs dans getCityUrl. Sitemap.xml : 4 URLs Marseille + hreflang.
+- Vérifié Playwright : 4 pages OK (H1/canonical/FAQ/schémas), carte Marseille sur /countries OK.

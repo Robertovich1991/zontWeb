@@ -99,6 +99,19 @@ export const citiesData = {
     urlFr: '/transfert-aeroport-cote-azur',
     urlRu: '/taksi-iz-aeroporta-lazurnyy-bereg',
   },
+  marseille: {
+    id: 'marseille',
+    country: 'France',
+    nameEn: 'Marseille',
+    nameFr: 'Marseille',
+    nameRu: 'Марсель',
+    desc: 'Transfer company Marseille',
+    airports: ['Marseille Provence (MRS)'],
+    urlEn: '/marseille',
+    urlFr: '/fr/marseille',
+    urlRu: '/ru/marseille',
+    urlEs: '/es/marseille',
+  },
   disneyland: {
     id: 'disneyland',
     country: 'France',
@@ -200,7 +213,7 @@ export const citiesData = {
 export const countriesList = [
   {
     name: 'France',
-    cities: ['paris', 'cdg', 'orly', 'beauvais', 'paristrainstation', 'nice', 'cannes', 'cotedazur', 'disneyland']
+    cities: ['paris', 'cdg', 'orly', 'beauvais', 'paristrainstation', 'nice', 'cannes', 'cotedazur', 'marseille', 'disneyland']
   },
   {
     name: 'Monaco',

@@ -128,6 +128,7 @@ const HotelGuard = ({ children }) => {
 const NiceTransfer = lazy(() => import("@/pages/cities/Nice"));
 const MonacoTransfer = lazy(() => import("@/pages/cities/Monaco"));
 const CannesTransfer = lazy(() => import("@/pages/cities/Cannes"));
+const MarseilleTransfer = lazy(() => import("@/pages/cities/Marseille"));
 const BerlinTransfer = lazy(() => import("@/pages/cities/Berlin"));
 const MunichTransfer = lazy(() => import("@/pages/cities/Munich"));
 const RomeTransfer = lazy(() => import("@/pages/cities/Rome"));
@@ -360,6 +361,12 @@ function App() {
                   <Route path="/transfert-aeroport-monaco" element={<MonacoTransfer />} />
                   <Route path="/taksi-iz-aeroporta-monako" element={<MonacoTransfer />} />
                   <Route path="/monako-odanavakayani-transfer" element={<MonacoTransfer />} />
+                  {/* Marseille */}
+                  <Route path="/marseille" element={<MarseilleTransfer />} />
+                  <Route path="/fr/marseille" element={<MarseilleTransfer />} />
+                  <Route path="/ru/marseille" element={<MarseilleTransfer />} />
+                  <Route path="/es/marseille" element={<MarseilleTransfer />} />
+
                   {/* Cannes */}
                   <Route path="/cannes-airport-transfer" element={<CannesTransfer />} />
                   <Route path="/transfert-aeroport-cannes" element={<CannesTransfer />} />
