@@ -424,7 +424,7 @@ const KioskPage = () => {
     try {
       const resp = await fetch(`${API}/api/kiosk/book`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hotelSlug: slug, clientName: clientName.trim(), clientPhone: fullPhone, destination: selectedDest.name, destinationAddress: selectedDest.address, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.minAmount, passengers: 1 }),
+        body: JSON.stringify({ hotelSlug: slug, clientName: clientName.trim(), clientPhone: fullPhone, destination: selectedDest.name, destinationAddress: selectedDest.address, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.maxAmount, passengers: 1 }),
       });
       if (!resp.ok) throw new Error();
       const data = await resp.json();
@@ -990,7 +990,7 @@ const KioskPage = () => {
           <div style={{ animation: 'fadeUp 0.3s ease-out' }}>
             <h2 className="text-3xl lg:text-4xl font-bold text-center mb-8">{t.chooseVehicle}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-[1600px] mx-auto">
-              {[...(selectedDest?.vehicles || [])].sort((a, b) => (a.minAmount || 0) - (b.minAmount || 0)).map((v, i) => {
+              {[...(selectedDest?.vehicles || [])].sort((a, b) => (a.maxAmount || 0) - (b.maxAmount || 0)).map((v, i) => {
                 const imgUrl = transferService.getVehicleImageUrl(v.imagePath);
                 return (
                   <button
@@ -1014,7 +1014,7 @@ const KioskPage = () => {
                     </div>
                     <div className="border-t border-white/[0.06] pt-4">
                       <p className="text-[10px] uppercase tracking-widest text-gray-500 font-semibold mb-1">{t.from}</p>
-                      <p className="text-[#2ecc71] font-black text-5xl lg:text-6xl xl:text-7xl leading-none">{v.minAmount}<span className="text-2xl">&euro;</span></p>
+                      <p className="text-[#2ecc71] font-black text-5xl lg:text-6xl xl:text-7xl leading-none">{v.maxAmount}<span className="text-2xl">&euro;</span></p>
                     </div>
                   </button>
                 );
@@ -1031,7 +1031,7 @@ const KioskPage = () => {
             <div className="bg-[#111827]/60 border border-white/[0.06] rounded-xl p-4 mb-5 flex items-center justify-between text-sm">
               <div><p className="text-gray-500">{t.towards}</p><p className="text-white font-semibold">{selectedDest?.name}</p></div>
               <div><p className="text-gray-500">{date} {time}</p><p className="text-white font-semibold">{selectedVehicle?.tripType}</p></div>
-              <p className="text-[#2ecc71] font-bold text-2xl">{selectedVehicle?.minAmount}<span className="text-sm">&euro;</span></p>
+              <p className="text-[#2ecc71] font-bold text-2xl">{selectedVehicle?.maxAmount}<span className="text-sm">&euro;</span></p>
             </div>
             <div className="space-y-4">
               <div>
@@ -1117,7 +1117,7 @@ const KioskPage = () => {
                       <span className="flex items-center gap-1"><User className="w-3.5 h-3.5" />{clientName}</span>
                     </p>
                   </div>
-                  <p className="text-[#2ecc71] font-black text-3xl lg:text-4xl leading-none">{selectedVehicle?.minAmount}<span className="text-lg">&euro;</span></p>
+                  <p className="text-[#2ecc71] font-black text-3xl lg:text-4xl leading-none">{selectedVehicle?.maxAmount}<span className="text-lg">&euro;</span></p>
                 </div>
               </div>
 
@@ -1138,7 +1138,7 @@ const KioskPage = () => {
                     </div>
                     <h3 className="text-3xl lg:text-4xl font-bold text-white mb-2">Présentez votre carte</h3>
                     <p className="text-gray-300 text-lg mb-1">sur le terminal de paiement</p>
-                    <p className="text-[#2ecc71] font-black text-6xl lg:text-7xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
+                    <p className="text-[#2ecc71] font-black text-6xl lg:text-7xl mt-4">{selectedVehicle?.maxAmount}&euro;</p>
                     <p className="text-gray-500 text-sm mt-4">Sans contact, insertion ou Apple Pay</p>
                     {/* Accepted card brands */}
                     <div className="flex flex-wrap items-center justify-center gap-2 mt-6" data-testid="accepted-card-brands">
@@ -1170,7 +1170,7 @@ const KioskPage = () => {
                     </div>
                     <h3 className="text-4xl lg:text-5xl font-black text-[#2ecc71] mb-2">Paiement accepté !</h3>
                     <p className="text-white text-lg lg:text-xl">Votre chauffeur arrive bientôt</p>
-                    <p className="text-[#2ecc71] font-bold text-3xl lg:text-4xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
+                    <p className="text-[#2ecc71] font-bold text-3xl lg:text-4xl mt-4">{selectedVehicle?.maxAmount}&euro;</p>
                     <button onClick={resetKiosk} className="mt-8 bg-[#111827] border border-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/[0.05] transition-colors">
                       <RotateCcw className="w-4 h-4 inline mr-2" />{t.newBooking}
                     </button>

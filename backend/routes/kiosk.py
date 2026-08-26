@@ -186,7 +186,7 @@ async def get_kiosk_prices(slug: str):
                     results.append({
                         **dest,
                         "vehicles": vehicles,
-                        "cheapest": min((v["minAmount"] for v in vehicles), default=0),
+                        "cheapest": min((v["maxAmount"] for v in vehicles), default=0),
                     })
                 else:
                     logger.warning(f"C# pricing for {dest['name']}: HTTP {resp.status_code}")
@@ -297,7 +297,7 @@ async def get_kiosk_hourly_price(slug: str, req: KioskHourlyPriceRequest):
         "lng": hotel["lng"],
         "hours": req.hours,
         "vehicles": vehicles,
-        "cheapest": min((v["minAmount"] for v in vehicles), default=0),
+        "cheapest": min((v["maxAmount"] for v in vehicles), default=0),
     }
 
 
@@ -341,7 +341,7 @@ async def get_kiosk_custom_price(slug: str, req: KioskCustomPriceRequest):
                     "lat": req.destinationLat,
                     "lng": req.destinationLng,
                     "vehicles": vehicles,
-                    "cheapest": min((v["minAmount"] for v in vehicles), default=0),
+                    "cheapest": min((v["maxAmount"] for v in vehicles), default=0),
                 }
             raise HTTPException(502, "Pricing service unavailable")
     except HTTPException:

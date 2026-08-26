@@ -244,11 +244,11 @@ const CarSelection = () => {
   const applyDiscount = (price) => activeDiscount > 0 ? Math.round(price * (1 - activeDiscount / 100)) : Math.round(price);
 
   const handleSelectCar = (vehicle) => {
-    const finalPrice = applyDiscount(vehicle.minAmount);
+    const finalPrice = applyDiscount(vehicle.maxAmount);
     selectCar({
       tripType: vehicle.tripType,
       price: finalPrice,
-      originalPrice: Math.round(vehicle.minAmount),
+      originalPrice: Math.round(vehicle.maxAmount),
       maxPrice: activeDiscount > 0 ? applyDiscount(vehicle.maxAmount) : Math.round(vehicle.maxAmount),
       duration: vehicle.duration,
       distance: vehicle.distance,
@@ -297,7 +297,7 @@ const CarSelection = () => {
   const rawVehicles = vehicleResults || [];
   // Keep the first vehicle (API-recommended) as-is, sort the rest by price ascending (low → high)
   const vehicles = rawVehicles.length > 1
-    ? [rawVehicles[0], ...rawVehicles.slice(1).sort((a, b) => (a.minAmount || 0) - (b.minAmount || 0))]
+    ? [rawVehicles[0], ...rawVehicles.slice(1).sort((a, b) => (a.maxAmount || 0) - (b.maxAmount || 0))]
     : rawVehicles;
   const duration = vehicles.length > 0 ? vehicles[0].duration : null;
   const distance = vehicles.length > 0 ? vehicles[0].distance : null;
@@ -449,7 +449,7 @@ const CarSelection = () => {
               {vehicles.map((vehicle, index) => {
                 const isRecommended = index === 0;
                 const imageUrl = transferService.getVehicleImageUrl(vehicle.imagePath);
-                const price = vehicle.minAmount;
+                const price = vehicle.maxAmount;
                 const tripType = (vehicle.tripType || '').trim();
                 // Override passenger counts until C# API is updated
                 const passengerOverrides = { 'Regular Zont': 3, 'Shuttle private 8 pers.': 8 };

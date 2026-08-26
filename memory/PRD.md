@@ -185,3 +185,10 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - BUG corrigé : canCancelBooking/shouldShowContactMessage utilisaient new Date() sur le format C# DD/MM/YYYY → dates invalides/inversées → message "Moins de 24h" affiché à tort. Passés sur parseCSharpDate + fallback date+time.
 - UI : bouton "Annuler la réservation" toujours visible ; grisé/désactivé (cursor-not-allowed) sous le message amber quand <24h du départ. data-testid: cancel-booking-{i} / cancel-booking-disabled-{i}.
 - Logique validée par tests node (48h→annulable, 10h→non, jour>12 ok). Client test sans réservations pour test UI complet.
+
+### Session Jun 2026 — Prix web alignés sur mobile (maxAmount)
+- CarSelection.js : sélection, tri et affichage passés de minAmount → maxAmount (promo appliquée sur maxAmount, clientPrice cohérent).
+- KioskPage.js : affichages, tri et prix envoyé à /api/kiosk/book passés sur maxAmount.
+- kiosk.py : champ "cheapest" (prix "À PARTIR DE") calculé sur maxAmount.
+- HourlyBooking inchangé (utilise perMinuteForTime/baseFare).
+- Vérifié Playwright : Bristol→Strasbourg affiche 801€ (max) au lieu de 834€ (min), tri croissant OK.
