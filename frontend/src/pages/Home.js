@@ -743,11 +743,12 @@ const Home = () => {
         canonical={`https://www.zont.cab${homeSeoUrls[language] || homeSeoUrls.en}`}
         ogImage="https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=1200&q=80&auto=format"
         hreflang={[
-          { lang: 'fr', href: 'https://www.zont.cab/' },
           { lang: 'en', href: 'https://www.zont.cab/' },
-          { lang: 'ru', href: 'https://www.zont.cab/' },
-          { lang: 'hy', href: 'https://www.zont.cab/' },
+          { lang: 'fr', href: 'https://www.zont.cab/fr' },
+          { lang: 'ru', href: 'https://www.zont.cab/ru' },
+          { lang: 'hy', href: 'https://www.zont.cab/hy' },
           { lang: 'es', href: 'https://www.zont.cab/es' },
+          { lang: 'x-default', href: 'https://www.zont.cab/' },
         ]}
         jsonLd={[
           {

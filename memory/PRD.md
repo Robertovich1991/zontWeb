@@ -211,3 +211,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ### Session Jun 2026 — Upload admin migré vers Emergent Object Storage
 - admin_upload.py réécrit : POST /api/admin/upload → put_object (bucket zontcab/uploads/), GET /api/uploads/{filename} servi depuis l'object storage avec fallback disque legacy. Mount StaticFiles retiré de server.py. Testé : PUT/GET OK, 404 OK. Nécessite EMERGENT_LLM_KEY en prod.
+
+### Session Jun 2026 — Fix hreflang Home (P0 de l'audit SEO)
+- Home.js : bloc hreflang corrigé — en→/, fr→/fr, ru→/ru, hy→/hy, es→/es + x-default→/. Identique (réciproque) sur les 5 versions, aligné avec le sitemap. Canonicals auto-référents déjà OK. Vérifié Playwright sur les 5 URLs + visiteur neuf (Googlebot-like) : / reste / avec canonical /.
+- Audit restant non appliqué : P1 sitemap x-default (21 entrées villes pointent FR/RU au lieu de EN), P2 doublon /es dans sitemap, P3 URLs dédiées /fr pour countries/help/about.
