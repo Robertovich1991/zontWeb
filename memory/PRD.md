@@ -232,3 +232,8 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Help.js : bloc hy translittéré remplacé par du vrai arménien + nouveau bloc es (8 FAQ + labels).
 - Nouvelles URLs : /es/privacy, /hy/privacy, /es/terms, /hy/terms, /es/help (routes App.js + MULTI_LANG_URLS). Clusters hreflang désormais à 5 langues sur privacy/terms/help. Sitemap régénéré par script (clusters + nouvelles entrées, XML validé).
 - Vérifié Playwright : 5 URLs OK (H1 dans la bonne langue, canonical auto-référent, cluster en/fr/ru/hy/es + x-default).
+
+### Session Jun 2026 — Sitemap x-default alignés + doublon /es supprimé (Issues 1 & 2 audit SEO)
+- 30 entrées corrigées par script : x-default pointait vers l'URL FR au lieu de l'URL EN (pages villes/aéroports, gares, VTC 7/8 places, B2B, kiosk, driver-at-disposal, /es/traslado-aeropuerto-paris).
+- Entrée /es dupliquée (cluster incomplet es+x-default seul) supprimée ; l'entrée /es complète conservée.
+- Validation : XML parse OK, 0 mismatch x-default vs en, 0 entrée sans en, 0 doublon, sitemap servi vérifié via curl. Aligné avec la logique on-page (SEO.js / CityTransferPage x-default=EN).
