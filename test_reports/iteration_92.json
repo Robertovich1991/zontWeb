@@ -1,0 +1,33 @@
+{
+  "summary": "Frontend-only SEO/multi-language routing test for new per-language indexable URLs (privacy/terms/help/about/countries/hourly). 12 of 13 flows pass. Verified: content renders in correct language, self-referencing canonicals, hreflang clusters (per-page allow-list including forbidden-lang omission on /ru/help, x-default -> EN), legacy /cgv & /es/destinos preserved, header/footer language-aware internal links on /fr/about, base EN URL redirect using localStorage preference, language switcher FR -> RU works, regression pages (/, /chauffeur-mis-a-disposition, /fr/blog) still load. CONFIRMED BUG: language switcher cannot switch TO English from any non-EN static multi-language page (ping-pongs back).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "useLangRouting hook (/app/frontend/src/utils/useLangRouting.js) + Header handleLanguageChange",
+        "issue": "Switching language to English from a non-EN URL (e.g. /fr/privacy, /ru/about, /fr/countries, etc.) does NOT navigate to the EN URL. URL stays at the non-EN path and localStorage.language is reverted to the non-EN code. RCA: When user clicks English in the header dropdown, handleLanguageChange calls changeLanguage('en') then navigate('/privacy'). BEFORE the navigate takes effect, the STILL-mounted non-EN page's useLangRouting effect fires (deps [urlLang, language] with urlLang='fr' and new language='en') and hits the `else if (language !== urlLang) changeLanguage(urlLang)` branch, which resets language back to 'fr' (and writes 'fr' to localStorage). Once the router lands on /privacy, the target page's useLangRouting sees urlLang='en', language='fr', map['fr']='/fr/privacy' and navigates BACK to /fr/privacy. Result: infinite bounce back to the source URL. Switching to any other non-EN language (fr->ru, ru->fr, etc.) works because the target URL's urlLang matches the intended new language, so no bounce.",
+        "selector": "button:has(svg.lucide-globe) -> dropdown 'English'",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix language switcher to reliably switch to English from any non-EN static-multi-lang URL. Suggested fixes (pick one): (a) In useLangRouting, do NOT auto-sync language back to urlLang when language just became 'en' and there is a pending navigation — e.g. only sync if the URL is stable (use a small useEffect that reads location.pathname and skips when language change was user-initiated). (b) Simpler: change the sync branch to also call navigate(map[language]) instead of changeLanguage(urlLang) so language always wins over stale URL; but only when language is explicitly set. (c) Cleanest: in Header.handleLanguageChange, call navigate(translatedUrl) FIRST, then changeLanguage(langCode) after route change (e.g. inside a setTimeout(..., 0) or useEffect on location). (d) In useLangRouting, add a guard: if urlLang !== 'en' && language === 'en', do nothing (let the base-EN redirect on the destination page decide) — this breaks the sync loop. Recommend option (d) combined with keeping the base-EN redirect only when there is NO stored/explicit language preference in-session (e.g. use a ref-based `userJustChangedLanguage` flag to skip one cycle)."
+  ],
+  "critical_code_review_comments": [
+    "useLangRouting.js: The two branches (`if urlLang==='en' redirect to preferred lang` and `else changeLanguage(urlLang)`) fight each other during a client-side language switch to English. Needs a flag to distinguish 'URL-driven' vs 'user-driven' language changes.",
+    "LanguageContext.js initial useEffect only runs once on mount. If user navigates client-side from /fr/xxx to / (EN root), context still keeps 'fr'. This is desired for the base-EN redirect but couples with the bug above.",
+    "MULTI_LANG_URLS.privacy has only en/fr/ru — no hy/es. Language switcher from /fr/privacy to Armenian/Spanish will call buildTranslatedUrl which returns null; user stays put with language changed but URL unchanged. Consider adding a graceful fallback (e.g. redirect to /hy or / when target-lang privacy URL doesn't exist) OR hiding hy/es entries from the switcher on privacy-only pages. Same applies to /terms (no hy/es) and /help (no es).",
+    "Header.js still has many hard-coded per-language ternaries for disposal / vtc-7 / vtc-8 / partners links (lines 111, 120, 128, 159, 270-272). Recommend moving these into MULTI_LANG_URLS / langUrl() so link mapping stays DRY, matching the new pattern used for countries/help/hourly/about."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only)", "frontend": "92% (12/13 flows)"},
+  "seed_data_creation": "None",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "SEO tags (canonical + hreflang) are all correct for every tested URL — do not re-test those unless SEO.js changes. The single confirmed bug is the language-switcher -> English round-trip; reproduce by: clear localStorage, open /fr/privacy (or /ru/about), open globe dropdown in header, click 'English' -> URL stays on /fr/privacy and content stays French. Compare with clicking 'Русский' from /fr/privacy which correctly navigates to /ru/privacy. Base-EN redirect (localStorage=fr + goto /privacy -> /fr/privacy) works and should be preserved by any fix.",
+  "rca of the issue": "See ui_bugs[0].issue — race between changeLanguage() in Header.handleLanguageChange and useLangRouting effect on the source page which syncs language back to source urlLang before navigate lands on target. Then destination page's base-EN branch redirects back to source. Only manifests when target language is 'en'."
+}

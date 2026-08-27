@@ -44,6 +44,72 @@ export const MULTI_LANG_URLS = {
     hy: '/hy/blog',
     es: '/es/blog',
   },
+  countries: {
+    en: '/countries',
+    fr: '/fr/countries',
+    ru: '/ru/countries',
+    hy: '/hy/countries',
+    es: '/es/destinos',
+  },
+  help: {
+    en: '/help',
+    fr: '/fr/help',
+    ru: '/ru/help',
+    hy: '/hy/help',
+  },
+  about: {
+    en: '/about',
+    fr: '/fr/about',
+    ru: '/ru/about',
+    hy: '/hy/about',
+    es: '/es/about',
+  },
+  hourly: {
+    en: '/hourly-booking',
+    fr: '/fr/hourly-booking',
+    ru: '/ru/hourly-booking',
+    hy: '/hy/hourly-booking',
+    es: '/es/hourly-booking',
+  },
+  privacy: {
+    en: '/privacy',
+    fr: '/fr/privacy',
+    ru: '/ru/privacy',
+  },
+  terms: {
+    en: '/terms',
+    fr: '/cgv',
+    ru: '/ru/terms',
+  },
+};
+
+// Static pages handled generically (single component, per-language URL).
+export const STATIC_PAGE_KEYS = ['countries', 'help', 'about', 'hourly', 'privacy', 'terms'];
+
+const BASE_URL = 'https://www.zont.cab';
+
+// Self-referencing canonical for a page in a given language.
+export const buildCanonicalUrl = (pageKey, lang) => {
+  const map = MULTI_LANG_URLS[pageKey];
+  const path = map[lang] || map.en;
+  return `${BASE_URL}${path === '/' ? '' : path}`;
+};
+
+// Full hreflang cluster (all languages + x-default -> en).
+export const buildHreflangCluster = (pageKey) => {
+  const map = MULTI_LANG_URLS[pageKey];
+  const cluster = Object.entries(map).map(([lang, path]) => ({
+    lang,
+    href: `${BASE_URL}${path === '/' ? '' : path}`,
+  }));
+  cluster.push({ lang: 'x-default', href: `${BASE_URL}${map.en === '/' ? '' : map.en}` });
+  return cluster;
+};
+
+// Internal link helper: URL of a page for the active language (fallback en).
+export const langUrl = (pageKey, lang) => {
+  const map = MULTI_LANG_URLS[pageKey];
+  return map[lang] || map.en;
 };
 
 // Vehicle sub-slug maps for the disposal pages (used to build full sub-paths).
@@ -133,6 +199,13 @@ export const matchPathToLanguage = (pathname) => {
     return { pageKey: 'blogArticle', language: lang, slug };
   }
 
+  // 7) simple static multi-language pages (countries, help, about, hourly, privacy, terms)
+  for (const key of STATIC_PAGE_KEYS) {
+    for (const [lang, path] of Object.entries(MULTI_LANG_URLS[key])) {
+      if (clean === path) return { pageKey: key, language: lang };
+    }
+  }
+
   return null;
 };
 
@@ -169,6 +242,10 @@ export const buildTranslatedUrl = (pathname, targetLang) => {
     // The article slugs differ per language (e.g. -fr / -es suffix) so a direct
     // jump would 404. The blog index is a graceful landing page.
     return MULTI_LANG_URLS.blog[targetLang] || MULTI_LANG_URLS.blog.en;
+  }
+  if (STATIC_PAGE_KEYS.includes(pageKey)) {
+    const map = MULTI_LANG_URLS[pageKey];
+    return map[targetLang] || map.en;
   }
   return null;
 };

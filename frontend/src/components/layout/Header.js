@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Menu, X, ChevronDown, Globe, Phone } from 'lucide-react';
 import AuthModal from '@/components/auth/AuthModal';
-import { buildTranslatedUrl } from '@/utils/pageUrlMaps';
+import { buildTranslatedUrl, langUrl } from '@/utils/pageUrlMaps';
 
 const Header = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -90,7 +90,7 @@ const Header = () => {
                 {t('nav.becomeClient')}
               </Link>
               <Link
-                to={language === 'es' ? '/es/destinos' : '/countries'}
+                to={langUrl('countries', language)}
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
                 {t('nav.countries')}
@@ -136,13 +136,13 @@ const Header = () => {
                 )}
               </div>
               <Link
-                to="/help"
+                to={langUrl('help', language)}
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
                 {t('nav.help')}
               </Link>
               <Link
-                to="/hourly-booking"
+                to={langUrl('hourly', language)}
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
                 data-testid="nav-hourly"
               >
@@ -259,7 +259,7 @@ const Header = () => {
                 {t('nav.becomeClient')}
               </Link>
               <Link
-                to={language === 'es' ? '/es/destinos' : '/countries'}
+                to={langUrl('countries', language)}
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >
@@ -272,14 +272,14 @@ const Header = () => {
                 <Link to={language === 'en' ? '/vtc-8-seats' : language === 'ru' ? '/vtc-8-mest' : language === 'hy' ? '/vtc-8-tegh' : '/vtc-8-places'} onClick={() => setMobileMenuOpen(false)} className="block text-white hover:text-gray-300 py-1 text-sm" data-testid="nav-vtc-8-mobile">{language === 'en' ? 'Minibus 8 Seats' : language === 'ru' ? 'Минибус 8 Мест' : language === 'hy' ? 'VTC 8 Տեղ' : 'VTC 8 Places'}</Link>
               </div>
               <Link
-                to="/help"
+                to={langUrl('help', language)}
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >
                 {t('nav.help')}
               </Link>
               <Link
-                to="/hourly-booking"
+                to={langUrl('hourly', language)}
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
                 data-testid="nav-hourly-mobile"

@@ -215,3 +215,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 ### Session Jun 2026 — Fix hreflang Home (P0 de l'audit SEO)
 - Home.js : bloc hreflang corrigé — en→/, fr→/fr, ru→/ru, hy→/hy, es→/es + x-default→/. Identique (réciproque) sur les 5 versions, aligné avec le sitemap. Canonicals auto-référents déjà OK. Vérifié Playwright sur les 5 URLs + visiteur neuf (Googlebot-like) : / reste / avec canonical /.
 - Audit restant non appliqué : P1 sitemap x-default (21 entrées villes pointent FR/RU au lieu de EN), P2 doublon /es dans sitemap, P3 URLs dédiées /fr pour countries/help/about.
+
+### Session Jun 2026 — URLs dédiées par langue pour pages statiques (P3 audit SEO)
+- Nouveau système générique : MULTI_LANG_URLS étendu (countries/help/about/hourly/privacy/terms) dans pageUrlMaps.js + helpers buildCanonicalUrl, buildHreflangCluster, langUrl. Nouveau hook useLangRouting.js (langue forcée par URL + redirect base EN → URL de préférence).
+- Nouvelles routes indexables : /fr|ru|hy/help, /fr|ru|hy|es/about, /fr|ru|hy/countries (es=/es/destinos conservé), /fr|ru|hy|es/hourly-booking, /fr|ru/privacy, /ru/terms (fr=/cgv conservé). Chaque URL : contenu dans la langue, canonical auto-référent, cluster hreflang + x-default→EN.
+- Privacy/Terms : clusters limités à en/fr/ru (traductions hy placeholder "Delays" supprimées, es inexistante). Help : en/fr/ru/hy (hy = translittération latine, à retraduire).
+- Header/Footer : liens help/hourly/countries/about/terms/privacy dynamiques via langUrl(). Sélecteur de langue navigue vers l'URL équivalente.
+- sitemap.xml : entrées + clusters xhtml:link ajoutés pour les 6 groupes (about et hourly-booking étaient absents du sitemap).
+- Testing agent : 12/13 flux OK ; bug "retour vers English" (course changeLanguage/navigate) corrigé dans useLangRouting (sync URL sur pathname uniquement) puis re-vérifié Playwright.
+- Fix lint : AuthModal.js setMode → onSwitchMode.
+- Restant : traductions es (privacy/terms/help) et hy propre (privacy/terms/help) pour compléter les clusters ; P1 sitemap x-default villes ; P2 doublon /es sitemap.

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { useLanguage } from '@/context/LanguageContext';
+import { buildCanonicalUrl, buildHreflangCluster } from '@/utils/pageUrlMaps';
+import { useLangRouting } from '@/utils/useLangRouting';
 import { Mail, Phone, MapPin, Send, ChevronRight, Headphones, Clock, Shield, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -148,7 +149,7 @@ const content = {
 const iconMap = { headphones: Headphones, clock: Clock, shield: Shield };
 
 const Help = () => {
-  const { language } = useLanguage();
+  const language = useLangRouting('help');
   const c = content[language] || content.en;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -175,7 +176,8 @@ const Help = () => {
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
-        canonical="https://www.zont.cab/help"
+        canonical={buildCanonicalUrl('help', language)}
+        hreflang={buildHreflangCluster('help')}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "FAQPage",

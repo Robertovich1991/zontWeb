@@ -170,7 +170,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
           const payload = JSON.parse(atob(idToken.split('.')[1]));
           setFormData(prev => ({ ...prev, email: payload.email || '' }));
         } catch {}
-        setMode('signin');
+        onSwitchMode('signin');
         setStep('form');
         toast.error('Cet email est deja enregistre. Connectez-vous avec votre mot de passe.');
       } else {
@@ -205,7 +205,7 @@ const AuthModal = ({ isOpen, onClose, mode, onSwitchMode }) => {
             .catch(error => {
               const detail = error?.response?.data?.detail || '';
               if (typeof detail === 'string' && detail.includes('already registered')) {
-                setMode('signin');
+                onSwitchMode('signin');
                 setStep('form');
                 toast.error('Cet email est deja enregistre. Connectez-vous avec votre mot de passe.');
               } else {

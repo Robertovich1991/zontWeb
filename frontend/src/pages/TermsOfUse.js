@@ -1,9 +1,9 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { useLanguage } from '@/context/LanguageContext';
+import { buildCanonicalUrl, buildHreflangCluster } from '@/utils/pageUrlMaps';
+import { useLangRouting } from '@/utils/useLangRouting';
 
 const content = {
   fr: {
@@ -102,33 +102,15 @@ const content = {
       { title: '23. Применимое право', text: 'Настоящие Условия регулируются французским правом.\n\nСпоры решаются мирным путем или через компетентные суды.' },
     ],
   },
-  hy: {
-    seoTitle: 'Օգտագործման պայմաններ | Zont.cab',
-    seoDesc: ' Delays.',
-    lastUpdate: 'Delays: 14 delays 2026',
-    title: 'Delays',
-    intro: 'Delays www.zont.cab.',
-    sections: [
-      { title: '1. Delays', text: 'Zont Technologies Inc.\nEmail: contact@zont.cab\nPhone: +33 7 83 77 70 27' },
-    ],
-  },
 };
 
 const TermsOfUse = () => {
-  const { language } = useLanguage();
-  const location = useLocation();
-  const isCgv = location.pathname === '/cgv';
-  const c = isCgv ? content.fr : (content[language] || content.fr);
-  const canonical = isCgv ? 'https://www.zont.cab/cgv' : 'https://www.zont.cab/terms';
-  const hreflang = [
-    { lang: 'fr', href: 'https://www.zont.cab/cgv' },
-    { lang: 'en', href: 'https://www.zont.cab/terms' },
-    { lang: 'x-default', href: 'https://www.zont.cab/terms' },
-  ];
+  const lang = useLangRouting('terms');
+  const c = content[lang] || content.en;
 
   return (
     <div className="min-h-screen flex flex-col bg-white" data-testid="terms-page">
-      <SEO title={c.seoTitle} description={c.seoDesc} canonical={canonical} hreflang={hreflang} />
+      <SEO title={c.seoTitle} description={c.seoDesc} canonical={buildCanonicalUrl('terms', lang)} hreflang={buildHreflangCluster('terms')} />
       <Header />
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-16">
         <p className="text-sm text-gray-500 mb-2">{c.lastUpdate}</p>

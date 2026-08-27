@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
+import { buildCanonicalUrl, buildHreflangCluster } from '@/utils/pageUrlMaps';
+import { useLangRouting } from '@/utils/useLangRouting';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import transferService from '@/services/api';
 import { Clock, MapPin, Calendar, CreditCard, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
@@ -23,7 +24,7 @@ const T = {
 const HOURS_OPTIONS = [4, 6, 8, 10, 12];
 
 const HourlyBooking = () => {
-  const { language } = useLanguage();
+  const language = useLangRouting('hourly');
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -187,7 +188,8 @@ const HourlyBooking = () => {
       <SEO
         title={`${t.title} | ZONT Cab`}
         description={t.sub}
-        canonical="https://www.zont.cab/hourly-booking"
+        canonical={buildCanonicalUrl('hourly', language)}
+        hreflang={buildHreflangCluster('hourly')}
       />
       <Header />
 

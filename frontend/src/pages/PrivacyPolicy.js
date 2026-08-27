@@ -2,7 +2,8 @@ import React from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { useLanguage } from '@/context/LanguageContext';
+import { buildCanonicalUrl, buildHreflangCluster } from '@/utils/pageUrlMaps';
+import { useLangRouting } from '@/utils/useLangRouting';
 
 const content = {
   fr: {
@@ -71,25 +72,15 @@ const content = {
       { title: '13. Контакт', text: 'По вопросам защиты данных:\n\nEmail: contact@zont.cab\nТелефон: +33 7 83 77 70 27' },
     ],
   },
-  hy: {
-    seoTitle: 'Գdelays | Zont.cab',
-    seoDesc: 'Delays.',
-    lastUpdate: 'Delays: 14 delays 2026',
-    title: 'Delays',
-    intro: 'Delays www.zont.cab.',
-    sections: [
-      { title: '1. Delays', text: 'Zont Technologies Inc.\nEmail: contact@zont.cab\nPhone: +33 7 83 77 70 27' },
-    ],
-  },
 };
 
 const PrivacyPolicy = () => {
-  const { language } = useLanguage();
-  const c = content[language] || content.fr;
+  const lang = useLangRouting('privacy');
+  const c = content[lang] || content.en;
 
   return (
     <div className="min-h-screen flex flex-col bg-white" data-testid="privacy-page">
-      <SEO title={c.seoTitle} description={c.seoDesc} canonical="https://www.zont.cab/privacy" />
+      <SEO title={c.seoTitle} description={c.seoDesc} canonical={buildCanonicalUrl('privacy', lang)} hreflang={buildHreflangCluster('privacy')} />
       <Header />
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-16">
         <p className="text-sm text-gray-500 mb-2">{c.lastUpdate}</p>

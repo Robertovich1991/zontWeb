@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useLanguage } from '@/context/LanguageContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
+import { buildCanonicalUrl, buildHreflangCluster } from '@/utils/pageUrlMaps';
+import { useLangRouting } from '@/utils/useLangRouting';
 import { MapPin, Plane, ArrowRight, Star, Search, Shield, Clock, CreditCard } from 'lucide-react';
 import { citiesData, countriesList } from '@/data/cities';
 
@@ -132,12 +133,8 @@ const startingPrices = {
 const countryFlags = { France: '\ud83c\uddeb\ud83c\uddf7', Monaco: '\ud83c\uddf2\ud83c\udde8', Germany: '\ud83c\udde9\ud83c\uddea', Italy: '\ud83c\uddee\ud83c\uddf9', Spain: '\ud83c\uddea\ud83c\uddf8', Armenia: '\ud83c\udde6\ud83c\uddf2' };
 
 const Countries = () => {
-  const { language, changeLanguage } = useLanguage();
-  const isEsPage = typeof window !== 'undefined' && window.location.pathname.startsWith('/es/');
-  React.useEffect(() => {
-    if (isEsPage && language !== 'es') changeLanguage('es');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const language = useLangRouting('countries');
+  const canonical = buildCanonicalUrl('countries', language);
   const t = translations[language] || translations.en;
   const [search, setSearch] = useState('');
 
@@ -171,19 +168,15 @@ const Countries = () => {
       <SEO
         title={t.seoTitle}
         description={t.seoDesc}
-        canonical={isEsPage ? 'https://www.zont.cab/es/destinos' : 'https://www.zont.cab/countries'}
-        hreflang={[
-          { lang: 'en', href: 'https://www.zont.cab/countries' },
-          { lang: 'es', href: 'https://www.zont.cab/es/destinos' },
-          { lang: 'x-default', href: 'https://www.zont.cab/countries' },
-        ]}
+        canonical={canonical}
+        hreflang={buildHreflangCluster('countries')}
         ogImage="https://images.unsplash.com/photo-1762983166320-8e301ab178f7?w=1200&q=80&auto=format"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           "name": t.seoTitle,
           "description": t.seoDesc,
-          "url": isEsPage ? 'https://www.zont.cab/es/destinos' : 'https://www.zont.cab/countries',
+          "url": canonical,
           "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" },
           "about": { "@type": "LocalBusiness", "name": "Zont", "serviceType": "Airport Transfer", "areaServed": "Europe" }
         }}

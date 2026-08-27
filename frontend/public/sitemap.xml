@@ -561,12 +561,58 @@
   <url>
     <loc>https://www.zont.cab/countries</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/countries"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/countries"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/countries"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/countries"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/destinos"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/countries"/>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url><loc>https://www.zont.cab/es/destinos</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url>
+    <loc>https://www.zont.cab/fr/countries</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/countries"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/countries"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/countries"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/countries"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/destinos"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/countries"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/ru/countries</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/countries"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/countries"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/countries"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/countries"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/destinos"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/countries"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/hy/countries</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/countries"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/countries"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/countries"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/countries"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/destinos"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/countries"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/destinos</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/countries"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/countries"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/countries"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/countries"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/destinos"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/countries"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
 
   <!-- ==================== STATIC PAGES ==================== -->
   <url><loc>https://www.zont.cab/become-driver</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -578,13 +624,213 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
-  <url><loc>https://www.zont.cab/help</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url>
+    <loc>https://www.zont.cab/help</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/help"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/help"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/help"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/help"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/help"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/fr/help</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/help"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/help"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/help"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/help"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/help"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/ru/help</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/help"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/help"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/help"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/help"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/help"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/hy/help</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/help"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/help"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/help"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/help"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/help"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/about"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/about"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/about"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/about"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/about"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/fr/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/about"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/about"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/about"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/about"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/about"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/ru/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/about"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/about"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/about"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/about"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/about"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/hy/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/about"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/about"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/about"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/about"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/about"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/about"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/about"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/about"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/about"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/about"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/hourly-booking</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/hourly-booking"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/fr/hourly-booking</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/hourly-booking"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/ru/hourly-booking</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/hourly-booking"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/hy/hourly-booking</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/hourly-booking"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/es/hourly-booking</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/hy/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/hourly-booking"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/hourly-booking"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   <url><loc>https://www.zont.cab/looking-for-partners</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 
   <!-- ==================== LEGAL ==================== -->
-  <url><loc>https://www.zont.cab/cgv</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://www.zont.cab/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://www.zont.cab/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url>
+    <loc>https://www.zont.cab/terms</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/terms"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/cgv"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/terms"/>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/cgv</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/terms"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/cgv"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/terms"/>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/ru/terms</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/terms"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/cgv"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/terms"/>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/privacy"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/privacy"/>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/fr/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/privacy"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/privacy"/>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://www.zont.cab/ru/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/privacy"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/privacy"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/privacy"/>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
 
   <!-- ==================== B2B PAGES ==================== -->
   <url><loc>https://www.zont.cab/partners</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>

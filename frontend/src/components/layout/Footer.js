@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Phone } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { langUrl } from '@/utils/pageUrlMaps';
 
 const Footer = () => {
   const { t, language } = useLanguage();
@@ -26,7 +27,7 @@ const Footer = () => {
               <li><Link to={language === 'en' ? '/vtc-7-seats' : language === 'ru' ? '/vtc-7-mest' : language === 'hy' ? '/vtc-7-tegh' : language === 'es' ? '/es/minivan-traslado-aeropuerto-paris' : '/vtc-7-places'} className="text-gray-400 hover:text-white transition-colors" data-testid="footer-vtc-7">{language === 'en' ? 'Minivan 7 Seats' : language === 'ru' ? 'Минивэн 7 Мест' : language === 'es' ? 'Minivan 7 plazas' : 'VTC 7 Places'}</Link></li>
               <li><Link to={language === 'en' ? '/vtc-8-seats' : language === 'ru' ? '/vtc-8-mest' : language === 'hy' ? '/vtc-8-tegh' : '/vtc-8-places'} className="text-gray-400 hover:text-white transition-colors" data-testid="footer-vtc-8">{language === 'en' ? 'Minibus 8 Seats' : language === 'ru' ? 'Минибус 8 Мест' : language === 'es' ? 'Minibús 8 plazas' : 'VTC 8 Places'}</Link></li>
               <li><Link to={language === 'es' ? '/es/hazte-cliente' : '/become-client'} className="text-gray-400 hover:text-white transition-colors">{t('nav.becomeClient')}</Link></li>
-              <li><Link to={language === 'es' ? '/es/destinos' : '/countries'} className="text-gray-400 hover:text-white transition-colors">{t('nav.countries')}</Link></li>
+              <li><Link to={langUrl('countries', language)} className="text-gray-400 hover:text-white transition-colors">{t('nav.countries')}</Link></li>
             </ul>
           </div>
 
@@ -35,7 +36,7 @@ const Footer = () => {
             <h3 className="text-base font-semibold mb-3 text-gray-300">{t('footer.quickLinks')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/about" className="text-gray-400 hover:text-white transition-colors">
+                <Link to={langUrl('about', language)} className="text-gray-400 hover:text-white transition-colors">
                   {t('footer.aboutUs')}
                 </Link>
               </li>
@@ -45,14 +46,14 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                <Link to={langUrl('terms', language)} className="text-gray-400 hover:text-white transition-colors">
                   {t('footer.terms')}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                <Link to={langUrl('privacy', language)} className="text-gray-400 hover:text-white transition-colors">
                   {t('footer.privacy')}
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

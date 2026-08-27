@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
-import { useLanguage } from '@/context/LanguageContext';
+import { buildCanonicalUrl, buildHreflangCluster } from '@/utils/pageUrlMaps';
+import { useLangRouting } from '@/utils/useLangRouting';
 import {
   ArrowRight, Shield, Plane, Clock, Heart, Globe, Star,
   Users, BadgeCheck, MapPin, Car, Headphones
@@ -240,21 +241,23 @@ const iconMap = {
 };
 
 const About = () => {
-  const { language } = useLanguage();
+  const language = useLangRouting('about');
   const c = content[language] || content.en;
+  const canonical = buildCanonicalUrl('about', language);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#1a2332]" data-testid="about-page">
       <SEO
         title={c.seoTitle}
         description={c.seoDesc}
-        canonical="https://www.zont.cab/about"
+        canonical={canonical}
+        hreflang={buildHreflangCluster('about')}
         jsonLd={[{
           '@context': 'https://schema.org',
           '@type': 'AboutPage',
           name: c.seoTitle,
           description: c.seoDesc,
-          url: 'https://www.zont.cab/about',
+          url: canonical,
           mainEntity: {
             '@type': 'Organization',
             name: 'Zont',

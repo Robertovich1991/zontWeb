@@ -232,6 +232,10 @@ function App() {
                   <Route path="/hy/blog/:slug" element={<BlogArticle language="hy" />} />
                   <Route path="/admin/blog" element={<BlogAdmin />} />
                   <Route path="/hourly-booking" element={<HourlyBooking />} />
+                  <Route path="/fr/hourly-booking" element={<HourlyBooking />} />
+                  <Route path="/ru/hourly-booking" element={<HourlyBooking />} />
+                  <Route path="/hy/hourly-booking" element={<HourlyBooking />} />
+                  <Route path="/es/hourly-booking" element={<HourlyBooking />} />
 
                   <Route path="/" element={<Home />} />
                   <Route path="/fr" element={<Home />} />
@@ -432,8 +436,18 @@ function App() {
                   <Route path="/become-client" element={<BecomeClient />} />
                   <Route path="/es/hazte-cliente" element={<BecomeClient />} />
                   <Route path="/help" element={<Help />} />
+                  <Route path="/fr/help" element={<Help />} />
+                  <Route path="/ru/help" element={<Help />} />
+                  <Route path="/hy/help" element={<Help />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/fr/about" element={<About />} />
+                  <Route path="/ru/about" element={<About />} />
+                  <Route path="/hy/about" element={<About />} />
+                  <Route path="/es/about" element={<About />} />
                   <Route path="/countries" element={<Countries />} />
+                  <Route path="/fr/countries" element={<Countries />} />
+                  <Route path="/ru/countries" element={<Countries />} />
+                  <Route path="/hy/countries" element={<Countries />} />
                   <Route path="/es/destinos" element={<Countries />} />
                   {/* B2B Pages */}
                   <Route path="/partners" element={<Partners />} />
@@ -443,7 +457,10 @@ function App() {
                   <Route path="/b2b-odanavakayani-transfer" element={<Partners />} />
                   <Route path="/terms" element={<TermsOfUse />} />
                   <Route path="/cgv" element={<TermsOfUse />} />
+                  <Route path="/ru/terms" element={<TermsOfUse />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/fr/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/ru/privacy" element={<PrivacyPolicy />} />
                   {/* VTC Service Pages */}
                   <Route path="/vtc-8-places" element={<VTC8Places />} />
                   <Route path="/vtc-8-seats" element={<VTC8Places />} />
