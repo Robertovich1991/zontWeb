@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import CityTransferPage from '@/components/CityTransferPage';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -210,6 +211,13 @@ const faqs = {
 
 const faqTitles = { en: 'Marseille Transfer — Frequently Asked Questions', fr: 'Transfert Marseille — Questions Fréquentes', ru: 'Трансфер в Марселе — частые вопросы', es: 'Traslado Marsella — Preguntas Frecuentes' };
 
+const airportLinks = {
+  en: { text: 'Arriving or departing by plane?', anchor: 'Marseille Airport transfer (MRS)', to: '/marseille-airport-transfer' },
+  fr: { text: 'Vous arrivez ou partez en avion ?', anchor: 'Transfert Aéroport Marseille Provence (MRS)', to: '/fr/transfert-aeroport-marseille' },
+  ru: { text: 'Прилетаете или улетаете?', anchor: 'Трансфер из аэропорта Марсель-Прованс (MRS)', to: '/ru/transfer-aeroport-marsel' },
+  es: { text: '¿Llegas o sales en avión?', anchor: 'Traslado Aeropuerto Marsella (MRS)', to: '/es/traslado-aeropuerto-marsella' },
+};
+
 const seoUrls = { en: '/marseille', fr: '/fr/marseille', ru: '/ru/marseille', es: '/es/marseille' };
 
 const MarseilleTransfer = () => {
@@ -234,7 +242,16 @@ const MarseilleTransfer = () => {
   };
 
   const extraSections = (
-    <section className="py-12 md:py-20 px-4 bg-[#111827]" data-testid="marseille-faq-section">
+    <>
+      <section className="py-10 px-4 bg-[#0f1419]" data-testid="marseille-airportlink-section">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-gray-400 mb-3">{airportLinks[lang].text}</p>
+          <Link to={airportLinks[lang].to} className="text-[#2ecc71] font-semibold hover:underline text-lg" data-testid="link-to-marseille-airport">
+            {airportLinks[lang].anchor} →
+          </Link>
+        </div>
+      </section>
+      <section className="py-12 md:py-20 px-4 bg-[#111827]" data-testid="marseille-faq-section">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <div className="max-w-3xl mx-auto">
@@ -251,7 +268,8 @@ const MarseilleTransfer = () => {
           ))}
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 
   const c = { ...(content[lang] || content.en) };

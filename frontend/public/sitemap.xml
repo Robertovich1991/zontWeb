@@ -295,6 +295,21 @@
   <url><loc>https://www.zont.cab/ru/marseille</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/es/marseille</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
+  <!-- ==================== MARSEILLE AIRPORT (MRS) ==================== -->
+  <url>
+    <loc>https://www.zont.cab/marseille-airport-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/marseille-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/fr/transfert-aeroport-marseille"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/ru/transfer-aeroport-marsel"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/traslado-aeropuerto-marsella"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/marseille-airport-transfer"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url><loc>https://www.zont.cab/fr/transfert-aeroport-marseille</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/ru/transfer-aeroport-marsel</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/es/traslado-aeropuerto-marsella</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
   <!-- ==================== BERLIN ==================== -->
   <url>
     <loc>https://www.zont.cab/berlin-airport-transfer</loc>
@@ -545,9 +560,13 @@
   <!-- ==================== COUNTRIES ==================== -->
   <url>
     <loc>https://www.zont.cab/countries</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/countries"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://www.zont.cab/es/destinos"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/countries"/>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url><loc>https://www.zont.cab/es/destinos</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
   <!-- ==================== STATIC PAGES ==================== -->
   <url><loc>https://www.zont.cab/become-driver</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>

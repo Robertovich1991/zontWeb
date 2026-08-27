@@ -2,6 +2,8 @@ export const citiesData = {
   // FRANCE - PARIS
   paris: {
     id: 'paris',
+    nameEs: 'París',
+    urlEs: '/es/traslado-aeropuerto-paris',
     country: 'France',
     nameEn: 'Paris',
     nameFr: 'Paris',
@@ -13,6 +15,8 @@ export const citiesData = {
   },
   cdg: {
     id: 'cdg',
+    nameEs: 'CDG - Charles de Gaulle',
+    urlEs: '/es/traslado-aeropuerto-charles-de-gaulle',
     country: 'France',
     nameEn: 'CDG - Charles de Gaulle',
     nameFr: 'CDG - Charles de Gaulle',
@@ -24,6 +28,8 @@ export const citiesData = {
   },
   orly: {
     id: 'orly',
+    nameEs: 'Aeropuerto Orly',
+    urlEs: '/es/traslado-aeropuerto-orly',
     country: 'France',
     nameEn: 'Orly Airport',
     nameFr: 'Aeroport Orly',
@@ -35,6 +41,8 @@ export const citiesData = {
   },
   beauvais: {
     id: 'beauvais',
+    nameEs: 'Aeropuerto Beauvais',
+    urlEs: '/es/traslado-aeropuerto-beauvais',
     country: 'France',
     nameEn: 'Beauvais Airport',
     nameFr: 'Aeroport Beauvais',
@@ -46,6 +54,8 @@ export const citiesData = {
   },
   paristrainstation: {
     id: 'paristrainstation',
+    nameEs: 'Estaciones de Tren de París',
+    urlEs: '/es/traslado-estaciones-tren-paris',
     country: 'France',
     nameEn: 'Paris Train Stations',
     nameFr: 'Gares de Paris',
@@ -57,6 +67,8 @@ export const citiesData = {
   },
   nice: {
     id: 'nice',
+    nameEs: 'Niza',
+    urlEs: '/es/traslado-aeropuerto-niza',
     country: 'France',
     nameEn: 'Nice',
     nameFr: 'Nice',
@@ -68,6 +80,8 @@ export const citiesData = {
   },
   monaco: {
     id: 'monaco',
+    nameEs: 'Mónaco',
+    urlEs: '/es/traslado-aeropuerto-monaco',
     country: 'Monaco',
     nameEn: 'Monaco',
     nameFr: 'Monaco',
@@ -79,6 +93,8 @@ export const citiesData = {
   },
   cannes: {
     id: 'cannes',
+    nameEs: 'Cannes',
+    urlEs: '/es/traslado-aeropuerto-cannes',
     country: 'France',
     nameEn: 'Cannes',
     nameFr: 'Cannes',
@@ -101,6 +117,7 @@ export const citiesData = {
   },
   marseille: {
     id: 'marseille',
+    nameEs: 'Marsella',
     country: 'France',
     nameEn: 'Marseille',
     nameFr: 'Marseille',
@@ -114,6 +131,8 @@ export const citiesData = {
   },
   disneyland: {
     id: 'disneyland',
+    nameEs: 'Disneyland París',
+    urlEs: '/es/traslado-disneyland-paris',
     country: 'France',
     nameEn: 'Disneyland Paris',
     nameFr: 'Disneyland Paris',
@@ -127,6 +146,8 @@ export const citiesData = {
   // GERMANY
   berlin: {
     id: 'berlin',
+    nameEs: 'Berlín',
+    urlEs: '/es/traslado-aeropuerto-berlin',
     country: 'Germany',
     nameEn: 'Berlin',
     nameFr: 'Berlin',
@@ -138,6 +159,8 @@ export const citiesData = {
   },
   munich: {
     id: 'munich',
+    nameEs: 'Múnich',
+    urlEs: '/es/traslado-aeropuerto-munich',
     country: 'Germany',
     nameEn: 'Munich',
     nameFr: 'Munich',
@@ -151,6 +174,8 @@ export const citiesData = {
   // ITALY
   rome: {
     id: 'rome',
+    nameEs: 'Roma',
+    urlEs: '/es/traslado-aeropuerto-roma',
     country: 'Italy',
     nameEn: 'Rome',
     nameFr: 'Rome',
@@ -162,6 +187,8 @@ export const citiesData = {
   },
   milan: {
     id: 'milan',
+    nameEs: 'Milán',
+    urlEs: '/es/traslado-aeropuerto-milan',
     country: 'Italy',
     nameEn: 'Milan',
     nameFr: 'Milan',
@@ -175,6 +202,8 @@ export const citiesData = {
   // SPAIN
   alicante: {
     id: 'alicante',
+    nameEs: 'Alicante',
+    urlEs: '/es/traslado-aeropuerto-alicante',
     country: 'Spain',
     nameEn: 'Alicante',
     nameFr: 'Alicante',
@@ -186,6 +215,8 @@ export const citiesData = {
   },
   barcelona: {
     id: 'barcelona',
+    nameEs: 'Barcelona',
+    urlEs: '/es/traslado-aeropuerto-barcelona',
     country: 'Spain',
     nameEn: 'Barcelona',
     nameFr: 'Barcelone',
@@ -199,6 +230,8 @@ export const citiesData = {
   // ARMENIA
   yerevan: {
     id: 'yerevan',
+    nameEs: 'Ereván',
+    urlEs: '/es/traslado-aeropuerto-erevan-zvartnots',
     country: 'Armenia',
     nameEn: 'Yerevan',
     nameFr: 'Erevan',

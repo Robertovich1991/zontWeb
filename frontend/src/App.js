@@ -129,6 +129,7 @@ const NiceTransfer = lazy(() => import("@/pages/cities/Nice"));
 const MonacoTransfer = lazy(() => import("@/pages/cities/Monaco"));
 const CannesTransfer = lazy(() => import("@/pages/cities/Cannes"));
 const MarseilleTransfer = lazy(() => import("@/pages/cities/Marseille"));
+const MarseilleAirportTransfer = lazy(() => import("@/pages/cities/MarseilleAirport"));
 const BerlinTransfer = lazy(() => import("@/pages/cities/Berlin"));
 const MunichTransfer = lazy(() => import("@/pages/cities/Munich"));
 const RomeTransfer = lazy(() => import("@/pages/cities/Rome"));
@@ -367,6 +368,12 @@ function App() {
                   <Route path="/ru/marseille" element={<MarseilleTransfer />} />
                   <Route path="/es/marseille" element={<MarseilleTransfer />} />
 
+                  {/* Marseille Airport (MRS) */}
+                  <Route path="/marseille-airport-transfer" element={<MarseilleAirportTransfer />} />
+                  <Route path="/fr/transfert-aeroport-marseille" element={<MarseilleAirportTransfer />} />
+                  <Route path="/ru/transfer-aeroport-marsel" element={<MarseilleAirportTransfer />} />
+                  <Route path="/es/traslado-aeropuerto-marsella" element={<MarseilleAirportTransfer />} />
+
                   {/* Cannes */}
                   <Route path="/cannes-airport-transfer" element={<CannesTransfer />} />
                   <Route path="/transfert-aeroport-cannes" element={<CannesTransfer />} />
@@ -427,6 +434,7 @@ function App() {
                   <Route path="/help" element={<Help />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/countries" element={<Countries />} />
+                  <Route path="/es/destinos" element={<Countries />} />
                   {/* B2B Pages */}
                   <Route path="/partners" element={<Partners />} />
                   <Route path="/b2b-airport-transfers" element={<Partners />} />

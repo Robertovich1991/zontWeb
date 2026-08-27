@@ -90,7 +90,7 @@ const Header = () => {
                 {t('nav.becomeClient')}
               </Link>
               <Link
-                to="/countries"
+                to={language === 'es' ? '/es/destinos' : '/countries'}
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
                 {t('nav.countries')}
@@ -259,7 +259,7 @@ const Header = () => {
                 {t('nav.becomeClient')}
               </Link>
               <Link
-                to="/countries"
+                to={language === 'es' ? '/es/destinos' : '/countries'}
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-white hover:text-gray-300 py-2 text-sm font-medium"
               >

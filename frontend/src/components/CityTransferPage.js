@@ -783,7 +783,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         <section className="py-12 px-4 bg-[#0f1419]">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-xl md:text-2xl font-bold text-white mb-4">{c.otherCitiesTitle}</h2>
-            <Link to="/countries" className="inline-flex items-center bg-[#2ecc71] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors" data-testid="view-all-cities-btn">
+            <Link to={language === 'es' ? '/es/destinos' : '/countries'} className="inline-flex items-center bg-[#2ecc71] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#27ae60] transition-colors" data-testid="view-all-cities-btn">
               {c.otherCitiesBtn} <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
             </Link>
           </div>

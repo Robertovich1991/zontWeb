@@ -85,6 +85,24 @@ const translations = {
     ctaTitle: 'Готовы Забронировать?', ctaText: 'Выберите город или свяжитесь с нами.',
     downloadIos: 'Скачать для iOS', downloadAndroid: 'Скачать для Android',
   },
+  es: {
+    seoTitle: 'Traslados Aeropuerto en Europa - Todos los Destinos | Zont',
+    seoDesc: 'Traslado privado premium desde el aeropuerto en 16 ciudades europeas. Precios fijos, seguimiento de vuelo. Reserva online.',
+    heroTitle: 'Traslados Aeropuerto', heroAccent: 'Por Toda Europa',
+    heroSub: 'Servicio premium de conductor privado en 16 ciudades. Reserva tu traslado al aeropuerto con precios fijos y chóferes profesionales.',
+    searchPh: 'Buscar una ciudad o aeropuerto...',
+    stats: [{ v: '16', l: 'Ciudades' }, { v: '6', l: 'Países' }, { v: '24/7', l: 'Servicio' }, { v: '4.5/5', l: 'Valoración' }],
+    browseTitle: 'Elige Tu Destino',
+    viewCity: 'Reservar Traslado', from: 'Desde', airports: 'Aeropuertos',
+    noResults: 'No se encontraron destinos para',
+    trustTitle: '¿Por Qué Elegir Zont?',
+    t1: 'Precios Fijos', t1d: 'Sin cargos ocultos, precio confirmado al reservar',
+    t2: 'Seguimiento de Vuelos', t2d: 'Monitorización en tiempo real, espera gratuita',
+    t3: 'Vehículos Premium', t3d: 'Mercedes, BMW, menos de 3 años',
+    t4: 'Pago Seguro', t4d: 'Visa, Mastercard, Apple Pay',
+    ctaTitle: '¿Listo para Reservar?', ctaText: 'Elige tu ciudad arriba o contáctanos para un presupuesto.',
+    downloadIos: 'Descargar para iOS', downloadAndroid: 'Descargar para Android',
+  },
   hy: {
     seoTitle: 'Օդանավակայանի Տրանսֆերներ Եվրոպայում - Բոլոր Ուղղությունները | Zont',
     seoDesc: 'Պրեմիում անձնական օդանավակայանի տրանսֆեր 16 եվրոպական քաղաքներում: Հաստատ գներ:',
@@ -114,14 +132,19 @@ const startingPrices = {
 const countryFlags = { France: '\ud83c\uddeb\ud83c\uddf7', Monaco: '\ud83c\uddf2\ud83c\udde8', Germany: '\ud83c\udde9\ud83c\uddea', Italy: '\ud83c\uddee\ud83c\uddf9', Spain: '\ud83c\uddea\ud83c\uddf8', Armenia: '\ud83c\udde6\ud83c\uddf2' };
 
 const Countries = () => {
-  const { language } = useLanguage();
+  const { language, changeLanguage } = useLanguage();
+  const isEsPage = typeof window !== 'undefined' && window.location.pathname.startsWith('/es/');
+  React.useEffect(() => {
+    if (isEsPage && language !== 'es') changeLanguage('es');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const t = translations[language] || translations.en;
   const [search, setSearch] = useState('');
 
   const getCityName = (cityId) => {
     const city = citiesData[cityId];
     if (!city) return cityId;
-    return language === 'fr' ? city.nameFr : language === 'ru' ? city.nameRu : language === 'hy' ? (city.nameHy || city.nameEn) : city.nameEn;
+    return language === 'fr' ? city.nameFr : language === 'ru' ? city.nameRu : language === 'es' ? (city.nameEs || city.nameEn) : language === 'hy' ? (city.nameHy || city.nameEn) : city.nameEn;
   };
 
   const getCityUrl = (cityId) => {
@@ -148,14 +171,19 @@ const Countries = () => {
       <SEO
         title={t.seoTitle}
         description={t.seoDesc}
-        canonical="https://www.zont.cab/countries"
+        canonical={isEsPage ? 'https://www.zont.cab/es/destinos' : 'https://www.zont.cab/countries'}
+        hreflang={[
+          { lang: 'en', href: 'https://www.zont.cab/countries' },
+          { lang: 'es', href: 'https://www.zont.cab/es/destinos' },
+          { lang: 'x-default', href: 'https://www.zont.cab/countries' },
+        ]}
         ogImage="https://images.unsplash.com/photo-1762983166320-8e301ab178f7?w=1200&q=80&auto=format"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           "name": t.seoTitle,
           "description": t.seoDesc,
-          "url": "https://www.zont.cab/countries",
+          "url": isEsPage ? 'https://www.zont.cab/es/destinos' : 'https://www.zont.cab/countries',
           "provider": { "@type": "Organization", "name": "Zont", "url": "https://www.zont.cab" },
           "about": { "@type": "LocalBusiness", "name": "Zont", "serviceType": "Airport Transfer", "areaServed": "Europe" }
         }}

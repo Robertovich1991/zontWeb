@@ -199,7 +199,7 @@ from routes.admin_auth import router as auth_router
 from routes.admin_pages import router as pages_router
 from routes.admin_places import router as places_router
 from routes.admin_cms import router as cms_router
-from routes.admin_upload import router as upload_router
+from routes.admin_upload import router as upload_router, serve_router as uploads_serve_router
 from routes.public_cms import router as public_router
 from routes.company import router as company_router
 from routes.csharp_proxy import router as proxy_router, set_proxy_db
@@ -214,6 +214,7 @@ app.include_router(pages_router)
 app.include_router(places_router)
 app.include_router(cms_router)
 app.include_router(upload_router)
+app.include_router(uploads_serve_router)
 app.include_router(public_router)
 app.include_router(company_router)
 app.include_router(proxy_router)
@@ -269,10 +270,7 @@ app.include_router(fb_router)
 
 
 
-# Serve uploaded files
-UPLOAD_DIR = ROOT_DIR / "uploads"
-UPLOAD_DIR.mkdir(exist_ok=True)
-app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
+# Uploaded files are served by routes/admin_upload.py (Emergent object storage + legacy fallback)
 
 app.add_middleware(
     CORSMiddleware,

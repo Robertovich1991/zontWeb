@@ -203,3 +203,11 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - CityTransferPage : nouveau prop hidePrices (masque prix véhicules + offers JSON-LD) + prix de routes optionnels (route.price facultatif). Aucun prix inventé (pricing C# ne couvre pas Marseille : /api/proxy/distance renvoie une erreur pour MRS).
 - /countries : Marseille ajouté (cities.js + countriesList France), desc "Transfer company Marseille", image Vieux-Port, support urlEs dans getCityUrl. Sitemap.xml : 4 URLs Marseille + hreflang.
 - Vérifié Playwright : 4 pages OK (H1/canonical/FAQ/schémas), carte Marseille sur /countries OK.
+
+### Session Jun 2026 — Page Aéroport Marseille (MRS) + Countries en espagnol
+- MarseilleAirport.js : URLs /marseille-airport-transfer, /fr/transfert-aeroport-marseille, /ru/transfer-aeroport-marsel, /es/traslado-aeropuerto-marsella. H1/title/meta/canonical/hreflang par langue, FAQ 10 questions + FAQPage + BreadcrumbList, contenu distinct de /marseille (anti-cannibalisation). Maillage croisé bidirectionnel /marseille ↔ page aéroport (4 langues). Sitemap à jour.
+- Countries ES : nouvelle URL /es/destinos (force langue es, canonical propre, hreflang en/es/x-default sur /countries et /es/destinos). Traductions es complètes du template Countries, nameEs+urlEs ajoutés aux 17 villes dans cities.js (getCityName/getCityUrl es). Liens Header/Footer/CityTransferPage → /es/destinos quand langue=es. Sitemap à jour.
+- Vérifié Playwright : 4 pages aéroport OK (canonical, crosslinks, FAQ×10), /es/destinos OK (UI es, cartes pointent vers les pages ES).
+
+### Session Jun 2026 — Upload admin migré vers Emergent Object Storage
+- admin_upload.py réécrit : POST /api/admin/upload → put_object (bucket zontcab/uploads/), GET /api/uploads/{filename} servi depuis l'object storage avec fallback disque legacy. Mount StaticFiles retiré de server.py. Testé : PUT/GET OK, 404 OK. Nécessite EMERGENT_LLM_KEY en prod.
