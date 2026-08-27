@@ -56,6 +56,7 @@ export const MULTI_LANG_URLS = {
     fr: '/fr/help',
     ru: '/ru/help',
     hy: '/hy/help',
+    es: '/es/help',
   },
   about: {
     en: '/about',
@@ -75,11 +76,15 @@ export const MULTI_LANG_URLS = {
     en: '/privacy',
     fr: '/fr/privacy',
     ru: '/ru/privacy',
+    hy: '/hy/privacy',
+    es: '/es/privacy',
   },
   terms: {
     en: '/terms',
     fr: '/cgv',
     ru: '/ru/terms',
+    hy: '/hy/terms',
+    es: '/es/terms',
   },
 };
 

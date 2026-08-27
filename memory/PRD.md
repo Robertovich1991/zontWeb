@@ -225,3 +225,10 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Testing agent : 12/13 flux OK ; bug "retour vers English" (course changeLanguage/navigate) corrigé dans useLangRouting (sync URL sur pathname uniquement) puis re-vérifié Playwright.
 - Fix lint : AuthModal.js setMode → onSwitchMode.
 - Restant : traductions es (privacy/terms/help) et hy propre (privacy/terms/help) pour compléter les clusters ; P1 sitemap x-default villes ; P2 doublon /es sitemap.
+
+### Session Jun 2026 — Traductions ES + HY complètes (privacy/terms/help)
+- PrivacyPolicy.js : blocs es + hy (arménien natif) complets (13 sections chacun).
+- TermsOfUse.js : blocs es + hy complets (23 sections chacun).
+- Help.js : bloc hy translittéré remplacé par du vrai arménien + nouveau bloc es (8 FAQ + labels).
+- Nouvelles URLs : /es/privacy, /hy/privacy, /es/terms, /hy/terms, /es/help (routes App.js + MULTI_LANG_URLS). Clusters hreflang désormais à 5 langues sur privacy/terms/help. Sitemap régénéré par script (clusters + nouvelles entrées, XML validé).
+- Vérifié Playwright : 5 URLs OK (H1 dans la bonne langue, canonical auto-référent, cluster en/fr/ru/hy/es + x-default).

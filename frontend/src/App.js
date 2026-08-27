@@ -439,6 +439,7 @@ function App() {
                   <Route path="/fr/help" element={<Help />} />
                   <Route path="/ru/help" element={<Help />} />
                   <Route path="/hy/help" element={<Help />} />
+                  <Route path="/es/help" element={<Help />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/fr/about" element={<About />} />
                   <Route path="/ru/about" element={<About />} />
@@ -458,9 +459,13 @@ function App() {
                   <Route path="/terms" element={<TermsOfUse />} />
                   <Route path="/cgv" element={<TermsOfUse />} />
                   <Route path="/ru/terms" element={<TermsOfUse />} />
+                  <Route path="/hy/terms" element={<TermsOfUse />} />
+                  <Route path="/es/terms" element={<TermsOfUse />} />
                   <Route path="/privacy" element={<PrivacyPolicy />} />
                   <Route path="/fr/privacy" element={<PrivacyPolicy />} />
                   <Route path="/ru/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/hy/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/es/privacy" element={<PrivacyPolicy />} />
                   {/* VTC Service Pages */}
                   <Route path="/vtc-8-places" element={<VTC8Places />} />
                   <Route path="/vtc-8-seats" element={<VTC8Places />} />
