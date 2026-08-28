@@ -12,11 +12,76 @@ resend.api_key = os.environ.get("RESEND_API_KEY", "")
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
 
 
+def _parse_address_stops(addresses: str) -> list:
+    if not addresses:
+        return []
+    return [part.strip() for part in addresses.split("|") if part and part.strip()]
+
+
+def _stop_label(index: int, total: int) -> str:
+    if total <= 1:
+        return "Arrivee"
+    if index == 0:
+        return "Destination 1"
+    if index == total - 1:
+        return "Destination finale"
+    return f"Destination {index + 1}"
+
+
+def _build_dropoff_rows_html(end_address: str) -> str:
+    stops = _parse_address_stops(end_address)
+    if not stops:
+        return ""
+
+    rows = []
+    markers = ["B", "C", "D", "E"]
+    for index, stop in enumerate(stops):
+        marker = markers[min(index, len(markers) - 1)]
+        label = _stop_label(index, len(stops))
+        rows.append(f"""
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #f1f5f9;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="32" valign="top">
+                          <div style="width:24px;height:24px;background-color:#fee2e2;border-radius:50%;text-align:center;line-height:24px;font-size:12px;">{marker}</div>
+                        </td>
+                        <td style="padding-left:12px;">
+                          <p style="margin:0;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">{label}</p>
+                          <p style="margin:2px 0 0;color:#0f172a;font-size:14px;font-weight:600;">{stop}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>""")
+
+    return "".join(rows)
+
+
 def build_booking_confirmation_html(booking_data: dict) -> str:
     booking_id = booking_data.get("bookingId", "N/A")
     client_name = booking_data.get("clientName", "Client")
     pickup = booking_data.get("startAddress", "")
-    dropoff = booking_data.get("endAddress", "")
+    end_address = booking_data.get("endAddress", "")
+    dropoff_rows = _build_dropoff_rows_html(end_address)
+    if not dropoff_rows:
+        dropoff_display = booking_data.get("endAddress", "")
+        dropoff_rows = f"""
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #f1f5f9;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="32" valign="top">
+                          <div style="width:24px;height:24px;background-color:#fee2e2;border-radius:50%;text-align:center;line-height:24px;font-size:12px;">B</div>
+                        </td>
+                        <td style="padding-left:12px;">
+                          <p style="margin:0;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Arrivee</p>
+                          <p style="margin:2px 0 0;color:#0f172a;font-size:14px;font-weight:600;">{dropoff_display}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>"""
     date_time = booking_data.get("startDate", "")
     price = booking_data.get("clientPrice", 0)
     car_type = booking_data.get("carType", "")
@@ -86,22 +151,7 @@ def build_booking_confirmation_html(booking_data: dict) -> str:
                     </table>
                   </td>
                 </tr>
-                <!-- Dropoff -->
-                <tr>
-                  <td style="padding:12px 0;border-bottom:1px solid #f1f5f9;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td width="32" valign="top">
-                          <div style="width:24px;height:24px;background-color:#fee2e2;border-radius:50%;text-align:center;line-height:24px;font-size:12px;">B</div>
-                        </td>
-                        <td style="padding-left:12px;">
-                          <p style="margin:0;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Arrivee</p>
-                          <p style="margin:2px 0 0;color:#0f172a;font-size:14px;font-weight:600;">{dropoff}</p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
+                {dropoff_rows}
               </table>
             </td>
           </tr>
