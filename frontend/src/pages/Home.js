@@ -11,7 +11,8 @@ import LastMinuteWarning from '@/components/LastMinuteWarning';
 import { useLanguage } from '@/context/LanguageContext';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import { transferService } from '@/services/api';
-import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight, Sparkles, Loader2, Mic, MicOff } from 'lucide-react';
+import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight, Sparkles, Loader2, Mic, MicOff, Plus, X } from 'lucide-react';
+import { emptyStop, MAX_EXTRA_STOPS, buildRouteSearchData, resolveStopCoords } from '@/utils/routeStops';
 
 const IMAGES = {
   hero: '/images/hero.webp',
@@ -28,7 +29,7 @@ const homeContent = {
     heroSub: 'Professional private drivers in 16 cities. Fixed prices, flight tracking, meet & greet.',
     bookingTitle: 'Book Your Transfer',
     tabTransfer: 'Transfer', tabDisposal: 'Driver at disposal', hoursLabel: 'How many hours?',
-    pickup: 'Pick up address', dropoff: 'Drop off address', date: 'Date', time: 'Time',
+    pickup: 'Pick up address', dropoff: 'Destination 1', dropoff2: 'Destination 2 (optional)', dropoffFinal: 'Final destination (optional)', addStop: '+ Add stop', removeStop: 'Remove', date: 'Date', time: 'Time',
     datePh: 'Select a date', timePh: 'Select a time',
     pickupPh: 'Airport, hotel, address...', dropoffPh: 'Hotel, city center, address...',
     bookNow: 'SEARCH TRANSFER', searching: 'SEARCHING...',
@@ -59,7 +60,7 @@ const homeContent = {
     heroSub: 'Chauffeurs privés professionnels dans 16 villes. Prix fixes, suivi de vol, accueil personnalisé.',
     bookingTitle: 'Réservez Votre Transfert',
     tabTransfer: 'Transfert', tabDisposal: 'Chauffeur à disposition', hoursLabel: 'Combien d\'heures ?',
-    pickup: 'Adresse de départ', dropoff: 'Adresse d\'arrivée', date: 'Date', time: 'Heure',
+    pickup: 'Adresse de départ', dropoff: 'Destination 1', dropoff2: 'Destination 2 (optionnel)', dropoffFinal: 'Destination finale (optionnel)', addStop: '+ Ajouter un arrêt', removeStop: 'Supprimer', date: 'Date', time: 'Heure',
     datePh: 'Choisir une date', timePh: 'Choisir une heure',
     pickupPh: 'Aéroport, hôtel, adresse...', dropoffPh: 'Hôtel, centre-ville, adresse...',
     bookNow: 'RECHERCHER UN TRANSFERT', searching: 'RECHERCHE...',
@@ -199,6 +200,8 @@ const Home = () => {
   const bookingRef = useRef(null);
   const [pickup, setPickup] = useState({ address: '', latitude: null, longitude: null });
   const [dropoff, setDropoff] = useState({ address: '', latitude: null, longitude: null });
+  const [extraStops, setExtraStops] = useState([]);
+  const extraStopRefs = useRef([]);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [mode, setMode] = useState('transfer'); // 'transfer' | 'disposal' (hourly)
@@ -387,10 +390,27 @@ const Home = () => {
 
     let pickupCoords = getCoords(pickupSafeRef, pickup, pickupAddr);
     let dropoffCoords = getCoords(dropoffSafeRef, dropoff, dropoffAddr);
+    let destinationAddresses;
+    let destinationCoords;
 
     try {
       if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickupSafeRef.current.placeId || pickup.placeId);
       if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoffSafeRef.current.placeId || dropoff.placeId);
+
+      destinationAddresses = [dropoffAddr];
+      destinationCoords = [dropoffCoords];
+      for (let i = 0; i < extraStops.length; i++) {
+        const stop = extraStops[i];
+        const stopAddr = stop.address?.trim();
+        if (!stopAddr) {
+          toast.error(language === 'fr' ? 'Veuillez remplir toutes les destinations ajoutées' : 'Please fill in all added destinations');
+          setLoading(false);
+          return;
+        }
+        const stopCoords = await resolveStopCoords(stop, { current: extraStopRefs.current[i] }, geocodeAddress);
+        destinationAddresses.push(stopAddr);
+        destinationCoords.push(stopCoords);
+      }
     } catch {
       toast.error(language === 'fr' ? 'Adresse introuvable. Veuillez réessayer.' : 'Address not found. Please try again.');
       setLoading(false);
@@ -399,25 +419,34 @@ const Home = () => {
 
     // Save to recent searches immediately (before API call)
     try {
-      const entry = { pickup: pickupAddr, dropoff: dropoffAddr, pickupCoords, dropoffCoords, date, time };
+      const entry = {
+        pickup: pickupAddr,
+        dropoff: destinationAddresses.join(' → '),
+        pickupCoords,
+        dropoffCoords: destinationCoords[destinationCoords.length - 1],
+        destinationCoords,
+        destinationAddresses,
+        date,
+        time,
+      };
       const prev = JSON.parse(localStorage.getItem('recentSearches') || '[]');
-      const filtered = prev.filter(s => !(s.pickup === pickupAddr && s.dropoff === dropoffAddr));
+      const filtered = prev.filter((s) => !(s.pickup === pickupAddr && s.dropoff === entry.dropoff));
       const updated = [entry, ...filtered].slice(0, 3);
       localStorage.setItem('recentSearches', JSON.stringify(updated));
       setRecentSearches(updated);
     } catch { /* localStorage full or unavailable */ }
 
     try {
-      const vehicles = await transferService.calculatePreorderPrice(pickupCoords, dropoffCoords);
+      const vehicles = await transferService.calculatePreorderPriceForRoute(pickupCoords, destinationCoords);
       setVehicleResults(vehicles);
-      startBooking({
-        pickup: pickupAddr,
-        dropoff: dropoffAddr,
+      startBooking(buildRouteSearchData({
+        pickupAddr,
         pickupCoords,
-        dropoffCoords,
+        destinationAddresses,
+        destinationCoords,
         date,
         time,
-      });
+      }));
       navigate('/car-selection');
       trackSearch({ pickup: pickup.address, dropoff: dropoff.address, date });
     } catch (error) {
@@ -443,6 +472,37 @@ const Home = () => {
       dropoffSafeRef.current = { ...dropoffSafeRef.current, placeId: data.placeId, address: data.address };
     }
     setDropoff(data);
+  };
+
+  const addExtraStop = () => {
+    if (extraStops.length >= MAX_EXTRA_STOPS) return;
+    setExtraStops((prev) => [...prev, emptyStop()]);
+  };
+
+  const removeExtraStop = (index) => {
+    setExtraStops((prev) => prev.filter((_, i) => i !== index));
+    extraStopRefs.current.splice(index, 1);
+  };
+
+  const handleExtraStopChange = (index, data) => {
+    if (!extraStopRefs.current[index]) {
+      extraStopRefs.current[index] = { latitude: null, longitude: null, placeId: null, address: '' };
+    }
+    if (data.latitude != null) {
+      extraStopRefs.current[index] = {
+        latitude: data.latitude,
+        longitude: data.longitude,
+        placeId: data.placeId,
+        address: data.address,
+      };
+    } else if (data.placeId) {
+      extraStopRefs.current[index] = {
+        ...extraStopRefs.current[index],
+        placeId: data.placeId,
+        address: data.address,
+      };
+    }
+    setExtraStops((prev) => prev.map((stop, i) => (i === index ? data : stop)));
   };
 
   // Notification sound - short chime when AI response or new question
@@ -699,19 +759,22 @@ const Home = () => {
   };
 
   const handleRecentClick = async (search) => {
-    if (!search.pickupCoords?.latitude || !search.dropoffCoords?.latitude) return;
+    const destinationCoords = search.destinationCoords?.length
+      ? search.destinationCoords
+      : (search.dropoffCoords?.latitude ? [search.dropoffCoords] : []);
+    if (!search.pickupCoords?.latitude || destinationCoords.length === 0) return;
     setLoading(true);
     try {
-      const vehicles = await transferService.calculatePreorderPrice(search.pickupCoords, search.dropoffCoords);
+      const vehicles = await transferService.calculatePreorderPriceForRoute(search.pickupCoords, destinationCoords);
       setVehicleResults(vehicles);
-      startBooking({
-        pickup: search.pickup,
-        dropoff: search.dropoff,
+      startBooking(buildRouteSearchData({
+        pickupAddr: search.pickup,
         pickupCoords: search.pickupCoords,
-        dropoffCoords: search.dropoffCoords,
+        destinationAddresses: search.destinationAddresses || [search.dropoff].filter(Boolean),
+        destinationCoords,
         date: search.date || '',
         time: search.time || '',
-      });
+      }));
       navigate('/car-selection');
     } catch {
       toast.error(language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.');
@@ -936,6 +999,44 @@ const Home = () => {
                               </button>
                             ))}
                           </div>
+                        )}
+                        {extraStops.map((stop, index) => (
+                          <div key={`extra-stop-${index}`} className="mt-3">
+                            <div className="flex items-center justify-between mb-1">
+                              <label htmlFor={`h-stop-${index + 2}`} className="block text-gray-700 font-medium text-sm">
+                                {index === 0 ? (c.dropoff2 || 'Destination 2 (optional)') : (c.dropoffFinal || 'Final destination (optional)')}
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => removeExtraStop(index)}
+                                className="text-xs text-gray-500 hover:text-red-500 flex items-center gap-1"
+                                data-testid={`remove-stop-${index + 2}`}
+                              >
+                                <X className="w-3 h-3" aria-hidden="true" />
+                                {c.removeStop || 'Remove'}
+                              </button>
+                            </div>
+                            <PlacesAutocomplete
+                              id={`h-stop-${index + 2}`}
+                              value={stop}
+                              onChange={(data) => handleExtraStopChange(index, data)}
+                              placeholder={index === 0 ? (c.dropoff2 || 'Destination 2') : (c.dropoffFinal || 'Final destination')}
+                              icon={<MapPin className="w-4 h-4 text-orange-500" aria-hidden="true" />}
+                              className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
+                              data-testid={`home-stop-${index + 2}-input`}
+                            />
+                          </div>
+                        ))}
+                        {extraStops.length < MAX_EXTRA_STOPS && (
+                          <button
+                            type="button"
+                            onClick={addExtraStop}
+                            className="mt-3 w-full py-2.5 rounded-lg border border-dashed border-gray-300 text-sm font-medium text-gray-600 hover:border-[#2ecc71] hover:text-[#2ecc71] flex items-center justify-center gap-2 transition-colors"
+                            data-testid="add-stop-button"
+                          >
+                            <Plus className="w-4 h-4" aria-hidden="true" />
+                            {c.addStop || '+ Add stop'}
+                          </button>
                         )}
                       </div>
                       {mode === 'disposal' && (

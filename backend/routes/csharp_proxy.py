@@ -166,7 +166,8 @@ async def proxy_distance(req: DistanceRequest):
     """Calculate trip pricing between two or more points."""
     try:
         coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        resp = await (await get_http_client()).post("/api/Distance", params={"radius": req.radius}, json=coords)
+        endpoint = "/api/Distance/multipleDest" if len(coords) > 2 else "/api/Distance"
+        resp = await (await get_http_client()).post(endpoint, params={"radius": req.radius}, json=coords)
         resp.raise_for_status()
         return resp.json()
     except httpx.HTTPStatusError as e:
@@ -179,10 +180,15 @@ async def proxy_distance(req: DistanceRequest):
 
 @router.post("/preorder-distance")
 async def proxy_preorder_distance(req: PreorderRequest):
-    """Get fixed pricing for preorder between two points."""
+    """Get fixed pricing for preorder between two or more points."""
     try:
         coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        resp = await (await get_http_client()).post("/api/PreorderDistance/driverTypesTwo", json=coords)
+        endpoint = (
+            "/api/PreorderDistance/driverTypesMultipleDest"
+            if len(coords) > 2
+            else "/api/PreorderDistance/driverTypesTwo"
+        )
+        resp = await (await get_http_client()).post(endpoint, json=coords)
         resp.raise_for_status()
         return resp.json()
     except Exception as e:
@@ -863,9 +869,20 @@ async def proxy_create_booking(request: Request):
         dest = payload.get("destination", "")
         end_lat = payload.pop("endPointLatitude", None)
         end_lng = payload.pop("endPointLongitude", None)
-        if dest and not all(c in "0123456789.,-+ " for c in str(dest)):
+        if dest and not all(c in "0123456789.,-+ |" for c in str(dest)):
             if end_lat is not None and end_lng is not None:
                 payload["destination"] = f"{end_lat},{end_lng}"
+        elif dest and "|" in str(dest):
+            last_point = str(dest).split("|")[-1].strip()
+            parts = last_point.split(",")
+            if len(parts) >= 2:
+                try:
+                    payload["endPointLatitude"] = float(parts[0])
+                    payload["endPointLongitude"] = float(parts[1])
+                except ValueError:
+                    pass
+        elif end_lat is not None and end_lng is not None and not dest:
+            payload["destination"] = f"{end_lat},{end_lng}"
 
     logger.info(f"C# addAuction forward tripType={payload.get('tripType')} carType={payload.get('carType')}")
 

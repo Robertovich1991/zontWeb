@@ -12,7 +12,8 @@ import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocompl
 import LastMinuteWarning from '@/components/LastMinuteWarning';
 import { trackSearch } from '@/utils/fbPixel';
 import { getRelatedRoutes, RELATED_TITLES, resolvePageId } from '@/data/relatedRoutes';
-import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
+import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight, Plus, X } from 'lucide-react';
+import { emptyStop, MAX_EXTRA_STOPS, buildRouteSearchData, resolveStopCoords } from '@/utils/routeStops';
 
 const IMAGES = {
   hero: '/images/hero.webp',
@@ -41,6 +42,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   const bookingFormRef = useRef(null);
   const [pickup, setPickup] = useState({ address: '', latitude: null, longitude: null, placeId: null });
   const [dropoff, setDropoff] = useState({ address: '', latitude: null, longitude: null, placeId: null });
+  const [extraStops, setExtraStops] = useState([]);
+  const extraStopRefs = useRef([]);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [cmsPage, setCmsPage] = useState(null);
@@ -213,21 +216,38 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
 
       let pickupCoords = getCoords(pickupSafeRef, pickup, pickupAddr);
       let dropoffCoords = getCoords(dropoffSafeRef, dropoff, dropoffAddr);
+      let destinationAddresses;
+      let destinationCoords;
 
       if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickupSafeRef.current.placeId || pickup.placeId);
       if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoffSafeRef.current.placeId || dropoff.placeId);
 
-      const vehicles = await transferService.calculatePreorderPrice(pickupCoords, dropoffCoords);
+      destinationAddresses = [dropoffAddr];
+      destinationCoords = [dropoffCoords];
+      for (let i = 0; i < extraStops.length; i++) {
+        const stop = extraStops[i];
+        const stopAddr = stop.address?.trim();
+        if (!stopAddr) {
+          toast.error(language === 'fr' ? 'Veuillez remplir toutes les destinations ajoutées' : 'Please fill in all added destinations');
+          setLoading(false);
+          return;
+        }
+        const stopCoords = await resolveStopCoords(stop, { current: extraStopRefs.current[i] }, geocodeAddress);
+        destinationAddresses.push(stopAddr);
+        destinationCoords.push(stopCoords);
+      }
+
+      const vehicles = await transferService.calculatePreorderPriceForRoute(pickupCoords, destinationCoords);
       setVehicleResults(vehicles);
-      startBooking({
-        pickup: pickupAddr,
-        dropoff: dropoffAddr,
+      startBooking(buildRouteSearchData({
+        pickupAddr,
         pickupCoords,
-        dropoffCoords,
+        destinationAddresses,
+        destinationCoords,
         date,
         time,
         selectedVehicle,
-      });
+      }));
       navigate('/car-selection');
       trackSearch({ pickup: pickup.address, dropoff: dropoff.address, date });
     } catch (error) {
@@ -252,6 +272,37 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
       dropoffSafeRef.current = { ...dropoffSafeRef.current, placeId: val.placeId, address: val.address };
     }
     setDropoff(val);
+  };
+
+  const addExtraStop = () => {
+    if (extraStops.length >= MAX_EXTRA_STOPS) return;
+    setExtraStops((prev) => [...prev, emptyStop()]);
+  };
+
+  const removeExtraStop = (index) => {
+    setExtraStops((prev) => prev.filter((_, i) => i !== index));
+    extraStopRefs.current.splice(index, 1);
+  };
+
+  const handleExtraStopChange = (index, data) => {
+    if (!extraStopRefs.current[index]) {
+      extraStopRefs.current[index] = { latitude: null, longitude: null, placeId: null, address: '' };
+    }
+    if (data.latitude != null) {
+      extraStopRefs.current[index] = {
+        latitude: data.latitude,
+        longitude: data.longitude,
+        placeId: data.placeId,
+        address: data.address,
+      };
+    } else if (data.placeId) {
+      extraStopRefs.current[index] = {
+        ...extraStopRefs.current[index],
+        placeId: data.placeId,
+        address: data.address,
+      };
+    }
+    setExtraStops((prev) => prev.map((stop, i) => (i === index ? data : stop)));
   };
 
   const scrollToBooking = (v) => {
@@ -437,6 +488,43 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                           className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
                           data-testid="dropoff-input"
                         />
+                        {extraStops.map((stop, index) => (
+                          <div key={`city-extra-stop-${index}`} className="mt-3">
+                            <div className="flex items-center justify-between mb-1">
+                              <label htmlFor={`city-stop-${index + 2}`} className="block text-gray-700 font-medium text-sm">
+                                {index === 0
+                                  ? (language === 'fr' ? 'Destination 2 (optionnel)' : 'Destination 2 (optional)')
+                                  : (language === 'fr' ? 'Destination finale (optionnel)' : 'Final destination (optional)')}
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => removeExtraStop(index)}
+                                className="text-xs text-gray-500 hover:text-red-500 flex items-center gap-1"
+                              >
+                                <X className="w-3 h-3" aria-hidden="true" />
+                                {language === 'fr' ? 'Supprimer' : 'Remove'}
+                              </button>
+                            </div>
+                            <PlacesAutocomplete
+                              id={`city-stop-${index + 2}`}
+                              value={stop}
+                              onChange={(data) => handleExtraStopChange(index, data)}
+                              placeholder={index === 0 ? (language === 'fr' ? 'Destination 2' : 'Destination 2') : (language === 'fr' ? 'Destination finale' : 'Final destination')}
+                              icon={<MapPin className="w-4 h-4 text-orange-500" />}
+                              className="w-full pl-9 pr-3 py-3 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm"
+                            />
+                          </div>
+                        ))}
+                        {extraStops.length < MAX_EXTRA_STOPS && (
+                          <button
+                            type="button"
+                            onClick={addExtraStop}
+                            className="mt-3 w-full py-2.5 rounded-lg border border-dashed border-gray-300 text-sm font-medium text-gray-600 hover:border-[#2ecc71] hover:text-[#2ecc71] flex items-center justify-center gap-2 transition-colors"
+                          >
+                            <Plus className="w-4 h-4" aria-hidden="true" />
+                            {language === 'fr' ? '+ Ajouter un arrêt' : '+ Add stop'}
+                          </button>
+                        )}
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>

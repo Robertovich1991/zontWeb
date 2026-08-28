@@ -1,19 +1,26 @@
 const API = process.env.REACT_APP_BACKEND_URL;
 
+function buildCoordinatePayload(pickupCoords, destinationCoords) {
+  return [
+    { latitude: pickupCoords.latitude, longitude: pickupCoords.longitude },
+    ...destinationCoords
+      .filter((c) => c?.latitude != null && c?.longitude != null)
+      .map((c) => ({ latitude: c.latitude, longitude: c.longitude })),
+  ];
+}
+
 export const transferService = {
   /**
-   * Calculate pricing between pickup and dropoff coordinates.
+   * Calculate pricing between pickup and one or more drop-off coordinates.
    * Returns array of vehicle types with pricing from C# backend.
    */
-  calculatePrice: async (pickupCoords, dropoffCoords) => {
+  calculatePrice: async (pickupCoords, dropoffCoords, extraDropoffCoords = []) => {
+    const destinationCoords = [dropoffCoords, ...extraDropoffCoords].filter(Boolean);
     const resp = await fetch(`${API}/api/proxy/distance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        coordinates: [
-          { latitude: pickupCoords.latitude, longitude: pickupCoords.longitude },
-          { latitude: dropoffCoords.latitude, longitude: dropoffCoords.longitude },
-        ],
+        coordinates: buildCoordinatePayload(pickupCoords, destinationCoords),
         radius: 50,
       }),
     });
@@ -22,17 +29,30 @@ export const transferService = {
   },
 
   /**
-   * Get fixed preorder pricing between two points.
+   * Get fixed preorder pricing for pickup plus one or more destinations.
    */
-  calculatePreorderPrice: async (pickupCoords, dropoffCoords) => {
+  calculatePreorderPrice: async (pickupCoords, dropoffCoords, extraDropoffCoords = []) => {
+    const destinationCoords = [dropoffCoords, ...extraDropoffCoords].filter(Boolean);
     const resp = await fetch(`${API}/api/proxy/preorder-distance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        coordinates: [
-          { latitude: pickupCoords.latitude, longitude: pickupCoords.longitude },
-          { latitude: dropoffCoords.latitude, longitude: dropoffCoords.longitude },
-        ],
+        coordinates: buildCoordinatePayload(pickupCoords, destinationCoords),
+      }),
+    });
+    if (!resp.ok) throw new Error('Failed to calculate preorder price');
+    return resp.json();
+  },
+
+  /**
+   * Get fixed preorder pricing for a full route (pickup + destinations).
+   */
+  calculatePreorderPriceForRoute: async (pickupCoords, destinationCoords) => {
+    const resp = await fetch(`${API}/api/proxy/preorder-distance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        coordinates: buildCoordinatePayload(pickupCoords, destinationCoords),
       }),
     });
     if (!resp.ok) throw new Error('Failed to calculate preorder price');

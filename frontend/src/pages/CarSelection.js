@@ -9,6 +9,7 @@ import SEO from '@/components/SEO';
 import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, CheckCircle, Loader2, Star } from 'lucide-react';
 import { PromoPopup, PromoBanner } from '@/components/PromoPopup';
 import { trackViewContent } from '@/utils/fbPixel';
+import { getDestinationCoords } from '@/utils/routeStops';
 
 const labels = {
   en: {
@@ -195,7 +196,8 @@ const CarSelection = () => {
 
   // Fetch vehicles from C# API if we have search data but no results yet
   useEffect(() => {
-    if (searchData?.pickupCoords && searchData?.dropoffCoords && !vehicleResults) {
+    const destinationCoords = getDestinationCoords(searchData);
+    if (searchData?.pickupCoords && destinationCoords.length > 0 && !vehicleResults) {
       fetchVehicles();
     }
   }, [searchData]);
@@ -209,13 +211,14 @@ const CarSelection = () => {
   // }, [vehicleResults, promoCode]);
 
   const fetchVehicles = async () => {
-    if (!searchData?.pickupCoords || !searchData?.dropoffCoords) return;
+    const destinationCoords = getDestinationCoords(searchData);
+    if (!searchData?.pickupCoords || destinationCoords.length === 0) return;
     setLoading(true);
     setError(null);
     try {
-      const results = await transferService.calculatePreorderPrice(
+      const results = await transferService.calculatePreorderPriceForRoute(
         searchData.pickupCoords,
-        searchData.dropoffCoords
+        destinationCoords
       );
       setVehicleResults(results);
     } catch (err) {

@@ -18,6 +18,7 @@ import {
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import WalletPaymentButton from '@/components/WalletPaymentButton';
+import { formatDestinationAddresses, formatDestinationCoords, getDestinationCoords } from '@/utils/routeStops';
 
 const GOOGLE_CLIENT_ID = '199230843213-u4t2m5tvci7747elp6uqgloug12skek0.apps.googleusercontent.com';
 const FACEBOOK_APP_ID = '1783544712624133';
@@ -691,9 +692,12 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
     setPayCooldownRemaining(PAYMENT_COOLDOWN_SECONDS);
     setLoading(true);
     try {
-      const dropoffCoords = searchData.dropoffCoords;
-      const destinationStr = dropoffCoords
-        ? `${dropoffCoords.latitude},${dropoffCoords.longitude}`
+      const destinationCoords = getDestinationCoords(searchData);
+      const destinationAddresses = searchData.destinationAddresses || [searchData.dropoff].filter(Boolean);
+      const finalCoords = destinationCoords[destinationCoords.length - 1];
+      const destinationStr = formatDestinationCoords(destinationCoords) || searchData.dropoff || '';
+      const endAddressStr = searchData.destinationAddresses
+        ? formatDestinationAddresses(searchData.destinationAddresses)
         : searchData.dropoff || '';
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
@@ -701,7 +705,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         clientPrice: selectedCar.price,
         startDate: formatDateForApi(searchData.date, searchData.time),
         startAddress: searchData.pickup,
-        endAddress: searchData.dropoff || '',
+        endAddress: endAddressStr,
         destination: destinationStr,
         tripType: 'distance',
         carType: selectedCar.tripType || '',
@@ -709,8 +713,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         duration: selectedCar.duration ? Math.round(selectedCar.duration) : 0,
         cardId: cardId,
         utcOffset: new Date().getTimezoneOffset() * -1,
-        endPointLatitude: dropoffCoords?.latitude,
-        endPointLongitude: dropoffCoords?.longitude,
+        endPointLatitude: finalCoords?.latitude,
+        endPointLongitude: finalCoords?.longitude,
         email: override.email || form.email,
       };
 
@@ -1267,15 +1271,24 @@ const Checkout = () => {
                           <p className="text-white text-sm font-medium" data-testid="checkout-pickup">{searchData.pickup}</p>
                         </div>
                       </div>
-                      {searchData.dropoff && (
-                        <div className="flex items-start gap-2.5">
+                      {(searchData.destinationAddresses?.length
+                        ? searchData.destinationAddresses
+                        : [searchData.dropoff].filter(Boolean)
+                      ).map((address, index, all) => (
+                        <div key={`checkout-stop-${index}`} className="flex items-start gap-2.5">
                           <MapPin className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
                           <div>
-                            <p className="text-xs text-gray-500">{c.to}</p>
-                            <p className="text-white text-sm font-medium" data-testid="checkout-dropoff">{searchData.dropoff}</p>
+                            <p className="text-xs text-gray-500">
+                              {all.length > 1
+                                ? (index === all.length - 1 ? `${c.to} (final)` : `${c.to} ${index + 1}`)
+                                : c.to}
+                            </p>
+                            <p className="text-white text-sm font-medium" data-testid={index === 0 ? 'checkout-dropoff' : `checkout-stop-${index + 1}`}>
+                              {address}
+                            </p>
                           </div>
                         </div>
-                      )}
+                      ))}
                       {searchData.date && (
                         <div className="flex items-start gap-2.5">
                           <Calendar className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
