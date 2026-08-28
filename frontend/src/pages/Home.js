@@ -11,6 +11,8 @@ import LastMinuteWarning from '@/components/LastMinuteWarning';
 import { useLanguage } from '@/context/LanguageContext';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import { transferService } from '@/services/api';
+import { ExtraStops, stopLabels, useExtraStops } from '@/components/ExtraStops';
+import { resolveStopCoords, buildRouteSearchData, formatDestinationDisplay, getDestinationCoords } from '@/utils/routeStops';
 import { CheckCircle, MapPin, Clock, Shield, Star, CreditCard, Plane, Users, ChevronRight, ArrowRight, Sparkles, Loader2, Mic, MicOff } from 'lucide-react';
 
 const IMAGES = {
@@ -203,6 +205,7 @@ const Home = () => {
   const [time, setTime] = useState('');
   const [mode, setMode] = useState('transfer'); // 'transfer' | 'disposal' (hourly)
   const [hours, setHours] = useState(4);
+  const { extraStops, extraStopRefs, addExtraStop, removeExtraStop, handleExtraStopChange } = useExtraStops();
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
   const [cmsHomepage, setCmsHomepage] = useState(null);
   const langSyncRef = useRef(false);
@@ -367,6 +370,13 @@ const Home = () => {
       return;
     }
 
+    // Every added stop field must be filled
+    if (extraStops.some(s => !(s.address || '').trim())) {
+      toast.error(language === 'fr' ? 'Veuillez remplir toutes les destinations ajoutées' : 'Please fill in all added destination fields');
+      setLoading(false);
+      return;
+    }
+
     // Priority: safeRef coords > state coords > geocode
     // SafeRef can NEVER be cleared by mobile browser onChange events
     const getCoords = (safeRef, stateObj, addr) => {
@@ -387,39 +397,38 @@ const Home = () => {
 
     let pickupCoords = getCoords(pickupSafeRef, pickup, pickupAddr);
     let dropoffCoords = getCoords(dropoffSafeRef, dropoff, dropoffAddr);
+    let stopCoords = [];
 
     try {
       if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickupSafeRef.current.placeId || pickup.placeId);
       if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoffSafeRef.current.placeId || dropoff.placeId);
+      stopCoords = await Promise.all(extraStops.map((s, i) => resolveStopCoords(s, extraStopRefs.current[i], geocodeAddress)));
     } catch {
       toast.error(language === 'fr' ? 'Adresse introuvable. Veuillez réessayer.' : 'Address not found. Please try again.');
       setLoading(false);
       return;
     }
 
+    const destinationCoords = [dropoffCoords, ...stopCoords];
+    const destinationAddresses = [dropoffAddr, ...extraStops.map(s => s.address)];
+    const dropoffDisplay = formatDestinationDisplay(destinationAddresses);
+
     // Save to recent searches immediately (before API call)
     try {
-      const entry = { pickup: pickupAddr, dropoff: dropoffAddr, pickupCoords, dropoffCoords, date, time };
+      const entry = { pickup: pickupAddr, dropoff: dropoffDisplay, pickupCoords, dropoffCoords: destinationCoords[destinationCoords.length - 1], destinationCoords, destinationAddresses, date, time };
       const prev = JSON.parse(localStorage.getItem('recentSearches') || '[]');
-      const filtered = prev.filter(s => !(s.pickup === pickupAddr && s.dropoff === dropoffAddr));
+      const filtered = prev.filter(s => !(s.pickup === pickupAddr && s.dropoff === dropoffDisplay));
       const updated = [entry, ...filtered].slice(0, 3);
       localStorage.setItem('recentSearches', JSON.stringify(updated));
       setRecentSearches(updated);
     } catch { /* localStorage full or unavailable */ }
 
     try {
-      const vehicles = await transferService.calculatePrice(pickupCoords, dropoffCoords);
+      const vehicles = await transferService.calculatePriceForRoute(pickupCoords, destinationCoords);
       setVehicleResults(vehicles);
-      startBooking({
-        pickup: pickupAddr,
-        dropoff: dropoffAddr,
-        pickupCoords,
-        dropoffCoords,
-        date,
-        time,
-      });
+      startBooking(buildRouteSearchData({ pickupAddr, pickupCoords, destinationAddresses, destinationCoords, date, time }));
       navigate('/car-selection');
-      trackSearch({ pickup: pickup.address, dropoff: dropoff.address, date });
+      trackSearch({ pickup: pickup.address, dropoff: dropoffDisplay, date });
     } catch (error) {
       toast.error(language === 'fr' ? 'Impossible de calculer le prix. Réessayez.' : 'Could not calculate price. Please try again.');
     } finally {
@@ -699,16 +708,19 @@ const Home = () => {
   };
 
   const handleRecentClick = async (search) => {
-    if (!search.pickupCoords?.latitude || !search.dropoffCoords?.latitude) return;
+    const destCoords = getDestinationCoords(search);
+    if (!search.pickupCoords?.latitude || !destCoords.length || destCoords[0]?.latitude == null) return;
     setLoading(true);
     try {
-      const vehicles = await transferService.calculatePrice(search.pickupCoords, search.dropoffCoords);
+      const vehicles = await transferService.calculatePriceForRoute(search.pickupCoords, destCoords);
       setVehicleResults(vehicles);
       startBooking({
         pickup: search.pickup,
         dropoff: search.dropoff,
         pickupCoords: search.pickupCoords,
-        dropoffCoords: search.dropoffCoords,
+        dropoffCoords: destCoords[destCoords.length - 1],
+        destinationCoords: destCoords,
+        destinationAddresses: search.destinationAddresses || [search.dropoff],
         date: search.date || '',
         time: search.time || '',
       });
@@ -914,7 +926,7 @@ const Home = () => {
                         )}
                       </div>
                       <div className={mode === 'disposal' ? 'hidden' : ''}>
-                        <label htmlFor="h-dropoff" className="block text-gray-700 font-medium text-sm mb-1">{c.dropoff}</label>
+                        <label htmlFor="h-dropoff" className="block text-gray-700 font-medium text-sm mb-1">{extraStops.length > 0 ? (stopLabels[language] || stopLabels.en).dest1 : c.dropoff}</label>
                         <PlacesAutocomplete
                           id="h-dropoff"
                           value={dropoff}
@@ -937,6 +949,16 @@ const Home = () => {
                           </div>
                         )}
                       </div>
+                      {mode !== 'disposal' && (
+                        <ExtraStops
+                          stops={extraStops}
+                          onAdd={addExtraStop}
+                          onRemove={removeExtraStop}
+                          onChange={handleExtraStopChange}
+                          language={language}
+                          idPrefix="home"
+                        />
+                      )}
                       {mode === 'disposal' && (
                         <div data-testid="home-hours-block">
                           <label className="block text-gray-700 font-medium text-sm mb-1">{c.hoursLabel}</label>

@@ -10,6 +10,8 @@ import SEO from '@/components/SEO';
 import TripAdvisorReviews from '@/components/TripAdvisorReviews';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import LastMinuteWarning from '@/components/LastMinuteWarning';
+import { ExtraStops, stopLabels, useExtraStops } from '@/components/ExtraStops';
+import { resolveStopCoords, buildRouteSearchData, formatDestinationDisplay } from '@/utils/routeStops';
 import { trackSearch } from '@/utils/fbPixel';
 import { getRelatedRoutes, RELATED_TITLES, resolvePageId } from '@/data/relatedRoutes';
 import { Users, Briefcase, Shield, Clock, Star, MapPin, Plane, CreditCard, Phone, CheckCircle, ChevronRight } from 'lucide-react';
@@ -43,6 +45,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   const [dropoff, setDropoff] = useState({ address: '', latitude: null, longitude: null, placeId: null });
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const { extraStops, extraStopRefs, addExtraStop, removeExtraStop, handleExtraStopChange } = useExtraStops();
   const [cmsPage, setCmsPage] = useState(null);
   const [cmsTrustBlocks, setCmsTrustBlocks] = useState(null);
   const [pageReviews, setPageReviews] = useState([]);
@@ -194,6 +197,10 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
       toast.error(language === 'fr' ? 'Veuillez remplir les adresses' : 'Please fill in the addresses');
       return;
     }
+    if (extraStops.some(s => !(s.address || '').trim())) {
+      toast.error(language === 'fr' ? 'Veuillez remplir toutes les destinations ajoutées' : 'Please fill in all added destination fields');
+      return;
+    }
     setLoading(true);
     try {
       // Priority: safeRef coords > state coords > geocode
@@ -216,20 +223,16 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
 
       if (!pickupCoords) pickupCoords = await geocodeAddress(pickupAddr, pickupSafeRef.current.placeId || pickup.placeId);
       if (!dropoffCoords) dropoffCoords = await geocodeAddress(dropoffAddr, dropoffSafeRef.current.placeId || dropoff.placeId);
+      const stopCoords = await Promise.all(extraStops.map((s, i) => resolveStopCoords(s, extraStopRefs.current[i], geocodeAddress)));
 
-      const vehicles = await transferService.calculatePrice(pickupCoords, dropoffCoords);
+      const destinationCoords = [dropoffCoords, ...stopCoords];
+      const destinationAddresses = [dropoffAddr, ...extraStops.map(s => s.address)];
+
+      const vehicles = await transferService.calculatePriceForRoute(pickupCoords, destinationCoords);
       setVehicleResults(vehicles);
-      startBooking({
-        pickup: pickupAddr,
-        dropoff: dropoffAddr,
-        pickupCoords,
-        dropoffCoords,
-        date,
-        time,
-        selectedVehicle,
-      });
+      startBooking(buildRouteSearchData({ pickupAddr, pickupCoords, destinationAddresses, destinationCoords, date, time, selectedVehicle }));
       navigate('/car-selection');
-      trackSearch({ pickup: pickup.address, dropoff: dropoff.address, date });
+      trackSearch({ pickup: pickup.address, dropoff: formatDestinationDisplay(destinationAddresses), date });
     } catch (error) {
       toast.error(language === 'fr' ? 'Impossible de calculer le prix. Reessayez.' : 'Could not calculate price. Please try again.');
     } finally {
@@ -427,7 +430,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                         />
                       </div>
                       <div>
-                        <label htmlFor="dropoff" className="block text-gray-700 font-medium text-sm mb-1">{c.dropoffLabel}</label>
+                        <label htmlFor="dropoff" className="block text-gray-700 font-medium text-sm mb-1">{extraStops.length > 0 ? (stopLabels[language] || stopLabels.en).dest1 : c.dropoffLabel}</label>
                         <PlacesAutocomplete
                           id="dropoff"
                           value={dropoff}
@@ -438,6 +441,14 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
                           data-testid="dropoff-input"
                         />
                       </div>
+                      <ExtraStops
+                        stops={extraStops}
+                        onAdd={addExtraStop}
+                        onRemove={removeExtraStop}
+                        onChange={handleExtraStopChange}
+                        language={language}
+                        idPrefix="city"
+                      />
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label htmlFor="date" className="block text-gray-700 font-medium text-sm mb-1">{c.dateLabel}</label>

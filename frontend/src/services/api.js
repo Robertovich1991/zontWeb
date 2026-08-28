@@ -1,5 +1,11 @@
 const API = process.env.REACT_APP_BACKEND_URL;
 
+// [pickup, dest1, dest2?, dest3?] payload for C# distance endpoints
+export const buildCoordinatePayload = (pickupCoords, destinationCoords) => ([
+  { latitude: pickupCoords.latitude, longitude: pickupCoords.longitude },
+  ...destinationCoords.map(c => ({ latitude: c.latitude, longitude: c.longitude })),
+]);
+
 export const transferService = {
   /**
    * Calculate pricing between pickup and dropoff coordinates.
@@ -18,6 +24,44 @@ export const transferService = {
       }),
     });
     if (!resp.ok) throw new Error('Failed to calculate price');
+    return resp.json();
+  },
+
+  /**
+   * Calculate pricing for a multi-stop route (pickup + 1 to 3 destinations).
+   * The proxy routes to C# /api/Distance (2 points) or /api/Distance/multipleDest (3+).
+   */
+  calculatePriceForRoute: async (pickupCoords, destinationCoords) => {
+    const resp = await fetch(`${API}/api/proxy/distance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        coordinates: buildCoordinatePayload(pickupCoords, destinationCoords),
+        radius: 50000,
+      }),
+    });
+    if (!resp.ok) throw new Error('Failed to calculate price');
+    const results = await resp.json();
+    // C# multipleDest can return min/max swapped and unsorted — normalize then sort by price
+    return Array.isArray(results)
+      ? results
+          .map(v => ({ ...v, maxAmount: Math.max(v.minAmount ?? 0, v.maxAmount ?? 0) }))
+          .sort((a, b) => (a.maxAmount ?? 0) - (b.maxAmount ?? 0))
+      : results;
+  },
+
+  /**
+   * Fixed preorder pricing for a multi-stop route.
+   */
+  calculatePreorderPriceForRoute: async (pickupCoords, destinationCoords) => {
+    const resp = await fetch(`${API}/api/proxy/preorder-distance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        coordinates: buildCoordinatePayload(pickupCoords, destinationCoords),
+      }),
+    });
+    if (!resp.ok) throw new Error('Failed to calculate preorder price');
     return resp.json();
   },
 

@@ -163,10 +163,11 @@ class AuctionAddRequest(BaseModel):
 
 @router.post("/distance")
 async def proxy_distance(req: DistanceRequest):
-    """Calculate trip pricing between two or more points."""
+    """Calculate trip pricing between two or more points (multi-stop supported)."""
     try:
         coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        resp = await (await get_http_client()).post("/api/Distance", params={"radius": req.radius}, json=coords)
+        endpoint = "/api/Distance/multipleDest" if len(coords) > 2 else "/api/Distance"
+        resp = await (await get_http_client()).post(endpoint, params={"radius": req.radius}, json=coords)
         resp.raise_for_status()
         return resp.json()
     except httpx.HTTPStatusError as e:
@@ -179,10 +180,11 @@ async def proxy_distance(req: DistanceRequest):
 
 @router.post("/preorder-distance")
 async def proxy_preorder_distance(req: PreorderRequest):
-    """Get fixed pricing for preorder between two points."""
+    """Get fixed pricing for preorder between two or more points (multi-stop supported)."""
     try:
         coords = [{"latitude": c.latitude, "longitude": c.longitude} for c in req.coordinates]
-        resp = await (await get_http_client()).post("/api/PreorderDistance/driverTypesTwo", json=coords)
+        endpoint = "/api/PreorderDistance/driverTypesMultipleDest" if len(coords) > 2 else "/api/PreorderDistance/driverTypesTwo"
+        resp = await (await get_http_client()).post(endpoint, json=coords)
         resp.raise_for_status()
         return resp.json()
     except Exception as e:
@@ -860,10 +862,19 @@ async def proxy_create_booking(request: Request):
 
     # For "distance" trips, convert address destination → "lat,lng" string as C# expects
     if payload.get("tripType") == "distance":
-        dest = payload.get("destination", "")
+        dest = str(payload.get("destination", ""))
         end_lat = payload.pop("endPointLatitude", None)
         end_lng = payload.pop("endPointLongitude", None)
-        if dest and not all(c in "0123456789.,-+ " for c in str(dest)):
+        if "|" in dest:
+            # Multi-stop: keep pipe-separated coords as-is; end point = last stop
+            last = dest.split("|")[-1].split(",")
+            if len(last) == 2:
+                try:
+                    payload["endPointLatitude"] = float(last[0])
+                    payload["endPointLongitude"] = float(last[1])
+                except ValueError:
+                    pass
+        elif dest and not all(c in "0123456789.,-+ " for c in dest):
             if end_lat is not None and end_lng is not None:
                 payload["destination"] = f"{end_lat},{end_lng}"
 

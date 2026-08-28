@@ -237,3 +237,12 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - 30 entrées corrigées par script : x-default pointait vers l'URL FR au lieu de l'URL EN (pages villes/aéroports, gares, VTC 7/8 places, B2B, kiosk, driver-at-disposal, /es/traslado-aeropuerto-paris).
 - Entrée /es dupliquée (cluster incomplet es+x-default seul) supprimée ; l'entrée /es complète conservée.
 - Validation : XML parse OK, 0 mismatch x-default vs en, 0 entrée sans en, 0 doublon, sitemap servi vérifié via curl. Aligné avec la logique on-page (SEO.js / CityTransferPage x-default=EN).
+
+### Session Jun 2026 — Multi-stop (jusqu'à 3 destinations) sur réservation transfert web
+- Nouveau : utils/routeStops.js (formatDestinationCoords "lat,lng|...", buildRouteSearchData, getDestinationCoords) + components/ExtraStops.js (composant + hook useExtraStops + stopLabels 5 langues).
+- Home.js & CityTransferPage.js : bouton "+ Ajouter un arrêt" (max 2 arrêts extra), label dropoff devient "Destination 1" si arrêts, validation arrêts vides, geocode via safeRefs, recherches récentes multi-stop. Caché en mode disposal/hourly.
+- api.js : calculatePriceForRoute → /api/proxy/distance avec [pickup,...dests] ; normalise maxAmount=max(min,max) (C# multipleDest les inverse !) et trie par prix croissant (sinon le "Recommandé" était le plus cher). calculatePreorderPriceForRoute ajouté aussi.
+- CarSelection : getDestinationCoords + calculatePriceForRoute. Checkout : payload destination="lat,lng|lat,lng", endAddress="A|B", endPoint=dernier arrêt ; récap liste les arrêts (checkout-stop-N / checkout-dropoff).
+- csharp_proxy.py : /distance → /api/Distance/multipleDest si 3+ coords ; /preorder-distance → driverTypesMultipleDest si 3+ ; /booking/create garde le pipe et set endPoint depuis le dernier arrêt.
+- Décision utilisateur : garder /api/Distance + maxAmount (aligné mobile), PAS de retour à preorder/minAmount.
+- Testing agent : 11/11 scénarios PASS (backend pytest 6/6 dans /app/backend/tests/test_multistop_distance.py). Fix appliqué post-test : tri par prix. Restant (mineur, non demandé) : marqueur d'arrêt intermédiaire sur carte TripRecap, persistance formulaire Home au retour arrière, GSI origin preview, chaînes FR dans checkout EN.

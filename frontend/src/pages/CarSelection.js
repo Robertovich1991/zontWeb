@@ -9,6 +9,7 @@ import SEO from '@/components/SEO';
 import { Users, Briefcase, Car, ChevronRight, ArrowRight, MapPin, Clock, Shield, CheckCircle, Loader2, Star } from 'lucide-react';
 import { PromoPopup, PromoBanner } from '@/components/PromoPopup';
 import { trackViewContent } from '@/utils/fbPixel';
+import { getDestinationCoords } from '@/utils/routeStops';
 
 const labels = {
   en: {
@@ -209,13 +210,15 @@ const CarSelection = () => {
   // }, [vehicleResults, promoCode]);
 
   const fetchVehicles = async () => {
-    if (!searchData?.pickupCoords || !searchData?.dropoffCoords) return;
+    if (!searchData?.pickupCoords) return;
+    const destinationCoords = getDestinationCoords(searchData);
+    if (!destinationCoords.length) return;
     setLoading(true);
     setError(null);
     try {
-      const results = await transferService.calculatePrice(
+      const results = await transferService.calculatePriceForRoute(
         searchData.pickupCoords,
-        searchData.dropoffCoords
+        destinationCoords
       );
       setVehicleResults(results);
     } catch (err) {

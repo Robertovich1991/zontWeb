@@ -11,6 +11,7 @@ import PhoneInput from '@/components/PhoneInput';
 import LastMinuteWarning from '@/components/LastMinuteWarning';
 import { toast } from 'sonner';
 import { trackInitiateCheckout } from '@/utils/fbPixel';
+import { formatDestinationCoords, formatDestinationAddresses, getDestinationCoords } from '@/utils/routeStops';
 import {
   CreditCard, MapPin, Calendar, Clock, Shield, CheckCircle,
   Loader2, User, Mail, Lock, Phone, ChevronLeft, ArrowRight, Car, Trash2
@@ -749,9 +750,11 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
   const handlePayWithCard = async (cardId, override = {}) => {
     setLoading(true);
     try {
-      const dropoffCoords = searchData.dropoffCoords;
-      const destinationStr = dropoffCoords
-        ? `${dropoffCoords.latitude},${dropoffCoords.longitude}`
+      const destinationCoords = getDestinationCoords(searchData);
+      const destinationAddresses = searchData.destinationAddresses || [searchData.dropoff].filter(Boolean);
+      const finalCoords = destinationCoords[destinationCoords.length - 1];
+      const destinationStr = destinationCoords.length
+        ? formatDestinationCoords(destinationCoords)
         : searchData.dropoff || '';
       const bookingPayload = {
         startPointLatitude: searchData.pickupCoords.latitude,
@@ -759,7 +762,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         clientPrice: selectedCar.price,
         startDate: formatDateForApi(searchData.date, searchData.time),
         startAddress: searchData.pickup,
-        endAddress: searchData.dropoff || '',
+        endAddress: formatDestinationAddresses(destinationAddresses),
         destination: destinationStr,
         tripType: 'distance',
         carType: selectedCar.tripType || '',
@@ -767,8 +770,8 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         duration: selectedCar.duration ? Math.round(selectedCar.duration) : 0,
         cardId: cardId,
         utcOffset: new Date().getTimezoneOffset() * -1,
-        endPointLatitude: dropoffCoords?.latitude,
-        endPointLongitude: dropoffCoords?.longitude,
+        endPointLatitude: finalCoords?.latitude,
+        endPointLongitude: finalCoords?.longitude,
         email: override.email || form.email,
       };
 
@@ -1345,15 +1348,15 @@ const Checkout = () => {
                           <p className="text-white text-sm font-medium" data-testid="checkout-pickup">{searchData.pickup}</p>
                         </div>
                       </div>
-                      {searchData.dropoff && (
-                        <div className="flex items-start gap-2.5">
-                          <MapPin className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                      {(searchData.destinationAddresses?.length ? searchData.destinationAddresses : [searchData.dropoff]).filter(Boolean).map((addr, i, arr) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <MapPin className={`w-4 h-4 mt-0.5 flex-shrink-0 ${i === arr.length - 1 ? 'text-red-400' : 'text-orange-400'}`} />
                           <div>
-                            <p className="text-xs text-gray-500">{c.to}</p>
-                            <p className="text-white text-sm font-medium" data-testid="checkout-dropoff">{searchData.dropoff}</p>
+                            <p className="text-xs text-gray-500">{arr.length > 1 ? `${c.to} ${i + 1}/${arr.length}` : c.to}</p>
+                            <p className="text-white text-sm font-medium" data-testid={i === arr.length - 1 ? 'checkout-dropoff' : `checkout-stop-${i + 1}`}>{addr}</p>
                           </div>
                         </div>
-                      )}
+                      ))}
                       {searchData.date && (
                         <div className="flex items-start gap-2.5">
                           <Calendar className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />

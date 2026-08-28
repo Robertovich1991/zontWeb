@@ -1,0 +1,41 @@
+{
+  "summary": "Full E2E + API test of the new multi-stop destination feature (transfer mode) on zont.cab preview. Backend: created /app/backend/tests/test_multistop_distance.py (6 tests, all pass) verifying POST /api/proxy/distance routes 2 coords -> /api/Distance and 3/4 coords -> /api/Distance/multipleDest with monotonically increasing price+distance (2:72EUR/33km, 3:162EUR/50km, 4:217EUR/74km), all vehicles priced, no _id leakage, 1 coord -> 400, bad payload -> 422. Frontend (Playwright, real Google autocomplete): add/remove stop UI, label switch to 'Destination 1', max-2 cap, disposal tab has no stop fields, single-stop regression (2 coords, 72EUR, 33km), 2-stop (3 coords, 87-95EUR, 51-52km), 3-stop (4 coords, 126EUR std / 76km / ~107min), empty-stop validation toast, remove-stop re-price back to 2 coords/72EUR, city page /paris-airport-transfer 2-stop (3 coords), recent-search chip shows 'A -> B -> C' and re-prices with 4 coords, checkout summary shows 'Drop-off 1/2' + 'Drop-off 2/2' (checkout-stop-1 / checkout-dropoff). No payment was attempted. All 11 requested scenarios PASS.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "CarSelection (multi-stop results)", "issue": "For multi-stop (3+ coords) results the vehicle list is NOT price-sorted: order is Luxury Sedan 167EUR, Standard Car 87EUR, Minivan 95EUR, Luxury Van 208EUR, so the most expensive car gets the green 'RECOMMENDED' badge and the pre-highlighted 'Book now' CTA. Single-stop results come back ascending (72/105/105/115). C# /multipleDest returns a different order; frontend should sort by final price before rendering to keep the recommendation consistent.", "selector": "[data-testid=\"car-card-0\"], [data-testid=\"car-price-0\"]", "priority": "MEDIUM"},
+      {"component": "TripRecap map", "issue": "On a 2-stop route the map shows only 2 markers (pickup green + final red); the intermediate destination has no marker/label, so users cannot visually confirm stop 1. Text summary is correct.", "selector": "[data-testid=\"trip-recap-map\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "Back navigation from /car-selection to Home", "issue": "Browser back leaves the Home form completely empty (pickup, dropoff, date, time and added stops all cleared), so the 'go back and remove a stop' path forces the user to retype everything. Re-pricing itself works once refilled (2 coords, 72EUR). Pre-existing behaviour, amplified by multi-stop editing.", "affected_selectors": ["[data-testid=\"home-pickup-input\"]", "[data-testid=\"home-stop-2-input\"]"]},
+      {"flow": "Checkout Google sign-in", "issue": "Console on /checkout: '[GSI_LOGGER]: The given origin is not allowed for the given client ID' + 403s — Google One Tap/Continue-with-Google is broken on the preview origin (unrelated to multi-stop, guest checkout works).", "affected_selectors": ["Continue with Google"]}
+    ],
+    "design_issues": [
+      {"screen": "/checkout", "issues": ["Mixed languages while UI language is EN: 'Retour au resume', 'TVA, peages et frais inclus' next to 'Complete Your Booking' / 'Passenger Details'"]},
+      {"screen": "Home / city booking form", "issues": ["Date and Time use native browser pickers (class date-native) instead of the shadcn calendar/time components - inconsistent styling across browsers (pre-existing)"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_multistop_distance.py", "/app/test_reports/pytest/multistop_results.xml"],
+  "action_items": [
+    "Sort multi-stop (multipleDest) vehicle results by price ascending in CarSelection so 'RECOMMENDED' is not the most expensive car",
+    "Optional: render intermediate stop marker(s) on the TripRecap map",
+    "Optional: persist Home form state (incl. extra stops) when returning from /car-selection",
+    "Unrelated: fix Google OAuth client origin for the preview domain; fix FR strings leaking into EN checkout"
+  ],
+  "critical_code_review_comments": [
+    "routeStops.resolveStopCoords compares only the first 12 chars of the ref address vs typed address to trust cached coords; two stops starting with the same 12 chars (e.g. 'Aeroport de ...') could reuse the wrong cached coords — prefer comparing placeId.",
+    "useExtraStops.removeExtraStop mutates extraStopRefs with splice while setExtraStops filters — correct today, but the ref array and state can desync if removal is called twice in the same tick; consider deriving refs from state or using a keyed map.",
+    "csharp_proxy /distance only differentiates on len(coords) > 2; a single-coordinate payload is forwarded and the C# API answers 400 (verified). Adding a Pydantic min_length=2 validator would return a clearer 422."
+  ],
+  "updated_files": ["/app/backend/tests/test_multistop_distance.py"],
+  "success_rate": {"backend": "100% (6/6)", "frontend": "100% of 11 requested scenarios passed (2 cosmetic/UX findings)"},
+  "seed_data_creation": "None. No booking created, no payment attempted (production Stripe untouched). Only read-only pricing calls to api.zont.cab.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "Test client garikgalstyan@gmail.com / 12345678 was NOT needed — /checkout is reachable as guest.",
+  "context_for_next_testing_agent": "Multi-stop feature verified end-to-end on 2026-08-28. Reusable pytest: /app/backend/tests/test_multistop_distance.py (real prices fluctuate run-to-run — assertions compare relative 2 vs 3 vs 4 coord amounts, not fixed values). Playwright helper pattern for Google autocomplete: type char-by-char (delay 40ms), wait 1800ms, click '.pac-item' first item. Home testids: home-pickup-input/home-dropoff-input/home-stop-2-input/home-stop-3-input/add-stop-button/remove-stop-2/remove-stop-3/home-date-input(YYYY-MM-DD fill)/home-time-input/home-submit-btn. City page: pickup-input/dropoff-input/city-stop-2-input/submit-booking-btn. Checkout stop lines: checkout-stop-1, checkout-dropoff. NEVER click Pay (live Stripe).",
+  "rca_of_the_issue": "No functional defect found in the multi-stop implementation. The only feature-related finding is presentation: C# /api/Distance/multipleDest returns vehicle types in a non-price order, and CarSelection renders them as-is, so the 'RECOMMENDED' badge/index-0 highlight lands on the priciest vehicle for multi-stop searches while single-stop searches (from /api/Distance) happen to come back ascending."
+}
