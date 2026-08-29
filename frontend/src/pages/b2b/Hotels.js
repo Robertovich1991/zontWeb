@@ -315,6 +315,7 @@ const seoUrls = {
 };
 
 const relatedPages = [
+  { path: '/partenaire-vtc-hotel-paris', name: 'Partenaire VTC Hôtel Paris', tagline: 'Jusqu\'à 10 % de commission Premium' },
   { path: '/concierge-services', name: 'Concierge Services', tagline: 'VIP chauffeur solutions' },
   { path: '/tourism-agencies', name: 'Tourism Agencies', tagline: 'Private transport solutions' },
   { path: '/event-agencies', name: 'Event Agencies', tagline: 'Event transportation' },

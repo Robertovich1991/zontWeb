@@ -246,3 +246,8 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - csharp_proxy.py : /distance → /api/Distance/multipleDest si 3+ coords ; /preorder-distance → driverTypesMultipleDest si 3+ ; /booking/create garde le pipe et set endPoint depuis le dernier arrêt.
 - Décision utilisateur : garder /api/Distance + maxAmount (aligné mobile), PAS de retour à preorder/minAmount.
 - Testing agent : 11/11 scénarios PASS (backend pytest 6/6 dans /app/backend/tests/test_multistop_distance.py). Fix appliqué post-test : tri par prix. Restant (mineur, non demandé) : marqueur d'arrêt intermédiaire sur carte TripRecap, persistance formulaire Home au retour arrière, GSI origin preview, chaînes FR dans checkout EN.
+
+### Session Jun 2026 — Page "Partenaire VTC Hôtel Paris"
+- Nouvelle page FR /partenaire-vtc-hotel-paris (pages/b2b/HotelPartnersParis.js) : contenu éditorial complet fourni par l'utilisateur (commission 10% Premium, transferts CDG/Orly/Beauvais, types d'hôtels, borne), Title/H1/meta exacts du brief, canonical auto-référent, JSON-LD Service.
+- Maillage : 4 liens vers /borne-reservation-hotel (hero, encart inline, section borne, footer form), lien retour hub B2B, entrée ajoutée dans la grille du hub B2B (Partners.js) + relatedPages de la page borne (Hotels.js). Sitemap à jour.
+- Formulaire lead → POST /api/leads (source_page), testé en curl (lead créé puis nettoyé). Screenshot OK.

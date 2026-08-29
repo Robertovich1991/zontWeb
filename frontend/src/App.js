@@ -157,6 +157,7 @@ const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
 const TravelAgencies = lazy(() => import("@/pages/b2b/TravelAgencies"));
 const TourismAgencies = lazy(() => import("@/pages/b2b/TourismAgencies"));
 const HotelsB2B = lazy(() => import("@/pages/b2b/Hotels"));
+const HotelPartnersParis = lazy(() => import("@/pages/b2b/HotelPartnersParis"));
 const ConciergeServices = lazy(() => import("@/pages/b2b/ConciergeServices"));
 const EventAgencies = lazy(() => import("@/pages/b2b/EventAgencies"));
 const CorporateClients = lazy(() => import("@/pages/b2b/CorporateClients"));
@@ -493,6 +494,7 @@ function App() {
                   <Route path="/travel-agencies" element={<TravelAgencies />} />
                   <Route path="/tourism-agencies" element={<TourismAgencies />} />
                   <Route path="/hotels" element={<HotelsB2B />} />
+                  <Route path="/partenaire-vtc-hotel-paris" element={<HotelPartnersParis />} />
                   <Route path="/hotel-booking-kiosk" element={<HotelsB2B />} />
                   <Route path="/borne-reservation-hotel" element={<HotelsB2B />} />
                   <Route path="/terminal-bronirovaniya-otel" element={<HotelsB2B />} />
