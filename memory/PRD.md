@@ -257,3 +257,9 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Toutes les pages récentes présentes (partenaire-vtc-hotel-paris, /es|/hy privacy/terms/help, /fr|ru|hy countries/about/hourly, Marseille...).
 - sitemap-index.xml : lastmod rafraîchi 2026-06-20. sitemap-blog.xml : généré dynamiquement depuis Mongo, vide en preview (articles en prod uniquement) — normal.
 - URLs GSC : https://www.zont.cab/sitemap-index.xml (recommandé, couvre tout) ou sitemap.xml + api/sitemap-blog.xml séparément.
+
+### Session Jun 2026 — Audit SEO + maillage interne
+- Sitemap : 249/249 URLs matchent une vraie route React (0 URL morte), 0 doublon, 0 alternate hreflang manquant. Routes privées (/hotel, /my-bookings, admin/fleet/driver) correctement exclues.
+- Alias : /es/vtc-7-plazas et /es/vtc-8-plazas sont des alias avec canonical correct vers /es/minivan-7-plazas et /es/minibus-8-plazas (vérifié rendu) — volontairement hors sitemap. 404 (ex /fr/transfert-aeroport-paris) = noindex,nofollow ✔.
+- Maillage : 83 liens internes uniques extraits de 9 pages clés rendues — 1 seul lien cassé trouvé et CORRIGÉ : la carte "Côte d'Azur" de cities.js pointait vers /french-riviera-airport-transfer, /transfert-aeroport-cote-azur, /taksi-iz-aeroporta-lazurnyy-bereg (pages inexistantes → 404) ; redirigée vers les pages Nice existantes (EN/FR/RU/ES). Vérifié rendu sur /countries et /fr/countries.
+- Échantillon SEO rendu OK : 1 seul H1 par page, canonicals auto-référents, hreflang 6 tags sur pages multilingues.

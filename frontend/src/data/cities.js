@@ -111,9 +111,10 @@ export const citiesData = {
     nameFr: 'Côte d\'Azur',
     nameRu: 'Лазурный Берег',
     airports: ['Nice Côte d\'Azur'],
-    urlEn: '/french-riviera-airport-transfer',
-    urlFr: '/transfert-aeroport-cote-azur',
-    urlRu: '/taksi-iz-aeroporta-lazurnyy-bereg',
+    urlEn: '/nice-airport-transfer',
+    urlFr: '/transfert-aeroport-nice',
+    urlRu: '/taksi-iz-aeroporta-nitstsa',
+    urlEs: '/es/traslado-aeropuerto-niza',
   },
   marseille: {
     id: 'marseille',
