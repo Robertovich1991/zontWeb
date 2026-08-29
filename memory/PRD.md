@@ -251,3 +251,9 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Nouvelle page FR /partenaire-vtc-hotel-paris (pages/b2b/HotelPartnersParis.js) : contenu éditorial complet fourni par l'utilisateur (commission 10% Premium, transferts CDG/Orly/Beauvais, types d'hôtels, borne), Title/H1/meta exacts du brief, canonical auto-référent, JSON-LD Service.
 - Maillage : 4 liens vers /borne-reservation-hotel (hero, encart inline, section borne, footer form), lien retour hub B2B, entrée ajoutée dans la grille du hub B2B (Partners.js) + relatedPages de la page borne (Hotels.js). Sitemap à jour.
 - Formulaire lead → POST /api/leads (source_page), testé en curl (lead créé puis nettoyé). Screenshot OK.
+
+### Session Jun 2026 — Audit complet sitemap (avant soumission GSC)
+- 249 URLs testées une par une : 249/249 en HTTP 200, 0 doublon, 0 alternate hreflang manquant du sitemap, XML valide.
+- Toutes les pages récentes présentes (partenaire-vtc-hotel-paris, /es|/hy privacy/terms/help, /fr|ru|hy countries/about/hourly, Marseille...).
+- sitemap-index.xml : lastmod rafraîchi 2026-06-20. sitemap-blog.xml : généré dynamiquement depuis Mongo, vide en preview (articles en prod uniquement) — normal.
+- URLs GSC : https://www.zont.cab/sitemap-index.xml (recommandé, couvre tout) ou sitemap.xml + api/sitemap-blog.xml séparément.
