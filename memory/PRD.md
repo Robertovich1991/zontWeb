@@ -269,3 +269,7 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Purchase se déclenche sur /booking-confirmation (après paiement réussi, tous moyens : carte, wallet), avec order_id. Refresh = pas de doublon (contexte perdu → early return).
 - Lead ajouté : formulaire HotelPartnersParis + formulaire B2BPage (les 9 pages B2B) — avant seul Partners.js traçait.
 - Rappel : les événements ne partent QUE sur zont.cab (prod) — tester après Deploy avec Meta Pixel Helper / Test Events. Lint OK, pages vérifiées au rendu.
+
+### Session Jun 2026 — Durcissement InitiateCheckout/Purchase (rapport user : non visible en prod)
+- Cause probable : la prod déployée datait d'avant le fix Meta Pixel. En plus, durcissement : InitiateCheckout part désormais dès que selectedCar est dispo (useEffect [selectedCar] + ref anti-doublon) au lieu du montage seul ; idem Purchase ([bookingDetails, selectedCar] + ref). Couvre les cas resume/iframe et restauration tardive.
+- Vérifié : lint OK, /checkout sans contexte rend l'état vide sans crash. User doit REDÉPLOYER puis tester avec Meta Test Events.

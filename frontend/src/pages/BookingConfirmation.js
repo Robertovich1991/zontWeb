@@ -102,13 +102,14 @@ const BookingConfirmation = () => {
     navigate('/');
   };
 
-  // Track Purchase on mount
+  // Track Purchase once, as soon as booking details and price are available
+  const trackedPurchase = React.useRef(false);
   React.useEffect(() => {
-    if (bookingDetails && selectedCar?.price) {
+    if (!trackedPurchase.current && bookingDetails && selectedCar?.price) {
+      trackedPurchase.current = true;
       trackPurchase({ price: selectedCar.price, bookingId: bookingDetails.id || bookingDetails.bookingId });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [bookingDetails, selectedCar]);
 
   if (!bookingDetails) {
     return (

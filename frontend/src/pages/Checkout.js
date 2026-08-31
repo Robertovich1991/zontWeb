@@ -1232,14 +1232,23 @@ const Checkout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const trackedCheckout = React.useRef(false);
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (selectedCar?.price) trackInitiateCheckout({ price: selectedCar.price, vehicle: selectedCar.tripType || selectedCar.name });
     // Google Ads: Begin Checkout conversion
     if (window.gtag) {
       window.gtag('event', 'conversion', { 'send_to': 'AW-1014783804/tU5OCIaUqZ8cELy-8eMD' });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Meta Pixel: fire once as soon as the selected car (and its price) is available
+  useEffect(() => {
+    if (!trackedCheckout.current && selectedCar?.price) {
+      trackedCheckout.current = true;
+      trackInitiateCheckout({ price: selectedCar.price, vehicle: selectedCar.tripType || selectedCar.name });
+    }
+  }, [selectedCar]);
 
   if (!searchData || !selectedCar) {
     return (
