@@ -104,9 +104,10 @@ const BookingConfirmation = () => {
 
   // Track Purchase on mount
   React.useEffect(() => {
-    if (bookingDetails && searchData?.price) {
-      trackPurchase({ price: searchData.price, bookingId: bookingDetails.id || bookingDetails.bookingId });
+    if (bookingDetails && selectedCar?.price) {
+      trackPurchase({ price: selectedCar.price, bookingId: bookingDetails.id || bookingDetails.bookingId });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!bookingDetails) {

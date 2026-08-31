@@ -6,6 +6,7 @@ import SEO from '@/components/SEO';
 import { useLanguage } from '@/context/LanguageContext';
 import { CheckCircle, ArrowRight, Phone, Mail, Building2, Clock, Shield, Users, Star, Plane, ChevronRight } from 'lucide-react';
 import { matchPathToLanguage } from '@/utils/pageUrlMaps';
+import { trackLead } from '@/utils/fbPixel';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -49,6 +50,7 @@ const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) =>
       });
       if (!res.ok) throw new Error('Failed');
       setSubmitted(true);
+      trackLead({ source: seoUrls?.[language] || window.location.pathname });
       setFormState({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {
       setError(language === 'fr' ? 'Erreur. Veuillez réessayer.' : language === 'ru' ? 'Ошибка. Попробуйте снова.' : language === 'hy' ? 'Սխալ: Խնդրում ենք կրկին փորձեք:' : 'Error. Please try again.');

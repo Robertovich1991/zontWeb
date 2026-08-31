@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import { CheckCircle, ArrowRight, Mail, Plane, Car, Users, Star, Building2, Percent, MonitorSmartphone, ChevronRight } from 'lucide-react';
+import { trackLead } from '@/utils/fbPixel';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 const CANONICAL = 'https://www.zont.cab/partenaire-vtc-hotel-paris';
@@ -59,6 +60,7 @@ export default function HotelPartnersParis() {
       });
       if (!res.ok) throw new Error('Failed');
       setSubmitted(true);
+      trackLead({ source: 'Hotel Partners Paris' });
       setFormState({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {
       setError('Erreur. Veuillez réessayer.');

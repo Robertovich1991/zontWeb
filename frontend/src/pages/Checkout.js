@@ -1234,7 +1234,7 @@ const Checkout = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (searchData?.price) trackInitiateCheckout({ price: searchData.price, vehicle: searchData.vehicleName });
+    if (selectedCar?.price) trackInitiateCheckout({ price: selectedCar.price, vehicle: selectedCar.tripType || selectedCar.name });
     // Google Ads: Begin Checkout conversion
     if (window.gtag) {
       window.gtag('event', 'conversion', { 'send_to': 'AW-1014783804/tU5OCIaUqZ8cELy-8eMD' });

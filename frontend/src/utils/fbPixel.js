@@ -95,8 +95,9 @@ export const trackViewContent = ({ vehicle, price, currency = 'EUR' }) => {
 /** User lands on Checkout page */
 export const trackInitiateCheckout = ({ price, currency = 'EUR', vehicle }) => {
   const eventId = genId();
+  const value = Number(price) || 0;
   fbq('track', 'InitiateCheckout', {
-    value: price,
+    value,
     currency,
     content_name: vehicle,
     num_items: 1,
@@ -104,7 +105,7 @@ export const trackInitiateCheckout = ({ price, currency = 'EUR', vehicle }) => {
   sendServer({
     event_name: 'InitiateCheckout',
     event_id: eventId,
-    value: price,
+    value,
     currency,
     content_name: vehicle,
     num_items: 1,
@@ -115,8 +116,9 @@ export const trackInitiateCheckout = ({ price, currency = 'EUR', vehicle }) => {
 /** Booking confirmed (Purchase) */
 export const trackPurchase = ({ price, currency = 'EUR', bookingId }) => {
   const eventId = genId();
+  const value = Number(price) || 0;
   fbq('track', 'Purchase', {
-    value: price,
+    value,
     currency,
     content_name: 'Airport Transfer',
     content_type: 'product',
@@ -125,7 +127,7 @@ export const trackPurchase = ({ price, currency = 'EUR', bookingId }) => {
   sendServer({
     event_name: 'Purchase',
     event_id: eventId,
-    value: price,
+    value,
     currency,
     content_name: 'Airport Transfer',
     order_id: bookingId ? String(bookingId) : '',

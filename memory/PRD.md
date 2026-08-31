@@ -263,3 +263,9 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Alias : /es/vtc-7-plazas et /es/vtc-8-plazas sont des alias avec canonical correct vers /es/minivan-7-plazas et /es/minibus-8-plazas (vérifié rendu) — volontairement hors sitemap. 404 (ex /fr/transfert-aeroport-paris) = noindex,nofollow ✔.
 - Maillage : 83 liens internes uniques extraits de 9 pages clés rendues — 1 seul lien cassé trouvé et CORRIGÉ : la carte "Côte d'Azur" de cities.js pointait vers /french-riviera-airport-transfer, /transfert-aeroport-cote-azur, /taksi-iz-aeroporta-lazurnyy-bereg (pages inexistantes → 404) ; redirigée vers les pages Nice existantes (EN/FR/RU/ES). Vérifié rendu sur /countries et /fr/countries.
 - Échantillon SEO rendu OK : 1 seul H1 par page, canonicals auto-référents, hreflang 6 tags sur pages multilingues.
+
+### Session Jun 2026 — Fix tracking Meta Pixel (Purchase & InitiateCheckout)
+- Bug : Checkout et BookingConfirmation gardaient sur `searchData.price` (champ inexistant) → InitiateCheckout et Purchase ne partaient JAMAIS. Corrigé : prix depuis `selectedCar.price` (+ Number() forcé avec fallback 0 dans fbPixel.js).
+- Purchase se déclenche sur /booking-confirmation (après paiement réussi, tous moyens : carte, wallet), avec order_id. Refresh = pas de doublon (contexte perdu → early return).
+- Lead ajouté : formulaire HotelPartnersParis + formulaire B2BPage (les 9 pages B2B) — avant seul Partners.js traçait.
+- Rappel : les événements ne partent QUE sur zont.cab (prod) — tester après Deploy avec Meta Pixel Helper / Test Events. Lint OK, pages vérifiées au rendu.
