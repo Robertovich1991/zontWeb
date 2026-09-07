@@ -273,3 +273,6 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 ### Session Jun 2026 — Durcissement InitiateCheckout/Purchase (rapport user : non visible en prod)
 - Cause probable : la prod déployée datait d'avant le fix Meta Pixel. En plus, durcissement : InitiateCheckout part désormais dès que selectedCar est dispo (useEffect [selectedCar] + ref anti-doublon) au lieu du montage seul ; idem Purchase ([bookingDetails, selectedCar] + ref). Couvre les cas resume/iframe et restauration tardive.
 - Vérifié : lint OK, /checkout sans contexte rend l'état vide sans crash. User doit REDÉPLOYER puis tester avec Meta Test Events.
+
+### Session Jun 2026 — Redirect non-www → www dans index.html
+- Script inline ajouté en tout premier dans <head> : si hostname === "zont.cab" → location.replace vers https://www.zont.cab + path + search. Aucun autre script/canonical/og:url touché. Vérifié servi (curl). En attente de Deploy par l'utilisateur.

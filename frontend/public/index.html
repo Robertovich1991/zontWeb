@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="fr">
     <head>
+        <!-- Redirection canonique : zont.cab (sans www) → www.zont.cab, avant tout autre script -->
+        <script>"zont.cab"===window.location.hostname&&window.location.replace("https://www.zont.cab"+window.location.pathname+window.location.search)</script>
         <!-- /blog/* — Server-side reverse proxy from /blog/* to blog.zont.cab/*
              (handled by FastAPI /api/blog router + ingress rewrite request to Emergent Support).
              Client-side redirect removed so the URL stays on zont.cab for SEO. -->
