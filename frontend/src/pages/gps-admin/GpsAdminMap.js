@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useGpsAdmin } from './GpsAdminAuthContext';
 import { Search, RefreshCw, Wifi, WifiOff, Clock, Loader2, Navigation, MapPin, Building2, Zap, X, Gauge } from 'lucide-react';
+import { loadGoogleMaps, createFleetMap, carIcon, animateMarkerG } from '@/utils/googleFleetMap';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 const WS_URL = API.replace(/^http/, 'ws');
@@ -35,108 +36,87 @@ function fmtAge(ts) {
   return `${Math.floor(s / 86400)}j`;
 }
 
-function carIconHtml(color, heading, selected) {
-  const s = selected ? 44 : 34;
-  return `<div style="width:${s}px;height:${s}px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.25));transform:rotate(${heading || 0}deg);transition:transform 0.8s cubic-bezier(.4,0,.2,1);">
-  <svg viewBox="0 0 36 36" width="${s}" height="${s}">
-    <rect x="9" y="3" width="18" height="30" rx="6" fill="${color}" stroke="white" stroke-width="2"/>
-    <rect x="12.5" y="7" width="11" height="6" rx="2" fill="rgba(255,255,255,0.5)"/>
-    <rect x="12.5" y="23" width="11" height="4" rx="1.5" fill="rgba(255,255,255,0.3)"/>
-    <rect x="7" y="9" width="3.5" height="6" rx="1.5" fill="${color}" stroke="white" stroke-width="1"/>
-    <rect x="7" y="21" width="3.5" height="6" rx="1.5" fill="${color}" stroke="white" stroke-width="1"/>
-    <rect x="25.5" y="9" width="3.5" height="6" rx="1.5" fill="${color}" stroke="white" stroke-width="1"/>
-    <rect x="25.5" y="21" width="3.5" height="6" rx="1.5" fill="${color}" stroke="white" stroke-width="1"/>
-    ${selected ? `<rect x="5" y="0" width="26" height="36" rx="9" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.4" stroke-dasharray="3,2"/>` : ''}
-  </svg></div>`;
-}
-
 function animateMarker(marker, from, to, duration = 1000) {
-  const [fLat, fLng] = from;
-  const [tLat, tLng] = to;
-  if (Math.abs(fLat - tLat) < 0.000001 && Math.abs(fLng - tLng) < 0.000001) return;
-  const start = performance.now();
-  const step = (now) => {
-    const t = Math.min((now - start) / duration, 1);
-    const ease = t * (2 - t);
-    marker.setLatLng([fLat + (tLat - fLat) * ease, fLng + (tLng - fLng) * ease]);
-    if (t < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
+  animateMarkerG(marker, from, to, duration);
 }
 
-// ── Map ──────────────────────────────────────────────────────────────
+// ── Map (Google Maps) ────────────────────────────────────────────────
 const MapView = ({ vehicles, selectedImei, onSelect }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const markersRef = useRef({});
   const prevPosRef = useRef({});
   const fitDone = useRef(false);
+  const [mapError, setMapError] = useState(false);
 
   useEffect(() => {
-    if (!document.getElementById('leaflet-css-admin2')) {
-      const l = document.createElement('link');
-      l.id = 'leaflet-css-admin2'; l.rel = 'stylesheet';
-      l.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(l);
-    }
-    const init = async () => {
-      const L = await import('leaflet');
-      if (mapInstance.current) return;
-      const map = L.map(mapRef.current, { center: [48.86, 2.35], zoom: 6, zoomControl: false, attributionControl: false });
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd' }).addTo(map);
-      mapInstance.current = map;
-    };
-    init();
-    return () => { if (mapInstance.current) { mapInstance.current.remove(); mapInstance.current = null; } };
+    let cancelled = false;
+    loadGoogleMaps()
+      .then(() => {
+        if (cancelled || mapInstance.current || !mapRef.current) return;
+        mapInstance.current = createFleetMap(mapRef.current, { center: { lat: 48.86, lng: 2.35 }, zoom: 6 });
+      })
+      .catch(() => setMapError(true));
+    return () => { cancelled = true; mapInstance.current = null; };
   }, []);
 
   useEffect(() => {
-    const update = async () => {
-      const L = await import('leaflet');
-      const map = mapInstance.current;
-      if (!map) return;
-      const valid = vehicles.filter(v => v.lat && v.lng);
-      const activeImeis = new Set(valid.map(v => v.imei));
+    const g = window.google;
+    const map = mapInstance.current;
+    if (!g || !map) return;
+    const valid = vehicles.filter(v => v.lat && v.lng);
+    const activeImeis = new Set(valid.map(v => v.imei));
 
-      Object.keys(markersRef.current).forEach(imei => {
-        if (!activeImeis.has(imei)) { map.removeLayer(markersRef.current[imei]); delete markersRef.current[imei]; delete prevPosRef.current[imei]; }
-      });
+    Object.keys(markersRef.current).forEach(imei => {
+      if (!activeImeis.has(imei)) { markersRef.current[imei].setMap(null); delete markersRef.current[imei]; delete prevPosRef.current[imei]; }
+    });
 
-      valid.forEach(v => {
-        const st = getStatus(v);
-        const cfg = STATUS[st];
-        const sel = v.imei === selectedImei;
-        const s = sel ? 44 : 34;
-        const icon = L.divIcon({ className: '', html: carIconHtml(cfg.color, v.heading, sel), iconSize: [s, s], iconAnchor: [s / 2, s / 2] });
+    valid.forEach(v => {
+      const st = getStatus(v);
+      const cfg = STATUS[st];
+      const sel = v.imei === selectedImei;
+      const s = sel ? 44 : 34;
+      const icon = carIcon(cfg.color, v.heading, s);
 
-        if (markersRef.current[v.imei]) {
-          const marker = markersRef.current[v.imei];
-          const prev = prevPosRef.current[v.imei];
-          marker.setIcon(icon);
-          if (prev && (prev[0] !== v.lat || prev[1] !== v.lng)) {
-            animateMarker(marker, prev, [v.lat, v.lng], 1000);
-          }
-        } else {
-          const m = L.marker([v.lat, v.lng], { icon }).addTo(map);
-          m.on('click', () => onSelect(v.imei));
-          markersRef.current[v.imei] = m;
-        }
-        prevPosRef.current[v.imei] = [v.lat, v.lng];
-      });
-
-      if (!fitDone.current && valid.length > 0) {
-        map.fitBounds(L.latLngBounds(valid.map(v => [v.lat, v.lng])), { padding: [80, 80], maxZoom: 13 });
-        fitDone.current = true;
+      if (markersRef.current[v.imei]) {
+        const marker = markersRef.current[v.imei];
+        const prev = prevPosRef.current[v.imei];
+        marker.setIcon(icon);
+        marker.setZIndex(sel ? 1000 : 1);
+        if (prev && (prev[0] !== v.lat || prev[1] !== v.lng)) animateMarker(marker, prev, [v.lat, v.lng], 1000);
+        else marker.setPosition({ lat: v.lat, lng: v.lng });
+      } else {
+        const m = new g.maps.Marker({ position: { lat: v.lat, lng: v.lng }, icon, map, zIndex: sel ? 1000 : 1 });
+        m.addListener('click', () => onSelect(v.imei));
+        markersRef.current[v.imei] = m;
       }
-      if (selectedImei) {
-        const sv = valid.find(v => v.imei === selectedImei);
-        if (sv) map.flyTo([sv.lat, sv.lng], 15, { duration: 0.8 });
-      }
-    };
-    update();
+      prevPosRef.current[v.imei] = [v.lat, v.lng];
+    });
+
+    if (!fitDone.current && valid.length > 0) {
+      const bounds = new g.maps.LatLngBounds();
+      valid.forEach(v => bounds.extend({ lat: v.lat, lng: v.lng }));
+      map.fitBounds(bounds, 80);
+      g.maps.event.addListenerOnce(map, 'idle', () => { if (map.getZoom() > 13) map.setZoom(13); });
+      fitDone.current = true;
+    }
+    if (selectedImei) {
+      const sv = valid.find(v => v.imei === selectedImei);
+      if (sv) { map.panTo({ lat: sv.lat, lng: sv.lng }); if (map.getZoom() < 14) map.setZoom(15); }
+    }
   }, [vehicles, selectedImei, onSelect]);
 
+  if (mapError) {
+    return (
+      <div className="absolute inset-0 z-0 flex items-center justify-center bg-gray-100 p-6" data-testid="gps-admin-map-error">
+        <div className="text-center max-w-sm">
+          <MapPin className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+          <p className="text-sm font-semibold text-gray-700 mb-1">Carte indisponible</p>
+          <p className="text-xs text-gray-400">Impossible de charger Google Maps. Verifiez que « Maps JavaScript API » est activee sur la cle Google.</p>
+        </div>
+      </div>
+    );
+  }
   return <div ref={mapRef} className="absolute inset-0 z-0" data-testid="gps-admin-map" />;
 };
 

@@ -6,21 +6,9 @@ import {
   Gauge, Clock, Navigation, MapPin, Loader2, Route as RouteIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { loadGoogleMaps, createFleetMap, carIcon, dotIcon } from '@/utils/googleFleetMap';
 
 const API = process.env.REACT_APP_BACKEND_URL;
-
-function carIconHtml(color, heading, size = 36) {
-  return `<div style="width:${size}px;height:${size}px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.25));transform:rotate(${heading || 0}deg);transition:transform 0.3s ease;">
-  <svg viewBox="0 0 36 36" width="${size}" height="${size}">
-    <rect x="9" y="3" width="18" height="30" rx="6" fill="${color}" stroke="white" stroke-width="2"/>
-    <rect x="12.5" y="7" width="11" height="6" rx="2" fill="rgba(255,255,255,0.5)"/>
-    <rect x="12.5" y="23" width="11" height="4" rx="1.5" fill="rgba(255,255,255,0.3)"/>
-    <rect x="7" y="9" width="3.5" height="6" rx="1.5" fill="${color}" stroke="white" stroke-width="1"/>
-    <rect x="7" y="21" width="3.5" height="6" rx="1.5" fill="${color}" stroke="white" stroke-width="1"/>
-    <rect x="25.5" y="9" width="3.5" height="6" rx="1.5" fill="${color}" stroke="white" stroke-width="1"/>
-    <rect x="25.5" y="21" width="3.5" height="6" rx="1.5" fill="${color}" stroke="white" stroke-width="1"/>
-  </svg></div>`;
-}
 
 function speedColor(s) {
   if (s > 90) return '#EF4444';
@@ -44,91 +32,77 @@ function fmtDuration(ms) {
   return `${m}min`;
 }
 
-// ── Map Component ────────────────────────────────────────────────────
+// ── Map Component (Google Maps) ──────────────────────────────────────
 const ReplayMap = ({ positions, currentIndex }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
-  const routeLayerRef = useRef(null);
+  const routeLayerRef = useRef([]);
   const markerRef = useRef(null);
   const startEndRef = useRef([]);
+  const [mapError, setMapError] = useState(false);
 
   useEffect(() => {
-    if (!document.getElementById('leaflet-css-replay')) {
-      const l = document.createElement('link');
-      l.id = 'leaflet-css-replay'; l.rel = 'stylesheet';
-      l.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(l);
-    }
-    const init = async () => {
-      const L = await import('leaflet');
-      if (mapInstance.current) return;
-      const map = L.map(mapRef.current, { center: [48.86, 2.35], zoom: 12, zoomControl: false, attributionControl: false });
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd' }).addTo(map);
-      mapInstance.current = map;
-    };
-    init();
-    return () => { if (mapInstance.current) { mapInstance.current.remove(); mapInstance.current = null; } };
+    let cancelled = false;
+    loadGoogleMaps()
+      .then(() => {
+        if (cancelled || mapInstance.current || !mapRef.current) return;
+        mapInstance.current = createFleetMap(mapRef.current, { center: { lat: 48.86, lng: 2.35 }, zoom: 12 });
+      })
+      .catch(() => setMapError(true));
+    return () => { cancelled = true; mapInstance.current = null; };
   }, []);
 
   // Draw route when positions change
   useEffect(() => {
-    const draw = async () => {
-      const L = await import('leaflet');
-      const map = mapInstance.current;
-      if (!map || positions.length < 2) return;
-
-      // Clear previous
-      if (routeLayerRef.current) { map.removeLayer(routeLayerRef.current); }
-      startEndRef.current.forEach(m => map.removeLayer(m));
-      startEndRef.current = [];
-
-      // Draw segmented polyline with speed-based colors
-      const segments = [];
-      for (let i = 0; i < positions.length - 1; i++) {
-        const p = positions[i], n = positions[i + 1];
-        segments.push(L.polyline([[p.lat, p.lng], [n.lat, n.lng]], {
-          color: speedColor(p.speed), weight: 4, opacity: 0.8,
-        }));
-      }
-      const group = L.featureGroup(segments).addTo(map);
-      routeLayerRef.current = group;
-
-      // Start/End markers
-      const first = positions[0], last = positions[positions.length - 1];
-      const startIcon = L.divIcon({ className: '', html: `<div style="width:18px;height:18px;background:#10B981;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`, iconSize: [18, 18], iconAnchor: [9, 9] });
-      const endIcon = L.divIcon({ className: '', html: `<div style="width:18px;height:18px;background:#EF4444;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`, iconSize: [18, 18], iconAnchor: [9, 9] });
-      startEndRef.current.push(L.marker([first.lat, first.lng], { icon: startIcon }).addTo(map));
-      startEndRef.current.push(L.marker([last.lat, last.lng], { icon: endIcon }).addTo(map));
-
-      map.fitBounds(group.getBounds(), { padding: [60, 60], maxZoom: 15 });
-    };
-    draw();
+    const g = window.google;
+    const map = mapInstance.current;
+    if (!g || !map || positions.length < 2) return;
+    routeLayerRef.current.forEach(l => l.setMap(null));
+    routeLayerRef.current = [];
+    startEndRef.current.forEach(m => m.setMap(null));
+    startEndRef.current = [];
+    const bounds = new g.maps.LatLngBounds();
+    for (let i = 0; i < positions.length - 1; i++) {
+      const p = positions[i], n = positions[i + 1];
+      routeLayerRef.current.push(new g.maps.Polyline({
+        path: [{ lat: p.lat, lng: p.lng }, { lat: n.lat, lng: n.lng }],
+        strokeColor: speedColor(p.speed), strokeWeight: 4, strokeOpacity: 0.85, map,
+      }));
+      bounds.extend({ lat: p.lat, lng: p.lng });
+      bounds.extend({ lat: n.lat, lng: n.lng });
+    }
+    const first = positions[0], last = positions[positions.length - 1];
+    startEndRef.current.push(new g.maps.Marker({ position: { lat: first.lat, lng: first.lng }, icon: dotIcon('#10B981'), map }));
+    startEndRef.current.push(new g.maps.Marker({ position: { lat: last.lat, lng: last.lng }, icon: dotIcon('#EF4444'), map }));
+    map.fitBounds(bounds, 60);
   }, [positions]);
 
   // Update car marker position
   useEffect(() => {
-    const move = async () => {
-      const L = await import('leaflet');
-      const map = mapInstance.current;
-      if (!map || !positions[currentIndex]) return;
-
-      const p = positions[currentIndex];
-      const icon = L.divIcon({
-        className: '', html: carIconHtml('#3B82F6', p.heading, 40),
-        iconSize: [40, 40], iconAnchor: [20, 20],
-      });
-
-      if (markerRef.current) {
-        markerRef.current.setLatLng([p.lat, p.lng]);
-        markerRef.current.setIcon(icon);
-      } else {
-        markerRef.current = L.marker([p.lat, p.lng], { icon, zIndexOffset: 1000 }).addTo(map);
-      }
-    };
-    move();
+    const g = window.google;
+    const map = mapInstance.current;
+    if (!g || !map || !positions[currentIndex]) return;
+    const p = positions[currentIndex];
+    const icon = carIcon('#3B82F6', p.heading, 40);
+    if (markerRef.current) {
+      markerRef.current.setPosition({ lat: p.lat, lng: p.lng });
+      markerRef.current.setIcon(icon);
+    } else {
+      markerRef.current = new g.maps.Marker({ position: { lat: p.lat, lng: p.lng }, icon, map, zIndex: 1000 });
+    }
   }, [positions, currentIndex]);
 
+  if (mapError) {
+    return (
+      <div className="absolute inset-0 z-0 flex items-center justify-center bg-gray-100 p-6" data-testid="replay-map-error">
+        <div className="text-center max-w-sm">
+          <MapPin className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+          <p className="text-sm font-semibold text-gray-700 mb-1">Carte indisponible</p>
+          <p className="text-xs text-gray-400">Impossible de charger Google Maps. Verifiez que « Maps JavaScript API » est activee sur la cle Google.</p>
+        </div>
+      </div>
+    );
+  }
   return <div ref={mapRef} className="absolute inset-0 z-0" data-testid="replay-map" />;
 };
 

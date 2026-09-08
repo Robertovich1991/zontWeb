@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGpsAdmin } from './GpsAdminAuthContext';
 import { History, Play, Pause, SkipForward, RotateCcw, Gauge, Route, Clock, MapPin } from 'lucide-react';
+import { loadGoogleMaps, createFleetMap, dotIcon } from '@/utils/googleFleetMap';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -21,7 +22,6 @@ const GpsAdminHistory = () => {
   const polylineRef = useRef(null);
   const markerRef = useRef(null);
   const markersRef = useRef([]);
-  const LRef = useRef(null);
   const playTimerRef = useRef(null);
 
   const headers = { Authorization: `Bearer ${token}` };
@@ -65,83 +65,61 @@ const GpsAdminHistory = () => {
       .finally(() => setLoading(false));
   }, [selectedImei, selectedDate]);
 
-  // Initialize Leaflet map
+  // Initialize Google map
   useEffect(() => {
     if (!mapRef.current) return;
     let cancelled = false;
-    const initMap = async () => {
-      if (!document.getElementById('leaflet-css-history')) {
-        const l = document.createElement('link');
-        l.id = 'leaflet-css-history'; l.rel = 'stylesheet';
-        l.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-        document.head.appendChild(l);
-      }
-      const L = await import('leaflet');
-      if (cancelled || mapInstanceRef.current) return;
-      LRef.current = L.default || L;
-      const Lf = LRef.current;
-      const map = Lf.map(mapRef.current, { zoomControl: true }).setView([48.8566, 2.3522], 12);
-      Lf.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap',
-      }).addTo(map);
-      mapInstanceRef.current = map;
-      setMapReady(true);
-    };
-    initMap();
+    loadGoogleMaps()
+      .then(() => {
+        if (cancelled || mapInstanceRef.current || !mapRef.current) return;
+        mapInstanceRef.current = createFleetMap(mapRef.current, { center: { lat: 48.8566, lng: 2.3522 }, zoom: 12 });
+        setMapReady(true);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        setMapReady(false);
-      }
+      mapInstanceRef.current = null;
+      setMapReady(false);
     };
   }, []);
 
   // Draw route on map
   useEffect(() => {
-    const L = LRef.current;
+    const g = window.google;
     const map = mapInstanceRef.current;
-    if (!L || !map || !mapReady) return;
+    if (!g || !map || !mapReady) return;
 
     // Clean previous
-    if (polylineRef.current) { map.removeLayer(polylineRef.current); polylineRef.current = null; }
-    if (markerRef.current) { map.removeLayer(markerRef.current); markerRef.current = null; }
-    markersRef.current.forEach(m => map.removeLayer(m));
+    if (polylineRef.current) { polylineRef.current.setMap(null); polylineRef.current = null; }
+    if (markerRef.current) { markerRef.current.setMap(null); markerRef.current = null; }
+    markersRef.current.forEach(m => m.setMap(null));
     markersRef.current = [];
 
     if (positions.length === 0) return;
 
-    const coords = positions.map(p => [p.lat, p.lng]);
-    const polyline = L.polyline(coords, { color: '#2ecc71', weight: 4, opacity: 0.8 }).addTo(map);
+    const coords = positions.map(p => ({ lat: p.lat, lng: p.lng }));
+    const polyline = new g.maps.Polyline({ path: coords, strokeColor: '#2ecc71', strokeWeight: 4, strokeOpacity: 0.85, map });
     polylineRef.current = polyline;
-    map.fitBounds(polyline.getBounds(), { padding: [30, 30] });
+    const bounds = new g.maps.LatLngBounds();
+    coords.forEach(c => bounds.extend(c));
+    map.fitBounds(bounds, 30);
 
     // Start marker
-    const startM = L.circleMarker(coords[0], { radius: 8, fillColor: '#2ecc71', fillOpacity: 1, color: '#fff', weight: 2 })
-      .bindPopup('Depart').addTo(map);
-    markersRef.current.push(startM);
+    markersRef.current.push(new g.maps.Marker({ position: coords[0], icon: dotIcon('#2ecc71', 16), map, title: 'Depart' }));
 
     // End marker
     if (coords.length > 1) {
-      const endM = L.circleMarker(coords[coords.length - 1], { radius: 8, fillColor: '#e74c3c', fillOpacity: 1, color: '#fff', weight: 2 })
-        .bindPopup('Arrivee').addTo(map);
-      markersRef.current.push(endM);
+      markersRef.current.push(new g.maps.Marker({ position: coords[coords.length - 1], icon: dotIcon('#e74c3c', 16), map, title: 'Arrivee' }));
     }
 
     // Moving marker
-    const icon = L.divIcon({
-      html: '<div style="width:14px;height:14px;border-radius:50%;background:#3498db;border:3px solid #fff;box-shadow:0 0 6px rgba(0,0,0,0.4)"></div>',
-      iconSize: [14, 14], className: '',
-    });
-    const marker = L.marker(coords[0], { icon }).addTo(map);
-    markerRef.current = marker;
+    markerRef.current = new g.maps.Marker({ position: coords[0], icon: dotIcon('#3498db', 14), map, zIndex: 1000 });
   }, [positions, mapReady]);
 
   // Update marker during playback
   useEffect(() => {
     if (markerRef.current && positions[playIndex]) {
-      markerRef.current.setLatLng([positions[playIndex].lat, positions[playIndex].lng]);
+      markerRef.current.setPosition({ lat: positions[playIndex].lat, lng: positions[playIndex].lng });
     }
   }, [playIndex]);
 

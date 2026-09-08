@@ -276,3 +276,10 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ### Session Jun 2026 — Redirect non-www → www dans index.html
 - Script inline ajouté en tout premier dans <head> : si hostname === "zont.cab" → location.replace vers https://www.zont.cab + path + search. Aucun autre script/canonical/og:url touché. Vérifié servi (curl). En attente de Deploy par l'utilisateur.
+
+### Session Sep 08, 2026 — Cartes GPS : Leaflet → Google Maps (clé existante)
+- Nouveau utils/googleFleetMap.js : réutilise le loader loadGoogleMaps (clé REACT_APP_GOOGLE_MAPS_KEY), style clair épuré LIGHT_MAP_STYLE, carIcon (SVG data-URI avec rotation cap intégrée), dotIcon, animateMarkerG, createFleetMap.
+- 4 cartes converties de Leaflet/CartoCDN vers Google Maps JS API : FleetGeolocation (UnifiedMap live+historique), FleetGPSHistory (ReplayMap), gps-admin/GpsAdminMap (MapView), gps-admin/GpsAdminHistory. Toutes fonctions conservées : marqueurs voiture pivotants, couleurs statut, animation position, fitBounds, panTo, polyligne colorée par vitesse, marqueurs départ/arrivée, replay.
+- Message d'erreur clair si "Maps JavaScript API" non activée (data-testid *-map-error).
+- Vérifié en réel : carte Fleet Géoloc affiche Google Maps ("Map data ©2026 Google"), 3 véhicules positionnés avec bons statuts, mode Historique OK. La clé a bien Maps JS API activée.
+- Leaflet plus référencé dans ces 4 fichiers (l'import de la lib peut rester dans package.json, inoffensif). Deploy requis pour la prod.
