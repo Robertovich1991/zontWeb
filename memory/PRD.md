@@ -283,3 +283,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Message d'erreur clair si "Maps JavaScript API" non activée (data-testid *-map-error).
 - Vérifié en réel : carte Fleet Géoloc affiche Google Maps ("Map data ©2026 Google"), 3 véhicules positionnés avec bons statuts, mode Historique OK. La clé a bien Maps JS API activée.
 - Leaflet plus référencé dans ces 4 fichiers (l'import de la lib peut rester dans package.json, inoffensif). Deploy requis pour la prod.
+
+### Session Sep 11, 2026 — Bascule GPS VPS→prod + ajout traceurs + fix compteur offline
+- Diagnostic : le VPS Teltonika (backend/vps-teltonika/, /opt/teltonika-gateway/.env) envoyait vers l'URL PREVIEW. Guidé l'user pour changer WEBHOOK_URL → https://www.zont.cab/api/fleet/gps/webhook (clé X-GPS-API-Key inchangée : GPS_WEBHOOK_API_KEY). VPS confirmé "Webhook OK".
+- Constat : positions bien enregistrées en prod (gps_admin/stats online:2) mais invisibles car /positions et /devices ne renvoient que les IMEI enregistrés dans gps_devices. Seul l'ancien Lexus DZ-960-CK (350317176003840, offline depuis 24/03) était déclaré en prod.
+- Action : ajouté 2 traceurs actifs dans la base PROD via POST /api/fleet/gps/devices (compte Fleet Nandetiri1) :
+  - Lexus NX300 — DQ-728-JN — IMEI 350317175915150
+  - Mercedes Classe E — EK-470-SH — IMEI 350317176004061
+  Vérifié : /api/fleet/gps/positions prod renvoie 3 véhicules, 2 en temps réel (age <30s). ✅
+- Fix compteur : gps_admin.py /stats — online restreint aux IMEI enregistrés + online=min(online,total_devices) + offline=max(0, total_devices-online). Plus jamais négatif. Vérifié preview (offline:3). NB : ce fix code ne s'applique en prod qu'après Deploy ; l'ajout des traceurs est déjà actif en prod (écrit direct en base prod).
+- GPS Admin creds : gps@zont.cab / gpsadmin123 (endpoint seed /api/gps-admin/auth/seed).

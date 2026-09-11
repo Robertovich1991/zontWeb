@@ -382,8 +382,12 @@ async def global_stats(request: Request):
     total_companies = await db.gps_companies.count_documents({})
     active_companies = await db.gps_companies.count_documents({"active": True})
 
-    # Online/offline
-    all_positions = await db.gps_positions.find({}, {"_id": 0, "imei": 1, "updatedAt": 1}).to_list(5000)
+    # Online/offline (only among registered devices, so counts stay consistent)
+    registered = await db.gps_devices.find({}, {"_id": 0, "imei": 1}).to_list(5000)
+    registered_imeis = [d["imei"] for d in registered]
+    all_positions = await db.gps_positions.find(
+        {"imei": {"$in": registered_imeis}}, {"_id": 0, "imei": 1, "updatedAt": 1}
+    ).to_list(5000)
     now = datetime.now(timezone.utc)
     online = 0
     for pos in all_positions:
@@ -396,12 +400,13 @@ async def global_stats(request: Request):
             except (ValueError, TypeError):
                 pass
 
+    online = min(online, total_devices)
     return {
         "totalDevices": total_devices,
         "assigned": assigned,
         "unassigned": unassigned,
         "online": online,
-        "offline": total_devices - online,
+        "offline": max(0, total_devices - online),
         "totalCompanies": total_companies,
         "activeCompanies": active_companies,
     }
