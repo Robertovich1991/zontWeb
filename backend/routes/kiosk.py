@@ -220,8 +220,8 @@ async def fetch_csharp_trips_price():
             and (now - _trips_price_cache["fetched_at"]) < _td(hours=1):
         return _trips_price_cache["data"]
 
-    company_user = os.environ.get("CSHARP_COMPANY_USERNAME", "Nandetiri1@gmail.com")
-    company_pwd = os.environ.get("CSHARP_COMPANY_PASSWORD", "12345678")
+    company_user = os.environ.get("CSHARP_COMPANY_USERNAME") or "Nandetiri1@gmail.com"
+    company_pwd = os.environ.get("CSHARP_COMPANY_PASSWORD") or "12345678"
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         login = await client.post(
             f"{CSHARP_API}/api/Login/company",
@@ -562,8 +562,9 @@ async def dispatch_to_csharp(booking):
     Returns the C# response (e.g. {"auctionId": .., "tripId": ..}).
     """
     ref = booking.get("reference", "")
-    company_user = os.environ.get("CSHARP_COMPANY_USERNAME", "Nandetiri1@gmail.com")
-    company_pwd = os.environ.get("CSHARP_COMPANY_PASSWORD", "12345678")
+    # Empty .env values must NOT override the working default → use `or` (not get-default).
+    company_user = os.environ.get("CSHARP_COMPANY_USERNAME") or "Nandetiri1@gmail.com"
+    company_pwd = os.environ.get("CSHARP_COMPANY_PASSWORD") or "12345678"
 
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         # 1. Company token (same account used across the kiosk backend)
