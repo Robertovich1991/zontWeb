@@ -229,6 +229,7 @@ const KioskPage = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
+  const [clientEmail, setClientEmail] = useState('');
   const [clientCountryCode, setClientCountryCode] = useState('+33');
   const [booking, setBooking] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -257,7 +258,7 @@ const KioskPage = () => {
       fetch(`${API}/api/stripe-terminal/cancel-payment/${pi}`, { method: 'POST', keepalive: true }).catch(() => {});
     }
     setStep(0); setSelectedDest(null); setDate(''); setTime('');
-    setSelectedVehicle(null); setClientName(''); setClientPhone(''); setClientCountryCode('+33');
+    setSelectedVehicle(null); setClientName(''); setClientPhone(''); setClientEmail(''); setClientCountryCode('+33');
     setBooking(null); setSubmitting(false); setCustomPricing(false);
     setCustomHours(4);
     setShowIdlePrompt(false);
@@ -424,7 +425,7 @@ const KioskPage = () => {
     try {
       const resp = await fetch(`${API}/api/kiosk/book`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hotelSlug: slug, clientName: clientName.trim(), clientPhone: fullPhone, destination: selectedDest.name, destinationAddress: selectedDest.address, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.maxAmount, passengers: 1 }),
+        body: JSON.stringify({ hotelSlug: slug, clientName: clientName.trim(), clientPhone: fullPhone, clientEmail: clientEmail.trim(), destination: selectedDest.name, destinationAddress: selectedDest.address, destLat: selectedDest.lat, destLng: selectedDest.lng, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.maxAmount, passengers: 1, utcOffset: new Date().getTimezoneOffset() * -1 }),
       });
       if (!resp.ok) throw new Error();
       const data = await resp.json();
@@ -1048,6 +1049,10 @@ const KioskPage = () => {
                   size="large"
                   darkMode={true}
                 />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">Email <span className="text-gray-600 normal-case">({t.optional || 'optionnel'})</span></label>
+                <input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="email@exemple.com" className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-email" />
               </div>
               <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim()} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
                 {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />{t.booking}</> : <><CheckCircle className="w-5 h-5" />{t.confirm}</>}

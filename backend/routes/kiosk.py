@@ -41,13 +41,17 @@ class KioskBookingRequest(BaseModel):
     hotelSlug: str
     clientName: str
     clientPhone: str
+    clientEmail: Optional[str] = ""
     destination: str
     destinationAddress: str
+    destLat: Optional[float] = None
+    destLng: Optional[float] = None
     date: str
     time: str
     vehicleType: str
     price: float
     passengers: int = 1
+    utcOffset: Optional[int] = None
 
 
 # ---------- Helpers ----------
@@ -417,13 +421,17 @@ async def create_kiosk_booking(req: KioskBookingRequest):
         "pickupLng": hotel["lng"],
         "destination": req.destination,
         "destinationAddress": req.destinationAddress,
+        "destLat": req.destLat,
+        "destLng": req.destLng,
         "clientName": req.clientName,
         "clientPhone": req.clientPhone,
+        "clientEmail": (req.clientEmail or "").strip(),
         "date": req.date,
         "time": req.time,
         "vehicleType": req.vehicleType,
         "price": req.price,
         "passengers": req.passengers,
+        "utcOffset": req.utcOffset,
         "status": "awaiting_payment",
         "stripeSessionId": session.id,
         "paymentUrl": session.url,
@@ -495,51 +503,118 @@ async def kiosk_stripe_webhook(request: Request):
     return {"received": True}
 
 
-async def dispatch_to_csharp(booking):
-    """Send a paid kiosk booking to C# as a confirmed mission."""
-    # Login as company to get token
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-        login_resp = await client.post(
-            f"{CSHARP_API}/api/Login/company",
-            json={"username": "Nandetiri1@gmail.com", "password": "12345678"},
-            headers={"Content-Type": "application/json"},
-        )
-        if login_resp.status_code != 200:
-            raise Exception("C# company login failed")
-        token = login_resp.json().get("accessToken", "")
+CSHARP_HEADERS = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
 
-        # Format date for C#: DD/MM/YYYY HH:mm:ss
+
+async def _register_and_login_client(client, email, password, first_name, last_name, phone):
+    """Register a C# client (ignore if already exists) then log in. Returns accessToken or ''."""
+    reg_payload = {
+        "firstName": first_name, "lastName": last_name, "email": email,
+        "phoneNumber": phone, "password": password, "gender": "male",
+        "dateOfBirth": "01/01/2000", "referalCode": "", "bankCards": None,
+    }
+    try:
+        await client.post(f"{CSHARP_API}/api/Client", json=reg_payload, headers=CSHARP_HEADERS)
+    except Exception as e:
+        logger.warning(f"C# client register attempt error (ignored): {e}")
+    try:
+        login_resp = await client.post(
+            f"{CSHARP_API}/api/Login/client",
+            json={"username": email, "password": password},
+            headers=CSHARP_HEADERS,
+        )
+        if login_resp.status_code == 200:
+            return login_resp.json().get("accessToken", "")
+    except Exception as e:
+        logger.warning(f"C# client login error: {e}")
+    return ""
+
+
+async def dispatch_to_csharp(booking):
+    """Send a paid kiosk booking to C# so it appears in #/admin/auctions and triggers
+    the operator email — using the SAME flow as the website (register a client → login →
+    POST /api/Auction/addAuction). A dedicated per-booking client carries the guest's
+    name/phone so the driver sees who to pick up.
+    """
+    ref = booking.get("reference", "")
+    # ── BLOCKED (pending C# backend change) ──────────────────────────────────
+    # C# exposes no prepaid/no-card auction-creation endpoint: /api/Auction/addAuction
+    # (the only accessible creator) ALWAYS requires a cardId and is client-role only, so
+    # using it would DOUBLE-CHARGE the kiosk guest who already paid via the Stripe Terminal.
+    # The full register→login→addAuction implementation below is ready; enable it (and swap
+    # to the new endpoint) once the C# dev adds a "prepaid"/kiosk booking endpoint that
+    # accepts an external Stripe PaymentIntent reference instead of a cardId.
+    raise Exception(
+        "Kiosk→C# dispatch pending: C# 'prepaid' (no-card) booking endpoint required. "
+        f"Booking {ref} is paid via Stripe Terminal; do NOT charge a card on C#."
+    )
+    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+        # 1. Resolve guest identity
+        name = (booking.get("clientName") or "Guest").strip()
+        parts = name.split()
+        first_name = parts[0] if parts else "Guest"
+        last_name = " ".join(parts[1:]) if len(parts) > 1 else parts[0] if parts else "Guest"
+        phone = booking.get("clientPhone", "")
+        password = "Zk" + secrets.token_urlsafe(10) + "!9"
+
+        # 2. Get a valid CLIENT token (addAuction rejects company accounts).
+        provided_email = (booking.get("clientEmail") or "").strip().lower()
+        generated_email = f"kiosk-{ref}@zont.cab".lower()
+        email_used = provided_email or generated_email
+        token = await _register_and_login_client(client, email_used, password, first_name, last_name, phone)
+        if not token and provided_email:
+            # Provided email likely already exists with a different password → fall back
+            # to a unique generated email so we always get a working token.
+            email_used = generated_email
+            token = await _register_and_login_client(client, email_used, password, first_name, last_name, phone)
+        if not token:
+            raise Exception("C# client token could not be obtained for kiosk dispatch")
+
+        # 3. Format date for C#: DD/MM/YYYY HH:mm:ss
         date_parts = booking.get("date", "").split("-")
         time_str = booking.get("time", "00:00")
         if len(date_parts) == 3:
             cs_date = f"{date_parts[2]}/{date_parts[1]}/{date_parts[0]} {time_str}:00"
         else:
-            cs_date = f"{booking['date']} {time_str}:00"
+            cs_date = f"{booking.get('date', '')} {time_str}:00"
 
-        # Create auction/booking on C#
+        # 4. Build the auction payload identical in shape to the website booking.
+        dest_lat = booking.get("destLat")
+        dest_lng = booking.get("destLng")
         auction_payload = {
-            "startAddress": booking.get("pickup", ""),
-            "endAddress": booking.get("destinationAddress", booking.get("destination", "")),
             "startPointLatitude": booking.get("pickupLat", 0),
             "startPointLongitude": booking.get("pickupLng", 0),
+            "startAddress": booking.get("pickup", ""),
+            "endAddress": booking.get("destinationAddress") or booking.get("destination", ""),
             "startDate": cs_date,
             "clientPrice": booking.get("price", 0),
             "carType": booking.get("vehicleType", ""),
             "tripType": "distance",
-            "clientName": booking.get("clientName", ""),
-            "clientPhone": booking.get("clientPhone", ""),
-            "passengerCount": booking.get("passengers", 1),
-            "description": f"Kiosk booking from {booking.get('hotelName', '')} - Ref: {booking.get('reference', '')}",
+            "distance": 0,
+            "duration": 0,
+            "utcOffset": booking.get("utcOffset") if booking.get("utcOffset") is not None else 120,
+            "email": email_used,
         }
+        if dest_lat is not None and dest_lng is not None:
+            auction_payload["destination"] = f"{dest_lat},{dest_lng}"
+            auction_payload["endPointLatitude"] = dest_lat
+            auction_payload["endPointLongitude"] = dest_lng
+        else:
+            auction_payload["destination"] = booking.get("destinationAddress") or booking.get("destination", "")
 
+        # 5. Create the auction as this client.
         resp = await client.post(
-            f"{CSHARP_API}/api/Auction/company",
+            f"{CSHARP_API}/api/Auction/addAuction",
             json=auction_payload,
-            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+            headers={"Authorization": f"Bearer {token}", **CSHARP_HEADERS},
         )
         if resp.status_code not in (200, 201):
-            raise Exception(f"C# auction creation failed: {resp.status_code} {resp.text[:200]}")
-        logger.info(f"C# auction created for kiosk booking {booking.get('reference')}")
+            raise Exception(f"C# addAuction failed: {resp.status_code} {resp.text[:300]}")
+        logger.info(f"C# auction created for kiosk booking {ref} (client {email_used})")
+        try:
+            return resp.json() if resp.text else {"success": True}
+        except Exception:
+            return {"success": True}
 
 
 @router.get("/{slug}/bookings")

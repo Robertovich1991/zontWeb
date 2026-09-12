@@ -272,14 +272,42 @@ async def get_payment_status(payment_intent_id: str):
     }
     kiosk_status = mapping.get(pi.status, pi.status)
 
-    # If just paid, update booking
+    # If just paid, mark the booking paid AND dispatch it to the C# backend
+    # (creates the auction visible in #/admin/auctions + triggers the operator email).
+    # The physical terminal flow previously stopped at "paid" and never dispatched.
     if pi.status == "succeeded" and db is not None:
         ref = (pi.metadata or {}).get("kiosk_reference")
         if ref:
-            await db.kiosk_bookings.update_one(
-                {"reference": ref},
-                {"$set": {"status": "paid", "paidAt": datetime.now(timezone.utc).isoformat()}},
+            now_iso = datetime.now(timezone.utc).isoformat()
+            # Atomically claim the dispatch so concurrent polls send it to C# only once.
+            claimed = await db.kiosk_bookings.find_one_and_update(
+                {"reference": ref, "csharpDispatch": {"$nin": ["pending", "done"]}},
+                {"$set": {"status": "paid", "paidAt": now_iso, "csharpDispatch": "pending"}},
             )
+            if claimed is not None:
+                try:
+                    from routes.kiosk import dispatch_to_csharp
+                    booking = await db.kiosk_bookings.find_one({"reference": ref}, {"_id": 0})
+                    await dispatch_to_csharp(booking)
+                    await db.kiosk_bookings.update_one(
+                        {"reference": ref},
+                        {"$set": {
+                            "status": "dispatched",
+                            "csharpDispatch": "done",
+                            "dispatchedAt": datetime.now(timezone.utc).isoformat(),
+                        }},
+                    )
+                    logger.info(f"Kiosk terminal booking {ref} dispatched to C# (auctions).")
+                except Exception as e:
+                    logger.error(f"C# dispatch failed for kiosk terminal booking {ref}: {e}")
+                    await db.kiosk_bookings.update_one(
+                        {"reference": ref},
+                        {"$set": {
+                            "status": "paid_dispatch_failed",
+                            "csharpDispatch": "failed",
+                            "dispatchError": str(e),
+                        }},
+                    )
 
     return {
         "payment_intent_id": pi.id,
