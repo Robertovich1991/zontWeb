@@ -471,6 +471,35 @@ const KioskPage = () => {
     return () => clearInterval(interval);
   }, [paymentIntentId, terminalStatus]);
 
+  // QR fallback: when the guest pays by scanning the QR on their phone (Stripe Checkout),
+  // the physical terminal poll no longer runs. Poll the booking status (which verifies the
+  // Stripe session server-side and dispatches to C#) so the kiosk detects the payment.
+  useEffect(() => {
+    if (!booking?.reference || !booking?.qrCode) return;
+    if (terminalStatus !== 'error' && terminalStatus !== 'cancelled') return;
+    const interval = setInterval(async () => {
+      try {
+        const r = await fetch(`${API}/api/kiosk/booking-status/${booking.reference}`);
+        const d = await r.json();
+        if (['paid', 'dispatched', 'paid_dispatch_failed'].includes(d.status)) {
+          setTerminalStatus('paid');
+          clearInterval(interval);
+        }
+      } catch {}
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [booking, terminalStatus]);
+
+  // Phone success redirect: when the QR payment completes, Stripe opens
+  // /kiosk/:slug?paid=REF on the guest's phone. Trigger the server-side confirm+dispatch.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paidRef = params.get('paid');
+    if (paidRef) {
+      fetch(`${API}/api/kiosk/booking-status/${paidRef}`).catch(() => {});
+    }
+  }, []);
+
   // Cancel pending Stripe Terminal payment when the kiosk page is closed / navigated away / refreshed.
   // Without this, the physical TPE keeps showing the amount and "Tap or insert" forever
   // until the customer or staff manually clears it on the terminal device.

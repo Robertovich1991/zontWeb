@@ -474,33 +474,82 @@ async def kiosk_stripe_webhook(request: Request):
     if event.type == "checkout.session.completed":
         session = event.data.object
         ref = session.get("metadata", {}).get("kiosk_reference") if isinstance(session, dict) else getattr(session, 'metadata', {}).get("kiosk_reference")
-        
         if ref and db is not None:
-            # Update booking status to paid
-            booking = await db.kiosk_bookings.find_one({"reference": ref}, {"_id": 0})
-            if booking:
-                await db.kiosk_bookings.update_one(
-                    {"reference": ref},
-                    {"$set": {"status": "paid", "paidAt": datetime.now(timezone.utc).isoformat()}}
-                )
-                logger.info(f"Kiosk booking {ref} paid. Dispatching to C#...")
-                
-                # Dispatch to C# as confirmed mission
-                try:
-                    await dispatch_to_csharp(booking)
-                    await db.kiosk_bookings.update_one(
-                        {"reference": ref},
-                        {"$set": {"status": "dispatched", "dispatchedAt": datetime.now(timezone.utc).isoformat()}}
-                    )
-                    logger.info(f"Kiosk booking {ref} dispatched to C#")
-                except Exception as e:
-                    logger.error(f"C# dispatch failed for {ref}: {e}")
-                    await db.kiosk_bookings.update_one(
-                        {"reference": ref},
-                        {"$set": {"status": "paid_dispatch_failed", "dispatchError": str(e)}}
-                    )
+            pi_id = session.get("payment_intent") if isinstance(session, dict) else getattr(session, 'payment_intent', None)
+            if pi_id:
+                await db.kiosk_bookings.update_one({"reference": ref}, {"$set": {"stripe_payment_intent_id": pi_id}})
+            logger.info(f"Kiosk webhook: session paid for {ref}. Claiming + dispatching...")
+            await _claim_and_dispatch(ref)
 
     return {"received": True}
+
+
+async def _claim_and_dispatch(ref):
+    """Atomically claim a booking (so it dispatches to C# only once), mark it paid, and
+    dispatch to C#. Safe to call repeatedly from the webhook, the booking-status poll,
+    or the terminal flow — the atomic claim guarantees a single dispatch. Retries a
+    previously failed dispatch."""
+    if db is None:
+        return
+    now_iso = datetime.now(timezone.utc).isoformat()
+    claimed = await db.kiosk_bookings.find_one_and_update(
+        {"reference": ref, "csharpDispatch": {"$nin": ["pending", "done"]}},
+        {"$set": {"status": "paid", "paidAt": now_iso, "csharpDispatch": "pending"}},
+    )
+    if claimed is None:
+        return  # already dispatched or in progress
+    try:
+        booking = await db.kiosk_bookings.find_one({"reference": ref}, {"_id": 0})
+        result = await dispatch_to_csharp(booking)
+        await db.kiosk_bookings.update_one({"reference": ref}, {"$set": {
+            "status": "dispatched", "csharpDispatch": "done",
+            "dispatchedAt": datetime.now(timezone.utc).isoformat(),
+            "csharpAuctionId": (result or {}).get("auctionId"),
+            "csharpTripId": (result or {}).get("tripId"),
+        }})
+        logger.info(f"Kiosk booking {ref} dispatched to C#: {result}")
+    except Exception as e:
+        logger.error(f"C# dispatch failed for {ref}: {e}")
+        await db.kiosk_bookings.update_one({"reference": ref}, {"$set": {
+            "status": "paid_dispatch_failed", "csharpDispatch": "failed", "dispatchError": str(e),
+        }})
+
+
+@router.get("/booking-status/{reference}")
+async def kiosk_booking_status(reference: str):
+    """Poll-friendly status check. Verifies the Stripe Checkout Session server-side (no
+    dependency on the Stripe webhook) and, once paid, dispatches to C#. Used by the kiosk
+    QR flow and the phone success redirect."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    booking = await db.kiosk_bookings.find_one({"reference": reference}, {"_id": 0})
+    if not booking:
+        raise HTTPException(404, "Booking not found")
+
+    if booking.get("csharpDispatch") != "done":
+        paid = booking.get("status") in ("paid", "dispatched", "paid_dispatch_failed")
+        if not paid and booking.get("stripeSessionId"):
+            try:
+                session = stripe.checkout.Session.retrieve(booking["stripeSessionId"])
+                if session.get("payment_status") == "paid":
+                    paid = True
+                    if session.get("payment_intent"):
+                        await db.kiosk_bookings.update_one(
+                            {"reference": reference},
+                            {"$set": {"stripe_payment_intent_id": session.get("payment_intent")}},
+                        )
+            except Exception as e:
+                logger.warning(f"booking-status Stripe check failed for {reference}: {e}")
+        if paid:
+            await _claim_and_dispatch(reference)
+        booking = await db.kiosk_bookings.find_one({"reference": reference}, {"_id": 0})
+
+    return {
+        "reference": reference,
+        "status": booking.get("status"),
+        "auctionId": booking.get("csharpAuctionId"),
+        "tripId": booking.get("csharpTripId"),
+    }
 
 
 CSHARP_HEADERS = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
@@ -535,9 +584,19 @@ async def dispatch_to_csharp(booking):
         else:
             cs_date = f"{booking.get('date', '')} {time_str}:00"
 
-        # 3. Destination as "lat,lng" when coordinates are known
+        # 3. Destination as "lat,lng" when coordinates are known. For older bookings that
+        #    lack stored coordinates, look them up from the hotel's destination config.
         dest_lat = booking.get("destLat")
         dest_lng = booking.get("destLng")
+        if (dest_lat is None or dest_lng is None) and db is not None:
+            try:
+                hotel = await db.kiosk_hotels.find_one({"slug": booking.get("hotelSlug")}, {"_id": 0, "destinations": 1})
+                for d in (hotel or {}).get("destinations", []):
+                    if d.get("name") == booking.get("destination") and d.get("lat") and d.get("lng"):
+                        dest_lat, dest_lng = d["lat"], d["lng"]
+                        break
+            except Exception as e:
+                logger.warning(f"dest coord lookup failed for {ref}: {e}")
         if dest_lat is not None and dest_lng is not None:
             destination = f"{dest_lat},{dest_lng}"
         else:
