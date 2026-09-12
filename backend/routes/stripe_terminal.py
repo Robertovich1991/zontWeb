@@ -288,13 +288,15 @@ async def get_payment_status(payment_intent_id: str):
                 try:
                     from routes.kiosk import dispatch_to_csharp
                     booking = await db.kiosk_bookings.find_one({"reference": ref}, {"_id": 0})
-                    await dispatch_to_csharp(booking)
+                    result = await dispatch_to_csharp(booking)
                     await db.kiosk_bookings.update_one(
                         {"reference": ref},
                         {"$set": {
                             "status": "dispatched",
                             "csharpDispatch": "done",
                             "dispatchedAt": datetime.now(timezone.utc).isoformat(),
+                            "csharpAuctionId": (result or {}).get("auctionId"),
+                            "csharpTripId": (result or {}).get("tripId"),
                         }},
                     )
                     logger.info(f"Kiosk terminal booking {ref} dispatched to C# (auctions).")

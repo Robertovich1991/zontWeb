@@ -293,3 +293,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
   Vérifié : /api/fleet/gps/positions prod renvoie 3 véhicules, 2 en temps réel (age <30s). ✅
 - Fix compteur : gps_admin.py /stats — online restreint aux IMEI enregistrés + online=min(online,total_devices) + offline=max(0, total_devices-online). Plus jamais négatif. Vérifié preview (offline:3). NB : ce fix code ne s'applique en prod qu'après Deploy ; l'ajout des traceurs est déjà actif en prod (écrit direct en base prod).
 - GPS Admin creds : gps@zont.cab / gpsadmin123 (endpoint seed /api/gps-admin/auth/seed).
+
+### Session Sep 11, 2026 — Kiosk bookings → C# auctions + operator email (FIXED)
+- ROOT CAUSE: kiosk pays via Stripe Terminal (stripe_terminal.py). On success it marked booking "paid" but NEVER dispatched to C#. The old dispatch_to_csharp targeted /api/Auction/company (404, nonexistent). And /api/Auction/addAuction requires a cardId + client role → would double-charge the already-paid kiosk guest. No prepaid endpoint existed.
+- C# dev added: POST /api/Auction/addPrepaid (company/admin Bearer token, NO card charge). Body: startPointLatitude/Longitude, startAddress, endAddress, destination "lat,lng", startDate "dd/MM/yyyy HH:mm:ss", utcOffset, clientPrice, paidAmount, carType, tripType "distance", distance, passengerName/Phone/Email, paymentStatus "prepaid", externalPaymentRef (Stripe pi id), currency "eur", source "kiosk". Response {auctionId, tripId}.
+- IMPLEMENTED:
+  - backend/routes/kiosk.py: rewrote dispatch_to_csharp() → company login (CSHARP_COMPANY_USERNAME/PASSWORD env, fallback Nandetiri1) → POST /api/Auction/addPrepaid. KioskBookingRequest + /book now store destLat/destLng/clientEmail/utcOffset.
+  - backend/routes/stripe_terminal.py: on PaymentIntent succeeded → atomically claim + mark paid + dispatch_to_csharp() → store csharpAuctionId/csharpTripId (or status paid_dispatch_failed on error). Idempotent via csharpDispatch flag.
+  - frontend/src/pages/kiosk/KioskPage.js: optional email field (data-testid kiosk-email), sends destLat/destLng/clientEmail/utcOffset in /book payload.
+- VERIFIED end-to-end: called real dispatch_to_csharp against live C# → auctionId 182 created, then deleted via admin (POST /api/Auction/deleteAuction/{id}). NOT testable here: the physical Terminal "succeeded" trigger (needs real card reader) — user to confirm with one real kiosk booking after Deploy.
+- DEPLOY REQUIRED to activate on www.zont.cab.
