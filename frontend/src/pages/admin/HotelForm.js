@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Loader2, CreditCard, KeyRound, Copy, RefreshCw, ExternalLink } from 'lucide-react';
+import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 
 const fields = [
   { section: 'Informations generales', items: [
@@ -113,6 +114,23 @@ const HotelForm = ({ hotel, onSave, onCancel }) => {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">{isEdit ? 'Modifier l\'hotel' : 'Creer un hotel'}</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Localisation GPS (nécessaire pour la borne / tarifs) */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm" data-testid="hotel-location-section">
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Localisation (GPS)</h2>
+          <p className="text-xs text-gray-500 mb-3">Recherchez l'adresse de l'hôtel : ses <b>coordonnées GPS</b> servent à calculer les tarifs des trajets sur la borne. Indispensable pour activer la borne.</p>
+          <PlacesAutocomplete
+            value={form.address}
+            onChange={(p) => setForm(prev => ({ ...prev, address: p.address, lat: p.latitude, lng: p.longitude }))}
+            placeholder="Rechercher l'adresse de l'hôtel…"
+            className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+          />
+          <p className="text-xs mt-2" data-testid="hotel-coords">
+            {form.lat != null && form.lng != null
+              ? <span className="text-emerald-600">✓ Coordonnées : {Number(form.lat).toFixed(5)}, {Number(form.lng).toFixed(5)}</span>
+              : <span className="text-amber-600">⚠ Aucune coordonnée — sélectionnez une adresse pour activer la tarification</span>}
+          </p>
+        </div>
+
         {fields.map(section => (
           <div key={section.section} className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">{section.section}</h2>

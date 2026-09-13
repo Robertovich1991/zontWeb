@@ -11,6 +11,64 @@ router = APIRouter(prefix="/api/admin/hotels", tags=["admin-hotels"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = os.environ.get("JWT_SECRET", "zont-admin-secret-key-2025")
 
+import re as _re
+
+def _slugify(name: str) -> str:
+    s = (name or "").lower().strip()
+    s = _re.sub(r"[àâä]", "a", s); s = _re.sub(r"[éèêë]", "e", s)
+    s = _re.sub(r"[îï]", "i", s); s = _re.sub(r"[ôö]", "o", s); s = _re.sub(r"[ûü]", "u", s)
+    s = _re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+    return s or "hotel"
+
+async def _unique_slug(db, base: str) -> str:
+    slug = base
+    i = 2
+    while await db.kiosk_hotels.find_one({"slug": slug}):
+        slug = f"{base}-{i}"; i += 1
+    return slug
+
+async def ensure_kiosk_hotel(db, hotel: dict) -> Optional[str]:
+    """Provision a kiosk_hotels record (borne config) for an admin-created hotel if missing.
+    Enables 'Configuration Borne'. Returns the slug (or None if no name)."""
+    from routes.kiosk import POPULAR_DESTINATIONS
+    name = hotel.get("name")
+    if not name:
+        return None
+    # Already provisioned? (by stored slug or by name)
+    existing = None
+    if hotel.get("kiosk_slug"):
+        existing = await db.kiosk_hotels.find_one({"slug": hotel["kiosk_slug"]}, {"_id": 0, "slug": 1})
+    if not existing:
+        existing = await db.kiosk_hotels.find_one({"name": name}, {"_id": 0, "slug": 1})
+    if existing:
+        slug = existing["slug"]
+    else:
+        slug = await _unique_slug(db, _slugify(name))
+        await db.kiosk_hotels.insert_one({
+            "slug": slug,
+            "name": name,
+            "address": hotel.get("address", ""),
+            "lat": hotel.get("lat"),
+            "lng": hotel.get("lng"),
+            "default_language": "fr",
+            "destinations": POPULAR_DESTINATIONS,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    # Keep coords/address in sync when provided
+    sync = {}
+    if hotel.get("lat") is not None:
+        sync["lat"] = hotel["lat"]
+    if hotel.get("lng") is not None:
+        sync["lng"] = hotel["lng"]
+    if hotel.get("address"):
+        sync["address"] = hotel["address"]
+    if sync:
+        await db.kiosk_hotels.update_one({"slug": slug}, {"$set": sync})
+    # Link the slug on the hotel doc and its login user
+    await db.hotels.update_one({"id": hotel["id"]}, {"$set": {"kiosk_slug": slug}})
+    await db.hotel_users.update_many({"hotel_id": hotel["id"]}, {"$set": {"kiosk_slug": slug}})
+    return slug
+
 # ── Auth helper ──
 async def require_admin(request: Request):
     auth = request.headers.get("Authorization", "")
@@ -44,6 +102,8 @@ class HotelCreate(BaseModel):
     status: str = "active"
     kiosks_planned: int = 0
     notes: str = ""
+    lat: Optional[float] = None
+    lng: Optional[float] = None
 
 class HotelUpdate(BaseModel):
     name: Optional[str] = None
@@ -62,6 +122,8 @@ class HotelUpdate(BaseModel):
     status: Optional[str] = None
     kiosks_planned: Optional[int] = None
     notes: Optional[str] = None
+    lat: Optional[float] = None
+    lng: Optional[float] = None
 
 class KioskCreate(BaseModel):
     hotel_id: str
@@ -107,12 +169,13 @@ async def list_hotels(request: Request):
         # Kiosk count
         h["kiosks_count"] = await db.kiosks.count_documents({"hotel_id": h["id"]})
         h["kiosks_online"] = await db.kiosks.count_documents({"hotel_id": h["id"], "status": "online"})
-        # Kiosk slug (universal /kiosk/:slug terminal link) — from the hotel_users account, fallback by name
-        slug = None
+        # Kiosk slug — prefer the value stored on the hotel doc, then hotel_users, then by name
+        slug = h.get("kiosk_slug")
         reader_id = None
-        hu = await db.hotel_users.find_one({"hotel_id": h["id"], "kiosk_slug": {"$exists": True}}, {"_id": 0, "kiosk_slug": 1})
-        if hu:
-            slug = hu.get("kiosk_slug")
+        if not slug:
+            hu = await db.hotel_users.find_one({"hotel_id": h["id"], "kiosk_slug": {"$exists": True}}, {"_id": 0, "kiosk_slug": 1})
+            if hu:
+                slug = hu.get("kiosk_slug")
         kh = None
         if slug:
             kh = await db.kiosk_hotels.find_one({"slug": slug}, {"_id": 0, "slug": 1, "stripe_terminal_reader_id": 1})
@@ -153,8 +216,11 @@ async def create_hotel(data: HotelCreate, request: Request):
                 "created_at": now,
             }
             await db.hotel_users.insert_one(user_doc)
+    # Provision the kiosk borne config (slug + defaults) so "Configuration Borne" is available
+    await ensure_kiosk_hotel(db, doc)
     doc.pop("_id", None)
-    return doc
+    fresh = await db.hotels.find_one({"id": hotel_id}, {"_id": 0})
+    return fresh or doc
 
 @router.post("/{hotel_id}/set-password")
 async def set_hotel_password(hotel_id: str, data: SetHotelPasswordReq, request: Request):
@@ -414,15 +480,30 @@ async def update_hotel(hotel_id: str, data: HotelUpdate, request: Request):
     result = await db.hotels.update_one({"id": hotel_id}, {"$set": updates})
     if result.matched_count == 0:
         raise HTTPException(404, "Hotel introuvable")
+    hotel = await db.hotels.find_one({"id": hotel_id}, {"_id": 0})
+    # Provision / sync the kiosk borne config (creates it if this hotel had none)
+    await ensure_kiosk_hotel(db, hotel)
     return await db.hotels.find_one({"id": hotel_id}, {"_id": 0})
 
 @router.delete("/{hotel_id}")
 async def delete_hotel(hotel_id: str, request: Request):
     await require_admin(request)
     db = request.app.state.db
+    hotel = await db.hotels.find_one({"id": hotel_id}, {"_id": 0, "kiosk_slug": 1, "name": 1})
     result = await db.hotels.delete_one({"id": hotel_id})
     if result.deleted_count == 0:
         raise HTTPException(404, "Hotel introuvable")
+    # Cascade: remove linked kiosk config, devices and login users (avoid orphans/duplicates)
+    slugs = set()
+    if hotel and hotel.get("kiosk_slug"):
+        slugs.add(hotel["kiosk_slug"])
+    async for u in db.hotel_users.find({"hotel_id": hotel_id}, {"_id": 0, "kiosk_slug": 1}):
+        if u.get("kiosk_slug"):
+            slugs.add(u["kiosk_slug"])
+    for s in slugs:
+        await db.kiosk_hotels.delete_one({"slug": s})
+        await db.kiosk_devices.delete_many({"hotel_slug": s})
+    await db.hotel_users.delete_many({"hotel_id": hotel_id})
     return {"ok": True}
 
 # ── Kiosks ──
