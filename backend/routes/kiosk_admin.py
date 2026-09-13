@@ -413,3 +413,48 @@ async def _store_reader_on_device(db, device: dict, reader) -> None:
         "stripe_terminal_location_id": reader.location,
         "stripe_terminal_registered_at": now,
     }})
+
+
+
+@router.post("/backfill-commissions")
+async def backfill_commissions(request: Request):
+    """Recover missing hotel commissions for already-paid kiosk/terminal bookings.
+
+    Older terminal (TPE) payments were marked paid & dispatched but never created a
+    `hotel_bookings` record, so they never appeared in the hotel extranet commissions.
+    This scans every paid booking and creates the missing commission record + marks the
+    linked search "booked". Idempotent — safe to run multiple times."""
+    await require_admin(request)
+    db = request.app.state.db
+    from routes.kiosk import _record_paid_side_effects
+
+    paid_statuses = ["paid", "dispatched", "paid_dispatch_failed"]
+    cursor = db.kiosk_bookings.find({"status": {"$in": paid_statuses}}, {"_id": 0})
+    scanned = 0
+    recovered = 0
+    skipped_existing = 0
+    unmatched = []
+    async for booking in cursor:
+        scanned += 1
+        ref = booking.get("reference")
+        if await db.hotel_bookings.find_one({"kiosk_reference": ref}, {"_id": 0, "id": 1}):
+            skipped_existing += 1
+            continue
+        before = await db.hotel_bookings.count_documents({"kiosk_reference": ref})
+        try:
+            await _record_paid_side_effects(booking)
+        except Exception as e:
+            logger.error(f"backfill failed for {ref}: {e}")
+        after = await db.hotel_bookings.count_documents({"kiosk_reference": ref})
+        if after > before:
+            recovered += 1
+        else:
+            unmatched.append({"reference": ref, "hotelSlug": booking.get("hotelSlug"),
+                              "hotelName": booking.get("hotelName"), "price": booking.get("price")})
+    return {
+        "scanned": scanned,
+        "recovered": recovered,
+        "already_recorded": skipped_existing,
+        "unmatched_count": len(unmatched),
+        "unmatched": unmatched[:50],
+    }

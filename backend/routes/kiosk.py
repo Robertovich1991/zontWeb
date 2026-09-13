@@ -7,6 +7,7 @@ import httpx
 import logging
 import secrets
 import string
+import re
 import os
 import stripe
 import qrcode
@@ -552,13 +553,32 @@ async def _record_paid_side_effects(booking):
     if await db.hotel_bookings.find_one({"kiosk_reference": ref}, {"_id": 0, "id": 1}):
         return
     slug = booking.get("hotelSlug")
-    hotel_doc = await db.hotels.find_one({"kiosk_slug": slug}, {"_id": 0, "id": 1, "commission_rate": 1, "zont_commission_rate": 1})
+    proj = {"_id": 0, "id": 1, "commission_rate": 1, "zont_commission_rate": 1}
+    # 1) direct link stored on the hotel doc
+    hotel_doc = await db.hotels.find_one({"kiosk_slug": slug}, proj)
+    # 2) link stored on the extranet user
     if not hotel_doc:
         hu = await db.hotel_users.find_one({"kiosk_slug": slug}, {"_id": 0, "hotel_id": 1})
         if hu:
-            hotel_doc = await db.hotels.find_one({"id": hu["hotel_id"]}, {"_id": 0, "id": 1, "commission_rate": 1, "zont_commission_rate": 1})
-    if not hotel_doc and booking.get("hotelName"):
-        hotel_doc = await db.hotels.find_one({"name": booking["hotelName"]}, {"_id": 0, "id": 1, "commission_rate": 1, "zont_commission_rate": 1})
+            hotel_doc = await db.hotels.find_one({"id": hu["hotel_id"]}, proj)
+    # 3) match by name — try the name saved on the booking, then the kiosk_hotels name.
+    #    Case-insensitive exact match so "Novotel Evry" == "novotel evry".
+    if not hotel_doc:
+        candidate_names = []
+        if booking.get("hotelName"):
+            candidate_names.append(booking["hotelName"])
+        kh = await db.kiosk_hotels.find_one({"slug": slug}, {"_id": 0, "name": 1, "hotel_id": 1})
+        if kh:
+            if kh.get("hotel_id"):
+                hotel_doc = await db.hotels.find_one({"id": kh["hotel_id"]}, proj)
+            if not hotel_doc and kh.get("name"):
+                candidate_names.append(kh["name"])
+        for nm in candidate_names:
+            if hotel_doc:
+                break
+            hotel_doc = await db.hotels.find_one(
+                {"name": {"$regex": f"^{re.escape(nm.strip())}$", "$options": "i"}}, proj
+            )
     if not hotel_doc:
         logger.warning(f"No hotel record for kiosk slug '{slug}' — commission not recorded for {ref}")
         return

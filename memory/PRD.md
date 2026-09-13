@@ -17,6 +17,15 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Commission TPE terminal manquante (Novotel Évry) — P0 fix
+- **Bug**: réservation 40€ payée par TERMINAL PHYSIQUE (TPE) n'apparaissait pas en commission ni en "Réservé". Cause racine: le flux terminal (`stripe_terminal.py::get_payment_status`) avait un bloc dupliqué qui marquait payé + dispatch C# mais **n'appelait jamais** `_record_paid_side_effects` (contrairement au flux QR/webhook corrigé auparavant). Aucun `hotel_bookings` créé → 0 commission.
+- **Fix (a)** `stripe_terminal.py`: le flux terminal appelle désormais `_claim_and_dispatch(ref)` de `kiosk.py` (claim atomique + commission + "booked" + dispatch, idempotent).
+- **Fix (b)** `kiosk.py::_record_paid_side_effects`: liaison borne↔hôtel plus robuste — kiosk_slug (hotels) → hotel_users.kiosk_slug → nom (booking OU kiosk_hotels, match **insensible à la casse**) → kiosk_hotels.hotel_id. Résout les hôtels sans `kiosk_slug` renseigné (ex: Bristol).
+- **Fix (c)** `kiosk_admin.py` POST `/api/admin/kiosk/backfill-commissions` (admin) + bouton "Récupérer les commissions manquantes" dans KioskSearchHistory.js: recrée les commissions manquantes des réservations payées existantes. Idempotent. Retourne scanned/recovered/already_recorded/unmatched.
+- **Vérifié preview**: Negresco (match slug, 12%) + Bristol (match nom, 15%) → hotel_bookings créés; idempotence OK; endpoint backfill recovered=1; bouton UI affiché.
+- ⚠️ La réservation Novotel réelle est en PRODUCTION → l'utilisateur doit **déployer** puis cliquer le bouton backfill pour la récupérer.
+
+
 ### Session Jun 2026 — Réservation kiosque → commissions hôtel + historique "réservé" (P0 fix)
 - **Bug**: une réservation payée sur la borne partait bien au C# mais n'apparaissait NI dans les commissions de l'extranet NI dans l'historique "Réservé". Cause: le dashboard hôtel agrège `hotel_bookings` alors que le kiosque n'écrivait que dans `kiosk_bookings`; et la recherche était marquée "booked" à la création (même sans paiement).
 - **Fix** (`kiosk.py`): `searchId` désormais stocké sur le kiosk_booking. Nouvelle fonction `_record_paid_side_effects(booking)` appelée dans `_claim_and_dispatch` (= paiement confirmé) qui: (1) marque la recherche `booked` UNIQUEMENT au paiement, (2) crée un enregistrement `hotel_bookings` (source=kiosk, status=confirmed, total_price, taux commission) → apparaît dans les commissions. Idempotent via `kiosk_reference`. Lookup hôtel: db.hotels.kiosk_slug → hotel_users.kiosk_slug → db.hotels.name.

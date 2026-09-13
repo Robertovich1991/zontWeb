@@ -286,38 +286,12 @@ async def get_payment_status(payment_intent_id: str):
     if pi.status == "succeeded" and db is not None:
         ref = (pi.metadata or {}).get("kiosk_reference")
         if ref:
-            now_iso = datetime.now(timezone.utc).isoformat()
-            # Atomically claim the dispatch so concurrent polls send it to C# only once.
-            claimed = await db.kiosk_bookings.find_one_and_update(
-                {"reference": ref, "csharpDispatch": {"$nin": ["pending", "done"]}},
-                {"$set": {"status": "paid", "paidAt": now_iso, "csharpDispatch": "pending"}},
-            )
-            if claimed is not None:
-                try:
-                    from routes.kiosk import dispatch_to_csharp
-                    booking = await db.kiosk_bookings.find_one({"reference": ref}, {"_id": 0})
-                    result = await dispatch_to_csharp(booking)
-                    await db.kiosk_bookings.update_one(
-                        {"reference": ref},
-                        {"$set": {
-                            "status": "dispatched",
-                            "csharpDispatch": "done",
-                            "dispatchedAt": datetime.now(timezone.utc).isoformat(),
-                            "csharpAuctionId": (result or {}).get("auctionId"),
-                            "csharpTripId": (result or {}).get("tripId"),
-                        }},
-                    )
-                    logger.info(f"Kiosk terminal booking {ref} dispatched to C# (auctions).")
-                except Exception as e:
-                    logger.error(f"C# dispatch failed for kiosk terminal booking {ref}: {e}")
-                    await db.kiosk_bookings.update_one(
-                        {"reference": ref},
-                        {"$set": {
-                            "status": "paid_dispatch_failed",
-                            "csharpDispatch": "failed",
-                            "dispatchError": str(e),
-                        }},
-                    )
+            # Delegate to the single shared handler in kiosk.py so the terminal flow
+            # records the hotel commission (hotel_bookings), marks the search "booked"
+            # AND dispatches to C# — all atomically & idempotently. Previously this path
+            # only dispatched and never recorded the commission.
+            from routes.kiosk import _claim_and_dispatch
+            await _claim_and_dispatch(ref)
 
     return {
         "payment_intent_id": pi.id,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, Search, TrendingUp, MapPin, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Search, TrendingUp, MapPin, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 
 const StatusPill = ({ s }) => s === 'booked'
   ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700"><CheckCircle2 className="w-3 h-3" />Réservé</span>
@@ -14,6 +14,7 @@ const KioskSearchHistory = ({ slug, hotelName, onBack }) => {
   const [status, setStatus] = useState('not_booked');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [backfilling, setBackfilling] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -32,6 +33,24 @@ const KioskSearchHistory = ({ slug, hotelName, onBack }) => {
 
   useEffect(() => { load(); }, [load]);
 
+  const runBackfill = useCallback(async () => {
+    setBackfilling(true);
+    try {
+      const res = await authFetch('/api/admin/kiosk/backfill-commissions', { method: 'POST' });
+      if (!res.ok) throw new Error();
+      const r = await res.json();
+      if (r.recovered > 0) {
+        toast.success(`${r.recovered} commission(s) récupérée(s). ${r.unmatched_count > 0 ? `${r.unmatched_count} sans hôtel associé.` : ''}`);
+      } else if (r.unmatched_count > 0) {
+        toast.warning(`Aucune commission récupérée. ${r.unmatched_count} réservation(s) sans hôtel associé.`);
+      } else {
+        toast.info('Toutes les commissions sont déjà à jour.');
+      }
+      load();
+    } catch { toast.error('Erreur lors de la récupération des commissions'); }
+    finally { setBackfilling(false); }
+  }, [authFetch, load]);
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 -m-4 lg:-m-6 p-4 lg:p-6 space-y-6" data-testid="kiosk-search-history">
       <button onClick={onBack} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800" data-testid="search-history-back">
@@ -43,6 +62,16 @@ const KioskSearchHistory = ({ slug, hotelName, onBack }) => {
           <h1 className="text-2xl font-bold text-gray-900" data-testid="search-history-title">Historique des recherches — {hotelName}</h1>
           <p className="text-gray-500 text-sm">Destinations recherchées sur la borne. Total : {data.total} · Non réservées : <b className="text-amber-600">{data.not_booked_total}</b></p>
         </div>
+        <button
+          onClick={runBackfill}
+          disabled={backfilling}
+          className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-60 transition"
+          data-testid="backfill-commissions-btn"
+          title="Recrée les commissions manquantes pour les paiements borne/terminal déjà payés"
+        >
+          {backfilling ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          Récupérer les commissions manquantes
+        </button>
       </div>
 
       {/* Filters */}
