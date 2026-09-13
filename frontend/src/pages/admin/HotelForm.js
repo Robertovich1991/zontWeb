@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, CreditCard } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, CreditCard, KeyRound, Copy, RefreshCw, ExternalLink } from 'lucide-react';
 
 const fields = [
   { section: 'Informations generales', items: [
@@ -36,8 +36,42 @@ const HotelForm = ({ hotel, onSave, onCancel }) => {
   const [saving, setSaving] = useState(false);
   const [readerId, setReaderId] = useState(hotel?.stripe_terminal_reader_id || '');
   const [readerSaving, setReaderSaving] = useState(false);
+  const [extranetPwd, setExtranetPwd] = useState('');
+  const [pwdSaving, setPwdSaving] = useState(false);
   const isEdit = !!hotel?.id;
   const kioskSlug = hotel?.kiosk_slug;
+  const extranetUrl = `${window.location.origin}/hotel/login`;
+  const loginEmail = hotel?.contact_email || form.contact_email || '';
+
+  const genPassword = () => {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789abcdefghijkmnpqrstuvwxyz';
+    let p = '';
+    for (let i = 0; i < 10; i++) p += chars[Math.floor(Math.random() * chars.length)];
+    setExtranetPwd(p);
+  };
+
+  const savePassword = async () => {
+    if (extranetPwd.trim().length < 6) { toast.error('Mot de passe : 6 caractères minimum'); return; }
+    setPwdSaving(true);
+    try {
+      const res = await authFetch(`/api/admin/hotels/${hotel.id}/set-password`, {
+        method: 'POST', body: JSON.stringify({ password: extranetPwd.trim() }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.detail || 'Erreur');
+      toast.success('Mot de passe extranet enregistré');
+    } catch (e) { toast.error(e.message || 'Erreur'); }
+    finally { setPwdSaving(false); }
+  };
+
+  const copy = (text, label) => {
+    navigator.clipboard.writeText(text).then(() => toast.success(`${label} copié`)).catch(() => toast.error('Copie impossible'));
+  };
+  const copyCredentials = () => {
+    if (!extranetPwd.trim()) { toast.error('Définissez d\'abord un mot de passe'); return; }
+    const txt = `Accès extranet ZONT\nLien : ${extranetUrl}\nEmail : ${loginEmail}\nMot de passe : ${extranetPwd.trim()}`;
+    copy(txt, 'Identifiants');
+  };
 
   const saveReader = async () => {
     if (!readerId.trim()) { toast.error('Saisissez le Reader ID Stripe (tmr_...)'); return; }
@@ -108,6 +142,37 @@ const HotelForm = ({ hotel, onSave, onCancel }) => {
             </div>
           </div>
         ))}
+
+        {/* Accès Extranet hôtel */}
+        {isEdit && (
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm" data-testid="hotel-extranet-section">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-2"><KeyRound className="w-4 h-4 text-emerald-600" /> Accès Extranet hôtel</h2>
+            <p className="text-xs text-gray-500 mb-4">Définissez un mot de passe et communiquez ces 3 informations à l'hôtel pour qu'il consulte ses commissions, réservations et factures.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500">Lien de l'extranet</label>
+                <div className="flex gap-2 mt-1">
+                  <input readOnly value={extranetUrl} className="flex-1 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm" data-testid="extranet-url" />
+                  <button type="button" onClick={() => copy(extranetUrl, 'Lien')} className="px-3 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50" data-testid="extranet-copy-link"><Copy className="w-4 h-4" /></button>
+                  <a href={extranetUrl} target="_blank" rel="noopener noreferrer" className="px-3 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 flex items-center"><ExternalLink className="w-4 h-4" /></a>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Email de connexion</label>
+                <input readOnly value={loginEmail} placeholder="Renseignez l'email du contact ci-dessus" className="w-full mt-1 px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 text-sm" data-testid="extranet-email" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Mot de passe</label>
+                <div className="flex flex-col sm:flex-row gap-2 mt-1">
+                  <input value={extranetPwd} onChange={e => setExtranetPwd(e.target.value)} placeholder="Saisir ou générer un mot de passe" className="flex-1 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none" data-testid="extranet-password" />
+                  <button type="button" onClick={genPassword} className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 text-sm hover:bg-gray-50" data-testid="extranet-generate"><RefreshCw className="w-4 h-4" /> Générer</button>
+                  <button type="button" onClick={savePassword} disabled={pwdSaving} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition disabled:opacity-50" data-testid="extranet-save-password">{pwdSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />} Enregistrer</button>
+                </div>
+              </div>
+              <button type="button" onClick={copyCredentials} className="flex items-center gap-2 text-sm text-emerald-700 hover:text-emerald-800 font-medium" data-testid="extranet-copy-credentials"><Copy className="w-4 h-4" /> Copier les identifiants (lien + email + mot de passe)</button>
+            </div>
+          </div>
+        )}
 
         {/* Terminal de paiement Stripe (niveau hôtel) */}
         {isEdit && kioskSlug && (

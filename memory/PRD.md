@@ -17,6 +17,12 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Accès Extranet hôtel + définition du mot de passe (admin) (P1)
+- **Contexte**: l'extranet hôtel existe (`/hotel/login` → dashboard commissions/réservations/factures). À la création d'un hôtel avec `contact_email`, un `hotel_users` est auto-créé avec mot de passe `hotel{id}` MAIS jamais affiché → impossible de le transmettre.
+- **Backend** `admin_hotels.py` : `POST /{hotel_id}/set-password {password}` — définit/réinitialise le mot de passe extranet (crée le hotel_user si absent, via contact_email). Vérifié : login extranet OK avec le mot de passe défini.
+- **Frontend HotelForm** : nouvelle section "Accès Extranet Hôtel" (mode édition) — lien `/hotel/login` (+ copier/ouvrir), email de connexion, champ mot de passe + bouton **Générer** + **Enregistrer**, et **Copier les identifiants** (lien + email + mdp).
+- Bristol remis à `hotel123` après test.
+
 ### Session Jun 2026 — Champ "ID Terminal Stripe" dans le profil hôtel (admin) (P1)
 - **Formulaire hôtel (admin, HotelForm)** : nouvelle section "Terminal de paiement Stripe" (mode édition + hôtel ayant un kiosk_slug) — champ Reader ID `tmr_xxx` + bouton "Rattacher le terminal".
 - **Backend** `kiosk_admin.py` : `PUT /{slug}/reader` (rattache au niveau hôtel, **tolérant si clé Stripe expirée** → enregistre l'ID quand même + renvoie un warning ; validé une fois la clé renouvelée) et `DELETE /{slug}/reader`. `admin_hotels.py` list_hotels renvoie désormais `stripe_terminal_reader_id` pour préremplir le formulaire.

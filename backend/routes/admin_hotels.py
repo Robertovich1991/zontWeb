@@ -68,6 +68,9 @@ class KioskCreate(BaseModel):
     name: str = ""
     location: str = ""
 
+class SetHotelPasswordReq(BaseModel):
+    password: str
+
 class HotelBookingCreate(BaseModel):
     hotel_id: str
     kiosk_id: Optional[str] = None
@@ -152,6 +155,35 @@ async def create_hotel(data: HotelCreate, request: Request):
             await db.hotel_users.insert_one(user_doc)
     doc.pop("_id", None)
     return doc
+
+@router.post("/{hotel_id}/set-password")
+async def set_hotel_password(hotel_id: str, data: SetHotelPasswordReq, request: Request):
+    """Admin sets/resets the hotel extranet password so it can be handed to the hotel."""
+    await require_admin(request)
+    db = request.app.state.db
+    hotel = await db.hotels.find_one({"id": hotel_id}, {"_id": 0})
+    if not hotel:
+        raise HTTPException(404, "Hotel introuvable")
+    if not data.password or len(data.password) < 6:
+        raise HTTPException(400, "Le mot de passe doit contenir au moins 6 caracteres")
+    user = await db.hotel_users.find_one({"hotel_id": hotel_id})
+    email = user["email"] if user else hotel.get("contact_email")
+    if not email:
+        raise HTTPException(400, "Renseignez d'abord l'email du contact de l'hotel")
+    pwd_hash = pwd_context.hash(data.password)
+    if user:
+        await db.hotel_users.update_one({"id": user["id"]}, {"$set": {"password_hash": pwd_hash}})
+    else:
+        await db.hotel_users.insert_one({
+            "id": str(uuid.uuid4()),
+            "hotel_id": hotel_id,
+            "email": email,
+            "password_hash": pwd_hash,
+            "name": hotel.get("contact_name") or hotel.get("name"),
+            "role": "hotel_admin",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    return {"success": True, "email": email}
 
 @router.get("/dashboard")
 async def hotel_dashboard_stats(request: Request):
