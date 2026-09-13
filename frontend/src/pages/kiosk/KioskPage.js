@@ -739,6 +739,20 @@ const KioskPage = () => {
               <p className="text-gray-400 text-sm sm:text-base">{t.heroSub}</p>
             </div>
 
+            {/* Address search bar — type any destination directly from the home screen */}
+            <div className="max-w-3xl mx-auto mb-10" data-testid="home-search-bar">
+              <div className="relative">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-[#2ecc71] pointer-events-none z-10" />
+                <PlacesAutocomplete
+                  value=""
+                  onChange={handleCustomDest}
+                  placeholder={t.searchOther}
+                  className="w-full pl-14 pr-5 py-5 bg-[#111827] border-2 border-white/10 rounded-2xl text-white text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] focus:border-[#2ecc71] shadow-lg"
+                />
+              </div>
+              {customPricing && <p className="text-center text-sm text-gray-400 mt-3 flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />{t.calcPrice}</p>}
+            </div>
+
             {/* 4 Category Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-10">
               {[
