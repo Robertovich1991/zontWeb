@@ -1,12 +1,16 @@
 name: Build Kiosk APK
 
-# Compile l'APK borne kiosk sur un runner x86_64 (Ubuntu) — évite le souci aarch64.
-# Lancement : onglet "Actions" du repo GitHub → "Build Kiosk APK" → "Run workflow".
+# Compile l'APK borne kiosk sur un runner x86_64 (Ubuntu) — evite le souci aarch64,
+# puis publie l'APK dans frontend/public/downloads/ (commit auto). Il ne reste qu'a Deploy.
+# Lancement : onglet "Actions" du repo GitHub -> "Build Kiosk APK" -> "Run workflow".
 on:
   workflow_dispatch:
   push:
     paths:
       - 'kiosk-apk/**'
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -40,8 +44,10 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Rename APK
+      - name: Publish APK into frontend/public/downloads
         run: |
+          mkdir -p frontend/public/downloads
+          cp kiosk-apk/android/app/build/outputs/apk/debug/app-debug.apk frontend/public/downloads/zont-kiosk.apk
           cp kiosk-apk/android/app/build/outputs/apk/debug/app-debug.apk zont-kiosk.apk
 
       - name: Upload APK artifact
@@ -50,3 +56,16 @@ jobs:
           name: zont-kiosk-apk
           path: zont-kiosk.apk
           retention-days: 30
+
+      - name: Commit updated APK to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/downloads/zont-kiosk.apk
+          if git diff --staged --quiet; then
+            echo "APK inchange, rien a committer."
+          else
+            git commit -m "chore(kiosk): build & publish latest kiosk APK [skip ci]"
+            git push
+            echo "APK publie dans frontend/public/downloads/zont-kiosk.apk"
+          fi
