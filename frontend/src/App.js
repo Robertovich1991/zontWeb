@@ -36,6 +36,7 @@ const ForgetPasswordRedirect = lazy(() => import("@/pages/ResetPassword"));
 
 // Kiosk
 const KioskPage = lazy(() => import("@/pages/kiosk/KioskPage"));
+const KioskLanding = lazy(() => import("@/pages/kiosk/KioskLanding"));
 const LookingForPartners = lazy(() => import("@/pages/LookingForPartners"));
 const ParisAirportTransfer = lazy(() => import("@/pages/ParisAirportTransfer"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -427,6 +428,7 @@ function App() {
                   <Route path="/my-bookings" element={<MyBookings />} />
                   <Route path="/my-account" element={<MyAccount />} />
                   <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+                  <Route path="/kiosk" element={<KioskLanding />} />
                   <Route path="/kiosk/:slug" element={<KioskPage />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/review" element={<ReviewForm />} />

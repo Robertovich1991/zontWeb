@@ -6,7 +6,11 @@ import jwt
 import os
 import io
 import csv
+import re
+import uuid
+import unicodedata
 from passlib.context import CryptContext
+from routes.kiosk import POPULAR_DESTINATIONS
 
 router = APIRouter(prefix="/api/hotel", tags=["hotel-portal"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -16,6 +20,30 @@ SECRET_KEY = os.environ.get("JWT_SECRET", "zont-admin-secret-key-2025")
 class HotelLogin(BaseModel):
     email: str
     password: str
+
+
+class KioskRegister(BaseModel):
+    email: str
+    password: str
+    hotelName: str
+    address: str
+    lat: float
+    lng: float
+
+
+def _slugify(name: str) -> str:
+    n = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii")
+    n = re.sub(r"[^a-zA-Z0-9]+", "-", n).strip("-").lower()
+    return n or "hotel"
+
+
+async def _unique_slug(db, base: str) -> str:
+    slug = base
+    i = 2
+    while await db.kiosk_hotels.find_one({"slug": slug}):
+        slug = f"{base}-{i}"
+        i += 1
+    return slug
 
 
 async def require_hotel_user(request: Request):
@@ -49,6 +77,64 @@ async def hotel_login(data: HotelLogin, request: Request):
         "token": token,
         "user": {"id": user["id"], "email": user["email"], "name": user.get("name", ""), "hotel_id": user["hotel_id"]},
         "hotel": {"name": hotel.get("name", ""), "city": hotel.get("city", "")} if hotel else {},
+        "kiosk_slug": user.get("kiosk_slug"),
+    }
+
+
+@router.post("/auth/register")
+async def kiosk_register(data: KioskRegister, request: Request):
+    """Self-service kiosk registration. Creates a hotel account (reused by the extranet)
+    and an active kiosk (/kiosk/:slug) with the hotel's address + GPS coordinates."""
+    db = request.app.state.db
+    email = data.email.lower().strip()
+    if len(data.password) < 6:
+        raise HTTPException(400, "Le mot de passe doit contenir au moins 6 caracteres")
+    if not data.hotelName.strip():
+        raise HTTPException(400, "Le nom de l'hotel est requis")
+    if await db.hotel_users.find_one({"email": email}):
+        raise HTTPException(409, "Un compte existe deja avec cet email")
+
+    slug = await _unique_slug(db, _slugify(data.hotelName))
+    now = datetime.now(timezone.utc).isoformat()
+    hotel_id = str(uuid.uuid4())[:8]
+
+    await db.kiosk_hotels.insert_one({
+        "slug": slug,
+        "name": data.hotelName.strip(),
+        "address": data.address.strip(),
+        "lat": data.lat,
+        "lng": data.lng,
+        "destinations": POPULAR_DESTINATIONS,
+        "created_at": now,
+    })
+    await db.hotels.insert_one({
+        "id": hotel_id,
+        "name": data.hotelName.strip(),
+        "address": data.address.strip(),
+        "city": "",
+        "contact_email": email,
+        "created_at": now,
+    })
+    user = {
+        "id": str(uuid.uuid4()),
+        "email": email,
+        "password_hash": pwd_context.hash(data.password),
+        "name": data.hotelName.strip(),
+        "hotel_id": hotel_id,
+        "kiosk_slug": slug,
+        "created_at": now,
+    }
+    await db.hotel_users.insert_one(user)
+
+    token = jwt.encode(
+        {"sub": user["id"], "email": email, "hotel_id": hotel_id,
+         "role": "hotel_admin", "name": data.hotelName.strip()},
+        SECRET_KEY, algorithm="HS256",
+    )
+    return {
+        "token": token,
+        "user": {"id": user["id"], "email": email, "name": data.hotelName.strip(), "hotel_id": hotel_id},
+        "kiosk_slug": slug,
     }
 
 
