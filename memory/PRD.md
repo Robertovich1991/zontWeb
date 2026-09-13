@@ -17,6 +17,14 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Historique des recherches (Search History) par hôtel + message de fin traduit (P1)
+- **Search History**: nouvelle collection `kiosk_searches` `{id, hotel_slug, device_id, from_address, destination_name, destination_address, price, status: not_booked|booked, booking_reference, created_at}`.
+  - Kiosk: `POST /api/kiosk/search-log` (loggé quand le client atteint l'étape véhicule, avec le prix min affiché) → renvoie searchId. `/api/kiosk/book` accepte `searchId` → passe la recherche en `booked`. Aucune donnée perso enregistrée.
+  - Admin: `GET /api/admin/kiosk/{slug}/searches?status=&date_from=&date_to=` → liste + agrégat top destinations + totaux. Défaut = not_booked.
+  - Frontend: `pages/admin/KioskSearchHistory.js` (filtre Non réservées/Réservées/Toutes, dates, "Les plus recherchées", tableau date/destination/prix/statut). Accès: Gestion Hotels → menu ⋮ → "Search History".
+- **Message de fin borne**: remplacé "Votre chauffeur arrive bientôt" par "Vous allez recevoir une confirmation par email ou SMS." traduit FR/EN/RU (clés paymentAccepted/confirmationSoon).
+- Filtre "Standard Car" confirmé conforme (garde 3 catégories dont Standard Minivan).
+
 ### Session Jun 2026 — Accès Extranet hôtel + définition du mot de passe (admin) (P1)
 - **Contexte**: l'extranet hôtel existe (`/hotel/login` → dashboard commissions/réservations/factures). À la création d'un hôtel avec `contact_email`, un `hotel_users` est auto-créé avec mot de passe `hotel{id}` MAIS jamais affiché → impossible de le transmettre.
 - **Backend** `admin_hotels.py` : `POST /{hotel_id}/set-password {password}` — définit/réinitialise le mot de passe extranet (crée le hotel_user si absent, via contact_email). Vérifié : login extranet OK avec le mot de passe défini.

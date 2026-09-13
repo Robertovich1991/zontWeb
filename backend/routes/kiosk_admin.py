@@ -160,6 +160,42 @@ async def save_destinations(slug: str, data: SaveDestinations, request: Request)
     return {"success": True, "destinations": dests}
 
 
+@router.get("/{slug}/searches")
+async def list_searches(slug: str, request: Request, status: Optional[str] = None,
+                        date_from: Optional[str] = None, date_to: Optional[str] = None):
+    """Search history for a hotel's borne(s). Default focuses on not-booked searches."""
+    await require_admin(request)
+    db = request.app.state.db
+    q = {"hotel_slug": slug}
+    if status in ("booked", "not_booked"):
+        q["status"] = status
+    if date_from or date_to:
+        rng = {}
+        if date_from:
+            rng["$gte"] = date_from
+        if date_to:
+            rng["$lte"] = date_to + "T23:59:59"
+        q["created_at"] = rng
+    items = await db.kiosk_searches.find(q, {"_id": 0}).sort("created_at", -1).limit(1000).to_list(1000)
+    # Aggregated top destinations (most searched) respecting the same filters
+    pipeline = [
+        {"$match": q},
+        {"$group": {"_id": "$destination_name",
+                    "count": {"$sum": 1},
+                    "not_booked": {"$sum": {"$cond": [{"$eq": ["$status", "not_booked"]}, 1, 0]}},
+                    "booked": {"$sum": {"$cond": [{"$eq": ["$status", "booked"]}, 1, 0]}},
+                    "last_price": {"$last": "$price"}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 20},
+    ]
+    top = await db.kiosk_searches.aggregate(pipeline).to_list(20)
+    top = [{"destination": t["_id"], "count": t["count"], "not_booked": t["not_booked"],
+            "booked": t["booked"], "last_price": t.get("last_price")} for t in top]
+    total = await db.kiosk_searches.count_documents({"hotel_slug": slug})
+    not_booked_total = await db.kiosk_searches.count_documents({"hotel_slug": slug, "status": "not_booked"})
+    return {"items": items, "top": top, "total": total, "not_booked_total": not_booked_total}
+
+
 @router.put("/{slug}/settings")
 async def save_settings(slug: str, data: SettingsUpdate, request: Request):
     await require_admin(request)

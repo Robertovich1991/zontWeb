@@ -241,6 +241,7 @@ const KioskPage = () => {
   const [clientEmail, setClientEmail] = useState('');
   const [clientCountryCode, setClientCountryCode] = useState('+33');
   const [booking, setBooking] = useState(null);
+  const [searchId, setSearchId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [customPricing, setCustomPricing] = useState(false);
   const [customHours, setCustomHours] = useState(4); // free hourly duration
@@ -390,6 +391,21 @@ const KioskPage = () => {
     if (unbindTimerRef.current) { clearTimeout(unbindTimerRef.current); unbindTimerRef.current = null; }
   }, []);
 
+  // Search history: log the searched destination + shown price (no personal data)
+  const logSearch = useCallback(async (dest) => {
+    if (!dest) return;
+    try {
+      const prices = (dest.vehicles || []).map(v => v.maxAmount).filter(n => typeof n === 'number');
+      const minPrice = prices.length ? Math.min(...prices) : (dest.maxAmount ?? null);
+      const r = await fetch(`${API}/api/kiosk/search-log`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hotelSlug: slug, deviceId: deviceId || undefined, fromAddress: hotel?.address, destinationName: dest.name, destinationAddress: dest.address, price: minPrice }),
+      });
+      const d = await r.json();
+      setSearchId(d.searchId);
+    } catch {}
+  }, [slug, deviceId, hotel]);
+
   // Borne heartbeat: report this device is online (last connection) every 60s
   useEffect(() => {
     if (!deviceId) return;
@@ -480,7 +496,7 @@ const KioskPage = () => {
     try {
       const resp = await fetch(`${API}/api/kiosk/book`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hotelSlug: slug, deviceId: deviceId || undefined, clientName: clientName.trim(), clientPhone: fullPhone, clientEmail: clientEmail.trim(), destination: selectedDest.name, destinationAddress: selectedDest.address, destLat: selectedDest.lat, destLng: selectedDest.lng, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.maxAmount, passengers: 1, utcOffset: new Date().getTimezoneOffset() * -1 }),
+        body: JSON.stringify({ hotelSlug: slug, deviceId: deviceId || undefined, searchId: searchId || undefined, clientName: clientName.trim(), clientPhone: fullPhone, clientEmail: clientEmail.trim(), destination: selectedDest.name, destinationAddress: selectedDest.address, destLat: selectedDest.lat, destLng: selectedDest.lng, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.maxAmount, passengers: 1, utcOffset: new Date().getTimezoneOffset() * -1 }),
       });
       if (!resp.ok) throw new Error();
       const data = await resp.json();
@@ -1101,7 +1117,7 @@ const KioskPage = () => {
                 <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wide font-semibold">{t.time}</label>
                 <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full px-6 py-5 bg-[#111827] border-2 border-white/10 rounded-2xl text-white text-2xl focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-time" />
               </div>
-              <button onClick={() => { if (date && time) setStep(2); }} disabled={!date || !time} className="w-full bg-[#2ecc71] text-white py-5 rounded-2xl font-bold text-xl hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-3 mt-4" data-testid="kiosk-next">
+              <button onClick={() => { if (date && time) { logSearch(selectedDest); setStep(2); } }} disabled={!date || !time} className="w-full bg-[#2ecc71] text-white py-5 rounded-2xl font-bold text-xl hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-3 mt-4" data-testid="kiosk-next">
                 {t.continue} <ArrowRight className="w-6 h-6" />
               </button>
             </div>

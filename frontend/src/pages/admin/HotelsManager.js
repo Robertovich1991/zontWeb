@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import HotelForm from './HotelForm';
 import HotelDetail from './HotelDetail';
 import KioskConfig from './KioskConfig';
+import KioskSearchHistory from './KioskSearchHistory';
 
 const HotelsManager = () => {
   const { authFetch } = useAdminAuth();
@@ -15,6 +16,7 @@ const HotelsManager = () => {
   const [editingHotel, setEditingHotel] = useState(null);
   const [viewingHotel, setViewingHotel] = useState(null);
   const [configuringHotel, setConfiguringHotel] = useState(null);
+  const [searchHistoryHotel, setSearchHistoryHotel] = useState(null);
   const [actionMenu, setActionMenu] = useState(null);
 
   const fetchHotels = async () => {
@@ -63,6 +65,7 @@ const HotelsManager = () => {
 
   if (viewingHotel) return <HotelDetail hotelId={viewingHotel} onBack={() => { setViewingHotel(null); fetchHotels(); }} />;
   if (configuringHotel) return <KioskConfig slug={configuringHotel.kiosk_slug} hotelName={configuringHotel.name} onBack={() => { setConfiguringHotel(null); fetchHotels(); }} />;
+  if (searchHistoryHotel) return <KioskSearchHistory slug={searchHistoryHotel.kiosk_slug} hotelName={searchHistoryHotel.name} onBack={() => { setSearchHistoryHotel(null); fetchHotels(); }} />;
   if (showForm || editingHotel) return <HotelForm hotel={editingHotel} onSave={handleSaved} onCancel={() => { setShowForm(false); setEditingHotel(null); }} />;
 
   return (
@@ -152,6 +155,7 @@ const HotelsManager = () => {
                         <button onClick={() => { setViewingHotel(h.id); setActionMenu(null); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><Eye className="w-3.5 h-3.5" /> Voir details</button>
                         <button onClick={() => { setEditingHotel(h); setActionMenu(null); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><Pencil className="w-3.5 h-3.5" /> Modifier</button>
                         <button onClick={() => { setConfiguringHotel(h); setActionMenu(null); }} disabled={!h.kiosk_slug} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed" data-testid={`config-kiosk-${h.id}`}><Settings2 className="w-3.5 h-3.5" /> Configuration Borne</button>
+                        <button onClick={() => { setSearchHistoryHotel(h); setActionMenu(null); }} disabled={!h.kiosk_slug} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed" data-testid={`search-history-${h.id}`}><Search className="w-3.5 h-3.5" /> Search History</button>
                         <button onClick={() => handleCopyKioskLink(h)} disabled={!h.kiosk_slug} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed" data-testid={`copy-kiosk-link-${h.id}`}><Copy className="w-3.5 h-3.5" /> Copier lien kiosque</button>
                         {h.kiosk_slug && (
                           <a href={kioskLink(h)} target="_blank" rel="noopener noreferrer" onClick={() => setActionMenu(null)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50" data-testid={`open-kiosk-link-${h.id}`}><ExternalLink className="w-3.5 h-3.5" /> Ouvrir le kiosque</a>

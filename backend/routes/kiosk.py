@@ -53,6 +53,7 @@ class KioskBookingRequest(BaseModel):
     passengers: int = 1
     utcOffset: Optional[int] = None
     deviceId: Optional[str] = None
+    searchId: Optional[str] = None
 
 
 # ---------- Helpers ----------
@@ -445,12 +446,50 @@ async def create_kiosk_booking(req: KioskBookingRequest):
     await db.kiosk_bookings.insert_one(booking)
     booking.pop("_id", None)
 
+    # Mark the corresponding search as "booked" (search history)
+    if req.searchId:
+        await db.kiosk_searches.update_one(
+            {"id": req.searchId},
+            {"$set": {"status": "booked", "booking_reference": reference,
+                      "booked_at": datetime.now(timezone.utc).isoformat()}},
+        )
+
     return {
         "reference": reference,
         "paymentUrl": session.url,
         "qrCode": f"data:image/png;base64,{qr_base64}",
         "booking": booking,
     }
+
+
+class KioskSearchLog(BaseModel):
+    hotelSlug: str
+    deviceId: Optional[str] = None
+    fromAddress: Optional[str] = None
+    destinationName: str
+    destinationAddress: Optional[str] = None
+    price: Optional[float] = None
+
+
+@router.post("/search-log")
+async def kiosk_search_log(req: KioskSearchLog):
+    """Log a destination search on the borne (no personal data). Status defaults to not_booked."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    search_id = secrets.token_hex(12)
+    await db.kiosk_searches.insert_one({
+        "id": search_id,
+        "hotel_slug": req.hotelSlug,
+        "device_id": req.deviceId,
+        "from_address": req.fromAddress,
+        "destination_name": req.destinationName,
+        "destination_address": req.destinationAddress,
+        "price": req.price,
+        "status": "not_booked",
+        "booking_reference": None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"searchId": search_id}
 
 
 class KioskHeartbeatRequest(BaseModel):
