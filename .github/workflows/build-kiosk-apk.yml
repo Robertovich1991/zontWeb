@@ -1,8 +1,8 @@
 name: Build Kiosk APK
 
-# Compile l'APK borne kiosk sur un runner x86_64 (Ubuntu) — evite le souci aarch64,
-# puis publie l'APK dans frontend/public/downloads/ (commit auto). Il ne reste qu'a Deploy.
-# Lancement : onglet "Actions" du repo GitHub -> "Build Kiosk APK" -> "Run workflow".
+# Compile un APK RELEASE signe de la borne kiosk sur un runner x86_64 (Ubuntu),
+# le publie dans frontend/public/downloads/ (commit auto). Il ne reste qu'a Deploy.
+# Lancement : onglet "Actions" -> "Build Kiosk APK" -> "Run workflow".
 on:
   workflow_dispatch:
   push:
@@ -11,6 +11,10 @@ on:
 
 permissions:
   contents: write
+
+env:
+  KS_PASS: zontkiosk
+  KS_ALIAS: kiosk
 
 jobs:
   build:
@@ -29,8 +33,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Android platform & build-tools
-        run: |
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Install Capacitor deps & sync config
         working-directory: kiosk-apk
@@ -38,23 +41,48 @@ jobs:
           npm install
           npx cap sync android
 
-      - name: Build debug APK
+      - name: Build release APK (unsigned)
         working-directory: kiosk-apk/android
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Restore or create signing keystore
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "Using keystore from repo secret."
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > /tmp/kiosk.jks
+          else
+            echo "No KEYSTORE_BASE64 secret -> generating a keystore (uploaded as artifact)."
+            keytool -genkeypair -v -keystore /tmp/kiosk.jks \
+              -storepass "$KS_PASS" -keypass "$KS_PASS" -alias "$KS_ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=ZONT Kiosk, O=ZONT, C=FR"
+          fi
+
+      - name: Zipalign & sign
+        run: |
+          BT="$ANDROID_SDK_ROOT/build-tools/34.0.0"
+          UNSIGNED=$(find kiosk-apk/android/app/build/outputs/apk/release -name "*-release-unsigned.apk" | head -1)
+          echo "Unsigned APK: $UNSIGNED"
+          "$BT/zipalign" -f 4 "$UNSIGNED" /tmp/aligned.apk
+          "$BT/apksigner" sign --ks /tmp/kiosk.jks \
+            --ks-pass pass:$KS_PASS --key-pass pass:$KS_PASS \
+            --ks-key-alias $KS_ALIAS --out zont-kiosk.apk /tmp/aligned.apk
+          "$BT/apksigner" verify zont-kiosk.apk && echo "Signature OK"
 
       - name: Publish APK into frontend/public/downloads
         run: |
           mkdir -p frontend/public/downloads
-          cp kiosk-apk/android/app/build/outputs/apk/debug/app-debug.apk frontend/public/downloads/zont-kiosk.apk
-          cp kiosk-apk/android/app/build/outputs/apk/debug/app-debug.apk zont-kiosk.apk
+          cp zont-kiosk.apk frontend/public/downloads/zont-kiosk.apk
 
-      - name: Upload APK artifact
+      - name: Upload artifacts (APK + keystore)
         uses: actions/upload-artifact@v4
         with:
           name: zont-kiosk-apk
-          path: zont-kiosk.apk
+          path: |
+            zont-kiosk.apk
+            /tmp/kiosk.jks
           retention-days: 30
 
       - name: Commit updated APK to repo
@@ -65,7 +93,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "APK inchange, rien a committer."
           else
-            git commit -m "chore(kiosk): build & publish latest kiosk APK [skip ci]"
+            git commit -m "chore(kiosk): build & publish signed kiosk APK [skip ci]"
             git push
             echo "APK publie dans frontend/public/downloads/zont-kiosk.apk"
           fi
