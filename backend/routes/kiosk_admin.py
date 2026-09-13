@@ -83,6 +83,10 @@ class LinkReaderReq(BaseModel):
     readerId: str
 
 
+class HotelReaderReq(BaseModel):
+    readerId: str
+
+
 # ── Helpers ──
 def _device_status(dev: dict) -> str:
     """Connectivity status of the borne itself, based on its last heartbeat.
@@ -164,6 +168,48 @@ async def save_settings(slug: str, data: SettingsUpdate, request: Request):
     lang = data.default_language if data.default_language in VALID_LANGS else "fr"
     await db.kiosk_hotels.update_one({"slug": slug}, {"$set": {"default_language": lang}})
     return {"success": True, "default_language": lang}
+
+
+@router.put("/{slug}/reader")
+async def set_hotel_reader(slug: str, data: HotelReaderReq, request: Request):
+    """Attach a Stripe Terminal Reader ID directly at the hotel level (paste tmr_...).
+    Tolerant of an expired/unavailable Stripe key: the ID is still saved (validated later)."""
+    await require_admin(request)
+    db = request.app.state.db
+    await _get_hotel(db, slug)
+    rid = data.readerId.strip()
+    if not rid:
+        raise HTTPException(400, "Reader ID Stripe requis (ex. tmr_xxx)")
+    label, location, warning = None, None, None
+    if stripe.api_key:
+        try:
+            reader = stripe.terminal.Reader.retrieve(rid)
+            label, location = reader.label, reader.location
+        except stripe.error.InvalidRequestError:
+            raise HTTPException(400, f"Reader '{rid}' introuvable sur ce compte Stripe")
+        except (stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError):
+            warning = "ID enregistre mais NON verifie (cle Stripe indisponible/expiree). Il deviendra actif des le renouvellement de la cle."
+    else:
+        warning = "ID enregistre (Stripe non configure) — a verifier une fois la cle en place."
+    await db.kiosk_hotels.update_one({"slug": slug}, {"$set": {
+        "stripe_terminal_reader_id": rid,
+        "stripe_terminal_reader_label": label,
+        **({"stripe_terminal_location_id": location} if location else {}),
+        "stripe_terminal_registered_at": datetime.now(timezone.utc).isoformat(),
+    }})
+    return {"success": True, "reader_id": rid, "label": label, "location_id": location, "warning": warning}
+
+
+@router.delete("/{slug}/reader")
+async def clear_hotel_reader(slug: str, request: Request):
+    await require_admin(request)
+    db = request.app.state.db
+    await _get_hotel(db, slug)
+    await db.kiosk_hotels.update_one({"slug": slug}, {"$set": {
+        "stripe_terminal_reader_id": None, "stripe_terminal_reader_label": None,
+    }})
+    return {"success": True}
+
 
 
 # ── Devices (borne-level) ──

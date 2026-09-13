@@ -17,6 +17,11 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Champ "ID Terminal Stripe" dans le profil hôtel (admin) (P1)
+- **Formulaire hôtel (admin, HotelForm)** : nouvelle section "Terminal de paiement Stripe" (mode édition + hôtel ayant un kiosk_slug) — champ Reader ID `tmr_xxx` + bouton "Rattacher le terminal".
+- **Backend** `kiosk_admin.py` : `PUT /{slug}/reader` (rattache au niveau hôtel, **tolérant si clé Stripe expirée** → enregistre l'ID quand même + renvoie un warning ; validé une fois la clé renouvelée) et `DELETE /{slug}/reader`. `admin_hotels.py` list_hotels renvoie désormais `stripe_terminal_reader_id` pour préremplir le formulaire.
+- ⚠️ **Incident data preview** : le pytest du testing_agent a vidé `db.hotels` (0 hôtel). Restaurés manuellement les 3 hôtels démo (Bristol c9baf685, Negresco 523e9be3, W Barcelona 92bcf8a7) liés aux hotel_users existants.
+
 ### Session Jun 2026 — Borne persistante + ergonomie kiosque (P1)
 - **Identification persistante**: la borne se connecte/se saisit UNE fois. `KioskPage` persiste `localStorage.kiosk_bound_slug` (+ `kiosk_bound_device`) à l'ouverture. `KioskLanding` redirige automatiquement vers `/kiosk/{slug}` si déjà lié (survit reboot/fermeture). Login/register stockent aussi le slug. Plus jamais de re-login au démarrage.
 - **Déconnexion admin**: appui long 2,5s sur le logo/nom (header, data-testid kiosk-brand) → modal de confirmation `kiosk-unbind-modal` → efface le binding et renvoie vers `/kiosk`. Geste volontaire, non déclenchable par un client par accident.

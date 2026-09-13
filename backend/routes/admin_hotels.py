@@ -106,14 +106,20 @@ async def list_hotels(request: Request):
         h["kiosks_online"] = await db.kiosks.count_documents({"hotel_id": h["id"], "status": "online"})
         # Kiosk slug (universal /kiosk/:slug terminal link) — from the hotel_users account, fallback by name
         slug = None
+        reader_id = None
         hu = await db.hotel_users.find_one({"hotel_id": h["id"], "kiosk_slug": {"$exists": True}}, {"_id": 0, "kiosk_slug": 1})
         if hu:
             slug = hu.get("kiosk_slug")
-        if not slug:
-            kh = await db.kiosk_hotels.find_one({"name": h.get("name")}, {"_id": 0, "slug": 1})
-            if kh:
-                slug = kh.get("slug")
+        kh = None
+        if slug:
+            kh = await db.kiosk_hotels.find_one({"slug": slug}, {"_id": 0, "slug": 1, "stripe_terminal_reader_id": 1})
+        if not kh:
+            kh = await db.kiosk_hotels.find_one({"name": h.get("name")}, {"_id": 0, "slug": 1, "stripe_terminal_reader_id": 1})
+        if kh:
+            slug = slug or kh.get("slug")
+            reader_id = kh.get("stripe_terminal_reader_id")
         h["kiosk_slug"] = slug
+        h["stripe_terminal_reader_id"] = reader_id
     return hotels
 
 @router.post("")

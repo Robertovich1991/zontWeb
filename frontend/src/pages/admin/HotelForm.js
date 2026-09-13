@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, CreditCard } from 'lucide-react';
 
 const fields = [
   { section: 'Informations generales', items: [
@@ -34,7 +34,25 @@ const HotelForm = ({ hotel, onSave, onCancel }) => {
   const { authFetch } = useAdminAuth();
   const [form, setForm] = useState(hotel ? { ...defaults, ...hotel } : { ...defaults });
   const [saving, setSaving] = useState(false);
+  const [readerId, setReaderId] = useState(hotel?.stripe_terminal_reader_id || '');
+  const [readerSaving, setReaderSaving] = useState(false);
   const isEdit = !!hotel?.id;
+  const kioskSlug = hotel?.kiosk_slug;
+
+  const saveReader = async () => {
+    if (!readerId.trim()) { toast.error('Saisissez le Reader ID Stripe (tmr_...)'); return; }
+    setReaderSaving(true);
+    try {
+      const res = await authFetch(`/api/admin/kiosk/${kioskSlug}/reader`, {
+        method: 'PUT', body: JSON.stringify({ readerId: readerId.trim() }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.detail || 'Erreur');
+      if (d.warning) toast.warning(d.warning);
+      else toast.success('Terminal Stripe rattaché à l\'hôtel');
+    } catch (e) { toast.error(e.message || 'Erreur'); }
+    finally { setReaderSaving(false); }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -90,6 +108,27 @@ const HotelForm = ({ hotel, onSave, onCancel }) => {
             </div>
           </div>
         ))}
+
+        {/* Terminal de paiement Stripe (niveau hôtel) */}
+        {isEdit && kioskSlug && (
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm" data-testid="hotel-reader-section">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-2"><CreditCard className="w-4 h-4 text-emerald-600" /> Terminal de paiement Stripe</h2>
+            <p className="text-xs text-gray-500 mb-4">Collez ici le <b>Reader ID</b> du terminal créé dans votre dashboard Stripe (ex. <code>tmr_xxx</code>). La borne s'y connectera automatiquement pour encaisser les paiements par carte.</p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                value={readerId}
+                onChange={e => setReaderId(e.target.value)}
+                placeholder="tmr_xxxxxxxxxxxxx"
+                className="flex-1 px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                data-testid="hotel-reader-id"
+              />
+              <button type="button" onClick={saveReader} disabled={readerSaving}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition disabled:opacity-50" data-testid="hotel-reader-save">
+                {readerSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CreditCard className="w-4 h-4" />} Rattacher le terminal
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Commission preview */}
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
