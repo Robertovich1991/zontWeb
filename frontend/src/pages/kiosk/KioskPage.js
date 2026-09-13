@@ -32,6 +32,7 @@ const LANGS = {
     ref: 'Reference', dest: 'Destination', dateTime: 'Date & Heure', vehicle: 'Vehicule',
     passenger: 'Passager', total: 'Total', autoReset: 'Cette page se reinitialise automatiquement',
     newBooking: 'Nouvelle reservation', back: 'Retour', continue: 'Continuer',
+    paymentAccepted: 'Paiement accepté !', confirmationSoon: 'Vous allez recevoir une confirmation par email ou SMS.',
     searchOther: 'Rechercher une autre destination...', calcPrice: 'Calcul du prix en cours...',
     booking: 'Reservation en cours...', date: 'Date', time: 'Heure',
     stillHereTitle: 'Etes-vous toujours la ?',
@@ -81,6 +82,7 @@ const LANGS = {
     ref: 'Reference', dest: 'Destination', dateTime: 'Date & Time', vehicle: 'Vehicle',
     passenger: 'Passenger', total: 'Total', autoReset: 'This page resets automatically',
     newBooking: 'New booking', back: 'Back', continue: 'Continue',
+    paymentAccepted: 'Payment accepted!', confirmationSoon: 'You will receive a confirmation by email or SMS shortly.',
     searchOther: 'Search another destination...', calcPrice: 'Calculating price...',
     booking: 'Booking in progress...', date: 'Date', time: 'Time',
     stillHereTitle: 'Are you still there?',
@@ -130,6 +132,7 @@ const LANGS = {
     ref: 'Номер', dest: 'Направление', dateTime: 'Дата и время', vehicle: 'Автомобиль',
     passenger: 'Пассажир', total: 'Итого', autoReset: 'Страница обновится автоматически',
     newBooking: 'Новое бронирование', back: 'Назад', continue: 'Продолжить',
+    paymentAccepted: 'Оплата принята!', confirmationSoon: 'Вы скоро получите подтверждение по email или SMS.',
     searchOther: 'Поиск другого направления...', calcPrice: 'Расчёт цены...',
     booking: 'Бронирование...', date: 'Дата', time: 'Время',
     stillHereTitle: 'Вы ещё здесь?',
@@ -1292,8 +1295,8 @@ const KioskPage = () => {
                     <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#2ecc71] flex items-center justify-center" style={{ animation: 'fadeUp 0.4s ease-out' }}>
                       <Check className="w-20 h-20 text-white" strokeWidth={3} />
                     </div>
-                    <h3 className="text-4xl lg:text-5xl font-black text-[#2ecc71] mb-2">Paiement accepté !</h3>
-                    <p className="text-white text-lg lg:text-xl">Votre chauffeur arrive bientôt</p>
+                    <h3 className="text-4xl lg:text-5xl font-black text-[#2ecc71] mb-2">{t.paymentAccepted}</h3>
+                    <p className="text-white text-lg lg:text-xl">{t.confirmationSoon}</p>
                     <p className="text-[#2ecc71] font-bold text-3xl lg:text-4xl mt-4">{selectedVehicle?.maxAmount}&euro;</p>
                     <button onClick={resetKiosk} className="mt-8 bg-[#111827] border border-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/[0.05] transition-colors">
                       <RotateCcw className="w-4 h-4 inline mr-2" />{t.newBooking}
