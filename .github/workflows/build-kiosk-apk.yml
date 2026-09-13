@@ -1,0 +1,52 @@
+name: Build Kiosk APK
+
+# Compile l'APK borne kiosk sur un runner x86_64 (Ubuntu) — évite le souci aarch64.
+# Lancement : onglet "Actions" du repo GitHub → "Build Kiosk APK" → "Run workflow".
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'kiosk-apk/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform & build-tools
+        run: |
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Install Capacitor deps & sync config
+        working-directory: kiosk-apk
+        run: |
+          npm install
+          npx cap sync android
+
+      - name: Build debug APK
+        working-directory: kiosk-apk/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: |
+          cp kiosk-apk/android/app/build/outputs/apk/debug/app-debug.apk zont-kiosk.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zont-kiosk-apk
+          path: zont-kiosk.apk
+          retention-days: 30
