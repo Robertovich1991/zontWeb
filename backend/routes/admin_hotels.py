@@ -104,6 +104,16 @@ async def list_hotels(request: Request):
         # Kiosk count
         h["kiosks_count"] = await db.kiosks.count_documents({"hotel_id": h["id"]})
         h["kiosks_online"] = await db.kiosks.count_documents({"hotel_id": h["id"], "status": "online"})
+        # Kiosk slug (universal /kiosk/:slug terminal link) — from the hotel_users account, fallback by name
+        slug = None
+        hu = await db.hotel_users.find_one({"hotel_id": h["id"], "kiosk_slug": {"$exists": True}}, {"_id": 0, "kiosk_slug": 1})
+        if hu:
+            slug = hu.get("kiosk_slug")
+        if not slug:
+            kh = await db.kiosk_hotels.find_one({"name": h.get("name")}, {"_id": 0, "slug": 1})
+            if kh:
+                slug = kh.get("slug")
+        h["kiosk_slug"] = slug
     return hotels
 
 @router.post("")

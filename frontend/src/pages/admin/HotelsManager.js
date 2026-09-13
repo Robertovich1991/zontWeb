@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
-import { Building2, Plus, Search, MapPin, Users, TrendingUp, Wifi, WifiOff, MoreVertical, Pencil, Trash2, ToggleLeft, ToggleRight, Loader2, Eye } from 'lucide-react';
+import { Building2, Plus, Search, MapPin, Users, TrendingUp, Wifi, WifiOff, MoreVertical, Pencil, Trash2, ToggleLeft, ToggleRight, Loader2, Eye, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import HotelForm from './HotelForm';
 import HotelDetail from './HotelDetail';
@@ -42,6 +42,17 @@ const HotelsManager = () => {
 
   const handleSaved = () => { setShowForm(false); setEditingHotel(null); fetchHotels(); };
 
+  const kioskLink = (h) => h.kiosk_slug ? `${window.location.origin}/kiosk/${h.kiosk_slug}` : null;
+
+  const handleCopyKioskLink = (h) => {
+    const link = kioskLink(h);
+    if (!link) { toast.error("Aucun lien kiosque (slug manquant)"); setActionMenu(null); return; }
+    navigator.clipboard.writeText(link)
+      .then(() => toast.success('Lien kiosque copie'))
+      .catch(() => toast.error('Copie impossible'));
+    setActionMenu(null);
+  };
+
   const filtered = hotels.filter(h =>
     h.name?.toLowerCase().includes(search.toLowerCase()) ||
     h.city?.toLowerCase().includes(search.toLowerCase()) ||
@@ -82,7 +93,7 @@ const HotelsManager = () => {
           <p className="text-gray-500">Aucun hotel trouve</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="overflow-x-auto md:overflow-x-visible overflow-y-visible rounded-xl border border-gray-200 bg-white shadow-sm">
           <table className="w-full text-sm" data-testid="hotels-table">
             <thead>
               <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
@@ -137,6 +148,10 @@ const HotelsManager = () => {
                       <div className="absolute right-4 top-full z-20 bg-white border border-gray-200 rounded-xl shadow-lg py-1 w-44" data-testid={`hotel-actions-${h.id}`}>
                         <button onClick={() => { setViewingHotel(h.id); setActionMenu(null); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><Eye className="w-3.5 h-3.5" /> Voir details</button>
                         <button onClick={() => { setEditingHotel(h); setActionMenu(null); }} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"><Pencil className="w-3.5 h-3.5" /> Modifier</button>
+                        <button onClick={() => handleCopyKioskLink(h)} disabled={!h.kiosk_slug} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed" data-testid={`copy-kiosk-link-${h.id}`}><Copy className="w-3.5 h-3.5" /> Copier lien kiosque</button>
+                        {h.kiosk_slug && (
+                          <a href={kioskLink(h)} target="_blank" rel="noopener noreferrer" onClick={() => setActionMenu(null)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50" data-testid={`open-kiosk-link-${h.id}`}><ExternalLink className="w-3.5 h-3.5" /> Ouvrir le kiosque</a>
+                        )}
                         <button onClick={() => handleToggleStatus(h)} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           {h.status === 'active' ? <ToggleLeft className="w-3.5 h-3.5" /> : <ToggleRight className="w-3.5 h-3.5" />}
                           {h.status === 'active' ? 'Desactiver' : 'Activer'}
