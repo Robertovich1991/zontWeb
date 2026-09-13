@@ -17,6 +17,11 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Kiosk : masquer la catégorie "Standard Car" (P1)
+- **Demande**: Sur les bornes Kiosque uniquement (pas le site web, pas l'app mobile), n'afficher que 3 catégories au lieu de 4. Masquer "Standard Car".
+- **Fix**: `KioskPage.js` — filtre appliqué à la réception des tarifs (`fetch .../prices`), retire les véhicules dont `tripType.trim().toLowerCase() === 'standard car'`. Résultat: Luxury Sedan, Luxury Van, Standard Minivan 8 pers.
+- **Vérifié**: Screenshot du flux Kiosk bristol → étape véhicule affiche exactement 3 cartes. Aucune régression site/app (le filtre est local au composant Kiosk).
+
 ### Session Jun 01, 2026 — Kiosk Hourly Disposal Vehicles Fix (P0)
 - **Bug**: Kiosk "Location voiture à l'heure" (Disposal excursions screen) showed empty vehicle list at Step 2 because clicking a disposal destination (Paris 4h / Versailles 5h / Fontainebleau 8h / Mont-Saint-Michel 12h) only set `selectedDest` locally without calling pricing API → `selectedDest.vehicles` was always undefined.
 - **Fix**: `KioskPage.js` disposal buttons now call existing `POST /api/kiosk/{slug}/custom-price` with proper lat/lng for each disposal destination → populates `vehicles[]` with 4 categories (Shuttle 8p, Luxury Sedan, Luxury Van, Standard Car) returned from C# `/api/PreorderDistance/driverTypesTwo`.

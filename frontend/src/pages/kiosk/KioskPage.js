@@ -343,7 +343,15 @@ const KioskPage = () => {
     setLoading(true);
     fetch(`${API}/api/kiosk/${slug}/prices`, { method: 'POST' })
       .then(r => { if (!r.ok) throw new Error('Hotel not found'); return r.json(); })
-      .then(data => { setHotel(data.hotel); setDestinations(data.destinations || []); })
+      .then(data => {
+        setHotel(data.hotel);
+        // Kiosk only: hide the "Standard Car" category (keep the other 3). Does not affect the website or mobile app.
+        const filtered = (data.destinations || []).map(dest => ({
+          ...dest,
+          vehicles: (dest.vehicles || []).filter(v => (v.tripType || '').trim().toLowerCase() !== 'standard car'),
+        }));
+        setDestinations(filtered);
+      })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [slug]);
