@@ -437,6 +437,7 @@ async def create_kiosk_booking(req: KioskBookingRequest):
         "passengers": req.passengers,
         "utcOffset": req.utcOffset,
         "deviceId": req.deviceId,
+        "searchId": req.searchId,
         "status": "awaiting_payment",
         "stripeSessionId": session.id,
         "paymentUrl": session.url,
@@ -445,14 +446,6 @@ async def create_kiosk_booking(req: KioskBookingRequest):
 
     await db.kiosk_bookings.insert_one(booking)
     booking.pop("_id", None)
-
-    # Mark the corresponding search as "booked" (search history)
-    if req.searchId:
-        await db.kiosk_searches.update_one(
-            {"id": req.searchId},
-            {"$set": {"status": "booked", "booking_reference": reference,
-                      "booked_at": datetime.now(timezone.utc).isoformat()}},
-        )
 
     return {
         "reference": reference,
@@ -544,6 +537,52 @@ async def kiosk_stripe_webhook(request: Request):
     return {"received": True}
 
 
+async def _record_paid_side_effects(booking):
+    """On confirmed payment: mark the linked search as booked and create a hotel_bookings
+    record so the reservation appears in the hotel's commissions. Idempotent per reference."""
+    ref = booking.get("reference")
+    now_iso = datetime.now(timezone.utc).isoformat()
+    # 1) Search history → booked
+    if booking.get("searchId"):
+        await db.kiosk_searches.update_one(
+            {"id": booking["searchId"]},
+            {"$set": {"status": "booked", "booking_reference": ref, "booked_at": now_iso}},
+        )
+    # 2) Hotel commissions → create a hotel_bookings record (once)
+    if await db.hotel_bookings.find_one({"kiosk_reference": ref}, {"_id": 0, "id": 1}):
+        return
+    slug = booking.get("hotelSlug")
+    hotel_doc = await db.hotels.find_one({"kiosk_slug": slug}, {"_id": 0, "id": 1, "commission_rate": 1, "zont_commission_rate": 1})
+    if not hotel_doc:
+        hu = await db.hotel_users.find_one({"kiosk_slug": slug}, {"_id": 0, "hotel_id": 1})
+        if hu:
+            hotel_doc = await db.hotels.find_one({"id": hu["hotel_id"]}, {"_id": 0, "id": 1, "commission_rate": 1, "zont_commission_rate": 1})
+    if not hotel_doc and booking.get("hotelName"):
+        hotel_doc = await db.hotels.find_one({"name": booking["hotelName"]}, {"_id": 0, "id": 1, "commission_rate": 1, "zont_commission_rate": 1})
+    if not hotel_doc:
+        logger.warning(f"No hotel record for kiosk slug '{slug}' — commission not recorded for {ref}")
+        return
+    await db.hotel_bookings.insert_one({
+        "id": f"HB-{ref}",
+        "kiosk_reference": ref,
+        "hotel_id": hotel_doc["id"],
+        "source": "kiosk",
+        "guest_name": booking.get("clientName", ""),
+        "service_type": "transfer",
+        "pickup_address": booking.get("pickup", ""),
+        "dropoff_address": booking.get("destinationAddress") or booking.get("destination", ""),
+        "ride_date": booking.get("date", ""),
+        "vehicle_type": booking.get("vehicleType", ""),
+        "total_price": booking.get("price", 0),
+        "status": "confirmed",
+        "hotel_commission_rate": hotel_doc.get("commission_rate", 0),
+        "zont_commission_rate": hotel_doc.get("zont_commission_rate", 0),
+        "created_at": booking.get("paidAt") or now_iso,
+        "updated_at": now_iso,
+    })
+    logger.info(f"Hotel commission recorded for {ref} (hotel {hotel_doc['id']})")
+
+
 async def _claim_and_dispatch(ref):
     """Atomically claim a booking (so it dispatches to C# only once), mark it paid, and
     dispatch to C#. Safe to call repeatedly from the webhook, the booking-status poll,
@@ -558,6 +597,11 @@ async def _claim_and_dispatch(ref):
     )
     if claimed is None:
         return  # already dispatched or in progress
+    # Payment confirmed → mark the search as "booked" and record the hotel booking (commissions)
+    try:
+        await _record_paid_side_effects(claimed)
+    except Exception as e:
+        logger.error(f"paid side-effects failed for {ref}: {e}")
     try:
         booking = await db.kiosk_bookings.find_one({"reference": ref}, {"_id": 0})
         result = await dispatch_to_csharp(booking)

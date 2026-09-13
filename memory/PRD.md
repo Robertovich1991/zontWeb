@@ -17,6 +17,12 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Réservation kiosque → commissions hôtel + historique "réservé" (P0 fix)
+- **Bug**: une réservation payée sur la borne partait bien au C# mais n'apparaissait NI dans les commissions de l'extranet NI dans l'historique "Réservé". Cause: le dashboard hôtel agrège `hotel_bookings` alors que le kiosque n'écrivait que dans `kiosk_bookings`; et la recherche était marquée "booked" à la création (même sans paiement).
+- **Fix** (`kiosk.py`): `searchId` désormais stocké sur le kiosk_booking. Nouvelle fonction `_record_paid_side_effects(booking)` appelée dans `_claim_and_dispatch` (= paiement confirmé) qui: (1) marque la recherche `booked` UNIQUEMENT au paiement, (2) crée un enregistrement `hotel_bookings` (source=kiosk, status=confirmed, total_price, taux commission) → apparaît dans les commissions. Idempotent via `kiosk_reference`. Lookup hôtel: db.hotels.kiosk_slug → hotel_users.kiosk_slug → db.hotels.name.
+- **Vérifié**: simulation paiement 40€ Bristol → dashboard +40€ CA, +6€ commission (15%), course listée; recherche passée en booked.
+- ⚠️ Ne rétro-remplit PAS les réservations déjà faites avant le déploiement du correctif; s'applique aux futures réservations payées.
+
 ### Session Jun 2026 — Barre de recherche accueil + masquage Standard Car global (P1)
 - **Barre de recherche d'adresse** sur l'écran d'accueil (step 0) du kiosque : `PlacesAutocomplete` réutilisant `handleCustomDest` → le client tape une adresse directement. Vérifié desktop + mobile.
 - **Masquage "Standard Car" rendu global** : filtre déplacé au niveau du rendu des véhicules (step 2, ligne ~1146) → s'applique à TOUS les flux (menu, aéroports, gares, Disney, disposition horaire, et adresse tapée / custom-price). Avant, le filtre `/prices` ne couvrait pas le flux adresse libre → Standard Car réapparaissait. Corrigé. Vérifié : 3 catégories partout.
