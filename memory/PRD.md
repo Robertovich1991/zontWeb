@@ -17,6 +17,10 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Barre de recherche accueil + masquage Standard Car global (P1)
+- **Barre de recherche d'adresse** sur l'écran d'accueil (step 0) du kiosque : `PlacesAutocomplete` réutilisant `handleCustomDest` → le client tape une adresse directement. Vérifié desktop + mobile.
+- **Masquage "Standard Car" rendu global** : filtre déplacé au niveau du rendu des véhicules (step 2, ligne ~1146) → s'applique à TOUS les flux (menu, aéroports, gares, Disney, disposition horaire, et adresse tapée / custom-price). Avant, le filtre `/prices` ne couvrait pas le flux adresse libre → Standard Car réapparaissait. Corrigé. Vérifié : 3 catégories partout.
+
 ### Session Jun 2026 — Historique des recherches (Search History) par hôtel + message de fin traduit (P1)
 - **Search History**: nouvelle collection `kiosk_searches` `{id, hotel_slug, device_id, from_address, destination_name, destination_address, price, status: not_booked|booked, booking_reference, created_at}`.
   - Kiosk: `POST /api/kiosk/search-log` (loggé quand le client atteint l'étape véhicule, avec le prix min affiché) → renvoie searchId. `/api/kiosk/book` accepte `searchId` → passe la recherche en `booked`. Aucune donnée perso enregistrée.

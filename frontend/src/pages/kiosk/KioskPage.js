@@ -1143,7 +1143,7 @@ const KioskPage = () => {
           <div style={{ animation: 'fadeUp 0.3s ease-out' }}>
             <h2 className="text-3xl lg:text-4xl font-bold text-center mb-8">{t.chooseVehicle}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-[1600px] mx-auto">
-              {[...(selectedDest?.vehicles || [])].sort((a, b) => (a.maxAmount || 0) - (b.maxAmount || 0)).map((v, i) => {
+              {[...(selectedDest?.vehicles || [])].filter(v => (v.tripType || '').trim().toLowerCase() !== 'standard car').sort((a, b) => (a.maxAmount || 0) - (b.maxAmount || 0)).map((v, i) => {
                 const imgUrl = transferService.getVehicleImageUrl(v.imagePath);
                 return (
                   <button
