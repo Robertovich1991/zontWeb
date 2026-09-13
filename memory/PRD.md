@@ -17,6 +17,11 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Borne persistante + ergonomie kiosque (P1)
+- **Identification persistante**: la borne se connecte/se saisit UNE fois. `KioskPage` persiste `localStorage.kiosk_bound_slug` (+ `kiosk_bound_device`) à l'ouverture. `KioskLanding` redirige automatiquement vers `/kiosk/{slug}` si déjà lié (survit reboot/fermeture). Login/register stockent aussi le slug. Plus jamais de re-login au démarrage.
+- **Déconnexion admin**: appui long 2,5s sur le logo/nom (header, data-testid kiosk-brand) → modal de confirmation `kiosk-unbind-modal` → efface le binding et renvoie vers `/kiosk`. Geste volontaire, non déclenchable par un client par accident.
+- **Ergonomie**: bouton Retour agrandi (pill blanc contrasté, grande zone tactile, icône 6-7 w/h) ; sélecteur de langue en pill segmenté bien visible (FR actif vert). Vérifié desktop + mobile (pas de débordement header).
+
 ### Session Jun 2026 — Module "Configuration Borne" (Kiosk config back-office) (P0)
 - **Objectif**: un seul APK pour tous les hôtels, chaque borne pilotée depuis le back-office. Architecture scalable multi-bornes.
 - **Backend**:

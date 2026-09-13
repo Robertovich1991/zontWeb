@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, LogIn, Building2, Mail, Lock, MapPin } from 'lucide-react';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
@@ -24,6 +24,16 @@ const KioskLanding = () => {
   const [address, setAddress] = useState('');
   const [coords, setCoords] = useState({ lat: null, lng: null });
 
+  // Persistent borne binding: if this tablet was already connected to an hotel,
+  // skip the login screen and reopen its kiosk directly (survives reboot / app restart).
+  useEffect(() => {
+    const boundSlug = localStorage.getItem('kiosk_bound_slug');
+    if (boundSlug) {
+      const dev = localStorage.getItem('kiosk_bound_device');
+      navigate(`/kiosk/${boundSlug}${dev ? `?device=${encodeURIComponent(dev)}` : ''}`, { replace: true });
+    }
+  }, [navigate]);
+
   const inputCls = "w-full pl-11 pr-4 py-3.5 bg-[#111827] border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71] text-base";
 
   const handleLogin = async () => {
@@ -37,6 +47,7 @@ const KioskLanding = () => {
       const d = await r.json();
       if (!r.ok) throw new Error(fmtErr(d.detail, 'Connexion echouee'));
       if (!d.kiosk_slug) throw new Error("Ce compte n'a pas de borne associee. Inscrivez-vous ou contactez l'administrateur.");
+      localStorage.setItem('kiosk_bound_slug', d.kiosk_slug);
       navigate(`/kiosk/${d.kiosk_slug}`);
     } catch (e) { setError(e.message); } finally { setLoading(false); }
   };
@@ -52,6 +63,7 @@ const KioskLanding = () => {
       });
       const d = await r.json();
       if (!r.ok) throw new Error(fmtErr(d.detail, 'Inscription echouee'));
+      localStorage.setItem('kiosk_bound_slug', d.kiosk_slug);
       navigate(`/kiosk/${d.kiosk_slug}`);
     } catch (e) { setError(e.message); } finally { setLoading(false); }
   };

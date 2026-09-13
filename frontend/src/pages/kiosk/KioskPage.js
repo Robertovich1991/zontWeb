@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { transferService } from '@/services/api';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 import PhoneInput from '@/components/PhoneInput';
@@ -212,8 +212,11 @@ const AttractScreen = ({ hotelName, onTap }) => {
 /* ──── MAIN KIOSK ──── */
 const KioskPage = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   // Optional per-borne identifier: /kiosk/:slug?device=TERM-001 (or device id)
   const deviceId = (typeof window !== 'undefined') ? new URLSearchParams(window.location.search).get('device') : null;
+  const [showUnbind, setShowUnbind] = useState(false);
+  const unbindTimerRef = useRef(null);
   const [hotel, setHotel] = useState(null);
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -361,6 +364,28 @@ const KioskPage = () => {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  // Persist the borne binding on the tablet: once opened on /kiosk/:slug it stays
+  // associated to this hotel (and device) across reboots — until an admin unbinds it.
+  useEffect(() => {
+    if (!slug) return;
+    localStorage.setItem('kiosk_bound_slug', slug);
+    if (deviceId) localStorage.setItem('kiosk_bound_device', deviceId);
+  }, [slug, deviceId]);
+
+  const unbindBorne = useCallback(() => {
+    localStorage.removeItem('kiosk_bound_slug');
+    localStorage.removeItem('kiosk_bound_device');
+    navigate('/kiosk', { replace: true });
+  }, [navigate]);
+
+  const startUnbindHold = useCallback(() => {
+    if (unbindTimerRef.current) clearTimeout(unbindTimerRef.current);
+    unbindTimerRef.current = setTimeout(() => setShowUnbind(true), 2500);
+  }, []);
+  const cancelUnbindHold = useCallback(() => {
+    if (unbindTimerRef.current) { clearTimeout(unbindTimerRef.current); unbindTimerRef.current = null; }
+  }, []);
 
   // Borne heartbeat: report this device is online (last connection) every 60s
   useEffect(() => {
@@ -611,7 +636,14 @@ const KioskPage = () => {
 
       {/* Header */}
       <header className="px-6 py-4 flex items-center justify-between flex-shrink-0 border-b border-white/[0.06]">
-        <div className="flex items-center gap-3">
+        <div
+          className="flex items-center gap-3 select-none cursor-default"
+          onPointerDown={startUnbindHold}
+          onPointerUp={cancelUnbindHold}
+          onPointerLeave={cancelUnbindHold}
+          data-testid="kiosk-brand"
+          title="Maintenez 2,5s pour déconnecter la borne (admin)"
+        >
           <div className="w-10 h-10 bg-[#2ecc71]/10 rounded-lg flex items-center justify-center border border-[#2ecc71]/20">
             <span className="text-[#2ecc71] font-black text-lg">Z</span>
           </div>
@@ -620,22 +652,53 @@ const KioskPage = () => {
             <p className="text-xs text-gray-500">{hotel?.name || ''}</p>
           </div>
         </div>
-        {step > 0 && step < 4 && (
-          <button onClick={() => setStep(Math.max(0, step - 1))} className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm" data-testid="kiosk-back">
-            <ChevronLeft className="w-4 h-4" />{t.back}
-          </button>
-        )}
-        {step === 4 && (
-          <button onClick={resetKiosk} className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm" data-testid="kiosk-new">
-            <RotateCcw className="w-4 h-4" />{t.newBooking}
-          </button>
-        )}
-        <div className="flex items-center gap-1 text-sm">
-          {['fr','en','ru'].map(l => (
-            <button key={l} onClick={() => { langTouchedRef.current = true; setLang(l); }} className={`px-2 py-1 rounded ${lang === l ? 'text-[#2ecc71] font-bold' : 'text-gray-500 hover:text-white'}`}>{l.toUpperCase()}</button>
-          ))}
+        <div className="flex items-center gap-3">
+          {step > 0 && step < 4 && (
+            <button
+              onClick={() => setStep(Math.max(0, step - 1))}
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-semibold text-base lg:text-lg px-5 py-3 rounded-full border border-white/20 transition-all shadow-lg"
+              data-testid="kiosk-back"
+            >
+              <ChevronLeft className="w-6 h-6 lg:w-7 lg:h-7" />{t.back}
+            </button>
+          )}
+          {step === 4 && (
+            <button
+              onClick={resetKiosk}
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-semibold text-base lg:text-lg px-5 py-3 rounded-full border border-white/20 transition-all shadow-lg"
+              data-testid="kiosk-new"
+            >
+              <RotateCcw className="w-6 h-6 lg:w-7 lg:h-7" />{t.newBooking}
+            </button>
+          )}
+          <div className="flex items-center gap-1.5 bg-[#111827] border border-white/10 rounded-full p-1" data-testid="kiosk-lang-switcher">
+            {['fr','en','ru'].map(l => (
+              <button
+                key={l}
+                onClick={() => { langTouchedRef.current = true; setLang(l); }}
+                className={`px-4 py-2 rounded-full text-base font-bold transition-all ${lang === l ? 'bg-[#2ecc71] text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                data-testid={`kiosk-lang-${l}`}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
+
+      {/* Admin: unbind borne confirmation (triggered by 2.5s long-press on the logo) */}
+      {showUnbind && (
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-6" onClick={() => setShowUnbind(false)} data-testid="kiosk-unbind-modal">
+          <div className="bg-[#0f1830] border border-white/10 rounded-3xl p-8 max-w-md w-full text-center" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold text-white mb-2">Déconnecter cette borne ?</h3>
+            <p className="text-gray-400 text-sm mb-7">L'hôtel associé (<span className="text-[#2ecc71]">{hotel?.name || slug}</span>) sera oublié sur cette tablette. Il faudra ressaisir les identifiants pour reconfigurer la borne.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowUnbind(false)} className="flex-1 py-3.5 rounded-xl border border-white/15 text-gray-300 hover:text-white hover:border-white/30 font-semibold transition-all" data-testid="kiosk-unbind-cancel">Annuler</button>
+              <button onClick={unbindBorne} className="flex-1 py-3.5 rounded-xl bg-red-500/90 hover:bg-red-500 text-white font-bold transition-all" data-testid="kiosk-unbind-confirm">Déconnecter</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && hotel && <div className="bg-red-500/10 border-b border-red-500/20 px-6 py-2 text-center text-red-400 text-sm">{error}</div>}
 
