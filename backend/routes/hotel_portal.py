@@ -104,6 +104,7 @@ async def kiosk_register(data: KioskRegister, request: Request):
         "address": data.address.strip(),
         "lat": data.lat,
         "lng": data.lng,
+        "default_language": "fr",
         "destinations": POPULAR_DESTINATIONS,
         "created_at": now,
     })

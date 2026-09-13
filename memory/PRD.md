@@ -17,6 +17,21 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Module "Configuration Borne" (Kiosk config back-office) (P0)
+- **Objectif**: un seul APK pour tous les hôtels, chaque borne pilotée depuis le back-office. Architecture scalable multi-bornes.
+- **Backend**:
+  - Nouveau routeur `routes/kiosk_admin.py` (prefix `/api/admin/kiosk`, require_admin) :
+    - `GET /{slug}/config`, `PUT /{slug}/destinations` (ordre + highlighted + hidden), `PUT /{slug}/settings` (default_language)
+    - Bornes: `GET/POST /{slug}/devices`, `DELETE /devices/{id}`, `POST /devices/{id}/register-reader|link-reader|unlink-reader`, `GET /devices/{id}/reader-status`
+  - Collection **`kiosk_devices`** : `{id, hotel_slug, device_code (TERM-001…), label, stripe_terminal_reader_id, stripe_terminal_location_id, last_seen_at}`. Statut = connectivité (heartbeat < 2 min = online). Reader mirroré sur `kiosk_hotels` (compat flux single-borne).
+  - `kiosk.py` : `/{slug}/prices` filtre `dest.hidden` + conserve l'ordre ; nouveau `POST /heartbeat {deviceId}` ; `KioskBookingRequest.deviceId` stocké sur la réservation.
+  - `stripe_terminal.py` create-payment : utilise le reader de la borne (booking.deviceId) sinon fallback reader hôtel.
+  - Erreurs Stripe renvoyées en **HTTP 400** (message FR) pour passer le proxy Cloudflare (les 5xx sont remplacés par la page Cloudflare).
+- **Frontend**: `pages/admin/KioskConfig.js` — 3 onglets Destinations (drag-drop + flèches, switch mise en avant, switch visible, ajout via Google Places) / Bornes (CRUD, Reader ID + Location ID, statut, dernière connexion, rattacher/lier/remplacer lecteur, lien `/kiosk/{slug}?device=TERM-xxx`) / Paramètres (langue par défaut). Ouvert depuis Gestion Hotels → menu ⋮ → "Configuration Borne".
+  - `KioskPage.js` : applique `hotel.default_language` (client peut toujours switcher), lit `?device=`, envoie heartbeat, met la borne à jour ; "Popular" = destinations `highlighted`.
+- **Testé**: testing_agent iteration_94 — frontend 100%, backend 11/12 (le 12e = clé Stripe live EXPIRÉE dans l'env preview, pas un bug code). Vérifié desktop + mobile.
+- ⚠️ **ACTION USER**: la clé `STRIPE_LIVE_SECRET_KEY` de l'environnement est **expirée** (Stripe: "Expired API Key"). Le rattachement d'un lecteur Stripe échouera tant qu'elle n'est pas renouvelée.
+
 ### Session Jun 2026 — Kiosk : masquer la catégorie "Standard Car" (P1)
 - **Demande**: Sur les bornes Kiosque uniquement (pas le site web, pas l'app mobile), n'afficher que 3 catégories au lieu de 4. Masquer "Standard Car".
 - **Fix**: `KioskPage.js` — filtre appliqué à la réception des tarifs (`fetch .../prices`), retire les véhicules dont `tripType.trim().toLowerCase() === 'standard car'`. Résultat: Luxury Sedan, Luxury Van, Standard Minivan 8 pers.

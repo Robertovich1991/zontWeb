@@ -208,6 +208,7 @@ from routes.partner import router as partner_router
 from routes.partner_payment import router as partner_payment_router
 from routes.admin_hotels import router as admin_hotels_router
 from routes.hotel_portal import router as hotel_portal_router
+from routes.kiosk_admin import router as kiosk_admin_router
 
 app.include_router(auth_router)
 app.include_router(pages_router)
@@ -222,6 +223,7 @@ app.include_router(partner_router)
 app.include_router(partner_payment_router)
 app.include_router(admin_hotels_router)
 app.include_router(hotel_portal_router)
+app.include_router(kiosk_admin_router)
 from routes.fleet_portal import router as fleet_router
 app.include_router(fleet_router)
 from routes.fleet_my_bookings import router as fleet_my_bookings_router

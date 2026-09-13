@@ -212,12 +212,15 @@ const AttractScreen = ({ hotelName, onTap }) => {
 /* ──── MAIN KIOSK ──── */
 const KioskPage = () => {
   const { slug } = useParams();
+  // Optional per-borne identifier: /kiosk/:slug?device=TERM-001 (or device id)
+  const deviceId = (typeof window !== 'undefined') ? new URLSearchParams(window.location.search).get('device') : null;
   const [hotel, setHotel] = useState(null);
   const [destinations, setDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAttract, setShowAttract] = useState(true);
   const [lang, setLang] = useState('fr');
+  const langTouchedRef = useRef(false);
   const t = LANGS[lang] || LANGS.fr;
   const idleTimerRef = useRef(null);
 
@@ -345,6 +348,9 @@ const KioskPage = () => {
       .then(r => { if (!r.ok) throw new Error('Hotel not found'); return r.json(); })
       .then(data => {
         setHotel(data.hotel);
+        // Borne default language (client can still switch manually via the FR/EN/RU toggle)
+        const dl = data.hotel?.default_language;
+        if (dl && LANGS[dl] && !langTouchedRef.current) setLang(dl);
         // Kiosk only: hide the "Standard Car" category (keep the other 3). Does not affect the website or mobile app.
         const filtered = (data.destinations || []).map(dest => ({
           ...dest,
@@ -355,6 +361,19 @@ const KioskPage = () => {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  // Borne heartbeat: report this device is online (last connection) every 60s
+  useEffect(() => {
+    if (!deviceId) return;
+    const beat = () => fetch(`${API}/api/kiosk/heartbeat`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId }), keepalive: true,
+    }).catch(() => {});
+    beat();
+    const iv = setInterval(beat, 60000);
+    return () => clearInterval(iv);
+  }, [deviceId]);
+
 
   // PWA "Add to Home Screen": dynamic manifest + iOS meta tags per kiosk slug
   useEffect(() => {
@@ -433,7 +452,7 @@ const KioskPage = () => {
     try {
       const resp = await fetch(`${API}/api/kiosk/book`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hotelSlug: slug, clientName: clientName.trim(), clientPhone: fullPhone, clientEmail: clientEmail.trim(), destination: selectedDest.name, destinationAddress: selectedDest.address, destLat: selectedDest.lat, destLng: selectedDest.lng, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.maxAmount, passengers: 1, utcOffset: new Date().getTimezoneOffset() * -1 }),
+        body: JSON.stringify({ hotelSlug: slug, deviceId: deviceId || undefined, clientName: clientName.trim(), clientPhone: fullPhone, clientEmail: clientEmail.trim(), destination: selectedDest.name, destinationAddress: selectedDest.address, destLat: selectedDest.lat, destLng: selectedDest.lng, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.maxAmount, passengers: 1, utcOffset: new Date().getTimezoneOffset() * -1 }),
       });
       if (!resp.ok) throw new Error();
       const data = await resp.json();
@@ -613,7 +632,7 @@ const KioskPage = () => {
         )}
         <div className="flex items-center gap-1 text-sm">
           {['fr','en','ru'].map(l => (
-            <button key={l} onClick={() => setLang(l)} className={`px-2 py-1 rounded ${lang === l ? 'text-[#2ecc71] font-bold' : 'text-gray-500 hover:text-white'}`}>{l.toUpperCase()}</button>
+            <button key={l} onClick={() => { langTouchedRef.current = true; setLang(l); }} className={`px-2 py-1 rounded ${lang === l ? 'text-[#2ecc71] font-bold' : 'text-gray-500 hover:text-white'}`}>{l.toUpperCase()}</button>
           ))}
         </div>
       </header>
@@ -665,7 +684,7 @@ const KioskPage = () => {
                 <div className="flex-1 h-px bg-white/[0.06]" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {destinations.slice(0, 4).map((d, i) => (
+                {(destinations.some(d => d.highlighted) ? destinations.filter(d => d.highlighted) : destinations).slice(0, 4).map((d, i) => (
                   <button key={i} onClick={() => { setSelectedDest(d); setStep(1); }} className="bg-[#111827]/60 border border-white/[0.06] hover:border-[#2ecc71]/40 rounded-2xl px-5 py-4 flex items-center gap-4 transition-all text-left group" data-testid={`pop-dest-${i}`}>
                     <div className="w-14 h-14 bg-[#2ecc71]/10 rounded-xl flex items-center justify-center flex-shrink-0">
                       {d.icon === 'plane' ? <Plane className="w-7 h-7 text-[#2ecc71]" /> : d.icon === 'train' ? <TrainFront className="w-7 h-7 text-[#2ecc71]" /> : <MapPin className="w-7 h-7 text-[#2ecc71]" />}

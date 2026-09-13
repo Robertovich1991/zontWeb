@@ -52,6 +52,7 @@ class KioskBookingRequest(BaseModel):
     price: float
     passengers: int = 1
     utcOffset: Optional[int] = None
+    deviceId: Optional[str] = None
 
 
 # ---------- Helpers ----------
@@ -165,6 +166,8 @@ async def get_kiosk_prices(slug: str):
 
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         for dest in hotel.get("destinations", []):
+            if dest.get("hidden"):
+                continue  # borne config: destination masquee pour cet hotel
             dest_coords = {"latitude": dest["lat"], "longitude": dest["lng"]}
             try:
                 resp = await client.post(
@@ -432,6 +435,7 @@ async def create_kiosk_booking(req: KioskBookingRequest):
         "price": req.price,
         "passengers": req.passengers,
         "utcOffset": req.utcOffset,
+        "deviceId": req.deviceId,
         "status": "awaiting_payment",
         "stripeSessionId": session.id,
         "paymentUrl": session.url,
@@ -447,6 +451,23 @@ async def create_kiosk_booking(req: KioskBookingRequest):
         "qrCode": f"data:image/png;base64,{qr_base64}",
         "booking": booking,
     }
+
+
+class KioskHeartbeatRequest(BaseModel):
+    deviceId: str
+
+
+@router.post("/heartbeat")
+async def kiosk_heartbeat(req: KioskHeartbeatRequest):
+    """Called periodically by a borne to report it is online (last connection)."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    now = datetime.now(timezone.utc).isoformat()
+    res = await db.kiosk_devices.update_one({"id": req.deviceId}, {"$set": {"last_seen_at": now}})
+    if res.matched_count == 0:
+        # Also allow matching by device_code for convenience
+        res = await db.kiosk_devices.update_one({"device_code": req.deviceId}, {"$set": {"last_seen_at": now}})
+    return {"ok": res.matched_count > 0, "last_seen_at": now}
 
 
 @router.post("/webhook/stripe")

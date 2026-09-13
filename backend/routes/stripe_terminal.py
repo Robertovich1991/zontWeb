@@ -192,10 +192,18 @@ async def create_terminal_payment(req: CreateTerminalPaymentRequest):
         raise HTTPException(404, "Booking not found")
 
     hotel = await db.kiosk_hotels.find_one({"slug": booking["hotelSlug"]}, {"_id": 0})
-    if not hotel or not hotel.get("stripe_terminal_reader_id"):
-        raise HTTPException(400, "Aucun terminal de paiement enregistré pour cet hôtel")
+    # Prefer the reader bound to the specific borne (device) when the booking carries a deviceId.
+    reader_id = None
+    device_id = booking.get("deviceId")
+    if device_id:
+        device = await db.kiosk_devices.find_one({"id": device_id}, {"_id": 0, "stripe_terminal_reader_id": 1})
+        if device and device.get("stripe_terminal_reader_id"):
+            reader_id = device["stripe_terminal_reader_id"]
+    if not reader_id:
+        reader_id = hotel.get("stripe_terminal_reader_id") if hotel else None
+    if not reader_id:
+        raise HTTPException(400, "Aucun terminal de paiement enregistré pour cette borne")
 
-    reader_id = hotel["stripe_terminal_reader_id"]
     amount_cents = int(round(float(booking["price"]) * 100))
 
     # 1. Create the PaymentIntent in card-present mode
