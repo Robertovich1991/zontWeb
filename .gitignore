@@ -79,15 +79,7 @@ agenthub/agents/youtube/db
 # Mobile development
 android-sdk/ frontend/node_modules/.cache/default-development/0.pack
 frontend/node_modules/.cache/default-development/0.pack
--e 
-# Environment files
-*.env
-*.env.*
 frontend/node_modules/.cache/default-development/5.pack
--e 
-# Environment files
-*.env
-*.env.*
 frontend/node_modules/.cache/default-development/8.pack
 frontend/node_modules/.cache/default-development/10.pack
 frontend/node_modules/.cache/default-development/14.pack
@@ -97,9 +89,7 @@ frontend/node_modules/.cache/default-development/28.pack
 frontend/node_modules/.cache/default-development/31.pack
 frontend/node_modules/.cache/default-development/41.pack
 frontend/node_modules/.cache/default-development/52.pack
-.env
 frontend/node_modules/.cache/default-development/3.pack
-.env.*
 credentials.json
 *.key
 .credentials

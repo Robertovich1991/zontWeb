@@ -16,7 +16,7 @@ import base64
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/kiosk", tags=["kiosk"])
 
-CSHARP_API = "https://api.zont.cab"
+CSHARP_API = os.environ.get("CSHARP_API_URL", "https://api.zont.cab")
 TIMEOUT = 15.0
 STRIPE_SECRET = os.environ.get("STRIPE_LIVE_SECRET_KEY", "")
 stripe.api_key = STRIPE_SECRET

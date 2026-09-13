@@ -37,7 +37,7 @@ async def get_http_client():
         async with _client_lock:
             if http_client is None or http_client.is_closed:
                 http_client = httpx.AsyncClient(
-                    base_url="https://api.zont.cab",
+                    base_url=os.environ.get("CSHARP_API_URL", "https://api.zont.cab"),
                     timeout=httpx.Timeout(15.0, connect=5.0, read=30.0)
                 )
     return http_client
@@ -46,7 +46,7 @@ async def get_http_client():
 async def lifespan_client(router_instance: APIRouter):
     global http_client
     http_client = httpx.AsyncClient(
-        base_url="https://api.zont.cab",
+        base_url=os.environ.get("CSHARP_API_URL", "https://api.zont.cab"),
         timeout=httpx.Timeout(15.0, connect=5.0, read=30.0)
     )
     yield
