@@ -680,22 +680,6 @@ const KioskPage = () => {
 
       {/* Header */}
       <header className="px-6 py-4 flex items-center justify-between flex-shrink-0 border-b border-white/[0.06]">
-        <div
-          className="flex items-center gap-3 select-none cursor-default"
-          onPointerDown={startUnbindHold}
-          onPointerUp={cancelUnbindHold}
-          onPointerLeave={cancelUnbindHold}
-          data-testid="kiosk-brand"
-          title="Maintenez 2,5s pour déconnecter la borne (admin)"
-        >
-          <div className="w-10 h-10 bg-[#2ecc71]/10 rounded-lg flex items-center justify-center border border-[#2ecc71]/20">
-            <span className="text-[#2ecc71] font-black text-lg">Z</span>
-          </div>
-          <div>
-            <p className="text-white font-bold leading-tight">Zont Transfer</p>
-            <p className="text-xs text-gray-500">{hotel?.name || ''}</p>
-          </div>
-        </div>
         <div className="flex items-center gap-3">
           {step > 0 && step < 4 && (
             <button
@@ -715,6 +699,24 @@ const KioskPage = () => {
               <RotateCcw className="w-6 h-6 lg:w-7 lg:h-7" />{t.newBooking}
             </button>
           )}
+          <div
+            className="flex items-center gap-3 select-none cursor-default"
+            onPointerDown={startUnbindHold}
+            onPointerUp={cancelUnbindHold}
+            onPointerLeave={cancelUnbindHold}
+            data-testid="kiosk-brand"
+            title="Maintenez 2,5s pour déconnecter la borne (admin)"
+          >
+            <div className="w-10 h-10 bg-[#2ecc71]/10 rounded-lg flex items-center justify-center border border-[#2ecc71]/20">
+              <span className="text-[#2ecc71] font-black text-lg">Z</span>
+            </div>
+            <div>
+              <p className="text-white font-bold leading-tight">Zont Transfer</p>
+              <p className="text-xs text-gray-500">{hotel?.name || ''}</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 bg-[#111827] border border-white/10 rounded-full p-1" data-testid="kiosk-lang-switcher">
             {['fr','en','ru'].map(l => (
               <button
