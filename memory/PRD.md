@@ -17,6 +17,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Intégration Pixel publicitaire OpenAI (OAIQ) (P1)
+- **Pixel de base** ajouté dans `frontend/public/index.html`, dans le bloc tracking **production-only** (host `zont.cab`), après consentement CookieYes + différé (requestIdleCallback), à côté de Meta/GA4/Google Ads. `pixelId: PkzxozCo2onLD7RvtNz8zQ`, `debug:false`. Sur preview `window.oaiq` reste undefined (pas de pollution).
+- **Attribution oppref**: capturée **synchronement** au landing (dans le bloc prod, avant le différé) → `localStorage.zont_oppref`, pour survivre à la navigation SPA. Le SDK OAIQ la lit à l'init.
+- **Conversion `order_created`**: util `frontend/src/utils/openaiAds.js` → `trackOrderCreated({priceEuros, bookingId})`. Montant en **centimes** (`Math.round(euros*100)`), `currency:EUR`, `type:contents`, `event_id = booking id` (dédup via localStorage `zont_oaiq_fired` + dédup serveur OpenAI). Appelée dans `Checkout.js` juste après `submitBooking` réussi (même point que la conversion Google Ads) → **uniquement après paiement réel confirmé**. Pas d'InitiateCheckout comme conversion principale (demande explicite).
+- **Vérifié preview**: test payload avec stub — 40€→4000, 100,50€→10050, event_id correct, dédup OK, montants invalides ignorés. ⚠️ Le tir réel du SDK ne peut être testé que sur PRODUCTION (tracking prod-only) via le debugger de pixel OpenAI après déploiement.
+
+
 ### Session Jun 2026 — Search History: tracer les recherches sans clic véhicule (P1)
 - **Problème**: la recherche n'était loggée qu'au clic « Continuer » (étape date/heure → véhicules). Les recherches abandonnées AVANT (sur l'écran date/heure) n'apparaissaient jamais. L'utilisateur veut voir TOUTES les recherches, même sans appui sur une catégorie de voiture.
 - **Fix (KioskPage.js)**: `logSearch` déclenché désormais via un `useEffect` **dès l'entrée sur l'étape 1** (date/heure) quand une destination + prix sont connus (menu, aéroport, gare, Disney, adresse tapée). Dédupliqué par signature destination (`lastLoggedSearchRef`) → pas de doublon au retour/avance. Réinitialisé dans `resetKiosk` (nouvelle session = nouveau log). Retiré l'appel du bouton « Continuer ».

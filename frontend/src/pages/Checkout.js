@@ -11,6 +11,7 @@ import PhoneInput from '@/components/PhoneInput';
 import LastMinuteWarning from '@/components/LastMinuteWarning';
 import { toast } from 'sonner';
 import { trackInitiateCheckout } from '@/utils/fbPixel';
+import { trackOrderCreated } from '@/utils/openaiAds';
 import { formatDestinationCoords, formatDestinationAddresses, getDestinationCoords } from '@/utils/routeStops';
 import {
   CreditCard, MapPin, Calendar, Clock, Shield, CheckCircle,
@@ -798,6 +799,13 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         });
       }
       console.log('[ZONT] Conversion fired:', JSON.stringify(conversionData));
+
+      // OpenAI Ads (OAIQ) — main conversion, fired ONLY here after a real paid & confirmed
+      // booking. Amount sent in cents, event_id = booking id (dedup). No-ops off production.
+      trackOrderCreated({
+        priceEuros: selectedCar.price,
+        bookingId: result?.id || result?.bookingId || conversionData.transaction_id,
+      });
 
       toast.success(c.bookingSuccess);
       setTimeout(() => navigate('/booking-confirmation'), 1500);

@@ -24,6 +24,14 @@
           var IS_PROD = (host === 'www.zont.cab' || host === 'zont.cab');
           if (!IS_PROD) return; // 🔒 Tracking DISABLED on preview/dev/staging
 
+          // ───── OpenAI Ads (OAIQ) — preserve 'oppref' attribution for the WHOLE journey ─────
+          // Captured synchronously on landing (before the SDK defers) so it is never lost
+          // when the SPA navigates and strips query params. The OAIQ SDK reads it on init.
+          try {
+            var _op = new URLSearchParams(window.location.search).get('oppref');
+            if (_op) localStorage.setItem('zont_oppref', _op);
+          } catch (e) {}
+
           // ⚡ Defer all tracking until after first paint to protect LCP/FID
           var initTrackers = function(){
 
@@ -38,6 +46,11 @@
           'https://connect.facebook.net/en_US/fbevents.js');
           fbq('init', '26750687997954052');
           fbq('track', 'PageView');
+
+          // ───── OpenAI Ads Pixel (OAIQ) — base pixel (visits). Conversion "order_created"
+          //       is fired from the app ONLY after a real paid booking (utils/openaiAds.js). ─────
+          !function(w,d,s,u){if(w.oaiq)return;var q=function(){q.q.push(arguments)};q.q=[];w.oaiq=q;var j=d.createElement(s);j.async=1;j.src=u;var f=d.getElementsByTagName(s)[0];f.parentNode.insertBefore(j,f)}(window,document,"script","https://bzrcdn.openai.com/sdk/oaiq.min.js");
+          oaiq("init",{pixelId:"PkzxozCo2onLD7RvtNz8zQ",debug:false});
 
           // ───── Yandex Metrika ─────
           (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
