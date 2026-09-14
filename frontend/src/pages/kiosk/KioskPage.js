@@ -261,6 +261,7 @@ const KioskPage = () => {
   useEffect(() => { terminalStatusRef.current = terminalStatus; }, [terminalStatus]);
   const idlePromptTimerRef = useRef(null);
   const idleCountdownIntervalRef = useRef(null);
+  const lastLoggedSearchRef = useRef(null);
 
   const resetKiosk = useCallback(() => {
     // Cancel any pending terminal payment to avoid TPE staying on "Tap or insert" after the kiosk resets
@@ -276,6 +277,7 @@ const KioskPage = () => {
     setCustomHours(4);
     setShowIdlePrompt(false);
     setPaymentIntentId(null); setTerminalStatus(null); setTerminalError(null);
+    setSearchId(null); lastLoggedSearchRef.current = null;
   }, []);
 
   const clearIdlePrompt = useCallback(() => {
@@ -430,6 +432,20 @@ const KioskPage = () => {
       setSearchId(d.searchId);
     } catch {}
   }, [slug, deviceId, hotel]);
+
+  // Log a search as soon as the client reaches the date/time step with a chosen
+  // destination + computed prices — i.e. the moment the 3 vehicle prices are shown.
+  // This captures ALL searches, including those abandoned WITHOUT pressing any
+  // vehicle category. Deduped per destination so going back/forward won't re-log.
+  useEffect(() => {
+    if (step === 1 && selectedDest) {
+      const sig = `${selectedDest.name}|${selectedDest.address}|${selectedDest.lat},${selectedDest.lng}`;
+      if (lastLoggedSearchRef.current !== sig) {
+        lastLoggedSearchRef.current = sig;
+        logSearch(selectedDest);
+      }
+    }
+  }, [step, selectedDest, logSearch]);
 
   // Borne heartbeat: report this device is online (last connection) every 60s
   useEffect(() => {
@@ -1179,7 +1195,7 @@ const KioskPage = () => {
                   <AlertCircle className="w-5 h-5 flex-shrink-0" /> {t.min3h}
                 </div>
               )}
-              <button onClick={() => { if (dateTimeValid) { logSearch(selectedDest); setStep(2); } }} disabled={!dateTimeValid} className="w-full bg-[#2ecc71] text-white py-5 rounded-2xl font-bold text-xl hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-3 mt-4" data-testid="kiosk-next">
+              <button onClick={() => { if (dateTimeValid) { setStep(2); } }} disabled={!dateTimeValid} className="w-full bg-[#2ecc71] text-white py-5 rounded-2xl font-bold text-xl hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-3 mt-4" data-testid="kiosk-next">
                 {t.continue} <ArrowRight className="w-6 h-6" />
               </button>
             </div>

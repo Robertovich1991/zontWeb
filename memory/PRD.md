@@ -17,6 +17,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Search History: tracer les recherches sans clic véhicule (P1)
+- **Problème**: la recherche n'était loggée qu'au clic « Continuer » (étape date/heure → véhicules). Les recherches abandonnées AVANT (sur l'écran date/heure) n'apparaissaient jamais. L'utilisateur veut voir TOUTES les recherches, même sans appui sur une catégorie de voiture.
+- **Fix (KioskPage.js)**: `logSearch` déclenché désormais via un `useEffect` **dès l'entrée sur l'étape 1** (date/heure) quand une destination + prix sont connus (menu, aéroport, gare, Disney, adresse tapée). Dédupliqué par signature destination (`lastLoggedSearchRef`) → pas de doublon au retour/avance. Réinitialisé dans `resetKiosk` (nouvelle session = nouveau log). Retiré l'appel du bouton « Continuer ».
+- Résultat: chaque recherche (y compris adresse libre) est enregistrée avec son prix (`minPrice` des véhicules), statut `not_booked` par défaut, puis passe `booked` uniquement au paiement. Les recherches abandonnées sans véhicule sélectionné apparaissent dans « Non réservées ».
+- **Vérifié preview**: sélection Orly → arrivée écran date/heure sans toucher un véhicule → 1 `kiosk_searches` créé (Orly, 105€, not_booked).
+
+
 ### Session Jun 2026 — Borne: sélecteur d'heure tactile + délai minimum 3h (P1)
 - **Problème**: sur la tablette (APK), l'écran « Quand partez-vous ? » ouvrait la roue horaire native d'Android dont le bouton de validation était coupé/invisible à droite. + besoin métier: n'accepter les réservations borne qu'au moins 3h à l'avance.
 - **Fix (KioskPage.js step 1)**: remplacement de `<input type="time">` par un sélecteur **intégré à la page** (data-testid `kiosk-time-picker`) — 2 grandes colonnes HEURES/MINUTES avec gros chevrons +/− (`kiosk-hour-up/down`, `kiosk-minute-up/down`), pas de 15 min, grand affichage. Rien ne peut être coupé (rendu web contrôlé).
