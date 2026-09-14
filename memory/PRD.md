@@ -17,6 +17,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Borne: sélecteur d'heure tactile + délai minimum 3h (P1)
+- **Problème**: sur la tablette (APK), l'écran « Quand partez-vous ? » ouvrait la roue horaire native d'Android dont le bouton de validation était coupé/invisible à droite. + besoin métier: n'accepter les réservations borne qu'au moins 3h à l'avance.
+- **Fix (KioskPage.js step 1)**: remplacement de `<input type="time">` par un sélecteur **intégré à la page** (data-testid `kiosk-time-picker`) — 2 grandes colonnes HEURES/MINUTES avec gros chevrons +/− (`kiosk-hour-up/down`, `kiosk-minute-up/down`), pas de 15 min, grand affichage. Rien ne peut être coupé (rendu web contrôlé).
+- **Règle 3h**: défaut = maintenant +3h (arrondi au quart d'heure sup.). `dateTimeValid` bloque le bouton « Continuer » si l'heure choisie < maintenant+3h, avec message amber `kiosk-min3h-warning` (« Réservation possible au minimum 3 h à l'avance »). FR/EN/RU. Frontend uniquement (site web inchangé).
+- **Vérifié preview**: picker s'affiche grand et complet; baisser l'heure sous le seuil → warning + bouton grisé; pas d'overflow.
+
+
 ### Session Jun 2026 — Commission TPE terminal manquante (Novotel Évry) — P0 fix
 - **Bug**: réservation 40€ payée par TERMINAL PHYSIQUE (TPE) n'apparaissait pas en commission ni en "Réservé". Cause racine: le flux terminal (`stripe_terminal.py::get_payment_status`) avait un bloc dupliqué qui marquait payé + dispatch C# mais **n'appelait jamais** `_record_paid_side_effects` (contrairement au flux QR/webhook corrigé auparavant). Aucun `hotel_bookings` créé → 0 commission.
 - **Fix (a)** `stripe_terminal.py`: le flux terminal appelle désormais `_claim_and_dispatch(ref)` de `kiosk.py` (claim atomique + commission + "booked" + dispatch, idempotent).

@@ -7,7 +7,7 @@ import {
   Plane, TrainFront, Castle, MapPin, Clock, Users, Briefcase,
   ChevronRight, ChevronLeft, CheckCircle, Phone, User, Loader2,
   Calendar, ArrowRight, RotateCcw, Car, Search, Euro, Zap, ShieldCheck, Sparkles,
-  CreditCard, Check, X
+  CreditCard, Check, X, ChevronUp, ChevronDown, AlertCircle
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -35,6 +35,7 @@ const LANGS = {
     paymentAccepted: 'Paiement accepté !', confirmationSoon: 'Vous allez recevoir une confirmation par email ou SMS.',
     searchOther: 'Rechercher une autre destination...', calcPrice: 'Calcul du prix en cours...',
     booking: 'Reservation en cours...', date: 'Date', time: 'Heure',
+    hours: 'Heures', minutes: 'Minutes', min3h: 'Reservation possible au minimum 3 h a l\'avance',
     stillHereTitle: 'Etes-vous toujours la ?',
     stillHereSub: 'Sans reponse de votre part, votre reservation sera effacee dans',
     stillHereSeconds: 'secondes',
@@ -85,6 +86,7 @@ const LANGS = {
     paymentAccepted: 'Payment accepted!', confirmationSoon: 'You will receive a confirmation by email or SMS shortly.',
     searchOther: 'Search another destination...', calcPrice: 'Calculating price...',
     booking: 'Booking in progress...', date: 'Date', time: 'Time',
+    hours: 'Hours', minutes: 'Minutes', min3h: 'Booking available at least 3 hours in advance',
     stillHereTitle: 'Are you still there?',
     stillHereSub: 'Without a response your booking will be cleared in',
     stillHereSeconds: 'seconds',
@@ -135,6 +137,7 @@ const LANGS = {
     paymentAccepted: 'Оплата принята!', confirmationSoon: 'Вы скоро получите подтверждение по email или SMS.',
     searchOther: 'Поиск другого направления...', calcPrice: 'Расчёт цены...',
     booking: 'Бронирование...', date: 'Дата', time: 'Время',
+    hours: 'Часы', minutes: 'Минуты', min3h: 'Бронирование минимум за 3 часа',
     stillHereTitle: 'Вы ещё здесь?',
     stillHereSub: 'Без ответа ваше бронирование будет удалено через',
     stillHereSeconds: 'секунд',
@@ -334,10 +337,32 @@ const KioskPage = () => {
   }, [resetIdleTimer]);
 
   useEffect(() => {
-    const now = new Date(); now.setHours(now.getHours() + 2);
+    const now = new Date(); now.setHours(now.getHours() + 3);
+    now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15, 0, 0);
     setDate(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`);
-    setTime(`${String(now.getHours()).padStart(2,'0')}:00`);
+    setTime(`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`);
   }, [step]);
+
+  const stepTime = (field, dir) => {
+    let [h, m] = (time || '00:00').split(':').map(Number);
+    if (isNaN(h)) h = 0; if (isNaN(m)) m = 0;
+    if (field === 'h') {
+      h = (h + dir + 24) % 24;
+    } else {
+      m += dir * 15;
+      if (m >= 60) { m -= 60; h = (h + 1) % 24; }
+      if (m < 0) { m += 60; h = (h - 1 + 24) % 24; }
+    }
+    setTime(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+  };
+
+  // Kiosk rule: bookings must be at least 3 hours ahead of the departure time.
+  const dateTimeValid = (() => {
+    if (!date || !time) return false;
+    const sel = new Date(`${date}T${time}`).getTime();
+    if (isNaN(sel)) return false;
+    return sel >= Date.now() + 3 * 60 * 60 * 1000 - 60 * 1000; // 1-min tolerance
+  })();
 
   useEffect(() => {
     // Auto-reset the payment screen after 90s of inactivity (e.g. customer walked away)
@@ -1129,9 +1154,30 @@ const KioskPage = () => {
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-2 uppercase tracking-wide font-semibold">{t.time}</label>
-                <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full px-6 py-5 bg-[#111827] border-2 border-white/10 rounded-2xl text-white text-2xl focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-time" />
+                <div className="flex items-stretch justify-center gap-3 sm:gap-4" data-testid="kiosk-time-picker">
+                  {[['h', t.hours, (time || '00:00').split(':')[0]], ['m', t.minutes, (time || '00:00').split(':')[1]]].map(([field, label, val], idx) => (
+                    <React.Fragment key={field}>
+                      {idx === 1 && <div className="flex items-center text-5xl sm:text-6xl font-bold text-gray-600 pt-6">:</div>}
+                      <div className="flex-1 max-w-[200px] bg-[#111827] border-2 border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col items-center">
+                        <span className="text-xs sm:text-sm text-gray-400 uppercase tracking-wide font-semibold mb-2">{label}</span>
+                        <button onClick={() => stepTime(field, 1)} className="w-full py-3 sm:py-4 rounded-xl bg-white/5 hover:bg-[#2ecc71]/20 active:bg-[#2ecc71]/40 transition-colors flex items-center justify-center" data-testid={`kiosk-${field === 'h' ? 'hour' : 'minute'}-up`}>
+                          <ChevronUp className="w-9 h-9 sm:w-10 sm:h-10 text-[#2ecc71]" />
+                        </button>
+                        <span className="text-5xl sm:text-6xl font-bold my-2 sm:my-3 tabular-nums select-none" data-testid={`kiosk-${field === 'h' ? 'hour' : 'minute'}-value`}>{val}</span>
+                        <button onClick={() => stepTime(field, -1)} className="w-full py-3 sm:py-4 rounded-xl bg-white/5 hover:bg-[#2ecc71]/20 active:bg-[#2ecc71]/40 transition-colors flex items-center justify-center" data-testid={`kiosk-${field === 'h' ? 'hour' : 'minute'}-down`}>
+                          <ChevronDown className="w-9 h-9 sm:w-10 sm:h-10 text-[#2ecc71]" />
+                        </button>
+                      </div>
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
-              <button onClick={() => { if (date && time) { logSearch(selectedDest); setStep(2); } }} disabled={!date || !time} className="w-full bg-[#2ecc71] text-white py-5 rounded-2xl font-bold text-xl hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-3 mt-4" data-testid="kiosk-next">
+              {!dateTimeValid && (
+                <div className="flex items-center justify-center gap-2 text-amber-400 text-base sm:text-lg font-medium" data-testid="kiosk-min3h-warning">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" /> {t.min3h}
+                </div>
+              )}
+              <button onClick={() => { if (dateTimeValid) { logSearch(selectedDest); setStep(2); } }} disabled={!dateTimeValid} className="w-full bg-[#2ecc71] text-white py-5 rounded-2xl font-bold text-xl hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-3 mt-4" data-testid="kiosk-next">
                 {t.continue} <ArrowRight className="w-6 h-6" />
               </button>
             </div>
