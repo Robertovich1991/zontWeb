@@ -339,11 +339,15 @@ const KioskPage = () => {
   }, [resetIdleTimer]);
 
   useEffect(() => {
+    if (step !== 1) return;
+    // Only seed the default once — never overwrite a time the client has already chosen.
+    // resetKiosk() clears date/time between sessions, so a fresh booking recomputes it.
+    if (date && time) return;
     const now = new Date(); now.setHours(now.getHours() + 3);
     now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15, 0, 0);
     setDate(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`);
     setTime(`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`);
-  }, [step]);
+  }, [step, date, time]);
 
   const stepTime = (field, dir) => {
     let [h, m] = (time || '00:00').split(':').map(Number);

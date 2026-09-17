@@ -17,6 +17,12 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Borne: l'heure choisie était réinitialisée à la valeur par défaut (bug)
+- **Bug**: l'effet de pré-remplissage date/heure avait `[step]` en dépendances → il se relançait à CHAQUE changement d'étape et écrasait l'heure choisie par le client (revenait au défaut ≈ maintenant+3h, ex. 15:00) dès qu'on revenait sur l'écran de l'heure.
+- **Fix (KioskPage.js)**: l'effet ne pose le défaut que si `step===1` ET `!date && !time` (jamais par-dessus un choix existant). `resetKiosk` vide déjà date/time → nouvelle réservation = nouveau défaut correct. Deps `[step, date, time]`.
+- **Vérifié preview**: 13:00 choisi → étape suivante → retour → 13:00 conservé (PRESERVED: True).
+
+
 ### Session Jun 2026 — Intégration Pixel publicitaire OpenAI (OAIQ) (P1)
 - **Pixel de base** ajouté dans `frontend/public/index.html`, dans le bloc tracking **production-only** (host `zont.cab`), après consentement CookieYes + différé (requestIdleCallback), à côté de Meta/GA4/Google Ads. `pixelId: PkzxozCo2onLD7RvtNz8zQ`, `debug:false`. Sur preview `window.oaiq` reste undefined (pas de pollution).
 - **Attribution oppref**: capturée **synchronement** au landing (dans le bloc prod, avant le différé) → `localStorage.zont_oppref`, pour survivre à la navigation SPA. Le SDK OAIQ la lit à l'init.
