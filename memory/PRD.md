@@ -17,6 +17,15 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Dispatch C# addPrepaid (terminal/webhook) + email obligatoire
+- **kiosk.py `dispatch_to_csharp`**: login company en **Pascal-case** `{"Username","Password"}` (C# renvoie 400 sinon). Payload aligné sur la spec: `endPointLatitude/Longitude` ajoutés, `utcOffset:0`, `destination:"lat,lng" ou null` (plus de fallback adresse), `additionalComments:"Kiosk booking Ref: ZK-..."`, `externalPaymentRef` = PaymentIntent id (`pi_...`), `startDate` `dd/MM/yyyy HH:mm:ss`. Endpoint = `POST /api/Auction/addPrepaid` (déjà en place). Bearer token depuis `accessToken`.
+- **kiosk.py `/webhook/stripe`**: ajout du handler `payment_intent.succeeded` quand `metadata.channel=="kiosk_terminal"` → charge la réservation par `kiosk_reference`, stocke le PI id, puis `_claim_and_dispatch` (idempotent).
+- **`_claim_and_dispatch`** (inchangé): claim atomique via `csharpDispatch` → dispatch une seule fois; si `done` → rien; retry si `failed`/`paid`. Le flux terminal poll (`stripe_terminal.py get_payment_status`) délègue déjà à `_claim_and_dispatch`.
+- **stripe_terminal.py create-payment**: `client_email` ajouté dans les métadonnées du PaymentIntent.
+- **Email OBLIGATOIRE sur la borne** (demande explicite, override du "optional" de la spec): step 3 label `Email *`, validation regex, bouton « Confirmer » désactivé tant que l'email n'est pas valide, message d'erreur `invalidEmail` (FR/EN/RU). Le backend reste tolérant à un email null pour les anciennes réservations/retries.
+- **Vérifié preview**: payload dispatch conforme (test HTTP intercepté); webhook terminal → status `dispatched` une seule fois; email obligatoire testé (vide/invalide/valide).
+
+
 ### Session Jun 2026 — Borne: l'heure choisie était réinitialisée à la valeur par défaut (bug)
 - **Bug**: l'effet de pré-remplissage date/heure avait `[step]` en dépendances → il se relançait à CHAQUE changement d'étape et écrasait l'heure choisie par le client (revenait au défaut ≈ maintenant+3h, ex. 15:00) dès qu'on revenait sur l'écran de l'heure.
 - **Fix (KioskPage.js)**: l'effet ne pose le défaut que si `step===1` ET `!date && !time` (jamais par-dessus un choix existant). `resetKiosk` vide déjà date/time → nouvelle réservation = nouveau défaut correct. Deps `[step, date, time]`.

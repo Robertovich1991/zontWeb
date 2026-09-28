@@ -219,6 +219,7 @@ async def create_terminal_payment(req: CreateTerminalPaymentRequest):
                 "hotel_slug": booking["hotelSlug"],
                 "client_name": booking.get("clientName", ""),
                 "client_phone": booking.get("clientPhone", ""),
+                "client_email": booking.get("clientEmail", "") or "",
                 "channel": "kiosk_terminal",
             },
         )

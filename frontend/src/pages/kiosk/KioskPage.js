@@ -36,6 +36,7 @@ const LANGS = {
     searchOther: 'Rechercher une autre destination...', calcPrice: 'Calcul du prix en cours...',
     booking: 'Reservation en cours...', date: 'Date', time: 'Heure',
     hours: 'Heures', minutes: 'Minutes', min3h: 'Reservation possible au minimum 3 h a l\'avance',
+    invalidEmail: 'Veuillez saisir un email valide',
     stillHereTitle: 'Etes-vous toujours la ?',
     stillHereSub: 'Sans reponse de votre part, votre reservation sera effacee dans',
     stillHereSeconds: 'secondes',
@@ -87,6 +88,7 @@ const LANGS = {
     searchOther: 'Search another destination...', calcPrice: 'Calculating price...',
     booking: 'Booking in progress...', date: 'Date', time: 'Time',
     hours: 'Hours', minutes: 'Minutes', min3h: 'Booking available at least 3 hours in advance',
+    invalidEmail: 'Please enter a valid email',
     stillHereTitle: 'Are you still there?',
     stillHereSub: 'Without a response your booking will be cleared in',
     stillHereSeconds: 'seconds',
@@ -138,6 +140,7 @@ const LANGS = {
     searchOther: 'Поиск другого направления...', calcPrice: 'Расчёт цены...',
     booking: 'Бронирование...', date: 'Дата', time: 'Время',
     hours: 'Часы', minutes: 'Минуты', min3h: 'Бронирование минимум за 3 часа',
+    invalidEmail: 'Введите действительный email',
     stillHereTitle: 'Вы ещё здесь?',
     stillHereSub: 'Без ответа ваше бронирование будет удалено через',
     stillHereSeconds: 'секунд',
@@ -533,7 +536,8 @@ const KioskPage = () => {
   };
 
   const handleSubmitBooking = async () => {
-    if (!clientName.trim() || !clientPhone.trim()) return;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail.trim());
+    if (!clientName.trim() || !clientPhone.trim() || !emailOk) return;
     setSubmitting(true);
     // Combine country code + local number, stripping any leading 0 / + characters from the local part
     const localNumber = clientPhone.trim().replace(/[^\d]/g, '').replace(/^0+/, '');
@@ -1271,10 +1275,13 @@ const KioskPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">Email <span className="text-gray-600 normal-case">({t.optional || 'optionnel'})</span></label>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">Email *</label>
                 <input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} placeholder="email@exemple.com" className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]" data-testid="kiosk-email" />
+                {clientEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail.trim()) && (
+                  <p className="text-amber-400 text-sm mt-1.5" data-testid="kiosk-email-error">{t.invalidEmail}</p>
+                )}
               </div>
-              <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim()} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
+              <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail.trim())} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
                 {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />{t.booking}</> : <><CheckCircle className="w-5 h-5" />{t.confirm}</>}
               </button>
             </div>

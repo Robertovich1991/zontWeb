@@ -535,6 +535,18 @@ async def kiosk_stripe_webhook(request: Request):
             logger.info(f"Kiosk webhook: session paid for {ref}. Claiming + dispatching...")
             await _claim_and_dispatch(ref)
 
+    elif event.type == "payment_intent.succeeded":
+        pi = event.data.object
+        meta = (pi.get("metadata", {}) if isinstance(pi, dict) else getattr(pi, "metadata", {})) or {}
+        if meta.get("channel") == "kiosk_terminal":
+            ref = meta.get("kiosk_reference")
+            pi_id = pi.get("id") if isinstance(pi, dict) else getattr(pi, "id", None)
+            if ref and db is not None:
+                if pi_id:
+                    await db.kiosk_bookings.update_one({"reference": ref}, {"$set": {"stripe_payment_intent_id": pi_id}})
+                logger.info(f"Kiosk webhook: terminal PI succeeded for {ref}. Claiming + dispatching...")
+                await _claim_and_dispatch(ref)
+
     return {"received": True}
 
 
@@ -694,7 +706,7 @@ async def dispatch_to_csharp(booking):
         # 1. Company token (same account used across the kiosk backend)
         login_resp = await client.post(
             f"{CSHARP_API}/api/Login/company",
-            json={"username": company_user, "password": company_pwd},
+            json={"Username": company_user, "Password": company_pwd},  # C# requires Pascal-case or 400
             headers=CSHARP_HEADERS,
         )
         if login_resp.status_code != 200:
@@ -725,7 +737,7 @@ async def dispatch_to_csharp(booking):
         if dest_lat is not None and dest_lng is not None:
             destination = f"{dest_lat},{dest_lng}"
         else:
-            destination = booking.get("destinationAddress") or booking.get("destination", "")
+            destination = None
 
         price = booking.get("price", 0)
         email = (booking.get("clientEmail") or "").strip() or None
@@ -736,8 +748,10 @@ async def dispatch_to_csharp(booking):
             "startAddress": booking.get("pickup", ""),
             "endAddress": booking.get("destinationAddress") or booking.get("destination", ""),
             "destination": destination,
+            "endPointLatitude": dest_lat,
+            "endPointLongitude": dest_lng,
             "startDate": cs_date,
-            "utcOffset": booking.get("utcOffset") if booking.get("utcOffset") is not None else 120,
+            "utcOffset": 0,
             "clientPrice": price,
             "paidAmount": price,
             "carType": booking.get("vehicleType", ""),
@@ -750,6 +764,7 @@ async def dispatch_to_csharp(booking):
             "externalPaymentRef": booking.get("stripe_payment_intent_id", ""),
             "currency": "eur",
             "source": "kiosk",
+            "additionalComments": f"Kiosk booking Ref: {ref}",
         }
 
         # 4. Create the prepaid auction (no card charge).
