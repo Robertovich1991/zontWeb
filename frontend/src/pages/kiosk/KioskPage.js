@@ -382,6 +382,13 @@ const KioskPage = () => {
     }
   }, [step, booking, terminalStatus, resetKiosk]);
 
+  // After a successful payment: show the confirmation for 5s, then return to the main screen.
+  useEffect(() => {
+    if (terminalStatus !== 'paid') return;
+    const t = setTimeout(() => { resetKiosk(); setShowAttract(true); }, 5000);
+    return () => clearTimeout(t);
+  }, [terminalStatus, resetKiosk]);
+
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
