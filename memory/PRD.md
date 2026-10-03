@@ -17,6 +17,12 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Borne: écran d'accueil animé (diaporama photos blog)
+- **KioskPage.js `AttractScreen`**: remplace l'image statique unique par un **diaporama animé** des hero images du blog (`GET /api/blog-articles?language=fr&limit=50` → `hero_image_url`). Fondu enchaîné (opacity 1.5s) toutes les 6s + zoom Ken Burns 7s, overlay dégradé + branding ZONT + CTA « Touchez l'écran pour commencer ». Images préchargées. **Repli** sur `/images/kiosk-idle-screen.webp` si aucune image blog (ex. preview = 0 article; prod = 17).
+- **Vérifié**: slideshow rendu (mock API, 3 couches image + overlay + CTA); repli statique OK sur preview sans erreur de code.
+- **APK**: pas de nouvel APK nécessaire — l'APK `cab.zont.kiosk` est un web-wrapper Capacitor pointant vers `https://www.zont.cab/kiosk` (générique, pas par hôtel). Après Deploy, l'animation apparaît sur toutes les tablettes. APK signé déjà publié à `/downloads/zont-kiosk.apk`; rebuild via GitHub Action "Build Kiosk APK".
+
+
 ### Session Jun 2026 — Dispatch C# addPrepaid (terminal/webhook) + email obligatoire
 - **kiosk.py `dispatch_to_csharp`**: login company en **Pascal-case** `{"Username","Password"}` (C# renvoie 400 sinon). Payload aligné sur la spec: `endPointLatitude/Longitude` ajoutés, `utcOffset:0`, `destination:"lat,lng" ou null` (plus de fallback adresse), `additionalComments:"Kiosk booking Ref: ZK-..."`, `externalPaymentRef` = PaymentIntent id (`pi_...`), `startDate` `dd/MM/yyyy HH:mm:ss`. Endpoint = `POST /api/Auction/addPrepaid` (déjà en place). Bearer token depuis `accessToken`.
 - **kiosk.py `/webhook/stripe`**: ajout du handler `payment_intent.succeeded` quand `metadata.channel=="kiosk_terminal"` → charge la réservation par `kiosk_reference`, stocke le PI id, puis `_claim_and_dispatch` (idempotent).

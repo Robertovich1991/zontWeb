@@ -172,45 +172,114 @@ const LANGS = {
 };
 
 /* ──── ATTRACT SCREEN — Premium Image Idle ──── */
+const KIOSK_FALLBACK_IMG = '/images/kiosk-idle-screen.webp';
+
 const AttractScreen = ({ hotelName, onTap }) => {
   const [tapping, setTapping] = useState(false);
+  const [images, setImages] = useState([]);
+  const [idx, setIdx] = useState(0);
+
+  // Load blog hero images for the animated idle slideshow (falls back to the static visual
+  // when the blog has no images — e.g. on preview).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch(`${API}/api/blog-articles?language=fr&limit=50`);
+        const d = await r.json();
+        const arr = Array.isArray(d) ? d : (d.articles || []);
+        const urls = [...new Set(arr.map(a => a.hero_image_url).filter(Boolean))];
+        if (!cancelled && urls.length) {
+          urls.forEach(u => { const im = new Image(); im.src = u; }); // preload for smooth fades
+          setImages(urls);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Advance the slideshow every 6s
+  useEffect(() => {
+    if (images.length < 2) return;
+    const iv = setInterval(() => setIdx(i => (i + 1) % images.length), 6000);
+    return () => clearInterval(iv);
+  }, [images]);
+
   const handleTap = (e) => {
     if (tapping) return;
     setTapping(true);
-    // Brief flash, then forward to kiosk flow (language step already exists there)
     setTimeout(() => onTap(e), 350);
   };
 
+  const hasSlides = images.length > 0;
+
   return (
     <div
-      className="fixed inset-0 z-50 bg-black select-none overflow-hidden cursor-pointer flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-black select-none overflow-hidden cursor-pointer"
       onClick={handleTap}
       onTouchStart={handleTap}
       data-testid="kiosk-attract-screen"
     >
-      {/* Background image — premium chauffeur idle visual (entire image visible, letterboxed if needed) */}
-      <img
-        src="/images/kiosk-idle-screen.webp"
-        alt="ZONT — Your private driver is ready"
-        className="max-w-full max-h-full w-auto h-auto object-contain"
-        draggable={false}
-      />
+      {hasSlides ? (
+        <>
+          {images.map((src, i) => (
+            <div
+              key={src}
+              className="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out"
+              style={{ opacity: i === idx ? 1 : 0 }}
+            >
+              <img
+                src={src}
+                alt=""
+                className="w-full h-full object-cover"
+                style={{ animation: i === idx ? 'kenburns 7s ease-out forwards' : 'none' }}
+                draggable={false}
+              />
+            </div>
+          ))}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/55 pointer-events-none" />
+        </>
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <img
+            src={KIOSK_FALLBACK_IMG}
+            alt="ZONT — Your private driver is ready"
+            className="max-w-full max-h-full w-auto h-auto object-contain"
+            draggable={false}
+          />
+        </div>
+      )}
+
+      {/* Branding + CTA overlay (shown over the slideshow for readability) */}
+      {hasSlides && (
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-20 pointer-events-none z-10 text-center px-8" data-testid="kiosk-attract-overlay">
+          <div className="w-16 h-16 bg-[#2ecc71]/15 rounded-2xl flex items-center justify-center border border-[#2ecc71]/30 mb-5 backdrop-blur-sm">
+            <span className="text-[#2ecc71] font-black text-3xl">Z</span>
+          </div>
+          <h1 className="text-white font-black text-4xl lg:text-5xl mb-2 drop-shadow-lg">ZONT Transfer</h1>
+          <p className="text-white/80 text-lg lg:text-xl mb-8 drop-shadow">Votre chauffeur privé · Prix fixes · 24h/24</p>
+          <div className="inline-flex items-center gap-3 bg-[#2ecc71] text-white px-10 py-4 rounded-full font-bold text-xl shadow-2xl" style={{ animation: 'pulseTap 2s ease-in-out infinite' }}>
+            Touchez l'écran pour commencer
+          </div>
+        </div>
+      )}
 
       {/* Tap flash overlay */}
       <div
-        className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${tapping ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 pointer-events-none transition-opacity duration-300 z-20 ${tapping ? 'opacity-100' : 'opacity-0'}`}
         style={{ background: 'radial-gradient(circle at 50% 50%, rgba(46,204,113,0.45) 0%, transparent 50%)' }}
       />
 
-      {/* Hotel-specific label (small, top-left corner) */}
       {hotelName && (
-        <p className="absolute top-4 left-6 text-xs text-[#2ecc71]/70 font-medium uppercase tracking-widest z-10">
+        <p className="absolute top-4 left-6 text-xs text-[#2ecc71]/80 font-medium uppercase tracking-widest z-20 drop-shadow">
           {hotelName}
         </p>
       )}
 
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes kenburns { from{transform:scale(1)} to{transform:scale(1.12)} }
+        @keyframes pulseTap { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.05);opacity:0.88} }
       `}</style>
     </div>
   );
