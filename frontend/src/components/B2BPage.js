@@ -10,7 +10,7 @@ import { trackLead } from '@/utils/fbPixel';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) => {
+const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt, videoUrl, videoPoster }) => {
   const { language: ctxLanguage, changeLanguage } = useLanguage();
   const location = useLocation();
 
@@ -27,6 +27,14 @@ const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) =>
   }, [urlMatch?.language, ctxLanguage, changeLanguage]);
 
   const c = content[language] || content.en;
+  const videoLabels = {
+    fr: { title: 'Découvrez la borne ZONT en action', sub: "Une démonstration de l'expérience client, de la recherche à la réservation." },
+    en: { title: 'See the ZONT kiosk in action', sub: 'A walkthrough of the guest experience, from search to booking.' },
+    ru: { title: 'Терминал ZONT в действии', sub: 'Демонстрация пути гостя — от поиска до бронирования.' },
+    hy: { title: 'ZONT կրպակը գործողության մեջ', sub: 'Հյուրի փորձառության ցուցադրում՝ որոնումից մինչև ամրագրում:' },
+    es: { title: 'Descubre el terminal ZONT en acción', sub: 'Una demostración de la experiencia del huésped, de la búsqueda a la reserva.' },
+  };
+  const vl = videoLabels[language] || videoLabels.en;
   const contactRef = useRef(null);
   const [formState, setFormState] = useState({ name: '', company: '', email: '', phone: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -145,6 +153,30 @@ const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) =>
           </div>
         </div>
       </section>
+
+      {/* Video Demo Section */}
+      {videoUrl && (
+        <section className="py-14 bg-[#0c1220]" data-testid="b2b-video-section">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-3">{vl.title}</h2>
+            <p className="text-gray-400 text-center mb-8 max-w-2xl mx-auto">{vl.sub}</p>
+            <div className="relative rounded-2xl overflow-hidden border border-gray-700/40 shadow-2xl shadow-black/40 bg-black">
+              <video
+                src={videoUrl}
+                poster={videoPoster || heroImage}
+                controls
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                className="w-full h-auto"
+                data-testid="b2b-video"
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Benefits Section */}
       <section className="py-16 bg-[#111b2e]">

@@ -328,6 +328,7 @@ const Hotels = () => (
     relatedPages={relatedPages}
     heroImage="/images/borne-reservation-vtc-taxi-hotel-paris.webp"
     heroImageAlt="Borne de réservation ZONT — VTC, Taxi, Chauffeur privé installée à la réception d'un hôtel à Paris"
+    videoUrl="/videos/b2b.mp4"
   />
 );
 

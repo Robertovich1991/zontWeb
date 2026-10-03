@@ -17,6 +17,13 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Page B2B hôtel: ajout vidéo démo
+- Vidéo `b2b.mp4` (uploadée) téléchargée dans `frontend/public/videos/b2b.mp4` (H.264 Baseline + AAC, yuv420p, faststart moov avant mdat → démarrage instantané; servie en 206 range OK).
+- `components/B2BPage.js`: nouvelle prop optionnelle `videoUrl` (+`videoPoster`) → section vidéo sous le hero (titre/sous-titre traduits FR/EN/RU/HY/ES, `autoPlay muted loop playsInline controls`, poster = heroImage). Rendue seulement si `videoUrl` fourni.
+- `pages/b2b/Hotels.js`: passe `videoUrl="/videos/b2b.mp4"` → vidéo visible uniquement sur `/borne-reservation-hotel` (+ variantes langue `/hotel-booking-kiosk`, `/terminal-bronirovaniya-otel`, etc.). Les autres pages B2B ne l'affichent pas.
+- Note: l'erreur codec vue au test = navigateur Playwright sans codecs propriétaires (pas un vrai problème).
+
+
 ### Session Jun 2026 — Borne: écran d'accueil animé (diaporama photos blog)
 - **KioskPage.js `AttractScreen`**: remplace l'image statique unique par un **diaporama animé** des hero images du blog (`GET /api/blog-articles?language=fr&limit=50` → `hero_image_url`). Fondu enchaîné (opacity 1.5s) toutes les 6s + zoom Ken Burns 7s, overlay dégradé + branding ZONT + CTA « Touchez l'écran pour commencer ». Images préchargées. **Repli** sur `/images/kiosk-idle-screen.webp` si aucune image blog (ex. preview = 0 article; prod = 17).
 - **Vérifié**: slideshow rendu (mock API, 3 couches image + overlay + CTA); repli statique OK sur preview sans erreur de code.
