@@ -987,6 +987,7 @@ const Home = () => {
                               name="date"
                               value={date}
                               onChange={(e) => setDate(e.target.value)}
+                              onClick={(e) => { try { e.currentTarget.showPicker(); } catch (_) {} }}
                               required
                               className={`w-full px-3 py-3 bg-gray-50 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm ${date ? 'text-gray-900' : 'text-transparent'} caret-gray-900 date-native`}
                               data-testid="home-date-input"
@@ -1007,6 +1008,7 @@ const Home = () => {
                               name="time"
                               value={time}
                               onChange={(e) => setTime(e.target.value)}
+                              onClick={(e) => { try { e.currentTarget.showPicker(); } catch (_) {} }}
                               required
                               className={`w-full px-3 py-3 bg-gray-50 rounded-lg border border-gray-200 focus:border-[#2ecc71] focus:ring-1 focus:ring-[#2ecc71] text-sm ${time ? 'text-gray-900' : 'text-transparent'} caret-gray-900 date-native`}
                               data-testid="home-time-input"
