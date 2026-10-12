@@ -468,12 +468,7 @@ const KioskPage = () => {
         // Borne default language (client can still switch manually via the FR/EN/RU toggle)
         const dl = data.hotel?.default_language;
         if (dl && LANGS[dl] && !langTouchedRef.current) setLang(dl);
-        // Kiosk only: hide the "Standard Car" category (keep the other 3). Does not affect the website or mobile app.
-        const filtered = (data.destinations || []).map(dest => ({
-          ...dest,
-          vehicles: (dest.vehicles || []).filter(v => (v.tripType || '').trim().toLowerCase() !== 'standard car'),
-        }));
-        setDestinations(filtered);
+        setDestinations(data.destinations || []);
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
@@ -1291,7 +1286,7 @@ const KioskPage = () => {
           <div style={{ animation: 'fadeUp 0.3s ease-out' }}>
             <h2 className="text-3xl lg:text-4xl font-bold text-center mb-8">{t.chooseVehicle}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-[1600px] mx-auto">
-              {[...(selectedDest?.vehicles || [])].filter(v => (v.tripType || '').trim().toLowerCase() !== 'standard car').sort((a, b) => (a.maxAmount || 0) - (b.maxAmount || 0)).map((v, i) => {
+              {[...(selectedDest?.vehicles || [])].sort((a, b) => (a.maxAmount || 0) - (b.maxAmount || 0)).map((v, i) => {
                 const imgUrl = transferService.getVehicleImageUrl(v.imagePath);
                 return (
                   <button
