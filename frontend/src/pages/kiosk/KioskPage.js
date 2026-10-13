@@ -500,7 +500,7 @@ const KioskPage = () => {
   const logSearch = useCallback(async (dest) => {
     if (!dest) return;
     try {
-      const prices = (dest.vehicles || []).map(v => v.maxAmount).filter(n => typeof n === 'number');
+      const prices = (dest.vehicles || []).map(v => v.maxAmount).filter(n => typeof n === 'number' && n > 0);
       const minPrice = prices.length ? Math.min(...prices) : (dest.maxAmount ?? null);
       const r = await fetch(`${API}/api/kiosk/search-log`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1286,7 +1286,7 @@ const KioskPage = () => {
           <div style={{ animation: 'fadeUp 0.3s ease-out' }}>
             <h2 className="text-3xl lg:text-4xl font-bold text-center mb-8">{t.chooseVehicle}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 max-w-[1600px] mx-auto">
-              {[...(selectedDest?.vehicles || [])].sort((a, b) => (a.maxAmount || 0) - (b.maxAmount || 0)).map((v, i) => {
+              {[...(selectedDest?.vehicles || [])].filter(v => (v.maxAmount || 0) > 0).sort((a, b) => (a.maxAmount || 0) - (b.maxAmount || 0)).map((v, i) => {
                 const imgUrl = transferService.getVehicleImageUrl(v.imagePath);
                 return (
                   <button
