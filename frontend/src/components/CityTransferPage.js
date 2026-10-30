@@ -280,6 +280,14 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         jsonLd={[
           {
             "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Zont",
+            "url": "https://www.zont.cab",
+            "logo": "https://www.zont.cab/logo512.png",
+            "telephone": "+33783777027",
+          },
+          {
+            "@context": "https://schema.org",
             "@type": "LocalBusiness",
             "name": "Zont - " + c.title,
             "description": c.description,
@@ -319,6 +327,14 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             })(),
             ...(reviewSchema?.aggregateRating ? { "aggregateRating": reviewSchema.aggregateRating } : {}),
             ...(reviewSchema?.reviews?.length ? { "review": reviewSchema.reviews } : {}),
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Zont", "item": "https://www.zont.cab" },
+              { "@type": "ListItem", "position": 2, "name": (c.title || '').split(/\s[-|]\s/)[0].trim(), "item": seoUrls ? `https://www.zont.cab${seoUrls[language] || seoUrls.en}` : "https://www.zont.cab" },
+            ],
           }
         ]}
       />

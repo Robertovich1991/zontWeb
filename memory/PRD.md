@@ -444,3 +444,21 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 - Frontend: new /pages/kiosk/KioskLanding.js (login/register tabs, Google PlacesAutocomplete for address→lat/lng), route /kiosk added in App.js (before /kiosk/:slug).
 - VERIFIED on preview: register "Novotel Paris Test" → slug novotel-paris-test → login returns kiosk_slug → /api/kiosk/{slug} shows hotel+coords+6 dests. Page renders. Test data cleaned.
 - DEPLOY REQUIRED for production. NOTE: pre-existing extranet accounts created before this (e.g. admin@bristol.fr) have no kiosk_slug → /kiosk login shows "no kiosk associated"; bristol is still reachable directly at /kiosk/bristol. To make an old account redirect, set kiosk_slug on its hotel_users doc.
+
+## [2026-06] Analyse SEO/GEO + corrections (basée sur Google Search Console)
+Diagnostic GSC: pages fortes impressions / mauvaise position (page 2): /vtc-7-places (725 impr, pos 15), /paris-airport-transfer (173 impr, pos 17.7), /disneyland-paris-transfer (pos 11.8). Homepage pos 4.6.
+
+Problème majeur trouvé: AUCUN accent dans le contenu FR ("Prive","Aeroport","Reservez"...) → mauvais pour SEO FR + image premium.
+
+Appliqué et VÉRIFIÉ (preview):
+- Accents français restaurés sur VTC7Places.js (fr) et ParisAirportTransfer.js (fr) — tout le contenu visible + meta.
+- Ajout champ `h1` propre (sans "| Zont.cab") + `title` raccourci (<60c) + `metaDescription` sur ces 2 pages.
+- Schémas JSON-LD `Organization` + `BreadcrumbList` ajoutés dans composant partagé CityTransferPage.js → s'applique à TOUTES les pages services d'un coup.
+- Rendu vérifié par screenshot: H1 = "Taxi / VTC 7 Places avec Chauffeur Privé en Île-de-France", accents OK.
+
+BACKLOG SEO/GEO (non fait):
+- P1: Restaurer accents FR sur les ~22 autres pages (services/villes/blog FR).
+- P1: Enrichir contenu + FAQ sur /vtc-7-places et /paris-airport-transfer pour sortir de la page 2.
+- P2: Blocs FAQ + schéma FAQPage sur toutes les pages (SEO + GEO/ChatGPT).
+- P2: Pré-rendu (react-snap) pour indexation + lecture par IA (site actuellement 100% CSR).
+- Externe (action user): Google Maps = réactiver billing Google Cloud (REQUEST_DENIED).
