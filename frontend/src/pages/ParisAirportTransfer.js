@@ -179,7 +179,7 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 130, minibus: 190 };
+const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 120, minibus: 105 };
 
 const airportLinks = [
   {

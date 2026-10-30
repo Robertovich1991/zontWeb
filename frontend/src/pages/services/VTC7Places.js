@@ -24,11 +24,11 @@ const content = {
     step3: 'Profitez du Trajet', step3Desc: 'Installez-vous confortablement dans votre van 7 places. Detendez-vous et profitez du voyage avec votre groupe.',
     popularRoutesTitle: 'Trajets Populaires en Taxi / VTC 7 Places', fromLabel: 'A partir de',
     routes: [
-      { name: 'Aeroport CDG \u2192 Paris Centre (7 places)', price: 130 },
-      { name: 'Aeroport Orly \u2192 Paris Centre (7 places)', price: 110 },
-      { name: 'Paris \u2192 Disneyland Paris (7 places)', price: 140 },
-      { name: 'Paris \u2192 Chateau de Versailles (7 places)', price: 125 },
-      { name: 'Paris \u2192 Aeroport Beauvais (7 places)', price: 220 },
+      { name: 'Aeroport CDG \u2192 Paris Centre (7 places)', price: 105 },
+      { name: 'Aeroport Orly \u2192 Paris Centre (7 places)', price: 105 },
+      { name: 'Paris \u2192 Disneyland Paris (7 places)', price: 112 },
+      { name: 'Paris \u2192 Chateau de Versailles (7 places)', price: 103 },
+      { name: 'Paris \u2192 Aeroport Beauvais (7 places)', price: 155 },
     ],
     bookingForm: 'Reservez Votre Taxi / VTC 7 Places',
     pickupLabel: 'Adresse de depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -58,10 +58,10 @@ const content = {
     step3: 'Enjoy the Ride', step3Desc: 'Settle comfortably in your 7-seat van. Relax and enjoy the journey.',
     popularRoutesTitle: 'Popular 7-Seat Minivan Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'CDG Airport \u2192 Paris Center (7 seats)', price: 130 },
-      { name: 'Orly Airport \u2192 Paris Center (7 seats)', price: 110 },
-      { name: 'Paris \u2192 Disneyland Paris (7 seats)', price: 140 },
-      { name: 'Paris \u2192 Palace of Versailles (7 seats)', price: 125 },
+      { name: 'CDG Airport \u2192 Paris Center (7 seats)', price: 105 },
+      { name: 'Orly Airport \u2192 Paris Center (7 seats)', price: 105 },
+      { name: 'Paris \u2192 Disneyland Paris (7 seats)', price: 112 },
+      { name: 'Paris \u2192 Palace of Versailles (7 seats)', price: 103 },
     ],
     bookingForm: 'Book Your 7-Seat Minivan Transfer',
     pickupLabel: 'Pickup address', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Time',
@@ -90,8 +90,8 @@ const content = {
     step3: '\u041d\u0430\u0441\u043b\u0430\u0436\u0434\u0430\u0439\u0442\u0435\u0441\u044c \u041f\u043e\u0435\u0437\u0434\u043a\u043e\u0439', step3Desc: '\u041a\u043e\u043c\u0444\u043e\u0440\u0442\u043d\u0430\u044f \u043f\u043e\u0435\u0437\u0434\u043a\u0430 \u0434\u043b\u044f \u0432\u0441\u0435\u0439 \u0433\u0440\u0443\u043f\u043f\u044b.',
     popularRoutesTitle: '\u041f\u043e\u043f\u0443\u043b\u044f\u0440\u043d\u044b\u0435 \u041c\u0430\u0440\u0448\u0440\u0443\u0442\u044b \u0422\u0430\u043a\u0441\u0438 / VTC 7 \u043c\u0435\u0441\u0442', fromLabel: '\u041e\u0442',
     routes: [
-      { name: '\u0410\u044d\u0440\u043e\u043f\u043e\u0440\u0442 CDG \u2192 \u0426\u0435\u043d\u0442\u0440 \u041f\u0430\u0440\u0438\u0436\u0430 (7 \u043c\u0435\u0441\u0442)', price: 130 },
-      { name: '\u0410\u044d\u0440\u043e\u043f\u043e\u0440\u0442 \u041e\u0440\u043b\u0438 \u2192 \u0426\u0435\u043d\u0442\u0440 \u041f\u0430\u0440\u0438\u0436\u0430 (7 \u043c\u0435\u0441\u0442)', price: 110 },
+      { name: '\u0410\u044d\u0440\u043e\u043f\u043e\u0440\u0442 CDG \u2192 \u0426\u0435\u043d\u0442\u0440 \u041f\u0430\u0440\u0438\u0436\u0430 (7 \u043c\u0435\u0441\u0442)', price: 105 },
+      { name: '\u0410\u044d\u0440\u043e\u043f\u043e\u0440\u0442 \u041e\u0440\u043b\u0438 \u2192 \u0426\u0435\u043d\u0442\u0440 \u041f\u0430\u0440\u0438\u0436\u0430 (7 \u043c\u0435\u0441\u0442)', price: 105 },
     ],
     bookingForm: '\u0417\u0430\u0431\u0440\u043e\u043d\u0438\u0440\u0443\u0439\u0442\u0435 \u0422\u0430\u043a\u0441\u0438 / VTC 7 \u041c\u0435\u0441\u0442',
     pickupLabel: '\u041e\u0442\u043a\u0443\u0434\u0430', dropoffLabel: '\u041a\u0443\u0434\u0430', dateLabel: '\u0414\u0430\u0442\u0430', timeLabel: '\u0412\u0440\u0435\u043c\u044f',
@@ -153,11 +153,11 @@ const content = {
     step3: 'Disfruta del viaje', step3Desc: 'Instálate cómodamente en tu minivan 7 plazas. Relájate y disfruta del viaje con tu grupo.',
     popularRoutesTitle: 'Trayectos populares en minivan 7 plazas', fromLabel: 'Desde',
     routes: [
-      { name: 'Aeropuerto CDG → Centro de París (7 plazas)', price: 130 },
-      { name: 'Aeropuerto Orly → Centro de París (7 plazas)', price: 110 },
-      { name: 'París → Disneyland Paris (7 plazas)', price: 140 },
-      { name: 'París → Palacio de Versalles (7 plazas)', price: 125 },
-      { name: 'París → Aeropuerto Beauvais (7 plazas)', price: 220 },
+      { name: 'Aeropuerto CDG → Centro de París (7 plazas)', price: 105 },
+      { name: 'Aeropuerto Orly → Centro de París (7 plazas)', price: 105 },
+      { name: 'París → Disneyland Paris (7 plazas)', price: 112 },
+      { name: 'París → Palacio de Versalles (7 plazas)', price: 103 },
+      { name: 'París → Aeropuerto Beauvais (7 plazas)', price: 155 },
     ],
     bookingForm: 'Reserva tu minivan 7 plazas',
     pickupLabel: 'Dirección de recogida', dropoffLabel: 'Destino', dateLabel: 'Fecha', timeLabel: 'Hora',
@@ -167,7 +167,7 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 130, minibus: 190 };
+const vehiclesPrices = { sedan: 68, luxury: 95, minivan: 120, minibus: 105 };
 const seoUrls = { en: '/vtc-7-seats', fr: '/vtc-7-places', ru: '/vtc-7-mest', hy: '/vtc-7-tegh', es: '/es/minivan-7-plazas' };
 
 const VTC7Places = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} heroImage="/images/taxi-cab-transfer-7-places.webp" ogImage="/images/taxi-cab-transfer-7-places.webp" meetDriverImage="/images/taxi-cab-transfer-7-places.webp" />;

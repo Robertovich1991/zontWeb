@@ -17,6 +17,14 @@ Multi-portal platform (Client, Admin, Hotel, Fleet, Driver) integrating external
 
 ## Key Technical Decisions
 - DO NOT use BaseHTTPMiddleware (corrupts JSON streaming)
+### Session Jun 2026 — Prix d'exemple pages marketing: alignés sur le moteur C# réel
+- Vrais prix récupérés via `/api/proxy/preorder-distance` (C# driverTypesTwo). Types: Standard Car / Luxury Sedan / Standard Minivan 8 pers. / Luxury Van.
+- **VTC8Places.js** & **VTC7Places.js**: trajets corrigés (CDG 105, Orly 105, Disneyland 112, Versailles 103, Beauvais 155) + `vehiclesPrices={sedan:68,luxury:95,minivan:120,minibus:105}`. Appliqué sur tous les blocs langue (fr/en/ru/es + hy). Avant: 190/170/195/180/280 (trop cher).
+- **ParisAirportTransfer.js** & **cities/CDG.js**: `vehiclesPrices` van/minibus abaissés 130→120, 190→105 (sedan/luxury inchangés pour ne rien augmenter).
+- **Décision (jugement)**: pages aéroport/gare (Orly, Beauvais, Gares, ParisTrainStation, DisneylandParis) et villes HORS Paris (Barcelona, Berlin, Milan, Monaco, Munich, Nice, Rome, Yerevan, Alicante, Cannes) laissées inchangées — leurs prix « à partir de » sont déjà bas (parfois sous le réel); les modifier les aurait augmentés, contraire à la demande. Le moteur C# est basé Paris et ne fournit pas les tarifs locaux étrangers.
+- Table prix réels Paris (max, €): CDG 68/95/105/120 · Orly 70/105/105/152 · Disneyland 95/107/112/156 · Versailles 88/105/103/145 · Beauvais 118/155/155/220.
+
+
 ### Session Jun 2026 — Page B2B hôtel: ajout vidéo démo
 - Vidéo `b2b.mp4` (uploadée) téléchargée dans `frontend/public/videos/b2b.mp4` (H.264 Baseline + AAC, yuv420p, faststart moov avant mdat → démarrage instantané; servie en 206 range OK).
 - `components/B2BPage.js`: nouvelle prop optionnelle `videoUrl` (+`videoPoster`) → section vidéo sous le hero (titre/sous-titre traduits FR/EN/RU/HY/ES, `autoPlay muted loop playsInline controls`, poster = heroImage). Rendue seulement si `videoUrl` fourni.

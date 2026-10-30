@@ -22,11 +22,11 @@ const content = {
     step3: 'Voyagez en Groupe', step3Desc: 'Montez a bord de votre minibus confortable. Profitez du trajet avec tout votre groupe, sans stress.',
     popularRoutesTitle: 'Trajets Populaires en VTC 8 Places', fromLabel: 'A partir de',
     routes: [
-      { name: 'Aeroport CDG → Paris Centre (8 places)', price: 190 },
-      { name: 'Aeroport Orly → Paris Centre (8 places)', price: 170 },
-      { name: 'Paris → Disneyland Paris (8 places)', price: 195 },
-      { name: 'Paris → Versailles (8 places)', price: 180 },
-      { name: 'Paris → Aeroport Beauvais (8 places)', price: 280 },
+      { name: 'Aeroport CDG → Paris Centre (8 places)', price: 105 },
+      { name: 'Aeroport Orly → Paris Centre (8 places)', price: 105 },
+      { name: 'Paris → Disneyland Paris (8 places)', price: 112 },
+      { name: 'Paris → Versailles (8 places)', price: 103 },
+      { name: 'Paris → Aeroport Beauvais (8 places)', price: 155 },
     ],
     bookingForm: 'Reservez Votre VTC 8 Places',
     pickupLabel: 'Adresse de depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -53,11 +53,11 @@ const content = {
     step3: 'Travel as a Group', step3Desc: 'Board your comfortable minibus. Enjoy the ride stress-free with your group.',
     popularRoutesTitle: 'Popular 8-Seat Minibus Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'CDG Airport → Paris Center (8 seats)', price: 190 },
-      { name: 'Orly Airport → Paris Center (8 seats)', price: 170 },
-      { name: 'Paris → Disneyland Paris (8 seats)', price: 195 },
-      { name: 'Paris → Versailles (8 seats)', price: 180 },
-      { name: 'Paris → Beauvais Airport (8 seats)', price: 280 },
+      { name: 'CDG Airport → Paris Center (8 seats)', price: 105 },
+      { name: 'Orly Airport → Paris Center (8 seats)', price: 105 },
+      { name: 'Paris → Disneyland Paris (8 seats)', price: 112 },
+      { name: 'Paris → Versailles (8 seats)', price: 103 },
+      { name: 'Paris → Beauvais Airport (8 seats)', price: 155 },
     ],
     bookingForm: 'Book Your 8-Seat Minibus Transfer',
     pickupLabel: 'Pickup address', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Time',
@@ -84,9 +84,9 @@ const content = {
     step3: 'Путешествуйте Группой', step3Desc: 'Комфортная поездка для всей группы.',
     popularRoutesTitle: 'Популярные Маршруты', fromLabel: 'От',
     routes: [
-      { name: 'Аэропорт CDG → Центр Парижа (8 мест)', price: 190 },
-      { name: 'Аэропорт Орли → Центр Парижа (8 мест)', price: 170 },
-      { name: 'Париж → Диснейленд (8 мест)', price: 195 },
+      { name: 'Аэропорт CDG → Центр Парижа (8 мест)', price: 105 },
+      { name: 'Аэропорт Орли → Центр Парижа (8 мест)', price: 105 },
+      { name: 'Париж → Диснейленд (8 мест)', price: 112 },
     ],
     bookingForm: 'Забронируйте VTC 8 Мест',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
@@ -154,7 +154,7 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 150, minibus: 190 };
+const vehiclesPrices = { sedan: 68, luxury: 95, minivan: 120, minibus: 105 };
 const seoUrls = { en: '/vtc-8-seats', fr: '/vtc-8-places', ru: '/vtc-8-mest', hy: '/vtc-8-tegh', es: '/es/minibus-8-plazas' };
 
 const VTC8Places = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
