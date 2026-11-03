@@ -477,3 +477,16 @@ BACKLOG restant:
 - FAQ en RU/HY/ES sur ces 2 pages si besoin.
 - Pré-rendu react-snap (site CSR).
 - Externe: Google Maps billing (user).
+
+## [2026-06] FAQ sur toutes les pages + accents FR aéroports + Disneyland
+Appliqué et VÉRIFIÉ (rendu crawler):
+- NOUVEAU générateur de FAQ localisé: /app/frontend/src/utils/faqContent.js (buildFaq + faqHeading). 5 langues (fr/en/ru/es/hy). Génère 6 Q/R par page à partir des vrais trajets/prix de la page (question prix dynamique). 
+- Câblé dans CityTransferPage.js: faqList = c.faq explicite OU buildFaq(c, language). => FAQ + schéma FAQPage désormais sur les 24 pages CityTransferPage automatiquement.
+- Vérifié sur /transfert-aeroport-nice: FAQ affichée avec prix réels Nice (Monaco 65€, Cannes 75€).
+- Tâche 3 (RU/ES FAQ sur vtc-7 et paris): résolue automatiquement via le générateur (ces pages n'avaient faq explicite qu'en fr/en).
+- Accents FR corrigés + enrichissement: DisneylandParis.js (fr + meetDriver EN/FR), CDG.js, Orly.js, Beauvais.js (blocs fr complets ré-accentués, + metaDescription).
+
+RESTANT (backlog):
+- Accents FR sur les ~14 autres pages villes/gares: Barcelona, Berlin, Milan, Munich, Rome, Cannes, Monaco, Nice, Yerevan, Alicante, GareDuNord, GareDeLyon, GareMontparnasse, GareSaintLazare, GareAusterlitz, ParisTrainStation (contenu FR encore sans accents). FAQ déjà couverte partout.
+- Note: la Q2 du générateur FAQ cite les aéroports de Paris même sur pages Riviera (léger, acceptable).
+- TÂCHE 4 NON FAITE — Pré-rendu (react-snap): changement de pipeline de build qui peut casser le déploiement et NON vérifiable en preview (preview = dev server). À faire en étape dédiée avec test du build de prod. Google exécute déjà le JS; bénéfice surtout pour crawlers IA.

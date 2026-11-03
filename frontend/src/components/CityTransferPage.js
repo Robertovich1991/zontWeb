@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/SEO';
 import TripAdvisorReviews from '@/components/TripAdvisorReviews';
+import { buildFaq, faqHeading } from '@/utils/faqContent';
 import PlacesAutocomplete, { loadGoogleMaps } from '@/components/PlacesAutocomplete';
 import LastMinuteWarning from '@/components/LastMinuteWarning';
 import { ExtraStops, stopLabels, useExtraStops } from '@/components/ExtraStops';
@@ -116,6 +117,10 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
 
   const c = content[language] || content.en;
   const tr = trustLabels[language] || trustLabels.en;
+
+  // FAQ: use page-defined faq if present, otherwise generate localized Q&A from routes/prices
+  const faqList = (c.faq && c.faq.length) ? c.faq : buildFaq(c, language);
+  const faqTitleText = c.faqTitle || faqHeading(language);
 
   // CMS overrides for SEO fields
   const seoTitle = (cmsPage?.seo?.title?.[language]) || c.title;
@@ -336,10 +341,10 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
               { "@type": "ListItem", "position": 2, "name": (c.title || '').split(/\s[-|]\s/)[0].trim(), "item": seoUrls ? `https://www.zont.cab${seoUrls[language] || seoUrls.en}` : "https://www.zont.cab" },
             ],
           },
-          ...(c.faq?.length ? [{
+          ...(faqList?.length ? [{
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            "mainEntity": c.faq.map((f) => ({
+            "mainEntity": faqList.map((f) => ({
               "@type": "Question",
               "name": f.q,
               "acceptedAnswer": { "@type": "Answer", "text": f.a },
@@ -798,12 +803,12 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         </section>
 
         {/* FAQ — SEO rich results + GEO (ChatGPT/AI answers) */}
-        {c.faq?.length > 0 && (
+        {faqList?.length > 0 && (
           <section className="py-12 md:py-20 px-4 bg-[#1a2332]" data-testid="faq-section">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">{c.faqTitle || 'FAQ'}</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">{faqTitleText}</h2>
               <div className="space-y-3">
-                {c.faq.map((f, i) => (
+                {faqList.map((f, i) => (
                   <details key={i} className="group bg-[#0f1419] rounded-xl border border-white/5 overflow-hidden" data-testid={`faq-item-${i}`}>
                     <summary className="flex items-center justify-between cursor-pointer list-none px-5 py-4 text-white font-semibold text-base hover:bg-white/5 transition-colors">
                       <span className="pr-3">{f.q}</span>
