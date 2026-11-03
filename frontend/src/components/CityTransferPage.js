@@ -335,7 +335,16 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
               { "@type": "ListItem", "position": 1, "name": "Zont", "item": "https://www.zont.cab" },
               { "@type": "ListItem", "position": 2, "name": (c.title || '').split(/\s[-|]\s/)[0].trim(), "item": seoUrls ? `https://www.zont.cab${seoUrls[language] || seoUrls.en}` : "https://www.zont.cab" },
             ],
-          }
+          },
+          ...(c.faq?.length ? [{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": c.faq.map((f) => ({
+              "@type": "Question",
+              "name": f.q,
+              "acceptedAnswer": { "@type": "Answer", "text": f.a },
+            })),
+          }] : []),
         ]}
       />
       <Header />
@@ -787,6 +796,26 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             </div>
           </div>
         </section>
+
+        {/* FAQ — SEO rich results + GEO (ChatGPT/AI answers) */}
+        {c.faq?.length > 0 && (
+          <section className="py-12 md:py-20 px-4 bg-[#1a2332]" data-testid="faq-section">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-10">{c.faqTitle || 'FAQ'}</h2>
+              <div className="space-y-3">
+                {c.faq.map((f, i) => (
+                  <details key={i} className="group bg-[#0f1419] rounded-xl border border-white/5 overflow-hidden" data-testid={`faq-item-${i}`}>
+                    <summary className="flex items-center justify-between cursor-pointer list-none px-5 py-4 text-white font-semibold text-base hover:bg-white/5 transition-colors">
+                      <span className="pr-3">{f.q}</span>
+                      <ChevronRight className="w-5 h-5 text-[#2ecc71] shrink-0 transition-transform duration-300 group-open:rotate-90" aria-hidden="true" />
+                    </summary>
+                    <div className="px-5 pb-5 pt-0 text-gray-400 text-sm leading-relaxed">{f.a}</div>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Service Photo Section */}
         <section className="py-12 md:py-16 px-4 bg-[#1a2332]">

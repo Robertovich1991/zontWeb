@@ -34,6 +34,15 @@ const content = {
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: '',
     otherCitiesTitle: 'We serve 16+ cities across Europe', otherCitiesBtn: 'View All Destinations',
+    faqTitle: 'Frequently Asked Questions — Taxi & VTC in Paris',
+    faq: [
+      { q: 'Which airports and stations do you serve in Paris?', a: 'We provide transfers to and from all Paris airports — Roissy-Charles-de-Gaulle (CDG), Orly and Beauvais — as well as train stations (Gare du Nord, Gare de Lyon, Montparnasse) and any address across the Île-de-France region.' },
+      { q: 'How much is an airport transfer from CDG to Paris?', a: 'A Charles-de-Gaulle → central Paris transfer starts at €65, Orly → Paris at €45 and Beauvais → Paris at €120, fixed all-inclusive. The exact fare is confirmed before you book.' },
+      { q: 'Is there a meet-and-greet at the airport?', a: 'Yes. Your driver waits at arrivals with a name board and helps with your luggage. 60 minutes of free waiting time is included on airport transfers.' },
+      { q: 'Can I book a driver by the hour (hourly hire)?', a: 'Yes, you can book a private chauffeur on an hourly basis for 4 hours, 8 hours or a full day — perfect for business meetings, sightseeing or events.' },
+      { q: 'Are your vehicles suitable for families and groups?', a: 'Yes. Our fleet includes sedans, 7-seat vans and 8-seat minibuses, with free child seats and boosters on request. We carry families, groups and business travellers.' },
+      { q: 'Is payment secure and is the service available 24/7?', a: 'Online payment is fully secure and accepts all major cards. Our service operates 24/7, 365 days a year, with instant confirmation of your booking.' },
+    ],
     rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   fr: {
@@ -69,6 +78,15 @@ const content = {
     pickupLabel: 'Départ', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: '',
     otherCitiesTitle: 'Plus de 120 destinations en Europe', otherCitiesBtn: 'Voir Toutes les Destinations',
+    faqTitle: 'Questions fréquentes — Taxi & VTC à Paris',
+    faq: [
+      { q: 'Quels aéroports et gares desservez-vous à Paris ?', a: 'Nous assurons les transferts depuis et vers tous les aéroports parisiens — Roissy-Charles-de-Gaulle (CDG), Orly et Beauvais — ainsi que les gares (Gare du Nord, Gare de Lyon, Montparnasse) et toute adresse en Île-de-France.' },
+      { q: 'Quel est le prix d\'un transfert aéroport CDG → Paris ?', a: 'Le transfert Charles-de-Gaulle → centre de Paris démarre à 65 €, Orly → Paris à 45 € et Beauvais → Paris à 120 €, à prix fixe tout compris. Le tarif exact est confirmé avant la réservation.' },
+      { q: 'Y a-t-il un accueil personnalisé à l\'aéroport ?', a: 'Oui. Votre chauffeur vous attend à l\'arrivée avec une pancarte à votre nom et vous aide avec vos bagages. 60 minutes d\'attente gratuites sont incluses pour les transferts aéroport.' },
+      { q: 'Puis-je réserver un chauffeur à disposition à l\'heure ?', a: 'Oui, vous pouvez réserver un chauffeur privé en mise à disposition pour 4 heures, 8 heures ou la journée entière — idéal pour vos rendez-vous professionnels, le tourisme ou les événements.' },
+      { q: 'Vos véhicules conviennent-ils aux familles et aux groupes ?', a: 'Oui. Notre flotte comprend des berlines, des vans 7 places et des minibus 8 places, avec sièges enfant et rehausseurs gratuits sur demande. Nous transportons familles, groupes et voyageurs d\'affaires.' },
+      { q: 'Le paiement est-il sécurisé et le service disponible 24h/24 ?', a: 'Le paiement en ligne est entièrement sécurisé et accepte les principales cartes. Notre service fonctionne 24h/24, 7j/7, 365 jours par an, avec confirmation immédiate de votre réservation.' },
+    ],
     rating: '4.5/5 Tripadvisor (29 avis)',
   },
   ru: {

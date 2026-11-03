@@ -462,3 +462,18 @@ BACKLOG SEO/GEO (non fait):
 - P2: Blocs FAQ + schéma FAQPage sur toutes les pages (SEO + GEO/ChatGPT).
 - P2: Pré-rendu (react-snap) pour indexation + lecture par IA (site actuellement 100% CSR).
 - Externe (action user): Google Maps = réactiver billing Google Cloud (REQUEST_DENIED).
+
+## [2026-06] Enrichissement SEO/GEO pages page-2 (FAQ)
+Appliqué et VÉRIFIÉ (HTML rendu via crawler):
+- Section FAQ ajoutée au composant partagé CityTransferPage.js (accordéon <details> natif, data-testid faq-section / faq-item-N), déclenchée par champ `c.faq`. Réutilisable sur toute page ayant `faq`.
+- Schéma JSON-LD `FAQPage` injecté conditionnellement (spread dans jsonLd) → rich results Google + réponses IA (GEO).
+- Contenu FAQ FR + EN (6 Q/R chacune, avec prix et faits concrets) ajouté à:
+  - VTC7Places.js (/vtc-7-places FR + /vtc-7-seats EN)
+  - ParisAirportTransfer.js (/transfert-aeroport-paris FR + /paris-airport-transfer EN)
+- Vérifié: 6 items FAQ rendus, accents OK, H1 propre.
+
+BACKLOG restant:
+- Ajouter `faq` (et accents FR) aux ~22 autres pages services/villes.
+- FAQ en RU/HY/ES sur ces 2 pages si besoin.
+- Pré-rendu react-snap (site CSR).
+- Externe: Google Maps billing (user).

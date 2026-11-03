@@ -36,6 +36,15 @@ const content = {
     pickupLabel: 'Adresse de départ', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: '',
     otherCitiesTitle: 'Besoin de plus de places ? Découvrez notre Taxi / VTC 8 places', otherCitiesBtn: 'Voir Toutes Nos Destinations',
+    faqTitle: 'Questions fréquentes — Taxi / VTC 7 places',
+    faq: [
+      { q: 'Combien de passagers et de bagages dans un VTC 7 places ?', a: 'Nos vans 7 places (Mercedes Classe V ou similaire) accueillent jusqu\'à 7 passagers avec leurs bagages, soit environ 7 valises de taille standard plus les bagages à main. Idéal pour les familles et les groupes qui voyagent ensemble sans se séparer en deux véhicules.' },
+      { q: 'Quel est le prix d\'un VTC 7 places entre l\'aéroport CDG et Paris ?', a: 'Le transfert CDG → centre de Paris en van 7 places coûte à partir de 105 €, à prix fixe tout compris. Orly → Paris est également à 105 €, Paris → Disneyland à 112 € et Paris → Versailles à 103 €. Le tarif est confirmé avant la réservation, sans supplément.' },
+      { q: 'Les sièges enfant et rehausseurs sont-ils disponibles ?', a: 'Oui. Les sièges bébé, sièges enfant et rehausseurs sont fournis gratuitement sur demande lors de la réservation. Le chauffeur les installe avant votre arrivée pour un départ immédiat.' },
+      { q: 'Que se passe-t-il si mon vol a du retard ?', a: 'Nous suivons votre vol en temps réel et ajustons l\'heure de prise en charge automatiquement. Vous bénéficiez de 60 minutes d\'attente gratuites à l\'aéroport, sans frais supplémentaires en cas de retard.' },
+      { q: 'Le prix inclut-il les péages, le parking et l\'attente ?', a: 'Oui, nos tarifs sont tout compris : péages, parking aéroport, temps d\'attente et accueil avec pancarte sont inclus dans le prix affiché. Aucune mauvaise surprise à l\'arrivée.' },
+      { q: 'Comment réserver un taxi / VTC 7 places ?', a: 'Indiquez votre adresse de départ, votre destination, la date et l\'heure : vous obtenez un prix fixe instantané et une confirmation immédiate. La réservation prend moins de deux minutes et le paiement en ligne est sécurisé.' },
+    ],
     rating: '4.5/5 Tripadvisor (29 avis)',
   },
   en: {
@@ -69,6 +78,15 @@ const content = {
     pickupLabel: 'Pickup address', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: '',
     otherCitiesTitle: 'Need more seats? Discover our 8-seat minibus transfer', otherCitiesBtn: 'View All Destinations',
+    faqTitle: 'Frequently Asked Questions — 7-Seat Minivan Transfer',
+    faq: [
+      { q: 'How many passengers and bags fit in a 7-seat minivan?', a: 'Our 7-seat vans (Mercedes V-Class or similar) carry up to 7 passengers with their luggage — around 7 standard suitcases plus hand luggage. Ideal for families and groups travelling together in a single vehicle.' },
+      { q: 'How much is a 7-seat transfer from CDG Airport to Paris?', a: 'A CDG → central Paris transfer in a 7-seat van starts at €105, fixed all-inclusive price. Orly → Paris is also €105, Paris → Disneyland €112 and Paris → Versailles €103. The fare is confirmed before you book, with no surcharges.' },
+      { q: 'Are child seats and boosters available?', a: 'Yes. Baby seats, child seats and boosters are provided free of charge on request at booking. The driver installs them before your arrival so you can leave right away.' },
+      { q: 'What happens if my flight is delayed?', a: 'We track your flight in real time and adjust the pickup time automatically. You also get 60 minutes of free airport waiting, with no extra charge for delays.' },
+      { q: 'Does the price include tolls, parking and waiting?', a: 'Yes, our fares are all-inclusive: tolls, airport parking, waiting time and meet-and-greet with a name board are included in the displayed price. No surprises on arrival.' },
+      { q: 'How do I book a 7-seat minivan?', a: 'Enter your pickup address, destination, date and time to get an instant fixed price and immediate confirmation. Booking takes under two minutes and online payment is secure.' },
+    ],
     rating: '4.5/5 Tripadvisor (29 reviews)',
   },
   ru: {
