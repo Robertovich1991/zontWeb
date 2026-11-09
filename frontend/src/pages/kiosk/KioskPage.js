@@ -525,6 +525,23 @@ const KioskPage = () => {
     }
   }, [step, selectedDest, logSearch]);
 
+  // Record the furthest step a search reached so the hotel can see where the
+  // customer abandoned (date/time, prices, client info or payment screen).
+  const updateSearchStep = useCallback((sid, stepName) => {
+    if (!sid) return;
+    fetch(`${API}/api/kiosk/search-step`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ searchId: sid, step: stepName }),
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!searchId) return;
+    const map = { 2: 'vehicle', 3: 'customer_info', 4: 'payment' };
+    const stepName = map[step];
+    if (stepName) updateSearchStep(searchId, stepName);
+  }, [step, searchId, updateSearchStep]);
+
   // Borne heartbeat: report this device is online (last connection) every 60s
   useEffect(() => {
     if (!deviceId) return;

@@ -490,3 +490,14 @@ RESTANT (backlog):
 - Accents FR sur les ~14 autres pages villes/gares: Barcelona, Berlin, Milan, Munich, Rome, Cannes, Monaco, Nice, Yerevan, Alicante, GareDuNord, GareDeLyon, GareMontparnasse, GareSaintLazare, GareAusterlitz, ParisTrainStation (contenu FR encore sans accents). FAQ déjà couverte partout.
 - Note: la Q2 du générateur FAQ cite les aéroports de Paris même sur pages Riviera (léger, acceptable).
 - TÂCHE 4 NON FAITE — Pré-rendu (react-snap): changement de pipeline de build qui peut casser le déploiement et NON vérifiable en preview (preview = dev server). À faire en étape dédiée avec test du build de prod. Google exécute déjà le JS; bénéfice surtout pour crawlers IA.
+
+## [2026-06] Historique recherches kiosk — étape d'abandon
+Demande: voir à quel écran le client a abandonné (date/heure vs prix, etc.).
+Implémenté et VÉRIFIÉ (curl + DB):
+- backend/routes/kiosk.py: kiosk_searches stocke last_step + step_rank. Création = "date_time" (rank 1).
+  - Nouvel endpoint POST /api/kiosk/search-step {searchId, step} — avance uniquement (ne régresse jamais, garde par step_rank $lt). Ranks: date_time1, vehicle2, customer_info3, payment4, booked5.
+  - _record_paid_side_effects: booked => last_step="booked", step_rank=5.
+- frontend KioskPage.js: useEffect appelle /search-step quand step passe à 2 (vehicle), 3 (customer_info), 4 (payment).
+- admin KioskSearchHistory.js: nouvelle colonne "Abandon à l'étape" (StepPill coloré): Écran date/heure (gris), Écran des prix (bleu), Infos client (indigo), Écran paiement (orange). Réservé/anciens enregistrements => "—".
+- Vérif curl: étape progresse date_time→vehicle→payment, retour arrière n'abaisse pas le rank.
+- Note: s'applique aux NOUVELLES recherches; anciens enregistrements (sans last_step) affichent "—".

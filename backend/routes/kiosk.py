@@ -480,10 +480,37 @@ async def kiosk_search_log(req: KioskSearchLog):
         "destination_address": req.destinationAddress,
         "price": req.price,
         "status": "not_booked",
+        "last_step": "date_time",
+        "step_rank": 1,
         "booking_reference": None,
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
     return {"searchId": search_id}
+
+
+# Furthest kiosk step a (non-booked) search reached, so the hotel can see where
+# the customer abandoned: date/time screen, prices screen, client info or payment.
+SEARCH_STEP_RANKS = {"date_time": 1, "vehicle": 2, "customer_info": 3, "payment": 4, "booked": 5}
+
+
+class KioskSearchStep(BaseModel):
+    searchId: str
+    step: str
+
+
+@router.post("/search-step")
+async def kiosk_search_step(req: KioskSearchStep):
+    """Record the furthest step a search reached (only moves forward, never backward)."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    rank = SEARCH_STEP_RANKS.get(req.step)
+    if rank is None:
+        raise HTTPException(400, "Invalid step")
+    await db.kiosk_searches.update_one(
+        {"id": req.searchId, "$or": [{"step_rank": {"$lt": rank}}, {"step_rank": {"$exists": False}}]},
+        {"$set": {"last_step": req.step, "step_rank": rank}},
+    )
+    return {"ok": True}
 
 
 class KioskHeartbeatRequest(BaseModel):
@@ -559,7 +586,7 @@ async def _record_paid_side_effects(booking):
     if booking.get("searchId"):
         await db.kiosk_searches.update_one(
             {"id": booking["searchId"]},
-            {"$set": {"status": "booked", "booking_reference": ref, "booked_at": now_iso}},
+            {"$set": {"status": "booked", "booking_reference": ref, "booked_at": now_iso, "last_step": "booked", "step_rank": 5}},
         )
     # 2) Hotel commissions → create a hotel_bookings record (once)
     if await db.hotel_bookings.find_one({"kiosk_reference": ref}, {"_id": 0, "id": 1}):
