@@ -149,6 +149,10 @@ async def create_lead(input: LeadCreate, request: Request):
     doc['timestamp'] = doc['timestamp'].isoformat()
     await db.leads.insert_one(doc)
 
+    # Email + Telegram (same recipients / group as bookings) — best-effort
+    from routes.lead_notifications import fire_and_forget_partnership_lead
+    fire_and_forget_partnership_lead(doc)
+
     # Facebook Conversions API: Lead event
     from routes.fb_conversions import fire_and_forget as fb_fire, build_user_data as fb_user_data
     fb_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "")

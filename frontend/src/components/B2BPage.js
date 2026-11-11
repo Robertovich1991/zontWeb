@@ -48,6 +48,22 @@ const B2BPage = ({ content, seoUrls, relatedPages, heroImage, heroImageAlt }) =>
         body: JSON.stringify({ ...formState, source_page: seoUrls?.[language] || window.location.pathname }),
       });
       if (!res.ok) throw new Error('Failed');
+      const lead = await res.json().catch(() => ({}));
+      const sourcePage = seoUrls?.[language] || window.location.pathname;
+      // Telegram + admin email (same channels as bookings); backend also notifies — API dedupes
+      fetch('https://api.zont.cab/api/AdminNotify/partnershipLead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formState.name,
+          company: formState.company,
+          email: formState.email,
+          phone: formState.phone,
+          message: formState.message,
+          sourcePage,
+          leadId: lead?.id || '',
+        }),
+      }).catch(() => {});
       setSubmitted(true);
       setFormState({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {

@@ -542,6 +542,20 @@ const MICETransportation = () => {
         body: JSON.stringify({ ...form, source_page: location.pathname }),
       });
       if (!res.ok) throw new Error('Failed');
+      const lead = await res.json().catch(() => ({}));
+      fetch('https://api.zont.cab/api/AdminNotify/partnershipLead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          company: form.company,
+          email: form.email,
+          phone: form.phone,
+          message: form.message,
+          sourcePage: location.pathname,
+          leadId: lead?.id || '',
+        }),
+      }).catch(() => {});
       setSubmitted(true);
       setForm({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {
