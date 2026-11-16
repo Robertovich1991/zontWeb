@@ -27,6 +27,7 @@ const cityImages = {
   alicante: 'https://images.unsplash.com/photo-1660855562147-2f2eab48c0c7?w=600&q=75&auto=format',
   barcelona: 'https://images.unsplash.com/photo-1660855562147-2f2eab48c0c7?w=600&q=75&auto=format',
   yerevan: 'https://images.unsplash.com/photo-1771444617885-cf21bd096091?w=600&q=75&auto=format',
+  strasbourg: 'https://images.unsplash.com/photo-1708640944954-2c7e7feab704?w=600&q=75&auto=format',
 };
 
 const defaultImg = 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=600&q=75&auto=format';
@@ -126,8 +127,8 @@ const translations = {
 
 const startingPrices = {
   paris: 65, cdg: 65, orly: 45, beauvais: 120, paristrainstation: 25,
-  nice: 35, monaco: 65, cannes: 70, cotedazur: 45, disneyland: 49,
-  berlin: 45, munich: 55, rome: 40, milan: 35, alicante: 30, barcelona: 39, yerevan: 15,
+  nice: 35, monaco: 109, cannes: 70, cotedazur: 45, disneyland: 49,
+  berlin: 75, munich: 115, rome: 90, milan: 127, alicante: 31, barcelona: 48, yerevan: 8, strasbourg: 40,
 };
 
 const countryFlags = { France: '\ud83c\uddeb\ud83c\uddf7', Monaco: '\ud83c\uddf2\ud83c\udde8', Germany: '\ud83c\udde9\ud83c\uddea', Italy: '\ud83c\uddee\ud83c\uddf9', Spain: '\ud83c\uddea\ud83c\uddf8', Armenia: '\ud83c\udde6\ud83c\uddf2' };

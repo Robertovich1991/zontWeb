@@ -242,12 +242,27 @@ export const citiesData = {
     urlFr: '/transfert-aeroport-erevan',
     urlRu: '/taksi-iz-aeroporta-erevan',
   },
+  strasbourg: {
+    id: 'strasbourg',
+    nameEs: 'Estrasburgo',
+    urlEs: '/strasbourg-airport-transfer',
+    country: 'France',
+    nameEn: 'Strasbourg',
+    nameFr: 'Strasbourg',
+    nameRu: 'Страсбург',
+    nameHy: 'Ստրասբուրգ',
+    airports: ['Strasbourg Airport (SXB)'],
+    urlEn: '/strasbourg-airport-transfer',
+    urlFr: '/transfert-aeroport-strasbourg',
+    urlRu: '/taksi-iz-aeroporta-strasburg',
+    urlHy: '/strasburg-odanavakayani-transfer',
+  },
 };
 
 export const countriesList = [
   {
     name: 'France',
-    cities: ['paris', 'cdg', 'orly', 'beauvais', 'paristrainstation', 'nice', 'cannes', 'cotedazur', 'marseille', 'disneyland']
+    cities: ['paris', 'cdg', 'orly', 'beauvais', 'paristrainstation', 'nice', 'cannes', 'cotedazur', 'marseille', 'disneyland', 'strasbourg']
   },
   {
     name: 'Monaco',

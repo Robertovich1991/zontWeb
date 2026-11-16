@@ -346,6 +346,19 @@
   </url>
   <url><loc>https://www.zont.cab/transfert-aeroport-rome</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/taksi-iz-aeroporta-rim</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <!-- ==================== STRASBOURG ==================== -->
+  <url>
+    <loc>https://www.zont.cab/strasbourg-airport-transfer</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.zont.cab/strasbourg-airport-transfer"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://www.zont.cab/transfert-aeroport-strasbourg"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://www.zont.cab/taksi-iz-aeroporta-strasburg"/>
+    <xhtml:link rel="alternate" hreflang="hy" href="https://www.zont.cab/strasburg-odanavakayani-transfer"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.zont.cab/strasbourg-airport-transfer"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url><loc>https://www.zont.cab/transfert-aeroport-strasbourg</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.zont.cab/taksi-iz-aeroporta-strasburg</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.zont.cab/hrom-odanavakayani-transfer</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
   <!-- ==================== MILAN ==================== -->

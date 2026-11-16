@@ -512,3 +512,12 @@ Implémenté et VÉRIFIÉ (HTML rendu + compile clean):
 - Images: Unsplash/Pexels optimisées (w=800), lazy-loaded, pertinentes par destination.
 - Vérifié rendu: Strasbourg + Barcelona (Camp Nou From 51€ OK, photos OK, hreflang fr/ru/hy OK). Backend non modifié.
 Note: FAQ Q2 du générateur cite encore "aéroports de Paris" sur pages non-Paris (mineur, backlog).
+
+## [2026-06] Fix "no Strasbourg" + alignement prix page Destinations
+Cause: page Strasbourg routée mais absente de data/cities.js (source de /countries + sitemap).
+Corrigé et VÉRIFIÉ (crawl):
+- data/cities.js: ajout entrée `strasbourg` (France) + 'strasbourg' dans countriesList France.
+- public/sitemap.xml: ajout bloc Strasbourg (en/fr/ru/hy + x-default).
+- Countries.js: ajout image Strasbourg + startingPrices alignés sur nouveaux prix (rome 90, milan 127, barcelona 48, berlin 75, munich 115, alicante 31, yerevan 8, monaco 109, strasbourg 40).
+- Vérifié /countries: Strasbourg sous France (From 40€, photo cathédrale), tous prix MAJ.
+Note: libellé "16 cities" dans l'en-tête Countries reste statique (mineur).
