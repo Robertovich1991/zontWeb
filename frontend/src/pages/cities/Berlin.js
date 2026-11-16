@@ -22,10 +22,9 @@ const content = {
     step3: 'Direct to Berlin', step3Desc: 'Comfortable 30-45 minute ride to central Berlin.',
     popularRoutesTitle: 'Popular Berlin Airport Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'BER Airport → Berlin Mitte', price: 45 },
-      { name: 'BER Airport → Potsdamer Platz', price: 45 },
-      { name: 'BER Airport → Alexanderplatz', price: 50 },
-      { name: 'BER Airport → Charlottenburg', price: 55 },
+      { name: 'BER → Berlin City Centre', price: 75 },
+      { name: 'BER → Mitte', price: 69 },
+      { name: 'BER → Potsdam', price: 104 },
     ],
     bookingForm: 'Book Your Berlin Airport Transfer',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
@@ -53,10 +52,9 @@ const content = {
     step3: 'Direct vers Berlin', step3Desc: 'Trajet confortable de 30-45 minutes vers le centre de Berlin.',
     popularRoutesTitle: 'Trajets Populaires Transfert Aeroport Berlin', fromLabel: 'A partir de',
     routes: [
-      { name: 'Aeroport BER → Berlin Mitte', price: 45 },
-      { name: 'Aeroport BER → Potsdamer Platz', price: 45 },
-      { name: 'Aeroport BER → Alexanderplatz', price: 50 },
-      { name: 'Aeroport BER → Charlottenburg', price: 55 },
+      { name: 'BER → Centre de Berlin', price: 75 },
+      { name: 'BER → Mitte', price: 69 },
+      { name: 'BER → Potsdam', price: 104 },
     ],
     bookingForm: 'Reservez Votre Transfert Aeroport Berlin',
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -84,10 +82,9 @@ const content = {
     step3: 'Прямо в Берлин', step3Desc: 'Комфортная поездка 30-45 минут.',
     popularRoutesTitle: 'Популярные Маршруты из Аэропорта Берлина', fromLabel: 'От',
     routes: [
-      { name: 'Аэропорт BER → Берлин Митте', price: 45 },
-      { name: 'Аэропорт BER → Потсдамская площадь', price: 45 },
-      { name: 'Аэропорт BER → Александерплац', price: 50 },
-      { name: 'Аэропорт BER → Шарлоттенбург', price: 55 },
+      { name: 'BER → Центр Берлина', price: 75 },
+      { name: 'BER → Митте', price: 69 },
+      { name: 'BER → Потсдам', price: 104 },
     ],
     bookingForm: 'Забронируйте Трансфер из Аэропорта Берлина',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
@@ -127,8 +124,14 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 45, luxury: 70, minivan: 95, minibus: 150 };
+const vehiclesPrices = { sedan: 75, luxury: 95, minivan: 105, minibus: 160 };
 
 const seoUrls = { en: '/berlin-airport-transfer', fr: '/transfert-aeroport-berlin', ru: '/taksi-iz-aeroporta-berlin', hy: '/berlin-odanavakayani-transfer' };
-const BerlinTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+// Live +15% prices: Centre 74.75, Mitte 69, Potsdam 103.50
+const routeImages = [
+  'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1715711445589-7b83acc7281c?auto=format&fit=crop&w=800&q=70',
+];
+const BerlinTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} routeImages={routeImages} />;
 export default BerlinTransfer;

@@ -34,7 +34,7 @@ const trustLabels = {
   es: { trips: 'Viajes Realizados', available: 'Disponible', fixed: 'Precios Fijos', rating: 'Valoración', reviews: 'opiniones', trustTitle: 'La confianza de miles de viajeros', paySecure: 'Pago Seguro', payDesc: 'Todas las tarjetas aceptadas', verifiedDriver: 'Conductores Verificados', verifiedDesc: 'Profesionales con licencia', flightTrack: 'Seguimiento de Vuelo', flightDesc: 'Monitoreo en tiempo real', freeCancel: 'Cancelación Gratuita', cancelDesc: 'Hasta 24h antes' },
 };
 
-const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, heroImage, pageId, showDisposalCta, ogImage, extraSections, hidePrices }) => {
+const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriverImage, stationLinks, routeImages, heroImage, pageId, showDisposalCta, ogImage, extraSections, hidePrices }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { startBooking, setVehicleResults } = useBooking();
@@ -121,6 +121,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   // FAQ: use page-defined faq if present, otherwise generate localized Q&A from routes/prices
   const faqList = (c.faq && c.faq.length) ? c.faq : buildFaq(c, language);
   const faqTitleText = c.faqTitle || faqHeading(language);
+  const routeImgs = routeImages || [];
 
   // CMS overrides for SEO fields
   const seoTitle = (cmsPage?.seo?.title?.[language]) || c.title;
@@ -712,22 +713,46 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         {/* POPULAR ROUTES */}
         {routes.length > 0 && (
           <section className="py-12 md:py-20 px-4 bg-[#0f1419]">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-5xl mx-auto">
               <h2 className="text-2xl md:text-3xl font-bold text-white text-center mb-8">{c.popularRoutesTitle}</h2>
-              <div className="space-y-3">
-                {routes.map((route, i) => (
-                  <button key={i} onClick={() => scrollToBooking(null)} className="w-full bg-[#1a2332] rounded-lg p-4 flex items-center justify-between border border-gray-700 hover:border-[#2ecc71] transition-colors group text-left" data-testid={`route-${i}`} aria-label={route.price ? `${route.name} - ${c.fromLabel} ${route.price} euros` : route.name}>
-                    <div className="flex items-center">
-                      <MapPin className="w-5 h-5 text-[#2ecc71] mr-3 flex-shrink-0" aria-hidden="true" />
-                      <span className="text-white text-sm md:text-base">{route.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {route.price ? <span className="text-[#2ecc71] font-bold text-lg">{c.fromLabel} {route.price}&euro;</span> : null}
-                      <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-[#2ecc71]" aria-hidden="true" />
-                    </div>
-                  </button>
-                ))}
-              </div>
+              {routes.some((r, i) => r.image || routeImgs[i]) ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {routes.map((route, i) => {
+                    const img = route.image || routeImgs[i];
+                    return (
+                      <button key={i} onClick={() => scrollToBooking(null)} className="group bg-white/[0.04] border border-white/10 hover:border-[#2ecc71]/40 rounded-xl overflow-hidden transition-all hover:bg-[#2ecc71]/5 text-left" data-testid={`route-${i}`} aria-label={route.price ? `${route.name} - ${c.fromLabel} ${route.price} euros` : route.name}>
+                        {img && (
+                          <div className="h-36 overflow-hidden">
+                            <img src={img} alt={route.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                          </div>
+                        )}
+                        <div className="p-4 flex items-center justify-between gap-2">
+                          <div className="flex items-center min-w-0">
+                            <MapPin className="w-4 h-4 text-[#2ecc71] mr-2 flex-shrink-0" aria-hidden="true" />
+                            <span className="text-white text-sm font-medium">{route.name}</span>
+                          </div>
+                          {route.price ? <span className="text-[#2ecc71] font-bold text-base whitespace-nowrap">{c.fromLabel} {route.price}&euro;</span> : null}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {routes.map((route, i) => (
+                    <button key={i} onClick={() => scrollToBooking(null)} className="w-full bg-[#1a2332] rounded-lg p-4 flex items-center justify-between border border-gray-700 hover:border-[#2ecc71] transition-colors group text-left" data-testid={`route-${i}`} aria-label={route.price ? `${route.name} - ${c.fromLabel} ${route.price} euros` : route.name}>
+                      <div className="flex items-center">
+                        <MapPin className="w-5 h-5 text-[#2ecc71] mr-3 flex-shrink-0" aria-hidden="true" />
+                        <span className="text-white text-sm md:text-base">{route.name}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {route.price ? <span className="text-[#2ecc71] font-bold text-lg">{c.fromLabel} {route.price}&euro;</span> : null}
+                        <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-[#2ecc71]" aria-hidden="true" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         )}

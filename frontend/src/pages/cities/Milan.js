@@ -22,10 +22,10 @@ const content = {
     step3: 'Arrive in Style', step3Desc: 'Direct comfortable transfer to central Milan.',
     popularRoutesTitle: 'Popular Milan Airport Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'Malpensa MXP → Milan City Center', price: 70 },
-      { name: 'Linate LIN → Milan Duomo', price: 35 },
-      { name: 'Bergamo BGY → Milan City Center', price: 75 },
-      { name: 'Malpensa MXP → Lake Como', price: 120 },
+      { name: 'Malpensa → Milan City Centre', price: 127 },
+      { name: 'Malpensa → Fiera Milano Rho', price: 106 },
+      { name: 'Malpensa → Linate Airport', price: 143 },
+      { name: 'Malpensa → Monza', price: 104 },
     ],
     bookingForm: 'Book Your Milan Airport Transfer',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
@@ -52,10 +52,10 @@ const content = {
     step3: 'Arrivez avec Style', step3Desc: 'Transfert direct vers le centre de Milan.',
     popularRoutesTitle: 'Trajets Populaires Transfert Milan', fromLabel: 'A partir de',
     routes: [
-      { name: 'Malpensa MXP → Centre de Milan', price: 70 },
-      { name: 'Linate LIN → Duomo Milan', price: 35 },
-      { name: 'Bergame BGY → Centre de Milan', price: 75 },
-      { name: 'Malpensa MXP → Lac de Come', price: 120 },
+      { name: 'Malpensa → Centre de Milan', price: 127 },
+      { name: 'Malpensa → Fiera Milano Rho', price: 106 },
+      { name: 'Malpensa → Aéroport de Linate', price: 143 },
+      { name: 'Malpensa → Monza', price: 104 },
     ],
     bookingForm: 'Reservez Votre Transfert Aeroport Milan',
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -82,10 +82,10 @@ const content = {
     step3: 'Прибытие', step3Desc: 'Прямой трансфер в центр Милана.',
     popularRoutesTitle: 'Популярные Маршруты из Аэропорта Милана', fromLabel: 'От',
     routes: [
-      { name: 'Мальпенса MXP → Центр Милана', price: 70 },
-      { name: 'Линате LIN → Дуомо', price: 35 },
-      { name: 'Бергамо BGY → Центр Милана', price: 75 },
-      { name: 'Мальпенса MXP → Озеро Комо', price: 120 },
+      { name: 'Мальпенса → Центр Милана', price: 127 },
+      { name: 'Мальпенса → Фьера Милано Ро', price: 106 },
+      { name: 'Мальпенса → Аэропорт Линате', price: 143 },
+      { name: 'Мальпенса → Монца', price: 104 },
     ],
     bookingForm: 'Забронируйте Трансфер из Аэропорта Милана',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
@@ -125,8 +125,15 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 70, luxury: 95, minivan: 130, minibus: 190 };
+const vehiclesPrices = { sedan: 127, luxury: 150, minivan: 165, minibus: 230 };
 
 const seoUrls = { en: '/milan-airport-transfer', fr: '/transfert-aeroport-milan', ru: '/taksi-iz-aeroporta-milan', hy: '/milan-odanavakayani-transfer' };
-const MilanTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+// Live +15% prices: Centre 126.50, Fiera Rho 105.80, Linate 142.60, Monza 103.50
+const routeImages = [
+  'https://images.unsplash.com/photo-1610016302534-6f67f1c968d8?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1768590149034-c372f0c3a07c?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1758531491352-7887c1fe45b3?auto=format&fit=crop&w=800&q=70',
+  'https://images.pexels.com/photos/28441596/pexels-photo-28441596.jpeg?auto=compress&cs=tinysrgb&w=800',
+];
+const MilanTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} routeImages={routeImages} />;
 export default MilanTransfer;

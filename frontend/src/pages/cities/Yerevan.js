@@ -22,10 +22,8 @@ const content = {
     step3: 'Welcome to Yerevan', step3Desc: 'Comfortable 15-20 minute ride to Yerevan center.',
     popularRoutesTitle: 'Popular Yerevan Airport Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'Zvartnots EVN → Republic Square', price: 15 },
-      { name: 'Zvartnots EVN → Northern Avenue', price: 15 },
-      { name: 'Zvartnots EVN → Cascade Complex', price: 15 },
-      { name: 'Zvartnots EVN → Lake Sevan', price: 55 },
+      { name: 'Zvartnots EVN → Yerevan City Centre', price: 8 },
+      { name: 'Zvartnots EVN → Garni', price: 20 },
     ],
     bookingForm: 'Book Your Yerevan Airport Transfer',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
@@ -52,10 +50,8 @@ const content = {
     step3: 'Bienvenue a Erevan', step3Desc: 'Trajet confortable de 15-20 minutes vers le centre.',
     popularRoutesTitle: 'Trajets Populaires Transfert Erevan', fromLabel: 'A partir de',
     routes: [
-      { name: 'Zvartnots EVN → Place de la Republique', price: 15 },
-      { name: 'Zvartnots EVN → Avenue du Nord', price: 15 },
-      { name: 'Zvartnots EVN → Complexe Cascade', price: 15 },
-      { name: 'Zvartnots EVN → Lac Sevan', price: 55 },
+      { name: 'Zvartnots EVN → Centre d\'Erevan', price: 8 },
+      { name: 'Zvartnots EVN → Garni', price: 20 },
     ],
     bookingForm: 'Reservez Votre Transfert Aeroport Erevan',
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -82,10 +78,8 @@ const content = {
     step3: 'Добро Пожаловать в Ереван', step3Desc: 'Комфортная поездка 15-20 минут.',
     popularRoutesTitle: 'Популярные Маршруты из Аэропорта Еревана', fromLabel: 'От',
     routes: [
-      { name: 'Звартноц EVN → Площадь Республики', price: 15 },
-      { name: 'Звартноц EVN → Северный Проспект', price: 15 },
-      { name: 'Звартноц EVN → Каскад', price: 15 },
-      { name: 'Звартноц EVN → Озеро Севан', price: 55 },
+      { name: 'Звартноц EVN → Центр Еревана', price: 8 },
+      { name: 'Звартноц EVN → Гарни', price: 20 },
     ],
     bookingForm: 'Забронируйте Трансфер из Аэропорта Еревана',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
@@ -147,10 +141,8 @@ const content = {
     step3: 'Relajate y disfruta', step3Desc: 'Traslado directo y comodo al centro de Ereván en 20 minutos.',
     popularRoutesTitle: 'Rutas populares desde Zvartnots', fromLabel: 'Desde',
     routes: [
-      { name: 'Aeropuerto Zvartnots \u2192 Centro Ereván', price: 15 },
-      { name: 'Aeropuerto Zvartnots \u2192 Hotel Marriott', price: 18 },
-      { name: 'Aeropuerto Zvartnots \u2192 Lago Sevan', price: 60 },
-      { name: 'Aeropuerto Zvartnots \u2192 Dilijan', price: 75 },
+      { name: 'Aeropuerto Zvartnots \u2192 Centro de Ereván', price: 8 },
+      { name: 'Aeropuerto Zvartnots \u2192 Garni', price: 20 },
     ],
     bookingForm: 'Reserva tu traslado desde Zvartnots',
     pickupLabel: 'Recogida', dropoffLabel: 'Destino', dateLabel: 'Fecha', timeLabel: 'Hora',
@@ -162,8 +154,13 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 15, luxury: 25, minivan: 35, minibus: 55 };
+const vehiclesPrices = { sedan: 8, luxury: 15, minivan: 20, minibus: 35 };
 
 const seoUrls = { en: '/yerevan-airport-transfer', fr: '/transfert-aeroport-erevan', ru: '/taksi-iz-aeroporta-erevan', hy: '/erevan-odanavakayani-transfer', es: '/es/traslado-aeropuerto-erevan-zvartnots' };
-const YerevanTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+// Live +15% prices: Centre 7.82, Garni 20.47
+const routeImages = [
+  'https://images.unsplash.com/photo-1600758208050-a22f17dc5bb9?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1629761905941-a3801e2874e2?auto=format&fit=crop&w=800&q=70',
+];
+const YerevanTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} routeImages={routeImages} />;
 export default YerevanTransfer;

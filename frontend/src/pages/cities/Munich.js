@@ -22,10 +22,9 @@ const content = {
     step3: 'Enjoy the Ride', step3Desc: 'Comfortable 35-45 minute ride to central Munich.',
     popularRoutesTitle: 'Popular Munich Airport Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'MUC Airport → Munich Marienplatz', price: 55 },
-      { name: 'MUC Airport → Munich Hauptbahnhof', price: 55 },
-      { name: 'MUC Airport → BMW World', price: 50 },
-      { name: 'MUC Airport → Garmisch-Partenkirchen', price: 180 },
+      { name: 'MUC → Munich City Centre', price: 115 },
+      { name: 'MUC → Trade Fair Zone', price: 108 },
+      { name: 'MUC → Main Station Zone', price: 122 },
     ],
     bookingForm: 'Book Your Munich Airport Transfer',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
@@ -53,10 +52,9 @@ const content = {
     step3: 'Profitez du Trajet', step3Desc: 'Trajet confortable de 35-45 minutes vers Munich centre.',
     popularRoutesTitle: 'Trajets Populaires Transfert Munich', fromLabel: 'A partir de',
     routes: [
-      { name: 'Aeroport MUC → Munich Marienplatz', price: 55 },
-      { name: 'Aeroport MUC → Gare Centrale Munich', price: 55 },
-      { name: 'Aeroport MUC → BMW World', price: 50 },
-      { name: 'Aeroport MUC → Garmisch-Partenkirchen', price: 180 },
+      { name: 'MUC → Centre de Munich', price: 115 },
+      { name: 'MUC → Zone du Salon (Messe)', price: 108 },
+      { name: 'MUC → Gare Centrale', price: 122 },
     ],
     bookingForm: 'Reservez Votre Transfert Aeroport Munich',
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -84,10 +82,9 @@ const content = {
     step3: 'Наслаждайтесь', step3Desc: 'Комфортная поездка 35-45 минут.',
     popularRoutesTitle: 'Популярные Маршруты из Аэропорта Мюнхена', fromLabel: 'От',
     routes: [
-      { name: 'Аэропорт MUC → Мариенплац', price: 55 },
-      { name: 'Аэропорт MUC → Главный вокзал', price: 55 },
-      { name: 'Аэропорт MUC → BMW World', price: 50 },
-      { name: 'Аэропорт MUC → Гармиш', price: 180 },
+      { name: 'MUC → Центр Мюнхена', price: 115 },
+      { name: 'MUC → Выставочная зона', price: 108 },
+      { name: 'MUC → Главный вокзал', price: 122 },
     ],
     bookingForm: 'Забронируйте Трансфер из Аэропорта Мюнхена',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
@@ -127,8 +124,14 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 55, luxury: 80, minivan: 110, minibus: 165 };
+const vehiclesPrices = { sedan: 115, luxury: 140, minivan: 150, minibus: 210 };
 
 const seoUrls = { en: '/munich-airport-transfer', fr: '/transfert-aeroport-munich', ru: '/taksi-iz-aeroporta-munhen', hy: '/myunkhen-odanavakayani-transfer' };
-const MunichTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+// Live +15% prices: Centre 115, Trade Fair 108.10, Main Station 121.90
+const routeImages = [
+  'https://images.unsplash.com/photo-1649609765902-254a227dc960?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1768590149034-c372f0c3a07c?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1764505879447-787dfe93c468?auto=format&fit=crop&w=800&q=70',
+];
+const MunichTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} routeImages={routeImages} />;
 export default MunichTransfer;

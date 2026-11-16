@@ -148,6 +148,7 @@ const GareMontparnasseTransfer = lazy(() => import("@/pages/cities/GareMontparna
 const GareSaintLazareTransfer = lazy(() => import("@/pages/cities/GareSaintLazare"));
 const GareAusterlitzTransfer = lazy(() => import("@/pages/cities/GareAusterlitz"));
 const DisneylandTransfer = lazy(() => import("@/pages/cities/DisneylandParis"));
+const StrasbourgTransfer = lazy(() => import("@/pages/cities/Strasbourg"));
 const DisneyTransferPage = lazy(() => import("@/components/DisneyTransferPage"));
 const MICETransportation = lazy(() => import("@/pages/MICETransportation"));
 
@@ -400,6 +401,11 @@ function App() {
                   <Route path="/transfert-aeroport-rome" element={<RomeTransfer />} />
                   <Route path="/taksi-iz-aeroporta-rim" element={<RomeTransfer />} />
                   <Route path="/hrom-odanavakayani-transfer" element={<RomeTransfer />} />
+                  {/* Strasbourg */}
+                  <Route path="/strasbourg-airport-transfer" element={<StrasbourgTransfer />} />
+                  <Route path="/transfert-aeroport-strasbourg" element={<StrasbourgTransfer />} />
+                  <Route path="/taksi-iz-aeroporta-strasburg" element={<StrasbourgTransfer />} />
+                  <Route path="/strasburg-odanavakayani-transfer" element={<StrasbourgTransfer />} />
                   {/* Milan */}
                   <Route path="/milan-airport-transfer" element={<MilanTransfer />} />
                   <Route path="/transfert-aeroport-milan" element={<MilanTransfer />} />

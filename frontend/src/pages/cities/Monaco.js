@@ -22,10 +22,7 @@ const content = {
     step3: 'Arrive in Style', step3Desc: 'Direct luxury transfer to Monaco in 25-35 minutes.',
     popularRoutesTitle: 'Popular Monaco Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'Nice Airport → Monte-Carlo', price: 65 },
-      { name: 'Nice Airport → Monaco Port Hercules', price: 70 },
-      { name: 'Nice Airport → Fontvieille', price: 65 },
-      { name: 'Monaco → Cannes', price: 95 },
+      { name: 'Nice Airport (NCE) → Monaco', price: 109 },
     ],
     bookingForm: 'Book Your Monaco Airport Transfer',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
@@ -53,10 +50,7 @@ const content = {
     step3: 'Arrivez avec Style', step3Desc: 'Transfert de luxe direct vers Monaco en 25-35 minutes.',
     popularRoutesTitle: 'Trajets Populaires Transfert Monaco', fromLabel: 'A partir de',
     routes: [
-      { name: 'Aeroport Nice → Monte-Carlo', price: 65 },
-      { name: 'Aeroport Nice → Port Hercule Monaco', price: 70 },
-      { name: 'Aeroport Nice → Fontvieille', price: 65 },
-      { name: 'Monaco → Cannes', price: 95 },
+      { name: 'Aéroport de Nice (NCE) → Monaco', price: 109 },
     ],
     bookingForm: 'Reservez Votre Transfert Aeroport Monaco',
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -84,10 +78,7 @@ const content = {
     step3: 'Прибытие со Стилем', step3Desc: 'Прямой люкс-трансфер в Монако за 25-35 минут.',
     popularRoutesTitle: 'Популярные Маршруты Трансфера в Монако', fromLabel: 'От',
     routes: [
-      { name: 'Аэропорт Ниццы → Монте-Карло', price: 65 },
-      { name: 'Аэропорт Ниццы → Порт Эркюль Монако', price: 70 },
-      { name: 'Аэропорт Ниццы → Фонвьей', price: 65 },
-      { name: 'Монако → Канны', price: 95 },
+      { name: 'Аэропорт Ниццы (NCE) → Монако', price: 109 },
     ],
     bookingForm: 'Забронируйте Трансфер в Монако',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
@@ -127,8 +118,12 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 65, luxury: 95, minivan: 120, minibus: 180 };
+const vehiclesPrices = { sedan: 109, luxury: 135, minivan: 150, minibus: 210 };
 
 const seoUrls = { en: '/monaco-airport-transfer', fr: '/transfert-aeroport-monaco', ru: '/taksi-iz-aeroporta-monako', hy: '/monako-odanavakayani-transfer' };
-const MonacoTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} heroImage="/images/monaco-driver-service.jpg" />;
+// Live +15% price: NCE → Monaco 109.25
+const routeImages = [
+  'https://images.unsplash.com/photo-1631173383816-4dcb24950a19?auto=format&fit=crop&w=800&q=70',
+];
+const MonacoTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} heroImage="/images/monaco-driver-service.jpg" routeImages={routeImages} />;
 export default MonacoTransfer;

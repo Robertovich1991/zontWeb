@@ -501,3 +501,14 @@ Implémenté et VÉRIFIÉ (curl + DB):
 - admin KioskSearchHistory.js: nouvelle colonne "Abandon à l'étape" (StepPill coloré): Écran date/heure (gris), Écran des prix (bleu), Infos client (indigo), Écran paiement (orange). Réservé/anciens enregistrements => "—".
 - Vérif curl: étape progresse date_time→vehicle→payment, retour arrière n'abaisse pas le rank.
 - Note: s'applique aux NOUVELLES recherches; anciens enregistrements (sans last_step) affichent "—".
+
+## [2026-06] Prix fixes réels (API +15%) + cartes trajets avec photos sur pages villes
+Demande: afficher les nouveaux prix fixes (live C# +15%, arrondis entiers) avec photos sur les pages aéroport/villes, pattern CityTransferPage.
+Implémenté et VÉRIFIÉ (HTML rendu + compile clean):
+- CityTransferPage.js: nouvelle prop `routeImages` (par index). Section Popular Routes rend des CARTES avec photo + "From X€" quand image dispo (route.image || routeImgs[i]), sinon liste texte (rétrocompatible). scrollToBooking conservé.
+- Prix + routes mis à jour (en/fr/ru, +es Yerevan) + vehiclesPrices.sedan + routeImages sur: Rome(90/94/214/90), Barcelona(48/48/61/78/51 Camp Nou), Milan(127/106/143/104), Munich(115/108/122), Berlin(75/69/104), Alicante(31/31/36/114), Yerevan(8/20), Monaco(109, 1 trajet NCE→Monaco). Valeurs exactes (décimales) en commentaire au-dessus de routeImages.
+- NOUVELLE page Strasbourg.js (en/fr/ru/hy) + 4 trajets (40/40/97/138) + routeImages. Routes App.js: /strasbourg-airport-transfer, /transfert-aeroport-strasbourg, /taksi-iz-aeroporta-strasburg, /strasburg-odanavakayani-transfer.
+- Home.js popularDest: prix MAJ (Barcelona 48, Rome 90, Berlin 75, Monaco 109) + ajout Milan/Munich/Alicante/Yerevan/Strasbourg (URLs multilingues enregistrées).
+- Images: Unsplash/Pexels optimisées (w=800), lazy-loaded, pertinentes par destination.
+- Vérifié rendu: Strasbourg + Barcelona (Camp Nou From 51€ OK, photos OK, hreflang fr/ru/hy OK). Backend non modifié.
+Note: FAQ Q2 du générateur cite encore "aéroports de Paris" sur pages non-Paris (mineur, backlog).

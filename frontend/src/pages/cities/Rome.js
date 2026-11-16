@@ -22,10 +22,10 @@ const content = {
     step3: 'Enjoy Rome', step3Desc: 'Direct comfortable transfer to your destination.',
     popularRoutesTitle: 'Popular Rome Airport Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'Fiumicino FCO → Rome City Center', price: 50 },
-      { name: 'Fiumicino FCO → Vatican Area', price: 50 },
-      { name: 'Ciampino CIA → Rome City Center', price: 40 },
-      { name: 'Fiumicino FCO → Termini Station', price: 48 },
+      { name: 'Fiumicino FCO → Rome City Centre', price: 90 },
+      { name: 'Fiumicino FCO → Ciampino Airport', price: 94 },
+      { name: 'Fiumicino FCO → Civitavecchia Cruise Port', price: 214 },
+      { name: 'Fiumicino FCO → Roma Tiburtina Station', price: 90 },
     ],
     bookingForm: 'Book Your Rome Airport Transfer',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
@@ -52,10 +52,10 @@ const content = {
     step3: 'Profitez de Rome', step3Desc: 'Transfert direct et confortable.',
     popularRoutesTitle: 'Trajets Populaires Transfert Rome', fromLabel: 'A partir de',
     routes: [
-      { name: 'Fiumicino FCO → Centre de Rome', price: 50 },
-      { name: 'Fiumicino FCO → Quartier Vatican', price: 50 },
-      { name: 'Ciampino CIA → Centre de Rome', price: 40 },
-      { name: 'Fiumicino FCO → Gare Termini', price: 48 },
+      { name: 'Fiumicino FCO → Centre de Rome', price: 90 },
+      { name: 'Fiumicino FCO → Aéroport de Ciampino', price: 94 },
+      { name: 'Fiumicino FCO → Port de Croisière Civitavecchia', price: 214 },
+      { name: 'Fiumicino FCO → Gare Roma Tiburtina', price: 90 },
     ],
     bookingForm: 'Reservez Votre Transfert Aeroport Rome',
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -83,10 +83,10 @@ const content = {
     step3: 'Наслаждайтесь Римом', step3Desc: 'Прямой комфортный трансфер.',
     popularRoutesTitle: 'Популярные Маршруты из Аэропорта Рима', fromLabel: 'От',
     routes: [
-      { name: 'Фьюмичино FCO → Центр Рима', price: 50 },
-      { name: 'Фьюмичино FCO → Ватикан', price: 50 },
-      { name: 'Чампино CIA → Центр Рима', price: 40 },
-      { name: 'Фьюмичино FCO → Вокзал Термини', price: 48 },
+      { name: 'Фьюмичино FCO → Центр Рима', price: 90 },
+      { name: 'Фьюмичино FCO → Аэропорт Чампино', price: 94 },
+      { name: 'Фьюмичино FCO → Круизный порт Чивитавеккья', price: 214 },
+      { name: 'Фьюмичино FCO → Вокзал Рома Тибуртина', price: 90 },
     ],
     bookingForm: 'Забронируйте Трансфер из Аэропорта Рима',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
@@ -126,8 +126,15 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 50, luxury: 75, minivan: 100, minibus: 160 };
+const vehiclesPrices = { sedan: 90, luxury: 115, minivan: 125, minibus: 190 };
 
 const seoUrls = { en: '/rome-airport-transfer', fr: '/transfert-aeroport-rome', ru: '/taksi-iz-aeroporta-rim', hy: '/hrom-odanavakayani-transfer' };
-const RomeTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+// Live +15% prices: FCO→Centre 89.70, FCO→Ciampino 94.30, FCO→Civitavecchia 213.90, FCO→Tiburtina 89.70
+const routeImages = [
+  'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1758531491352-7887c1fe45b3?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1752884991294-cd424478903a?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1764505879447-787dfe93c468?auto=format&fit=crop&w=800&q=70',
+];
+const RomeTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} routeImages={routeImages} />;
 export default RomeTransfer;

@@ -22,10 +22,11 @@ const content = {
     step3: 'Enjoy Barcelona', step3Desc: 'Direct 20-30 minute ride to central Barcelona.',
     popularRoutesTitle: 'Popular Barcelona Airport Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'BCN Airport → La Rambla / Gothic Quarter', price: 39 },
-      { name: 'BCN Airport → Sagrada Familia / Eixample', price: 39 },
-      { name: 'BCN Airport → Port Olimpic', price: 42 },
-      { name: 'BCN Airport → Sitges', price: 65 },
+      { name: 'BCN → Barcelona City Centre', price: 48 },
+      { name: 'BCN → Sants Station', price: 48 },
+      { name: 'BCN → Cruise Port', price: 61 },
+      { name: 'BCN → Sitges', price: 78 },
+      { name: 'BCN → Spotify Camp Nou', price: 51 },
     ],
     bookingForm: 'Book Your Barcelona Airport Transfer',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
@@ -52,10 +53,11 @@ const content = {
     step3: 'Profitez de Barcelone', step3Desc: 'Trajet direct de 20-30 minutes vers le centre.',
     popularRoutesTitle: 'Trajets Populaires Transfert Barcelone', fromLabel: 'A partir de',
     routes: [
-      { name: 'Aeroport BCN → La Rambla / Quartier Gothique', price: 39 },
-      { name: 'Aeroport BCN → Sagrada Familia / Eixample', price: 39 },
-      { name: 'Aeroport BCN → Port Olimpic', price: 42 },
-      { name: 'Aeroport BCN → Sitges', price: 65 },
+      { name: 'BCN → Centre de Barcelone', price: 48 },
+      { name: 'BCN → Gare de Sants', price: 48 },
+      { name: 'BCN → Port de Croisière', price: 61 },
+      { name: 'BCN → Sitges', price: 78 },
+      { name: 'BCN → Spotify Camp Nou', price: 51 },
     ],
     bookingForm: 'Reservez Votre Transfert Aeroport Barcelone',
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -82,10 +84,11 @@ const content = {
     step3: 'Наслаждайтесь Барселоной', step3Desc: 'Прямой трансфер 20-30 минут.',
     popularRoutesTitle: 'Популярные Маршруты из Аэропорта Барселоны', fromLabel: 'От',
     routes: [
-      { name: 'Аэропорт BCN → Рамбла / Готический квартал', price: 39 },
-      { name: 'Аэропорт BCN → Саграда Фамилия', price: 39 },
-      { name: 'Аэропорт BCN → Порт Олимпик', price: 42 },
-      { name: 'Аэропорт BCN → Ситжес', price: 65 },
+      { name: 'BCN → Центр Барселоны', price: 48 },
+      { name: 'BCN → Вокзал Сантс', price: 48 },
+      { name: 'BCN → Круизный порт', price: 61 },
+      { name: 'BCN → Ситжес', price: 78 },
+      { name: 'BCN → Камп Ноу', price: 51 },
     ],
     bookingForm: 'Забронируйте Трансфер из Аэропорта Барселоны',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
@@ -125,8 +128,16 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 39, luxury: 60, minivan: 85, minibus: 140 };
+const vehiclesPrices = { sedan: 48, luxury: 65, minivan: 72, minibus: 120 };
 
 const seoUrls = { en: '/barcelona-airport-transfer', fr: '/transfert-aeroport-barcelone', ru: '/taksi-iz-aeroporta-barselona', hy: '/barselona-odanavakayani-transfer' };
-const BarcelonaTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+// Live +15% prices: Centre 48.30, Sants 48.30, Cruise Port 60.95, Sitges 78.20, Camp Nou 50.60
+const routeImages = [
+  'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1764505879447-787dfe93c468?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1752884991294-cd424478903a?auto=format&fit=crop&w=800&q=70',
+  'https://images.pexels.com/photos/16762288/pexels-photo-16762288.jpeg?auto=compress&cs=tinysrgb&w=800',
+  'https://images.unsplash.com/photo-1629217855633-79a6925d6c47?auto=format&fit=crop&w=800&q=70',
+];
+const BarcelonaTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} routeImages={routeImages} />;
 export default BarcelonaTransfer;

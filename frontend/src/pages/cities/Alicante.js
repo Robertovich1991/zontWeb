@@ -22,10 +22,10 @@ const content = {
     step3: 'Start Your Holiday', step3Desc: 'Direct transfer to your resort or hotel.',
     popularRoutesTitle: 'Popular Alicante Airport Transfer Routes', fromLabel: 'From',
     routes: [
-      { name: 'ALC Airport → Alicante City Center', price: 30 },
-      { name: 'ALC Airport → Benidorm', price: 65 },
-      { name: 'ALC Airport → Torrevieja', price: 45 },
-      { name: 'ALC Airport → Denia / Javea', price: 95 },
+      { name: 'ALC → Alicante City Centre', price: 31 },
+      { name: 'ALC → Terminal Station', price: 31 },
+      { name: 'ALC → Elche', price: 36 },
+      { name: 'ALC → Benidorm', price: 114 },
     ],
     bookingForm: 'Book Your Alicante Airport Transfer',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
@@ -52,10 +52,10 @@ const content = {
     step3: 'Commencez Vos Vacances', step3Desc: 'Transfert direct vers votre hotel ou resort.',
     popularRoutesTitle: 'Trajets Populaires Transfert Alicante', fromLabel: 'A partir de',
     routes: [
-      { name: 'Aeroport ALC → Centre d\'Alicante', price: 30 },
-      { name: 'Aeroport ALC → Benidorm', price: 65 },
-      { name: 'Aeroport ALC → Torrevieja', price: 45 },
-      { name: 'Aeroport ALC → Denia / Javea', price: 95 },
+      { name: 'ALC → Centre d\'Alicante', price: 31 },
+      { name: 'ALC → Gare d\'Alicante', price: 31 },
+      { name: 'ALC → Elche', price: 36 },
+      { name: 'ALC → Benidorm', price: 114 },
     ],
     bookingForm: 'Reservez Votre Transfert Aeroport Alicante',
     pickupLabel: 'Depart', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
@@ -82,10 +82,10 @@ const content = {
     step3: 'Начните Отдых', step3Desc: 'Прямой трансфер в отель.',
     popularRoutesTitle: 'Популярные Маршруты из Аэропорта Аликанте', fromLabel: 'От',
     routes: [
-      { name: 'Аэропорт ALC → Центр Аликанте', price: 30 },
-      { name: 'Аэропорт ALC → Бенидорм', price: 65 },
-      { name: 'Аэропорт ALC → Торревьеха', price: 45 },
-      { name: 'Аэропорт ALC → Дения / Хавея', price: 95 },
+      { name: 'ALC → Центр Аликанте', price: 31 },
+      { name: 'ALC → Вокзал Аликанте', price: 31 },
+      { name: 'ALC → Эльче', price: 36 },
+      { name: 'ALC → Бенидорм', price: 114 },
     ],
     bookingForm: 'Забронируйте Трансфер из Аэропорта Аликанте',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
@@ -125,8 +125,15 @@ const content = {
   },
 };
 
-const vehiclesPrices = { sedan: 30, luxury: 50, minivan: 75, minibus: 120 };
+const vehiclesPrices = { sedan: 31, luxury: 48, minivan: 55, minibus: 90 };
 
 const seoUrls = { en: '/alicante-airport-transfer', fr: '/transfert-aeroport-alicante', ru: '/taksi-iz-aeroporta-alikante', hy: '/alikante-odanavakayani-transfer' };
-const AlicanteTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
+// Live +15% prices: Centre 31.05, Station 31.05, Elche 35.65, Benidorm 113.85
+const routeImages = [
+  'https://images.unsplash.com/photo-1655405927518-94872964699f?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1764505879447-787dfe93c468?auto=format&fit=crop&w=800&q=70',
+  'https://images.unsplash.com/photo-1599875006868-6ffe41e63ea9?auto=format&fit=crop&w=800&q=70',
+  'https://images.pexels.com/photos/33917127/pexels-photo-33917127.jpeg?auto=compress&cs=tinysrgb&w=800',
+];
+const AlicanteTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} routeImages={routeImages} />;
 export default AlicanteTransfer;
