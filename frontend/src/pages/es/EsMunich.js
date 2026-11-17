@@ -4,6 +4,7 @@ import EsServicePage from './EsServicePage';
 const EsMunich = () => (
   <EsServicePage
     url="/es/traslado-aeropuerto-munich"
+    alt={{ en: '/munich-airport-transfer', fr: '/transfert-aeroport-munich', ru: '/taksi-iz-aeroporta-munhen', hy: '/myunkhen-odanavakayani-transfer' }}
     title="Traslado Aeropuerto Munich | Conductor Privado MUC Oktoberfest"
     description="Traslado privado del aeropuerto Munich Franz Josef Strauss (MUC) hacia tu hotel. Oktoberfest, Marienplatz, BMW Welt. Precio fijo, profesional."
     keywords="traslado aeropuerto Munich, taxi Munich MUC, conductor privado Munich, Oktoberfest transfer, transfer hotel Munich"

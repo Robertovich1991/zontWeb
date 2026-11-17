@@ -129,6 +129,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 70, luxury: 95, minivan: 120, minibus: 170 };
 
-const seoUrls = { en: '/cannes-airport-transfer', fr: '/transfert-aeroport-cannes', ru: '/taksi-iz-aeroporta-kanny', hy: '/kann-odanavakayani-transfer' };
+const seoUrls = { en: '/cannes-airport-transfer', fr: '/transfert-aeroport-cannes', ru: '/taksi-iz-aeroporta-kanny', hy: '/kann-odanavakayani-transfer', es: '/es/traslado-aeropuerto-cannes' };
 const CannesTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} />;
 export default CannesTransfer;

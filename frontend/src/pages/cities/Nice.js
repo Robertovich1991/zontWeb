@@ -129,6 +129,6 @@ const content = {
 
 const vehiclesPrices = { sedan: 35, luxury: 55, minivan: 85, minibus: 140 };
 
-const seoUrls = { en: '/nice-airport-transfer', fr: '/transfert-aeroport-nice', ru: '/taksi-iz-aeroporta-nitstsa', hy: '/nis-odanavakayani-transfer' };
+const seoUrls = { en: '/nice-airport-transfer', fr: '/transfert-aeroport-nice', ru: '/taksi-iz-aeroporta-nitstsa', hy: '/nis-odanavakayani-transfer', es: '/es/traslado-aeropuerto-niza' };
 const NiceTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} pageId="nice" />;
 export default NiceTransfer;

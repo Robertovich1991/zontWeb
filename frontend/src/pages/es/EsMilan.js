@@ -4,6 +4,7 @@ import EsServicePage from './EsServicePage';
 const EsMilan = () => (
   <EsServicePage
     url="/es/traslado-aeropuerto-milan"
+    alt={{ en: '/milan-airport-transfer', fr: '/transfert-aeroport-milan', ru: '/taksi-iz-aeroporta-milan', hy: '/milan-odanavakayani-transfer' }}
     title="Traslado Aeropuerto Milan | Conductor Privado Malpensa y Linate"
     description="Traslado privado del aeropuerto de Milan-Malpensa (MXP) o Linate (LIN) hacia el centro, Como, Bergamo, Turin. Moda, business, precio fijo."
     keywords="traslado aeropuerto Milan, taxi Malpensa MXP, taxi Linate LIN, conductor privado Milan, transfer Como Milan"

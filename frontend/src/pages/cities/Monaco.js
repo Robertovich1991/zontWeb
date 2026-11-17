@@ -120,7 +120,7 @@ const content = {
 
 const vehiclesPrices = { sedan: 109, luxury: 135, minivan: 150, minibus: 210 };
 
-const seoUrls = { en: '/monaco-airport-transfer', fr: '/transfert-aeroport-monaco', ru: '/taksi-iz-aeroporta-monako', hy: '/monako-odanavakayani-transfer' };
+const seoUrls = { en: '/monaco-airport-transfer', fr: '/transfert-aeroport-monaco', ru: '/taksi-iz-aeroporta-monako', hy: '/monako-odanavakayani-transfer', es: '/es/traslado-aeropuerto-monaco' };
 // Live +15% price: NCE → Monaco 109.25
 const routeImages = [
   'https://images.unsplash.com/photo-1631173383816-4dcb24950a19?auto=format&fit=crop&w=800&q=70',

@@ -126,7 +126,7 @@ const content = {
 
 const vehiclesPrices = { sedan: 75, luxury: 95, minivan: 105, minibus: 160 };
 
-const seoUrls = { en: '/berlin-airport-transfer', fr: '/transfert-aeroport-berlin', ru: '/taksi-iz-aeroporta-berlin', hy: '/berlin-odanavakayani-transfer' };
+const seoUrls = { en: '/berlin-airport-transfer', fr: '/transfert-aeroport-berlin', ru: '/taksi-iz-aeroporta-berlin', hy: '/berlin-odanavakayani-transfer', es: '/es/traslado-aeropuerto-berlin' };
 // Live +15% prices: Centre 74.75, Mitte 69, Potsdam 103.50
 const routeImages = [
   'https://images.unsplash.com/photo-1587330979470-3595ac045ab0?auto=format&fit=crop&w=800&q=70',

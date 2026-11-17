@@ -127,7 +127,7 @@ const content = {
 
 const vehiclesPrices = { sedan: 127, luxury: 150, minivan: 165, minibus: 230 };
 
-const seoUrls = { en: '/milan-airport-transfer', fr: '/transfert-aeroport-milan', ru: '/taksi-iz-aeroporta-milan', hy: '/milan-odanavakayani-transfer' };
+const seoUrls = { en: '/milan-airport-transfer', fr: '/transfert-aeroport-milan', ru: '/taksi-iz-aeroporta-milan', hy: '/milan-odanavakayani-transfer', es: '/es/traslado-aeropuerto-milan' };
 // Live +15% prices: Centre 126.50, Fiera Rho 105.80, Linate 142.60, Monza 103.50
 const routeImages = [
   'https://images.unsplash.com/photo-1610016302534-6f67f1c968d8?auto=format&fit=crop&w=800&q=70',

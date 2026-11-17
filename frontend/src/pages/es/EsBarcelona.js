@@ -4,6 +4,7 @@ import EsServicePage from './EsServicePage';
 const EsBarcelona = () => (
   <EsServicePage
     url="/es/traslado-aeropuerto-barcelona"
+    alt={{ en: '/barcelona-airport-transfer', fr: '/transfert-aeroport-barcelone', ru: '/taksi-iz-aeroporta-barselona', hy: '/barselona-odanavakayani-transfer' }}
     title="Traslado Aeropuerto Barcelona | Conductor Privado El Prat"
     description="Traslado privado desde el aeropuerto de Barcelona El Prat (BCN) hacia tu hotel en Barcelona, Sitges, Castelldefels. Precio fijo, conductor profesional."
     keywords="traslado aeropuerto Barcelona, taxi El Prat BCN, conductor privado Barcelona, transfer Sitges Barcelona, taxi a Castelldefels"

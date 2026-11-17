@@ -91,8 +91,12 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
       return;
     }
     const targetUrl = seoUrls[language];
-    if (targetUrl && targetUrl !== location.pathname) {
-      navigate(targetUrl, { replace: true });
+    if (targetUrl) {
+      if (targetUrl !== location.pathname) navigate(targetUrl, { replace: true });
+    } else if (language === 'es') {
+      // This page has no Spanish version — send the user to the Spanish home
+      // instead of leaving them on a non-ES URL showing English fallback content.
+      navigate('/es', { replace: true });
     }
   }, [language, seoUrls]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -276,12 +280,8 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
         canonical={seoUrls ? `https://www.zont.cab${seoUrls[language] || seoUrls.en}` : undefined}
         ogImage={ogImage ? (ogImage.startsWith('http') ? ogImage : `https://www.zont.cab${ogImage}`) : (heroImage ? (heroImage.startsWith('http') ? heroImage : `https://www.zont.cab${heroImage}`) : "https://www.zont.cab/images/hero.webp")}
         hreflang={seoUrls ? [
-          { lang: 'en', href: `https://www.zont.cab${seoUrls.en}` },
-          { lang: 'fr', href: `https://www.zont.cab${seoUrls.fr || seoUrls.en}` },
-          { lang: 'ru', href: `https://www.zont.cab${seoUrls.ru || seoUrls.en}` },
-          { lang: 'hy', href: `https://www.zont.cab${seoUrls.hy || seoUrls.en}` },
-          { lang: 'es', href: `https://www.zont.cab${seoUrls.es || seoUrls.en}` },
-          { lang: 'x-default', href: `https://www.zont.cab${seoUrls.en}` },
+          ...['en', 'fr', 'ru', 'hy', 'es'].filter((l) => seoUrls[l]).map((l) => ({ lang: l, href: `https://www.zont.cab${seoUrls[l]}` })),
+          { lang: 'x-default', href: `https://www.zont.cab${seoUrls.en || seoUrls.fr}` },
         ] : undefined}
         jsonLd={[
           {

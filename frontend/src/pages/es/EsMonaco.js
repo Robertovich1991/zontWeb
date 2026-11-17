@@ -4,6 +4,7 @@ import EsServicePage from './EsServicePage';
 const EsMonaco = () => (
   <EsServicePage
     url="/es/traslado-aeropuerto-monaco"
+    alt={{ en: '/monaco-airport-transfer', fr: '/transfert-aeroport-monaco', ru: '/taksi-iz-aeroporta-monako', hy: '/monako-odanavakayani-transfer' }}
     title="Traslado Aeropuerto Monaco | Conductor Privado Grand Prix"
     description="Traslado privado del aeropuerto de Niza hacia Monaco. Grand Prix, Casino, Monte-Carlo. Mercedes Clase S, precio fijo, conductor profesional."
     keywords="traslado Monaco, Monaco Grand Prix transfer, taxi Monte-Carlo, conductor privado Monaco, Niza a Monaco"

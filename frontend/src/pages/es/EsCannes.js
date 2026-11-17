@@ -4,6 +4,7 @@ import EsServicePage from './EsServicePage';
 const EsCannes = () => (
   <EsServicePage
     url="/es/traslado-aeropuerto-cannes"
+    alt={{ en: '/cannes-airport-transfer', fr: '/transfert-aeroport-cannes', ru: '/taksi-iz-aeroporta-kanny', hy: '/kann-odanavakayani-transfer' }}
     title="Traslado Aeropuerto Cannes | Conductor Privado Festival"
     description="Traslado privado desde el aeropuerto de Niza hacia Cannes, Mandelieu o Cannes-La Bocca. Festival de Cannes, MIPIM, Cannes Lions. Precio fijo."
     keywords="traslado aeropuerto Cannes, taxi Cannes festival, conductor privado Cannes, Niza a Cannes traslado, MIPIM Cannes"

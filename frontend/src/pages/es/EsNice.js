@@ -4,6 +4,7 @@ import EsServicePage from './EsServicePage';
 const EsNice = () => (
   <EsServicePage
     url="/es/traslado-aeropuerto-niza"
+    alt={{ en: '/nice-airport-transfer', fr: '/transfert-aeroport-nice', ru: '/taksi-iz-aeroporta-nitstsa', hy: '/nis-odanavakayani-transfer' }}
     title="Traslado Aeropuerto Niza | Conductor Privado Costa Azul"
     description="Traslado privado desde el aeropuerto de Niza (NCE) hacia Cannes, Monaco, Antibes, Saint-Tropez. Precio fijo, conductor profesional, 24/7."
     keywords="traslado aeropuerto Niza, taxi NCE Niza, conductor privado Niza, Costa Azul transfer, Niza a Monaco taxi"

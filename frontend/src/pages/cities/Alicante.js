@@ -127,7 +127,7 @@ const content = {
 
 const vehiclesPrices = { sedan: 31, luxury: 48, minivan: 55, minibus: 90 };
 
-const seoUrls = { en: '/alicante-airport-transfer', fr: '/transfert-aeroport-alicante', ru: '/taksi-iz-aeroporta-alikante', hy: '/alikante-odanavakayani-transfer' };
+const seoUrls = { en: '/alicante-airport-transfer', fr: '/transfert-aeroport-alicante', ru: '/taksi-iz-aeroporta-alikante', hy: '/alikante-odanavakayani-transfer', es: '/es/traslado-aeropuerto-alicante' };
 // Live +15% prices: Centre 31.05, Station 31.05, Elche 35.65, Benidorm 113.85
 const routeImages = [
   'https://images.unsplash.com/photo-1655405927518-94872964699f?auto=format&fit=crop&w=800&q=70',

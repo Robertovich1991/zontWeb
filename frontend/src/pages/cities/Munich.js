@@ -126,7 +126,7 @@ const content = {
 
 const vehiclesPrices = { sedan: 115, luxury: 140, minivan: 150, minibus: 210 };
 
-const seoUrls = { en: '/munich-airport-transfer', fr: '/transfert-aeroport-munich', ru: '/taksi-iz-aeroporta-munhen', hy: '/myunkhen-odanavakayani-transfer' };
+const seoUrls = { en: '/munich-airport-transfer', fr: '/transfert-aeroport-munich', ru: '/taksi-iz-aeroporta-munhen', hy: '/myunkhen-odanavakayani-transfer', es: '/es/traslado-aeropuerto-munich' };
 // Live +15% prices: Centre 115, Trade Fair 108.10, Main Station 121.90
 const routeImages = [
   'https://images.unsplash.com/photo-1649609765902-254a227dc960?auto=format&fit=crop&w=800&q=70',

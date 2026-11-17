@@ -130,7 +130,7 @@ const content = {
 
 const vehiclesPrices = { sedan: 48, luxury: 65, minivan: 72, minibus: 120 };
 
-const seoUrls = { en: '/barcelona-airport-transfer', fr: '/transfert-aeroport-barcelone', ru: '/taksi-iz-aeroporta-barselona', hy: '/barselona-odanavakayani-transfer' };
+const seoUrls = { en: '/barcelona-airport-transfer', fr: '/transfert-aeroport-barcelone', ru: '/taksi-iz-aeroporta-barselona', hy: '/barselona-odanavakayani-transfer', es: '/es/traslado-aeropuerto-barcelona' };
 // Live +15% prices: Centre 48.30, Sants 48.30, Cruise Port 60.95, Sitges 78.20, Camp Nou 50.60
 const routeImages = [
   'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800&q=70',

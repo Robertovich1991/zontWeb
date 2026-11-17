@@ -128,7 +128,7 @@ const content = {
 
 const vehiclesPrices = { sedan: 90, luxury: 115, minivan: 125, minibus: 190 };
 
-const seoUrls = { en: '/rome-airport-transfer', fr: '/transfert-aeroport-rome', ru: '/taksi-iz-aeroporta-rim', hy: '/hrom-odanavakayani-transfer' };
+const seoUrls = { en: '/rome-airport-transfer', fr: '/transfert-aeroport-rome', ru: '/taksi-iz-aeroporta-rim', hy: '/hrom-odanavakayani-transfer', es: '/es/traslado-aeropuerto-roma' };
 // Live +15% prices: FCO→Centre 89.70, FCO→Ciampino 94.30, FCO→Civitavecchia 213.90, FCO→Tiburtina 89.70
 const routeImages = [
   'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=70',

@@ -4,6 +4,7 @@ import EsServicePage from './EsServicePage';
 const EsAlicante = () => (
   <EsServicePage
     url="/es/traslado-aeropuerto-alicante"
+    alt={{ en: '/alicante-airport-transfer', fr: '/transfert-aeroport-alicante', ru: '/taksi-iz-aeroporta-alikante', hy: '/alikante-odanavakayani-transfer' }}
     title="Traslado Aeropuerto Alicante | Conductor Privado Costa Blanca"
     description="Traslado privado desde el aeropuerto de Alicante-Elche (ALC) hacia Benidorm, Torrevieja, Calpe, Denia. Costa Blanca. Precio fijo, 24/7."
     keywords="traslado aeropuerto Alicante, taxi Alicante ALC, conductor privado Benidorm, Costa Blanca transfer, taxi a Torrevieja"

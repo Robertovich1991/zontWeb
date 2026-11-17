@@ -521,3 +521,16 @@ Corrigé et VÉRIFIÉ (crawl):
 - Countries.js: ajout image Strasbourg + startingPrices alignés sur nouveaux prix (rome 90, milan 127, barcelona 48, berlin 75, munich 115, alicante 31, yerevan 8, monaco 109, strasbourg 40).
 - Vérifié /countries: Strasbourg sous France (From 40€, photo cathédrale), tous prix MAJ.
 Note: libellé "16 cities" dans l'en-tête Countries reste statique (mineur).
+
+## [2026-06] Fix i18n ES + duplication Google (hreflang)
+Symptôme user: /taksi-iz-aeroporta-barselona (et autres) ne passent pas en ES; GSC signale duplication.
+Causes trouvées:
+1. hreflang CityTransferPage: ligne `es` retombait sur l'URL EN quand seoUrls.es absent → URL anglaise déclarée comme EN+ES+x-default = conflit/duplication.
+2. 9 villes avaient des pages ES dédiées (pages/es/Es*.js via EsServicePage, routées /es/traslado-aeropuerto-*) MAIS n'étaient pas liées: leur CityTransferPage seoUrls n'avait pas `es` → le sélecteur de langue ne naviguait jamais vers la vraie page ES (affichait l'anglais), et hreflang non bidirectionnel.
+Corrigé et VÉRIFIÉ (rendu RU=russe, ES=espagnol, compile clean):
+- CityTransferPage.js: hreflang dynamique (seules langues réellement présentes dans seoUrls) + x-default=en. Switch langue: si seoUrls[lang] absent et lang=es → redirige /es (fallback sûr).
+- Ajout `es` aux seoUrls de 9 villes: Barcelona, Rome, Milan, Berlin, Munich, Alicante, Monaco, Nice, Cannes (pointant vers /es/traslado-aeropuerto-*).
+- EsServicePage.js: nouvelle prop `alt` → hreflang complet vers en/fr/ru/hy (return-tags bidirectionnels) + x-default=en.
+- 9 pages Es*.js: passent `alt={{en,fr,ru,hy}}`.
+Résultat: chaque URL = une langue cohérente, hreflang bidirectionnel complet → résout la duplication GSC. Switch GB→ES sur ces villes amène désormais à la vraie page espagnole.
+Note: Google doit re-crawler (quelques semaines) pour lever les duplicatas.

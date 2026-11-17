@@ -25,6 +25,7 @@ const EsServicePage = ({
   serviceName,
   faq = [],
   relatedLinks = [],
+  alt,
 }) => {
   const { changeLanguage } = useLanguage();
 
@@ -56,10 +57,11 @@ const EsServicePage = ({
     })),
   } : null;
 
-  // hreflang alternates — Spanish-only page so alternates point to the ES URL + canonical x-default to EN home
+  // hreflang alternates — include all language versions (bidirectional return tags) when provided
   const hreflang = [
+    ...(alt ? ['en', 'fr', 'ru', 'hy'].filter((l) => alt[l]).map((l) => ({ lang: l, href: `https://www.zont.cab${alt[l]}` })) : []),
     { lang: 'es', href: canonical },
-    { lang: 'x-default', href: 'https://www.zont.cab/' },
+    { lang: 'x-default', href: alt && alt.en ? `https://www.zont.cab${alt.en}` : 'https://www.zont.cab/' },
   ];
 
   return (

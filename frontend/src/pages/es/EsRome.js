@@ -4,6 +4,7 @@ import EsServicePage from './EsServicePage';
 const EsRome = () => (
   <EsServicePage
     url="/es/traslado-aeropuerto-roma"
+    alt={{ en: '/rome-airport-transfer', fr: '/transfert-aeroport-rome', ru: '/taksi-iz-aeroporta-rim', hy: '/hrom-odanavakayani-transfer' }}
     title="Traslado Aeropuerto Roma | Conductor Privado Fiumicino y Ciampino"
     description="Traslado privado del aeropuerto de Fiumicino (FCO) o Ciampino (CIA) hacia tu hotel en Roma. Vaticano, Coliseo, Trastevere. Precio fijo."
     keywords="traslado aeropuerto Roma, taxi Fiumicino FCO, taxi Ciampino CIA, conductor privado Roma, transfer hotel Roma"

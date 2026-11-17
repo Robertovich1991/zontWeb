@@ -4,6 +4,7 @@ import EsServicePage from './EsServicePage';
 const EsBerlin = () => (
   <EsServicePage
     url="/es/traslado-aeropuerto-berlin"
+    alt={{ en: '/berlin-airport-transfer', fr: '/transfert-aeroport-berlin', ru: '/taksi-iz-aeroporta-berlin', hy: '/berlin-odanavakayani-transfer' }}
     title="Traslado Aeropuerto Berlin | Conductor Privado BER Brandenburg"
     description="Traslado privado del aeropuerto Berlin Brandenburg (BER) hacia tu hotel en Berlin. Mitte, Kreuzberg, Potsdam. Precio fijo, conductor profesional."
     keywords="traslado aeropuerto Berlin, taxi Berlin BER, conductor privado Berlin Brandenburg, transfer hotel Berlin"
