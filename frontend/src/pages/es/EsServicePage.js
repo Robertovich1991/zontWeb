@@ -35,7 +35,7 @@ const EsServicePage = ({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canonical = `https://www.zont.cab${url}`;
-  const whatsAppLink = 'https://wa.me/33685432200?text=' + encodeURIComponent('Hola, me gustaria informacion sobre ' + (serviceName || title));
+  const whatsAppLink = 'https://wa.me/33783777027?text=' + encodeURIComponent('Hola, me gustaria informacion sobre ' + (serviceName || title));
 
   // JSON-LD Service + FAQPage schema
   const jsonLd = {
@@ -204,7 +204,7 @@ const EsServicePage = ({
               <Link to="/es" className="bg-[#2ecc71] hover:bg-[#27ae60] text-white px-7 py-3.5 rounded-xl font-bold inline-flex items-center gap-2">
                 Reservar un traslado
               </Link>
-              <a href="tel:+33685432200" className="bg-white border border-gray-300 hover:border-[#2ecc71] text-gray-900 px-7 py-3.5 rounded-xl font-bold inline-flex items-center gap-2">
+              <a href="tel:+33783777027" className="bg-white border border-gray-300 hover:border-[#2ecc71] text-gray-900 px-7 py-3.5 rounded-xl font-bold inline-flex items-center gap-2">
                 <Phone className="w-4 h-4" /> +33 6 85 43 22 00
               </a>
             </div>
