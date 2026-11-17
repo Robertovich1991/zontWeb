@@ -11,7 +11,7 @@ const EsRome = () => (
     h1="Traslado privado aeropuertos de Roma"
     serviceName="Traslado privado a Roma"
     intro="Llegada a Roma Fiumicino (FCO) o Ciampino (CIA)? ZONT te ofrece traslados privados premium hacia tu hotel en Roma, el Vaticano, Trastevere y todos los destinos romanos."
-    heroImage="/images/rome-airport-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'El aeropuerto Leonardo da Vinci-Fiumicino (FCO) es el mas grande de Italia, situado a 32 km al suroeste de Roma. Trayecto al centro en 35-40 minutos. El aeropuerto de Ciampino (CIA) recibe principalmente vuelos low-cost (Ryanair) a 15 km del centro.',
       'Nuestros conductores te esperan en el area de llegadas internacionales con un cartel a tu nombre. Destinos habituales: Hotel Hassler Roma, St. Regis, Hotel de Russie, Vaticano, Coliseo, Plaza Navona, Trastevere, Fontana di Trevi.',

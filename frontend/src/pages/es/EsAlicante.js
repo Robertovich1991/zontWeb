@@ -11,7 +11,7 @@ const EsAlicante = () => (
     h1="Traslado privado aeropuerto Alicante-Elche"
     serviceName="Traslado privado a la Costa Blanca"
     intro="Aeropuerto de Alicante-Elche Miguel Hernandez? ZONT te ofrece traslados privados hacia Alicante, Benidorm, Torrevieja, Calpe, Denia y toda la Costa Blanca."
-    heroImage="/images/alicante-airport-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1655405927518-94872964699f?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'El Aeropuerto de Alicante-Elche (ALC) es la principal puerta de entrada a la Costa Blanca, recibiendo viajeros britanicos, alemanes y nordicos en busca de sol. Nuestros conductores te esperan en el area de llegadas con un cartel personalizado.',
       'Destinos habituales: Alicante centro (15 min), Benidorm (50 min), Torrevieja (40 min), Calpe (1h), Denia (1h30), Altea, Javea, Murcia. Tambien traslados hacia los puertos de cruceros y campos de golf.',

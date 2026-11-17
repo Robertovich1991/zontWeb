@@ -11,7 +11,7 @@ const EsBarcelona = () => (
     h1="Traslado privado aeropuerto Barcelona El Prat"
     serviceName="Traslado privado a Barcelona"
     intro="Llegada a Barcelona-El Prat (BCN)? ZONT te ofrece un traslado privado puerta a puerta con precio fijo, recepcion personalizada y conductor profesional."
-    heroImage="/images/barcelona-airport-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'El Aeropuerto Josep Tarradellas Barcelona-El Prat (BCN) es el segundo aeropuerto de Espana, con dos terminales (T1 y T2) que reciben vuelos nacionales, internacionales y low-cost. Nuestros conductores te esperan en el area de llegadas internacionales con un cartel personalizado.',
       'Trayecto al centro de Barcelona en unos 25-30 minutos por la C-32 y B-10. Destinos habituales: Hotel Arts, W Barcelona, Majestic, Mandarin Oriental, Las Ramblas, Eixample, Sagrada Familia, Camp Nou.',

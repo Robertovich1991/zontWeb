@@ -102,7 +102,7 @@ const Header = () => {
                   className="flex items-center space-x-1 text-white hover:text-gray-300 transition-colors text-sm font-medium"
                   data-testid="nav-services-dropdown"
                 >
-                  <span>Services</span>
+                  <span>{language === 'es' ? 'Servicios' : language === 'ru' ? 'Услуги' : language === 'hy' ? 'Ծառայություններ' : 'Services'}</span>
                   <ChevronDown size={16} />
                 </button>
                 {servicesDropdownOpen && (
@@ -266,7 +266,7 @@ const Header = () => {
                 {t('nav.countries')}
               </Link>
               <div className="py-1 pl-2 border-l-2 border-gray-600 space-y-1">
-                <p className="text-gray-400 text-xs uppercase tracking-wider">Services</p>
+                <p className="text-gray-400 text-xs uppercase tracking-wider">{language === 'es' ? 'Servicios' : language === 'ru' ? 'Услуги' : language === 'hy' ? 'Ծառայություններ' : 'Services'}</p>
                 <Link to={language === 'en' ? '/driver-at-disposal' : language === 'ru' ? '/voditel-s-avtomobilem' : language === 'hy' ? '/varorde-tramadrutyamb' : '/chauffeur-mis-a-disposition'} onClick={() => setMobileMenuOpen(false)} className="block text-[#c8a951] hover:text-[#d4b85c] py-1 text-sm font-medium" data-testid="nav-driver-at-disposal-mobile">{language === 'en' ? 'Driver at Disposal' : language === 'ru' ? 'Водитель в распоряжение' : language === 'hy' ? 'Վարորդ տրամադրությամբ' : 'Chauffeur mis à disposition'}</Link>
                 <Link to={language === 'en' ? '/vtc-7-seats' : language === 'ru' ? '/vtc-7-mest' : language === 'hy' ? '/vtc-7-tegh' : '/vtc-7-places'} onClick={() => setMobileMenuOpen(false)} className="block text-white hover:text-gray-300 py-1 text-sm" data-testid="nav-vtc-7-mobile">{language === 'en' ? 'Minivan 7 Seats' : language === 'ru' ? 'Минивэн 7 Мест' : language === 'hy' ? 'VTC 7 Տեղ' : 'VTC 7 Places'}</Link>
                 <Link to={language === 'en' ? '/vtc-8-seats' : language === 'ru' ? '/vtc-8-mest' : language === 'hy' ? '/vtc-8-tegh' : '/vtc-8-places'} onClick={() => setMobileMenuOpen(false)} className="block text-white hover:text-gray-300 py-1 text-sm" data-testid="nav-vtc-8-mobile">{language === 'en' ? 'Minibus 8 Seats' : language === 'ru' ? 'Минибус 8 Мест' : language === 'hy' ? 'VTC 8 Տեղ' : 'VTC 8 Places'}</Link>

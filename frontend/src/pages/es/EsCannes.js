@@ -11,7 +11,7 @@ const EsCannes = () => (
     h1="Traslado privado aeropuerto Cannes"
     serviceName="Traslado privado a Cannes"
     intro="ZONT ofrece traslados premium desde el aeropuerto de Niza-Costa Azul hacia Cannes, Mandelieu y la Croisette — perfectos para el Festival de Cannes, MIPIM y Cannes Lions."
-    heroImage="/images/cannes-airport-transfer.webp"
+    heroImage="https://images.pexels.com/photos/38823288/pexels-photo-38823288.jpeg?auto=compress&cs=tinysrgb&w=1200"
     paragraphs={[
       'Cannes no tiene aeropuerto comercial propio (solo el pequeno aerodromo Cannes-Mandelieu para aviacion privada). Para llegar a Cannes, la mayoria de viajeros internacionales aterrizan en el aeropuerto de Niza (NCE), a 40 minutos.',
       'Recogemos a nuestros clientes en Terminal 1 o Terminal 2 del aeropuerto de Niza segun la compania aerea. El conductor te espera en llegadas con un cartel a tu nombre y te lleva directamente a tu hotel en la Croisette, al Palais des Festivals o a Cannes Mandelieu.',

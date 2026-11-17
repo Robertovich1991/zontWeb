@@ -11,7 +11,7 @@ const EsBerlin = () => (
     h1="Traslado privado aeropuerto Berlin Brandenburg"
     serviceName="Traslado privado a Berlin"
     intro="Llegada a Berlin Brandenburg Willy Brandt (BER)? ZONT te ofrece traslados privados premium hacia tu hotel en Berlin, Potsdam o cualquier destino aleman."
-    heroImage="/images/berlin-airport-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1587330979470-3595ac045ab0?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'El Aeropuerto Berlin Brandenburg Willy Brandt (BER) es el unico aeropuerto comercial de la capital alemana desde 2020. Situado a 25 km al sur del centro, conecta Berlin con destinos europeos y de larga distancia. Trayecto al centro en 30-40 minutos segun el trafico.',
       'Destinos habituales: Hotel Adlon Kempinski, Hotel de Rome, Regent Berlin, Mandala Hotel, Berlin Mitte, Kreuzberg, Charlottenburg, Potsdamer Platz, Brandenburg Gate. Tambien traslados a Potsdam (45 min) y Tegel-Reinickendorf.',

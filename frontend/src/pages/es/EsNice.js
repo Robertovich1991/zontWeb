@@ -11,7 +11,7 @@ const EsNice = () => (
     h1="Traslado privado aeropuerto de Niza"
     serviceName="Traslado privado aeropuerto Niza"
     intro="ZONT te ofrece traslados premium desde el aeropuerto de Niza Costa Azul hacia Cannes, Monaco, Antibes, Saint-Tropez y todos los destinos de la Riviera Francesa."
-    heroImage="/images/nice-airport-transfer.webp"
+    heroImage="https://images.pexels.com/photos/11917509/pexels-photo-11917509.jpeg?auto=compress&cs=tinysrgb&w=1200"
     paragraphs={[
       'El Aeropuerto de Niza (NCE) es el segundo de Francia por trafico de pasajeros y la puerta de entrada principal a la Costa Azul. Nuestros conductores te esperan en la zona de llegadas (Terminal 1 o Terminal 2 segun tu vuelo) con un cartel personalizado.',
       'Niza es el punto de partida ideal para descubrir Monaco (30 min), Cannes (40 min), Antibes (25 min), Saint-Tropez (1h30) y los pueblos perched del interior como Eze, Saint-Paul-de-Vence y Mougins.',

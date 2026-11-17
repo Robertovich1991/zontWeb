@@ -10,7 +10,7 @@ const EsGareDeLyon = () => (
     h1="Traslado privado Gare de Lyon Paris"
     serviceName="Traslado privado Gare de Lyon"
     intro="Servicio de traslado puerta a puerta desde la Gare de Lyon — la estacion principal hacia el sur de Francia, Italia y Suiza — con conductor profesional y precio fijo."
-    heroImage="/images/gare-de-lyon-paris-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1764505879447-787dfe93c468?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'La Gare de Lyon conecta Paris con Lyon, Marsella, Niza, Avignon, Ginebra, Milan, Turin y Zurich a traves de los trenes TGV inOui y TGV Lyria. ZONT te recoge en el anden directamente con un cartel personalizado.',
       'Sus dos halls (Diderot y Daumesnil) pueden ser confusos para los viajeros que llegan por primera vez. Indicas tu hall al reservar y el conductor te espera exactamente alli, sin tener que cruzar la estacion con tu equipaje.',

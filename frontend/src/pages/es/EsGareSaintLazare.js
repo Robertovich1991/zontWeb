@@ -10,7 +10,7 @@ const EsGareSaintLazare = () => (
     h1="Traslado privado Gare Saint-Lazare Paris"
     serviceName="Traslado privado Gare Saint-Lazare"
     intro="Traslados puerta a puerta desde la Gare Saint-Lazare — la estacion historica del oeste de Paris hacia Normandia y Versalles — con conductor privado y precio fijo."
-    heroImage="/images/gare-saint-lazare-paris-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1764505879447-787dfe93c468?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'La Gare Saint-Lazare es la estacion mas antigua de Paris, situada en el corazon del distrito 8. Conecta con Versalles, Le Havre, Caen, Rouen y toda Normandia. Es tambien una de las estaciones mas concurridas para los viajeros de negocios que llegan al centro de Paris.',
       'Nuestro conductor te espera junto al hall principal (Cour de Rome) con un cartel a tu nombre. Acceso facil al Boulevard Haussmann, Galerias Lafayette y Printemps a pocos minutos andando.',

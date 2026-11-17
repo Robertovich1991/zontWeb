@@ -11,7 +11,7 @@ const EsMunich = () => (
     h1="Traslado privado aeropuerto Munich"
     serviceName="Traslado privado a Munich"
     intro="Llegada a Munich Franz Josef Strauss (MUC)? ZONT te ofrece traslados privados premium hacia tu hotel en Munich, Marienplatz o destinos en Baviera."
-    heroImage="/images/munich-airport-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1649609765902-254a227dc960?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'El Aeropuerto de Munich-Franz Josef Strauss (MUC) es el segundo aeropuerto de Alemania, situado a 35 km al noreste del centro de Munich. Trayecto al centro en 40-45 minutos por la autopista A9. Dos terminales (T1 y T2) operados principalmente por Lufthansa Star Alliance.',
       'Destinos habituales: Hotel Bayerischer Hof, Mandarin Oriental, Charles Hotel, Marienplatz, Englischer Garten, BMW Welt, Allianz Arena, Stadt Mitte. Tambien traslados a Garmisch-Partenkirchen, Salzburgo, Innsbruck.',

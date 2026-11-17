@@ -10,7 +10,7 @@ const EsGareMontparnasse = () => (
     h1="Traslado privado Gare Montparnasse Paris"
     serviceName="Traslado privado Gare Montparnasse"
     intro="Servicio premium de traslado desde la Gare Montparnasse — la puerta de entrada hacia el oeste de Francia (Bretana, Burdeos, Nantes) — con precio fijo y conductor profesional."
-    heroImage="/images/gare-montparnasse-paris-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1764505879447-787dfe93c468?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'La Gare Montparnasse conecta Paris con Bretana (Rennes, Brest, Quimper), Burdeos, Nantes, La Rochelle y todo el suroeste de Francia mediante los trenes TGV inOui. Es tambien terminal del TGV hacia Espana (Hendaya, Bilbao).',
       'La estacion tiene 3 halls (1, 2 y Vaugirard). Indica al reservar tu hall de llegada y el conductor te espera ahi con un cartel. Acceso facil al distrito 14 y la Tour Montparnasse.',

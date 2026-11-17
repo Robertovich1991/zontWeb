@@ -10,7 +10,7 @@ const EsGareAusterlitz = () => (
     h1="Traslado privado Gare d'Austerlitz Paris"
     serviceName="Traslado privado Gare d'Austerlitz"
     intro="Traslados puerta a puerta desde la Gare d'Austerlitz — la estacion historica del distrito 13 — con conductor privado, precio fijo y recepcion personalizada."
-    heroImage="/images/gare-austerlitz-paris-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1764505879447-787dfe93c468?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'La Gare d\'Austerlitz sirve principalmente trenes Intercites hacia el centro de Francia (Orleans, Limoges, Toulouse) y trenes TER de la region Centre-Val de Loire. Tambien recibia hasta 2013 los trenes nocturnos Elipsos hacia Madrid y Barcelona.',
       'Situada en el Quai d\'Austerlitz junto al Sena, ofrece acceso directo al Jardin des Plantes, al Museo de Historia Natural y al Hospital de la Pitie-Salpetriere. Es una estacion mas tranquila que Gare du Nord o Gare de Lyon, perfecta para una recepcion sin estres.',

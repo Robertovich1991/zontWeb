@@ -10,7 +10,7 @@ const EsGareDuNord = () => (
     h1="Traslado privado Gare du Nord Paris"
     serviceName="Traslado privado Gare du Nord"
     intro="ZONT te lleva desde o hacia la Gare du Nord — el hub europeo de Eurostar y Thalys — con un conductor privado, precio fijo y recepcion personalizada."
-    heroImage="/images/gare-du-nord-paris-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1764505879447-787dfe93c468?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'La Gare du Nord es la estacion mas concurrida de Europa, con conexiones diarias hacia Londres (Eurostar), Bruselas, Amsterdam (Thalys) y todas las regiones del norte de Francia. Te recogemos directamente en el anden principal con un cartel a tu nombre.',
       'Tras un largo viaje en tren, evita las colas de taxi y el metro abarrotado. Nuestros vehiculos Mercedes Clase E o V te esperan en el aparcamiento oficial de la estacion. El conductor te ayuda con el equipaje y conoce las rutas alternativas para esquivar el trafico parisino.',

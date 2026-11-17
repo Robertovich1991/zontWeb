@@ -11,7 +11,7 @@ const EsMilan = () => (
     h1="Traslado privado aeropuertos de Milan"
     serviceName="Traslado privado a Milan"
     intro="Llegada a Milan-Malpensa (MXP), Linate (LIN) o Bergamo-Orio al Serio (BGY)? ZONT te ofrece traslados premium en Mercedes con conductor profesional."
-    heroImage="/images/milan-airport-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1610016302534-6f67f1c968d8?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'Milan tiene 3 aeropuertos principales: Malpensa (MXP) a 50 km del centro, Linate (LIN) a 8 km y Bergamo-Orio al Serio (BGY) a 50 km. Cubrimos los tres con precio fijo y recepcion personalizada.',
       'Destinos habituales: Hotel Bulgari Milano, Park Hyatt, Four Seasons, Mandarin Oriental, Duomo, Galleria Vittorio Emanuele, Quadrilatero della Moda, Navigli. Tambien Lago di Como, Bergamo y Turin.',

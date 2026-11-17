@@ -534,3 +534,11 @@ Corrigé et VÉRIFIÉ (rendu RU=russe, ES=espagnol, compile clean):
 - 9 pages Es*.js: passent `alt={{en,fr,ru,hy}}`.
 Résultat: chaque URL = une langue cohérente, hreflang bidirectionnel complet → résout la duplication GSC. Switch GB→ES sur ces villes amène désormais à la vraie page espagnole.
 Note: Google doit re-crawler (quelques semaines) pour lever les duplicatas.
+
+## [2026-06] Fix pages ES cassées (image hero manquante + "Services" non traduit)
+Symptôme: grande zone blanche sous le hero sur les pages ES (ex. /es/traslado-aeropuerto-barcelona).
+Cause: EsServicePage rend <img src={heroImage} h-96>; les fichiers /images/<ville>-airport-transfer.webp N'EXISTAIENT PAS → image cassée = bloc blanc + icône cassée (préexistant, visible depuis le lien des pages ES).
+Corrigé et VÉRIFIÉ (screenshot ES Barcelona OK: image chargée + "Servicios"):
+- heroImage remplacé par photos distantes fiables (Unsplash/Pexels, w=1200) sur 14 pages ES: Barcelona, Rome, Milan, Berlin, Munich, Alicante, Monaco, Nice, Cannes + EsGareAusterlitz/DeLyon/DuNord/Montparnasse/SaintLazare.
+- Header.js: "Services" traduit (Servicios ES / Услуги RU / Ծառայություններ HY) desktop + mobile.
+Compile clean.

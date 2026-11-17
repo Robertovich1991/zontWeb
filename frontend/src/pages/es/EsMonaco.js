@@ -11,7 +11,7 @@ const EsMonaco = () => (
     h1="Traslado privado a Monaco Monte-Carlo"
     serviceName="Traslado privado a Monaco"
     intro="ZONT ofrece traslados de lujo del aeropuerto de Niza hacia Monaco, Monte-Carlo y el Casino — perfectos para el Grand Prix, Yacht Show y eventos exclusivos."
-    heroImage="/images/monaco-airport-transfer.webp"
+    heroImage="https://images.unsplash.com/photo-1631173383816-4dcb24950a19?auto=format&fit=crop&w=1200&q=70"
     paragraphs={[
       'Monaco no tiene aeropuerto propio. La forma mas rapida de llegar es a traves del aeropuerto de Niza-Costa Azul (NCE), a solo 30 minutos por la autopista A8. Tambien ofrecemos traslados desde el helipuerto de Monaco (LNMC) para llegadas en helicoptero.',
       'Nuestros conductores te recogen en Terminal 1 o Terminal 2 de Niza con un cartel personalizado. Trayecto en Mercedes Clase E, Clase S o Clase V para grupos. Destinos habituales: Hotel de Paris, Hermitage, Metropole, Fairmont, Casino de Monte-Carlo, Yacht Club de Monaco.',
