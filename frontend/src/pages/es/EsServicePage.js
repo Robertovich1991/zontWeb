@@ -205,7 +205,7 @@ const EsServicePage = ({
                 Reservar un traslado
               </Link>
               <a href="tel:+33783777027" className="bg-white border border-gray-300 hover:border-[#2ecc71] text-gray-900 px-7 py-3.5 rounded-xl font-bold inline-flex items-center gap-2">
-                <Phone className="w-4 h-4" /> +33 6 85 43 22 00
+                <Phone className="w-4 h-4" /> +33 7 83 77 70 27
               </a>
             </div>
           </div>
