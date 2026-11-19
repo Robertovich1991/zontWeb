@@ -104,6 +104,7 @@ class HotelCreate(BaseModel):
     notes: str = ""
     lat: Optional[float] = None
     lng: Optional[float] = None
+    reception_codes: List[str] = []
 
 class HotelUpdate(BaseModel):
     name: Optional[str] = None
@@ -124,6 +125,7 @@ class HotelUpdate(BaseModel):
     notes: Optional[str] = None
     lat: Optional[float] = None
     lng: Optional[float] = None
+    reception_codes: Optional[List[str]] = None
 
 class KioskCreate(BaseModel):
     hotel_id: str

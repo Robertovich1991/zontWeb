@@ -55,6 +55,7 @@ class KioskBookingRequest(BaseModel):
     utcOffset: Optional[int] = None
     deviceId: Optional[str] = None
     searchId: Optional[str] = None
+    receptionCode: Optional[str] = None
 
 
 # ---------- Helpers ----------
@@ -373,6 +374,11 @@ async def create_kiosk_booking(req: KioskBookingRequest):
     reference = gen_reference()
     price_cents = int(req.price * 100)
 
+    # Optional reception code => email the Stripe payment link instead of using the terminal.
+    reception_code = (req.receptionCode or "").strip()
+    payment_mode = "email_link" if reception_code else "terminal"
+    email_clean = (req.clientEmail or "").strip()
+
     # Create Stripe Checkout Session
     frontend_url = os.environ.get("FRONTEND_URL", "https://www.zont.cab")
     try:
@@ -401,6 +407,7 @@ async def create_kiosk_booking(req: KioskBookingRequest):
                 "client_phone": req.clientPhone,
             },
             expires_at=int((datetime.now(timezone.utc).timestamp()) + 1800),  # 30 min expiry
+            **({"customer_email": email_clean} if email_clean else {}),
         )
     except Exception as e:
         logger.error(f"Stripe session creation failed: {e}")
@@ -440,6 +447,8 @@ async def create_kiosk_booking(req: KioskBookingRequest):
         "deviceId": req.deviceId,
         "searchId": req.searchId,
         "status": "awaiting_payment",
+        "receptionCode": reception_code or None,
+        "paymentMode": payment_mode,
         "stripeSessionId": session.id,
         "paymentUrl": session.url,
         "createdAt": datetime.now(timezone.utc).isoformat(),
@@ -448,8 +457,28 @@ async def create_kiosk_booking(req: KioskBookingRequest):
     await db.kiosk_bookings.insert_one(booking)
     booking.pop("_id", None)
 
+    # Email-link flow: send the Stripe payment link to the guest's email.
+    if payment_mode == "email_link" and email_clean:
+        try:
+            from routes.email_service import send_kiosk_payment_link
+            await send_kiosk_payment_link(email_clean, {
+                "reference": reference,
+                "hotelName": hotel["name"],
+                "destination": req.destination,
+                "date": req.date,
+                "time": req.time,
+                "vehicleType": req.vehicleType,
+                "price": req.price,
+                "clientName": req.clientName,
+                "receptionCode": reception_code,
+                "paymentUrl": session.url,
+            })
+        except Exception as e:
+            logger.error(f"Kiosk payment-link email failed for {reference}: {e}")
+
     return {
         "reference": reference,
+        "paymentMode": payment_mode,
         "paymentUrl": session.url,
         "qrCode": f"data:image/png;base64,{qr_base64}",
         "booking": booking,
@@ -715,6 +744,43 @@ async def kiosk_booking_status(reference: str):
     }
 
 
+@router.get("/booking/{reference}/status")
+async def kiosk_booking_status_v2(reference: str):
+    """Status endpoint for the email-link flow: verifies the Stripe Checkout Session
+    server-side, dispatches once paid, and returns the payment/dispatch state."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    booking = await db.kiosk_bookings.find_one({"reference": reference}, {"_id": 0})
+    if not booking:
+        raise HTTPException(404, "Booking not found")
+
+    if booking.get("csharpDispatch") != "done":
+        paid = booking.get("status") in ("paid", "dispatched", "paid_dispatch_failed")
+        if not paid and booking.get("stripeSessionId"):
+            try:
+                session = stripe.checkout.Session.retrieve(booking["stripeSessionId"])
+                if session.get("payment_status") == "paid":
+                    paid = True
+                    if session.get("payment_intent"):
+                        await db.kiosk_bookings.update_one(
+                            {"reference": reference},
+                            {"$set": {"stripe_payment_intent_id": session.get("payment_intent")}},
+                        )
+            except Exception as e:
+                logger.warning(f"booking status Stripe check failed for {reference}: {e}")
+        if paid:
+            await _claim_and_dispatch(reference)
+        booking = await db.kiosk_bookings.find_one({"reference": reference}, {"_id": 0})
+
+    return {
+        "reference": reference,
+        "status": booking.get("status"),
+        "paymentMode": booking.get("paymentMode", "terminal"),
+        "paidAt": booking.get("paidAt"),
+        "dispatchedAt": booking.get("dispatchedAt"),
+    }
+
+
 CSHARP_HEADERS = {"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"}
 
 
@@ -768,6 +834,11 @@ async def dispatch_to_csharp(booking):
 
         price = booking.get("price", 0)
         email = (booking.get("clientEmail") or "").strip() or None
+        reception_code = (booking.get("receptionCode") or "").strip()
+        comments = f"Kiosk booking Ref: {ref}"
+        if reception_code:
+            comments += f" | Reception code: {reception_code}"
+        ext_ref = booking.get("stripe_payment_intent_id") or booking.get("stripeSessionId") or ref
 
         payload = {
             "startPointLatitude": booking.get("pickupLat", 0),
@@ -788,10 +859,10 @@ async def dispatch_to_csharp(booking):
             "passengerPhone": booking.get("clientPhone", ""),
             "passengerEmail": email,
             "paymentStatus": "prepaid",
-            "externalPaymentRef": booking.get("stripe_payment_intent_id", ""),
+            "externalPaymentRef": ext_ref,
             "currency": "eur",
             "source": "kiosk",
-            "additionalComments": f"Kiosk booking Ref: {ref}",
+            "additionalComments": comments,
         }
 
         # 4. Create the prepaid auction (no card charge).

@@ -7,7 +7,7 @@ import {
   Plane, TrainFront, Castle, MapPin, Clock, Users, Briefcase,
   ChevronRight, ChevronLeft, CheckCircle, Phone, User, Loader2,
   Calendar, ArrowRight, RotateCcw, Car, Search, Euro, Zap, ShieldCheck, Sparkles,
-  CreditCard, Check, X, ChevronUp, ChevronDown, AlertCircle
+  CreditCard, Check, X, ChevronUp, ChevronDown, AlertCircle, Mail
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -314,6 +314,8 @@ const KioskPage = () => {
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [clientEmail, setClientEmail] = useState('');
+  const [receptionCode, setReceptionCode] = useState('');
+  const [paymentMode, setPaymentMode] = useState('terminal');
   const [clientCountryCode, setClientCountryCode] = useState('+33');
   const [booking, setBooking] = useState(null);
   const [searchId, setSearchId] = useState(null);
@@ -345,6 +347,7 @@ const KioskPage = () => {
     }
     setStep(0); setSelectedDest(null); setDate(''); setTime('');
     setSelectedVehicle(null); setClientName(''); setClientPhone(''); setClientEmail(''); setClientCountryCode('+33');
+    setReceptionCode(''); setPaymentMode('terminal');
     setBooking(null); setSubmitting(false); setCustomPricing(false);
     setCustomHours(4);
     setShowIdlePrompt(false);
@@ -633,12 +636,19 @@ const KioskPage = () => {
     try {
       const resp = await fetch(`${API}/api/kiosk/book`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hotelSlug: slug, deviceId: deviceId || undefined, searchId: searchId || undefined, clientName: clientName.trim(), clientPhone: fullPhone, clientEmail: clientEmail.trim(), destination: selectedDest.name, destinationAddress: selectedDest.address, destLat: selectedDest.lat, destLng: selectedDest.lng, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.maxAmount, passengers: 1, utcOffset: new Date().getTimezoneOffset() * -1 }),
+        body: JSON.stringify({ hotelSlug: slug, deviceId: deviceId || undefined, searchId: searchId || undefined, clientName: clientName.trim(), clientPhone: fullPhone, clientEmail: clientEmail.trim(), destination: selectedDest.name, destinationAddress: selectedDest.address, destLat: selectedDest.lat, destLng: selectedDest.lng, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.maxAmount, passengers: 1, utcOffset: new Date().getTimezoneOffset() * -1, ...(receptionCode.trim() ? { receptionCode: receptionCode.trim() } : {}) }),
       });
       if (!resp.ok) throw new Error();
       const data = await resp.json();
       setBooking(data);
+      setPaymentMode(data.paymentMode || 'terminal');
       setStep(4);
+
+      // Reception-code flow: payment link emailed to the client, no physical terminal.
+      if (data.paymentMode === 'email_link') {
+        setTerminalStatus('email_sent');
+        return;
+      }
 
       // Push payment to the physical Stripe Terminal reader
       try {
@@ -697,6 +707,30 @@ const KioskPage = () => {
     }, 3000);
     return () => clearInterval(interval);
   }, [booking, terminalStatus]);
+
+  // Email-link flow: poll booking status every 2s until paid (timeout 30 min = Checkout expiry).
+  useEffect(() => {
+    if (paymentMode !== 'email_link' || !booking?.reference) return;
+    if (['paid', 'error', 'cancelled'].includes(terminalStatus)) return;
+    const startedAt = Date.now();
+    const interval = setInterval(async () => {
+      if (Date.now() - startedAt > 30 * 60 * 1000) {
+        setTerminalStatus('error');
+        setTerminalError("Le lien de paiement a expiré. Merci de recommencer.");
+        clearInterval(interval);
+        return;
+      }
+      try {
+        const r = await fetch(`${API}/api/kiosk/booking/${booking.reference}/status`);
+        const d = await r.json();
+        if (['paid', 'dispatched', 'paid_dispatch_failed'].includes(d.status)) {
+          setTerminalStatus('paid');
+          clearInterval(interval);
+        }
+      } catch {}
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [paymentMode, booking, terminalStatus]);
 
   // Phone success redirect: when the QR payment completes, Stripe opens
   // /kiosk/:slug?paid=REF on the guest's phone. Trigger the server-side confirm+dispatch.
@@ -1369,6 +1403,15 @@ const KioskPage = () => {
                   <p className="text-amber-400 text-sm mt-1.5" data-testid="kiosk-email-error">{t.invalidEmail}</p>
                 )}
               </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">
+                  {lang === 'fr' ? 'Code réception (optionnel)' : lang === 'ru' ? 'Код ресепшн (необязательно)' : lang === 'hy' ? 'Ընդունարանի կոդ (ըստ ցանկության)' : 'Reception code (optional)'}
+                </label>
+                <input type="text" value={receptionCode} onChange={e => setReceptionCode(e.target.value)} placeholder="REC-1234" className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#c8a951]" data-testid="kiosk-reception-code" />
+                <p className="text-gray-500 text-xs mt-1.5">
+                  {lang === 'fr' ? 'Avec un code, le lien de paiement est envoyé par email (sans terminal).' : lang === 'ru' ? 'С кодом ссылка на оплату отправляется по email (без терминала).' : lang === 'hy' ? 'Կոդով՝ վճարման հղումն ուղարկվում է էլ. փոստով (առանց տերմինալի)։' : 'With a code, the payment link is emailed (no terminal).'}
+                </p>
+              </div>
               <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail.trim())} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
                 {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />{t.booking}</> : <><CheckCircle className="w-5 h-5" />{t.confirm}</>}
               </button>
@@ -1448,6 +1491,29 @@ const KioskPage = () => {
                     <Loader2 className="w-20 h-20 text-[#2ecc71] animate-spin mx-auto mb-6" />
                     <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">{lang === 'fr' ? 'Connexion au terminal…' : lang === 'ru' ? 'Подключение к терминалу…' : lang === 'hy' ? 'Միանում է տերմինալին…' : 'Connecting to terminal…'}</h3>
                     <p className="text-gray-400">{lang === 'fr' ? 'Veuillez patienter quelques instants' : lang === 'ru' ? 'Пожалуйста, подождите' : 'Please wait a moment'}</p>
+                  </div>
+                )}
+
+                {terminalStatus === 'email_sent' && (
+                  <div data-testid="kiosk-email-link-waiting">
+                    <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-[#c8a951]/10 border-4 border-[#c8a951]/40 flex items-center justify-center" style={{ animation: 'pulse 1.6s ease-in-out infinite' }}>
+                      <Mail className="w-14 h-14 text-[#c8a951]" />
+                    </div>
+                    <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">
+                      {lang === 'fr' ? 'Lien de paiement envoyé par email' : lang === 'ru' ? 'Ссылка для оплаты отправлена на email' : lang === 'hy' ? 'Վճարման հղումն ուղարկվեց էլ. փոստով' : 'Payment link sent by email'}
+                    </h3>
+                    <p className="text-gray-300 text-base lg:text-lg mb-1">
+                      {lang === 'fr' ? 'Le client reçoit le lien sur' : lang === 'ru' ? 'Клиент получит ссылку на' : lang === 'hy' ? 'Հղումն ուղարկվել է' : 'The link was sent to'}
+                    </p>
+                    <p className="text-[#2ecc71] font-bold text-lg lg:text-xl break-all">{clientEmail}</p>
+                    <div className="flex items-center justify-center gap-2 text-gray-400 mt-6">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>{lang === 'fr' ? 'En attente du paiement…' : lang === 'ru' ? 'Ожидание оплаты…' : lang === 'hy' ? 'Սպասում ենք վճարմանը…' : 'Waiting for payment…'}</span>
+                    </div>
+                    <p className="text-[#c8a951] font-black text-5xl lg:text-6xl mt-6">{selectedVehicle?.maxAmount}&euro;</p>
+                    <button onClick={resetKiosk} className="mt-8 bg-[#111827] border border-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/[0.05] transition-colors" data-testid="kiosk-email-link-new">
+                      <RotateCcw className="w-4 h-4 inline mr-2" />{t.newBooking}
+                    </button>
                   </div>
                 )}
 

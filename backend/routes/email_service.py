@@ -210,3 +210,51 @@ async def send_booking_confirmation(email: str, booking_data: dict):
     except Exception as e:
         logger.error(f"Failed to send booking confirmation email to {email}: {e}")
         return None
+
+
+async def send_kiosk_payment_link(email: str, data: dict):
+    """Email a Stripe payment link for a kiosk booking made via a reception code."""
+    if not resend.api_key:
+        logger.warning("RESEND_API_KEY not set, skipping kiosk payment-link email")
+        return None
+
+    ref = data.get("reference", "")
+    pay_url = data.get("paymentUrl", "")
+    price = data.get("price", 0)
+    html = f"""
+<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;background:#0b1120;color:#e5e7eb;border-radius:16px;overflow:hidden">
+  <div style="background:#111827;padding:24px 28px;border-bottom:3px solid #2ecc71">
+    <h1 style="margin:0;font-size:20px;color:#fff">ZONT.CAB — Votre transfert</h1>
+  </div>
+  <div style="padding:28px">
+    <p style="font-size:15px;margin:0 0 18px">Bonjour {data.get('clientName','')},</p>
+    <p style="font-size:15px;line-height:1.5;margin:0 0 22px">
+      Votre réservation de transfert est prête. Cliquez ci-dessous pour régler en toute sécurité par carte.
+    </p>
+    <table style="width:100%;border-collapse:collapse;background:#111827;border-radius:12px;margin-bottom:24px">
+      <tr><td style="padding:12px 16px;color:#9ca3af;font-size:13px">Référence</td><td style="padding:12px 16px;text-align:right;font-weight:bold;color:#fff">{ref}</td></tr>
+      <tr><td style="padding:12px 16px;color:#9ca3af;font-size:13px">Départ</td><td style="padding:12px 16px;text-align:right;color:#fff">{data.get('hotelName','')}</td></tr>
+      <tr><td style="padding:12px 16px;color:#9ca3af;font-size:13px">Destination</td><td style="padding:12px 16px;text-align:right;color:#fff">{data.get('destination','')}</td></tr>
+      <tr><td style="padding:12px 16px;color:#9ca3af;font-size:13px">Date & heure</td><td style="padding:12px 16px;text-align:right;color:#fff">{data.get('date','')} {data.get('time','')}</td></tr>
+      <tr><td style="padding:12px 16px;color:#9ca3af;font-size:13px">Véhicule</td><td style="padding:12px 16px;text-align:right;color:#fff">{data.get('vehicleType','')}</td></tr>
+      <tr><td style="padding:12px 16px;color:#9ca3af;font-size:13px">Code réception</td><td style="padding:12px 16px;text-align:right;color:#fff">{data.get('receptionCode','')}</td></tr>
+      <tr><td style="padding:12px 16px;color:#2ecc71;font-size:15px;font-weight:bold">Total</td><td style="padding:12px 16px;text-align:right;color:#2ecc71;font-size:22px;font-weight:bold">{price} €</td></tr>
+    </table>
+    <a href="{pay_url}" style="display:block;background:#2ecc71;color:#fff;text-decoration:none;text-align:center;padding:16px;border-radius:12px;font-size:17px;font-weight:bold">Payer {price} € maintenant</a>
+    <p style="font-size:12px;color:#6b7280;margin:18px 0 0;text-align:center">Ce lien expire dans 30 minutes. Paiement sécurisé par Stripe.</p>
+  </div>
+</div>
+"""
+    params = {
+        "from": SENDER_EMAIL,
+        "to": [email],
+        "subject": f"Payez votre transfert ZONT #{ref} — {price} €",
+        "html": html,
+    }
+    try:
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"Kiosk payment-link email sent to {email} for {ref}: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"Failed to send kiosk payment-link email to {email}: {e}")
+        return None

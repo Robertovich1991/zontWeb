@@ -583,3 +583,17 @@ Fait (compile clean; vérifié via bundle servi à l'edge preview = contient "19
 Van 7 places: capacité de carte rendue par CityTransferPage.js (ligne 150) était hardcodée passengers:6. Rendue per-page: `passengers: c.minivanPax ?? 6, luggage: c.minivanLuggage ?? 6`. ParisAirportTransfer.js et services/VTC7Places.js: `Object.values(content).forEach(v => {v.minivanPax=7; v.minivanLuggage=6})` + desc HY/ES alignés sur 7. Les autres pages villes (Rome, Nice...) gardent 6 (cohérent avec leur texte "jusqu'à 6"). VÉRIFIÉ screenshot page Paris: "Van 7 Places — Mercedes Classe V, jusqu'à 7 passagers — 7 Passagers / 6 Bagages".
 
 Reste non traité (user a reporté à plus tard): note 4,5 vs 4,9 (page V-Class premium).
+
+## [2026-11] Codes de réception hôtel + paiement par lien email (kiosk) — DONE
+Partie A — Admin hôtels: champ optionnel reception_codes (liste) par hôtel (10+ possibles).
+- Backend admin_hotels.py: HotelCreate.reception_codes: List[str]=[], HotelUpdate.reception_codes: Optional[List[str]]. Stocké sur db.hotels. (create+update testés via curl ✓)
+- Frontend HotelForm.js: section "Codes de réception" (ajouter/supprimer, vide filtré au submit). Vérifié screenshot ✓.
+
+Partie B — Kiosk booking (receptionCode optionnel → lien Stripe par email au lieu du terminal):
+- kiosk.py KioskBookingRequest.receptionCode: Optional[str]. POST /book: reception_code non vide => paymentMode="email_link" sinon "terminal"; customer_email ajouté à la Checkout Session; receptionCode+paymentMode stockés; si email_link => send_kiosk_payment_link (Resend) avec bouton lien + récap + code; retourne paymentMode.
+- Nouveau GET /api/kiosk/booking/{reference}/status => {reference,status,paymentMode,paidAt,dispatchedAt} (vérifie Stripe + dispatch). Testé via booking seedé ✓.
+- dispatch_to_csharp: additionalComments inclut le code réception; externalPaymentRef = paymentIntentId || stripeSessionId || reference.
+- email_service.py: send_kiosk_payment_link().
+- Frontend KioskPage.js: input "Code réception (optionnel)" en étape 3; si paymentMode==='email_link' => pas de terminal, écran "lien envoyé par email" + polling /booking/{ref}/status toutes les 2s (timeout 30 min) => succès quand paid|dispatched|paid_dispatch_failed. Sans code: flux Terminal inchangé.
+
+⚠️ NON testable en preview: la création réelle de la Stripe Checkout Session échoue car la clé STRIPE_SECRET de preview est une clé LIVE EXPIRÉE (blocage connu, impacte TOUTES les réservations kiosk, pas spécifique à cette feature). En production (clé valide) le flux complet fonctionne. Logique payment_mode + endpoint statut + admin codes = testés et OK.

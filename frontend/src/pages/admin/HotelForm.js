@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, CreditCard, KeyRound, Copy, RefreshCw, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, CreditCard, KeyRound, Copy, RefreshCw, ExternalLink, Hash, Plus, Trash2 } from 'lucide-react';
 import PlacesAutocomplete from '@/components/PlacesAutocomplete';
 
 const fields = [
@@ -29,7 +29,7 @@ const fields = [
   ]},
 ];
 
-const defaults = { name: '', hotel_group: '', address: '', city: '', postal_code: '', country: 'France', rooms: 0, contact_name: '', contact_role: '', contact_phone: '', contact_email: '', commission_rate: 15, zont_commission_rate: 10, status: 'active', kiosks_planned: 0, notes: '' };
+const defaults = { name: '', hotel_group: '', address: '', city: '', postal_code: '', country: 'France', rooms: 0, contact_name: '', contact_role: '', contact_phone: '', contact_email: '', commission_rate: 15, zont_commission_rate: 10, status: 'active', kiosks_planned: 0, notes: '', reception_codes: [] };
 
 const HotelForm = ({ hotel, onSave, onCancel }) => {
   const { authFetch } = useAdminAuth();
@@ -97,7 +97,8 @@ const HotelForm = ({ hotel, onSave, onCancel }) => {
     try {
       const url = isEdit ? `/api/admin/hotels/${hotel.id}` : '/api/admin/hotels';
       const method = isEdit ? 'PUT' : 'POST';
-      const res = await authFetch(url, { method, body: JSON.stringify(form) });
+      const payload = { ...form, reception_codes: (form.reception_codes || []).map(c => c.trim()).filter(Boolean) };
+      const res = await authFetch(url, { method, body: JSON.stringify(payload) });
       if (res.ok) { toast.success(isEdit ? 'Hotel modifie' : 'Hotel cree'); onSave(); }
       else { const err = await res.json().catch(() => ({})); toast.error(err.detail || 'Erreur'); }
     } catch { toast.error('Erreur reseau'); }
@@ -160,6 +161,31 @@ const HotelForm = ({ hotel, onSave, onCancel }) => {
             </div>
           </div>
         ))}
+
+        {/* Codes de réception (optionnel, plusieurs par hôtel) */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm" data-testid="hotel-reception-codes-section">
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-1 flex items-center gap-2"><Hash className="w-4 h-4 text-emerald-600" /> Codes de réception</h2>
+          <p className="text-xs text-gray-400 mb-3">Optionnel. Un hôtel peut avoir plusieurs codes. Utilisés par la borne pour envoyer le lien de paiement par email au client.</p>
+          <div className="space-y-2">
+            {(form.reception_codes || []).map((code, i) => (
+              <div key={i} className="flex items-center gap-2" data-testid={`reception-code-row-${i}`}>
+                <input value={code}
+                  onChange={e => set('reception_codes', (form.reception_codes || []).map((c, j) => j === i ? e.target.value : c))}
+                  placeholder="REC-1234"
+                  className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                  data-testid={`reception-code-input-${i}`} />
+                <button type="button" onClick={() => set('reception_codes', (form.reception_codes || []).filter((_, j) => j !== i))}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg" data-testid={`reception-code-remove-${i}`}>
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={() => set('reception_codes', [...(form.reception_codes || []), ''])}
+            className="mt-3 flex items-center gap-2 text-sm text-emerald-700 hover:text-emerald-800 font-medium" data-testid="reception-code-add">
+            <Plus className="w-4 h-4" /> Ajouter un code
+          </button>
+        </div>
 
         {/* Accès Extranet hôtel */}
         {isEdit && (
