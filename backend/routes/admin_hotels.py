@@ -573,6 +573,14 @@ async def list_hotel_bookings(request: Request):
     await require_admin(request)
     db = request.app.state.db
     bookings = await db.hotel_bookings.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    # Backfill reception_code from kiosk_bookings for kiosk-sourced records
+    kiosk_refs = [b["kiosk_reference"] for b in bookings if b.get("kiosk_reference") and not b.get("reception_code")]
+    if kiosk_refs:
+        kb_cursor = db.kiosk_bookings.find({"reference": {"$in": kiosk_refs}}, {"_id": 0, "reference": 1, "receptionCode": 1})
+        kb_map = {kb["reference"]: kb.get("receptionCode") async for kb in kb_cursor}
+        for b in bookings:
+            if not b.get("reception_code") and b.get("kiosk_reference") in kb_map:
+                b["reception_code"] = kb_map[b["kiosk_reference"]]
     # Add hotel name and commissions
     hotel_ids = list(set(b["hotel_id"] for b in bookings))
     hotels = await db.hotels.find({"id": {"$in": hotel_ids}}, {"_id": 0, "id": 1, "name": 1, "commission_rate": 1, "zont_commission_rate": 1}).to_list(500)

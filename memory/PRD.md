@@ -609,5 +609,12 @@ Changement demandé: l'email du lien de paiement kiosk (quand receptionCode pré
 TEST À FAIRE EN PROD après déploiement: réserver kiosk avec clientEmail=ericyanrobertovich@gmail.com, price=2, receptionCode=TEST-FIX → vérifier réception email (bouton Stripe) + la borne attend jusqu'au paiement.
 Pré-requis prod: l'endpoint C# /api/AdminNotify/kioskPaymentLink doit exister et envoyer via SMTP (confirmé par l'utilisateur).
 
+## [2026-06] Code de réception affiché dans Admin Réservations Hôtels — DONE (testé preview)
+Demande: afficher le code de réception (reception code) dans /admin/hotel-bookings.
+- Backend kiosk.py (_record_hotel_commission insert hotel_bookings): ajout "reception_code" (depuis booking.receptionCode) + "client_name" (avant seul guest_name était posé).
+- Backend admin_hotels.py GET /bookings/all: backfill reception_code depuis kiosk_bookings (join par kiosk_reference) pour les anciens enregistrements sans le champ.
+- Frontend HotelBookingsManager.js: nouvelle colonne "Code" (badge vert mono, "—" si absent), recherche inclut maintenant reception_code + client_name/guest_name, placeholder mis à jour.
+- Testé en preview via seed (RC-777 direct + RC-888 backfill) → colonne + recherche OK, données test nettoyées.
+
 ## [2026-11] Kiosk email-payment: compte à rebours 5 min + bouton prolonger — DONE
 KioskPage.js: l'écran d'attente paiement email (terminalStatus='email_sent') n'est plus soumis au reset auto 90s (exclu). Nouveau compte à rebours 5 min (emailWaitSeconds, state, reset dans resetKiosk). À ≤60s: minuteur orange + bouton "J'ai besoin de plus de temps (+5 min)" (data-testid kiosk-email-extend) qui remet à 300s. À 0: resetKiosk + écran principal. Non testable visuellement en preview (Stripe preview key expirée empêche d'atteindre email_sent). Compile OK.

@@ -43,7 +43,11 @@ const HotelBookingsManager = () => {
   const filtered = bookings.filter(b => {
     if (filterHotel && b.hotel_id !== filterHotel) return false;
     if (filterStatus && b.status !== filterStatus) return false;
-    if (search && !b.client_name?.toLowerCase().includes(search.toLowerCase()) && !b.id?.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const hay = `${b.client_name || b.guest_name || ''} ${b.id || ''} ${b.reception_code || ''}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     const dateMin = getDateFilter();
     if (dateMin && new Date(b.created_at) < dateMin) return false;
     return true;
@@ -90,7 +94,7 @@ const HotelBookingsManager = () => {
         <div className="flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input type="text" placeholder="Rechercher client ou ID..." value={search} onChange={e => setSearch(e.target.value)}
+            <input type="text" placeholder="Rechercher client, ID ou code..." value={search} onChange={e => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm focus:border-emerald-500 focus:outline-none" data-testid="booking-search" />
           </div>
           <select value={filterHotel} onChange={e => setFilterHotel(e.target.value)} data-testid="booking-filter-hotel"
@@ -134,6 +138,7 @@ const HotelBookingsManager = () => {
                   <th className="text-left px-4 py-3">ID</th>
                   <th className="text-left px-4 py-3">Hotel</th>
                   <th className="text-left px-4 py-3 hidden md:table-cell">Client</th>
+                  <th className="text-left px-4 py-3">Code</th>
                   <th className="text-left px-4 py-3 hidden lg:table-cell">Trajet</th>
                   <th className="text-left px-4 py-3 hidden md:table-cell">Date</th>
                   <th className="text-right px-4 py-3">Prix</th>
@@ -154,7 +159,14 @@ const HotelBookingsManager = () => {
                           <span className="text-gray-900 font-medium text-xs truncate max-w-[120px]">{b.hotel_name}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-700 hidden md:table-cell">{b.client_name}</td>
+                      <td className="px-4 py-3 text-gray-700 hidden md:table-cell">{b.client_name || b.guest_name || '—'}</td>
+                      <td className="px-4 py-3" data-testid={`booking-reception-code-${b.id}`}>
+                        {b.reception_code ? (
+                          <span className="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-mono text-xs font-semibold">{b.reception_code}</span>
+                        ) : (
+                          <span className="text-gray-300">—</span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
                         <p className="text-gray-600 text-xs truncate max-w-[180px]">{b.pickup_address}</p>
                         <p className="text-gray-400 text-xs truncate max-w-[180px]">{b.dropoff_address}</p>
