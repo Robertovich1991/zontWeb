@@ -462,13 +462,30 @@ async def create_kiosk_booking(req: KioskBookingRequest):
     payment_email_sent = False
     payment_email_error = None
     if payment_mode == "email_link":
+        # Emergent creates Stripe Checkout; C# SMTP emails the payment link to the client
         try:
-            from routes.email_service import send_kiosk_payment_link
-            result, payment_email_error = await send_kiosk_payment_link(email, {
-                **booking,
-                "paymentUrl": session.url,
-            })
-            payment_email_sent = bool(result)
+            async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+                mail_resp = await client.post(
+                    f"{CSHARP_API}/api/AdminNotify/kioskPaymentLink",
+                    json={
+                        "clientEmail": email,
+                        "clientName": req.clientName,
+                        "hotelName": hotel.get("name", ""),
+                        "destination": req.destination,
+                        "date": req.date,
+                        "time": req.time,
+                        "vehicleType": req.vehicleType,
+                        "price": req.price,
+                        "reference": reference,
+                        "receptionCode": reception_code,
+                        "paymentUrl": session.url,
+                    },
+                )
+            if mail_resp.status_code in (200, 201):
+                payment_email_sent = True
+            else:
+                payment_email_error = f"C# email HTTP {mail_resp.status_code}: {mail_resp.text[:300]}"
+                logger.error(f"Payment link email NOT sent for {reference}: {payment_email_error}")
             await db.kiosk_bookings.update_one(
                 {"reference": reference},
                 {"$set": {
@@ -477,11 +494,16 @@ async def create_kiosk_booking(req: KioskBookingRequest):
                     "paymentEmailSentAt": datetime.now(timezone.utc).isoformat() if payment_email_sent else None,
                 }},
             )
-            if not payment_email_sent:
-                logger.error(f"Payment link email NOT sent for {reference}: {payment_email_error}")
         except Exception as e:
             payment_email_error = str(e)
-            logger.error(f"Failed to email payment link for {reference}: {e}")
+            logger.error(f"Failed to email payment link via C# for {reference}: {e}")
+            await db.kiosk_bookings.update_one(
+                {"reference": reference},
+                {"$set": {
+                    "paymentEmailSent": False,
+                    "paymentEmailError": payment_email_error,
+                }},
+            )
 
     return {
         "reference": reference,
