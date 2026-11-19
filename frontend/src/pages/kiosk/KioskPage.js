@@ -7,7 +7,7 @@ import {
   Plane, TrainFront, Castle, MapPin, Clock, Users, Briefcase,
   ChevronRight, ChevronLeft, CheckCircle, Phone, User, Loader2,
   Calendar, ArrowRight, RotateCcw, Car, Search, Euro, Zap, ShieldCheck, Sparkles,
-  CreditCard, Check, X
+  CreditCard, Check, X, Mail
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -27,7 +27,13 @@ const LANGS = {
     fastBook: 'Reservation rapide', fastBookSub: 'Simple, rapide et securisee',
     when: 'Quand partez-vous ?', towards: 'Vers', chooseVehicle: 'Choisissez votre vehicule',
     yourInfo: 'Vos coordonnees', driverContact: 'Pour que votre chauffeur puisse vous contacter',
-    name: 'Nom complet', phone: 'Telephone', confirm: 'Confirmer la reservation',
+    name: 'Nom complet', phone: 'Telephone', email: 'Email', confirm: 'Confirmer la reservation',
+    emailHint: 'Pour retrouver et annuler votre course sur zont.cab',
+    receptionCode: 'Code reception (optionnel)',
+    receptionCodeHint: 'Si renseigne, le lien de paiement Stripe est envoye par email',
+    waitingEmailTitle: 'Lien de paiement envoye',
+    waitingEmailSub: 'Consultez votre email et finalisez le paiement. Cette ecran se met a jour automatiquement.',
+    waitingEmailPaid: 'Paiement recu !',
     confirmed: 'Reservation confirmee !', driverWill: 'Votre chauffeur viendra vous chercher a la reception',
     ref: 'Reference', dest: 'Destination', dateTime: 'Date & Heure', vehicle: 'Vehicule',
     passenger: 'Passager', total: 'Total', autoReset: 'Cette page se reinitialise automatiquement',
@@ -76,7 +82,13 @@ const LANGS = {
     fastBook: 'Fast booking', fastBookSub: 'Simple, fast and secure',
     when: 'When do you depart?', towards: 'To', chooseVehicle: 'Choose your vehicle',
     yourInfo: 'Your details', driverContact: 'So your driver can contact you',
-    name: 'Full name', phone: 'Phone', confirm: 'Confirm booking',
+    name: 'Full name', phone: 'Phone', email: 'Email', confirm: 'Confirm booking',
+    emailHint: 'To view and cancel your trip on zont.cab',
+    receptionCode: 'Reception code (optional)',
+    receptionCodeHint: 'If provided, a Stripe payment link is emailed to the guest',
+    waitingEmailTitle: 'Payment link sent',
+    waitingEmailSub: 'Check your email and complete payment. This screen updates automatically.',
+    waitingEmailPaid: 'Payment received!',
     confirmed: 'Booking confirmed!', driverWill: 'Your driver will meet you at reception',
     ref: 'Reference', dest: 'Destination', dateTime: 'Date & Time', vehicle: 'Vehicle',
     passenger: 'Passenger', total: 'Total', autoReset: 'This page resets automatically',
@@ -125,7 +137,13 @@ const LANGS = {
     fastBook: 'Быстрое бронирование', fastBookSub: 'Просто, быстро, безопасно',
     when: 'Когда вы выезжаете?', towards: 'В', chooseVehicle: 'Выберите автомобиль',
     yourInfo: 'Ваши данные', driverContact: 'Чтобы водитель мог связаться с вами',
-    name: 'Полное имя', phone: 'Телефон', confirm: 'Подтвердить бронирование',
+    name: 'Полное имя', phone: 'Телефон', email: 'Email', confirm: 'Подтвердить бронирование',
+    emailHint: 'Чтобы видеть и отменять поездку на zont.cab',
+    receptionCode: 'Код ресепшн (необязательно)',
+    receptionCodeHint: 'Если указан, ссылка на оплату Stripe отправляется на email',
+    waitingEmailTitle: 'Ссылка на оплату отправлена',
+    waitingEmailSub: 'Проверьте email и завершите оплату. Этот экран обновится автоматически.',
+    waitingEmailPaid: 'Оплата получена!',
     confirmed: 'Бронирование подтверждено!', driverWill: 'Водитель встретит вас на ресепшн',
     ref: 'Номер', dest: 'Направление', dateTime: 'Дата и время', vehicle: 'Автомобиль',
     passenger: 'Пассажир', total: 'Итого', autoReset: 'Страница обновится автоматически',
@@ -229,6 +247,8 @@ const KioskPage = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
+  const [clientEmail, setClientEmail] = useState('');
+  const [receptionCode, setReceptionCode] = useState('');
   const [clientCountryCode, setClientCountryCode] = useState('+33');
   const [booking, setBooking] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -238,8 +258,9 @@ const KioskPage = () => {
   const [idleCountdown, setIdleCountdown] = useState(15);
   // Stripe Terminal (physical card reader) state
   const [paymentIntentId, setPaymentIntentId] = useState(null);
-  const [terminalStatus, setTerminalStatus] = useState(null); // 'waiting_card' | 'processing' | 'paid' | 'cancelled' | 'error'
+  const [terminalStatus, setTerminalStatus] = useState(null); // 'waiting_card' | 'processing' | 'paid' | 'cancelled' | 'error' | 'waiting_email'
   const [terminalError, setTerminalError] = useState(null);
+  const [paymentMode, setPaymentMode] = useState(null); // 'terminal' | 'email_link'
   // Refs to avoid stale closure inside resetKiosk
   const paymentIntentIdRef = useRef(null);
   const terminalStatusRef = useRef(null);
@@ -258,10 +279,11 @@ const KioskPage = () => {
     }
     setStep(0); setSelectedDest(null); setDate(''); setTime('');
     setSelectedVehicle(null); setClientName(''); setClientPhone(''); setClientCountryCode('+33');
+    setClientEmail(''); setReceptionCode('');
     setBooking(null); setSubmitting(false); setCustomPricing(false);
     setCustomHours(4);
     setShowIdlePrompt(false);
-    setPaymentIntentId(null); setTerminalStatus(null); setTerminalError(null);
+    setPaymentIntentId(null); setTerminalStatus(null); setTerminalError(null); setPaymentMode(null);
   }, []);
 
   const clearIdlePrompt = useCallback(() => {
@@ -329,13 +351,14 @@ const KioskPage = () => {
   }, [step]);
 
   useEffect(() => {
-    // Auto-reset the payment screen after 90s of inactivity (e.g. customer walked away)
+    // Auto-reset payment screen: 90s for terminal, 30 min for emailed Stripe link (matches Checkout expiry)
     // resetKiosk() will also cancel the pending Stripe Terminal PaymentIntent so the TPE goes back to idle
     if (step === 4 && booking && terminalStatus !== 'paid') {
-      const t2 = setTimeout(() => { resetKiosk(); setShowAttract(true); }, 90000);
+      const timeoutMs = paymentMode === 'email_link' ? 30 * 60 * 1000 : 90000;
+      const t2 = setTimeout(() => { resetKiosk(); setShowAttract(true); }, timeoutMs);
       return () => clearTimeout(t2);
     }
-  }, [step, booking, terminalStatus, resetKiosk]);
+  }, [step, booking, terminalStatus, paymentMode, resetKiosk]);
 
   useEffect(() => {
     if (!slug) return;
@@ -416,21 +439,49 @@ const KioskPage = () => {
   };
 
   const handleSubmitBooking = async () => {
-    if (!clientName.trim() || !clientPhone.trim()) return;
+    if (!clientName.trim() || !clientPhone.trim() || !clientEmail.trim()) return;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail.trim());
+    if (!emailOk) {
+      setError('Email invalid');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
     setSubmitting(true);
     // Combine country code + local number, stripping any leading 0 / + characters from the local part
     const localNumber = clientPhone.trim().replace(/[^\d]/g, '').replace(/^0+/, '');
     const fullPhone = `${clientCountryCode}${localNumber}`;
+    const reception = receptionCode.trim();
     try {
       const resp = await fetch(`${API}/api/kiosk/book`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hotelSlug: slug, clientName: clientName.trim(), clientPhone: fullPhone, destination: selectedDest.name, destinationAddress: selectedDest.address, date, time, vehicleType: selectedVehicle.tripType, price: selectedVehicle.minAmount, passengers: 1 }),
+        body: JSON.stringify({
+          hotelSlug: slug,
+          clientName: clientName.trim(),
+          clientPhone: fullPhone,
+          clientEmail: clientEmail.trim().toLowerCase(),
+          destination: selectedDest.name,
+          destinationAddress: selectedDest.address,
+          date,
+          time,
+          vehicleType: selectedVehicle.tripType,
+          price: selectedVehicle.minAmount,
+          passengers: 1,
+          ...(reception ? { receptionCode: reception } : {}),
+        }),
       });
       if (!resp.ok) throw new Error();
       const data = await resp.json();
       setBooking(data);
       setStep(4);
 
+      // Reception code present → email Stripe link and wait for paid status
+      if (data.paymentMode === 'email_link' || reception) {
+        setPaymentMode('email_link');
+        setTerminalStatus('waiting_email');
+        return;
+      }
+
+      setPaymentMode('terminal');
       // Push payment to the physical Stripe Terminal reader
       try {
         const pay = await fetch(`${API}/api/stripe-terminal/create-payment`, {
@@ -469,6 +520,24 @@ const KioskPage = () => {
     }, 2000);
     return () => clearInterval(interval);
   }, [paymentIntentId, terminalStatus]);
+
+  // Poll booking status when paying via emailed Stripe link
+  useEffect(() => {
+    if (paymentMode !== 'email_link' || !booking?.reference) return;
+    if (terminalStatus === 'paid') return;
+    const interval = setInterval(async () => {
+      try {
+        const r = await fetch(`${API}/api/kiosk/booking/${booking.reference}/status`);
+        if (!r.ok) return;
+        const data = await r.json();
+        if (data.status === 'paid' || data.status === 'dispatched' || data.status === 'paid_dispatch_failed') {
+          setTerminalStatus('paid');
+          clearInterval(interval);
+        }
+      } catch {}
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [paymentMode, booking?.reference, terminalStatus]);
 
   // Cancel pending Stripe Terminal payment when the kiosk page is closed / navigated away / refreshed.
   // Without this, the physical TPE keeps showing the amount and "Tap or insert" forever
@@ -1049,7 +1118,34 @@ const KioskPage = () => {
                   darkMode={true}
                 />
               </div>
-              <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim()} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.email} *</label>
+                <input
+                  type="email"
+                  value={clientEmail}
+                  onChange={e => setClientEmail(e.target.value)}
+                  placeholder="name@email.com"
+                  className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]"
+                  data-testid="kiosk-email"
+                  inputMode="email"
+                  autoComplete="email"
+                />
+                <p className="text-gray-500 text-xs mt-1.5">{t.emailHint}</p>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide font-semibold">{t.receptionCode}</label>
+                <input
+                  type="text"
+                  value={receptionCode}
+                  onChange={e => setReceptionCode(e.target.value)}
+                  placeholder="ex. REC-1234"
+                  className="w-full px-5 py-4 bg-[#111827] border border-white/10 rounded-xl text-white text-lg placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2ecc71]"
+                  data-testid="kiosk-reception-code"
+                  autoComplete="off"
+                />
+                <p className="text-gray-500 text-xs mt-1.5">{t.receptionCodeHint}</p>
+              </div>
+              <button onClick={handleSubmitBooking} disabled={submitting || !clientName.trim() || !clientPhone.trim() || !clientEmail.trim()} className="w-full bg-[#2ecc71] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#27ae60] transition-all disabled:bg-gray-700 disabled:text-gray-500 flex items-center justify-center gap-2 mt-2" data-testid="kiosk-confirm">
                 {submitting ? <><Loader2 className="w-5 h-5 animate-spin" />{t.booking}</> : <><CheckCircle className="w-5 h-5" />{t.confirm}</>}
               </button>
             </div>
@@ -1121,9 +1217,28 @@ const KioskPage = () => {
                 </div>
               </div>
 
-              {/* === RIGHT — Terminal payment status === */}
+              {/* === RIGHT — Terminal payment status / email-link wait === */}
               <div className="text-center">
-                {!terminalStatus && (
+                {terminalStatus === 'waiting_email' && (
+                  <div data-testid="email-link-waiting">
+                    <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#2ecc71]/10 border-4 border-[#2ecc71]/40 flex items-center justify-center" style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>
+                      <Mail className="w-16 h-16 text-[#2ecc71]" />
+                    </div>
+                    <h3 className="text-3xl lg:text-4xl font-bold text-white mb-2">{t.waitingEmailTitle}</h3>
+                    <p className="text-gray-300 text-lg mb-3">{t.waitingEmailSub}</p>
+                    <p className="text-[#2ecc71] font-mono text-sm mb-2">{clientEmail.trim().toLowerCase()}</p>
+                    {receptionCode.trim() && (
+                      <p className="text-yellow-500 text-sm mb-4">{t.receptionCode}: <span className="font-mono font-bold">{receptionCode.trim()}</span></p>
+                    )}
+                    <p className="text-[#2ecc71] font-black text-6xl lg:text-7xl mt-2">{selectedVehicle?.minAmount}&euro;</p>
+                    <div className="flex items-center justify-center gap-2 mt-6 text-gray-400 text-sm">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>{lang === 'fr' ? 'En attente du paiement…' : lang === 'ru' ? 'Ожидание оплаты…' : 'Waiting for payment…'}</span>
+                    </div>
+                  </div>
+                )}
+
+                {!terminalStatus && paymentMode !== 'email_link' && (
                   <div data-testid="terminal-initializing">
                     <Loader2 className="w-20 h-20 text-[#2ecc71] animate-spin mx-auto mb-6" />
                     <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2">{lang === 'fr' ? 'Connexion au terminal…' : lang === 'ru' ? 'Подключение к терминалу…' : lang === 'hy' ? 'Միանում է տերմինալին…' : 'Connecting to terminal…'}</h3>
@@ -1168,7 +1283,9 @@ const KioskPage = () => {
                     <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#2ecc71] flex items-center justify-center" style={{ animation: 'fadeUp 0.4s ease-out' }}>
                       <Check className="w-20 h-20 text-white" strokeWidth={3} />
                     </div>
-                    <h3 className="text-4xl lg:text-5xl font-black text-[#2ecc71] mb-2">Paiement accepté !</h3>
+                    <h3 className="text-4xl lg:text-5xl font-black text-[#2ecc71] mb-2">
+                      {paymentMode === 'email_link' ? t.waitingEmailPaid : 'Paiement accepté !'}
+                    </h3>
                     <p className="text-white text-lg lg:text-xl">Votre chauffeur arrive bientôt</p>
                     <p className="text-[#2ecc71] font-bold text-3xl lg:text-4xl mt-4">{selectedVehicle?.minAmount}&euro;</p>
                     <button onClick={resetKiosk} className="mt-8 bg-[#111827] border border-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/[0.05] transition-colors">

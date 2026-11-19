@@ -41,6 +41,7 @@ class KioskBookingRequest(BaseModel):
     hotelSlug: str
     clientName: str
     clientPhone: str
+    clientEmail: str
     destination: str
     destinationAddress: str
     date: str
@@ -48,6 +49,7 @@ class KioskBookingRequest(BaseModel):
     vehicleType: str
     price: float
     passengers: int = 1
+    receptionCode: Optional[str] = None
 
 
 # ---------- Helpers ----------
@@ -343,9 +345,28 @@ async def get_kiosk_custom_price(slug: str, req: KioskCustomPriceRequest):
         raise HTTPException(502, "Failed to get pricing")
 
 
+@router.get("/booking/{reference}/status")
+async def get_kiosk_booking_status(reference: str):
+    """Poll kiosk booking payment/dispatch status (used by email-link payment flow)."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    booking = await db.kiosk_bookings.find_one({"reference": reference}, {"_id": 0})
+    if not booking:
+        raise HTTPException(404, "Booking not found")
+    return {
+        "reference": reference,
+        "status": booking.get("status", "awaiting_payment"),
+        "paymentMode": booking.get("paymentMode", "terminal"),
+        "paidAt": booking.get("paidAt"),
+        "dispatchedAt": booking.get("dispatchedAt"),
+    }
+
+
 @router.post("/book")
 async def create_kiosk_booking(req: KioskBookingRequest):
-    """Create a kiosk booking with Stripe payment link + QR code."""
+    """Create a kiosk booking with Stripe payment link + QR code.
+    If receptionCode is provided: email the Checkout link and skip terminal flow.
+    """
     if db is None:
         raise HTTPException(500, "Database not available")
 
@@ -353,17 +374,21 @@ async def create_kiosk_booking(req: KioskBookingRequest):
     if not hotel:
         raise HTTPException(404, "Hotel not found")
 
+    email = (req.clientEmail or "").strip().lower()
+    if not email or "@" not in email or "." not in email.split("@")[-1]:
+        raise HTTPException(400, "Valid clientEmail is required")
+
+    reception_code = (req.receptionCode or "").strip()
+    payment_mode = "email_link" if reception_code else "terminal"
+
     reference = gen_reference()
     price_cents = int(req.price * 100)
 
     # Create Stripe Checkout Session
     frontend_url = os.environ.get("FRONTEND_URL", "https://www.zont.cab")
     try:
-        session = stripe.checkout.Session.create(
-            # Payment methods are configured in Stripe Dashboard → Payment Methods
-            # (card + Apple Pay + Google Pay enabled). Do not pass payment_method_types
-            # or automatic_payment_methods here — let Stripe honor Dashboard settings.
-            line_items=[{
+        session_kwargs = {
+            "line_items": [{
                 "price_data": {
                     "currency": "eur",
                     "unit_amount": price_cents,
@@ -374,17 +399,23 @@ async def create_kiosk_booking(req: KioskBookingRequest):
                 },
                 "quantity": 1,
             }],
-            mode="payment",
-            success_url=f"{frontend_url}/kiosk/{req.hotelSlug}?paid={reference}",
-            cancel_url=f"{frontend_url}/kiosk/{req.hotelSlug}?cancelled={reference}",
-            metadata={
+            "mode": "payment",
+            "success_url": f"{frontend_url}/kiosk/{req.hotelSlug}?paid={reference}",
+            "cancel_url": f"{frontend_url}/kiosk/{req.hotelSlug}?cancelled={reference}",
+            "customer_email": email,
+            "metadata": {
                 "kiosk_reference": reference,
                 "hotel_slug": req.hotelSlug,
                 "client_name": req.clientName,
                 "client_phone": req.clientPhone,
+                "client_email": email,
+                "payment_mode": payment_mode,
             },
-            expires_at=int((datetime.now(timezone.utc).timestamp()) + 1800),  # 30 min expiry
-        )
+            "expires_at": int((datetime.now(timezone.utc).timestamp()) + 1800),  # 30 min expiry
+        }
+        if reception_code:
+            session_kwargs["metadata"]["reception_code"] = reception_code
+        session = stripe.checkout.Session.create(**session_kwargs)
     except Exception as e:
         logger.error(f"Stripe session creation failed: {e}")
         raise HTTPException(502, "Payment service unavailable")
@@ -411,11 +442,14 @@ async def create_kiosk_booking(req: KioskBookingRequest):
         "destinationAddress": req.destinationAddress,
         "clientName": req.clientName,
         "clientPhone": req.clientPhone,
+        "clientEmail": email,
         "date": req.date,
         "time": req.time,
         "vehicleType": req.vehicleType,
         "price": req.price,
         "passengers": req.passengers,
+        "receptionCode": reception_code or None,
+        "paymentMode": payment_mode,
         "status": "awaiting_payment",
         "stripeSessionId": session.id,
         "paymentUrl": session.url,
@@ -425,10 +459,31 @@ async def create_kiosk_booking(req: KioskBookingRequest):
     await db.kiosk_bookings.insert_one(booking)
     booking.pop("_id", None)
 
+    payment_email_sent = False
+    if payment_mode == "email_link":
+        try:
+            from routes.email_service import send_kiosk_payment_link
+            result = await send_kiosk_payment_link(email, {
+                **booking,
+                "paymentUrl": session.url,
+            })
+            payment_email_sent = bool(result)
+            await db.kiosk_bookings.update_one(
+                {"reference": reference},
+                {"$set": {
+                    "paymentEmailSent": payment_email_sent,
+                    "paymentEmailSentAt": datetime.now(timezone.utc).isoformat() if payment_email_sent else None,
+                }},
+            )
+        except Exception as e:
+            logger.error(f"Failed to email payment link for {reference}: {e}")
+
     return {
         "reference": reference,
         "paymentUrl": session.url,
         "qrCode": f"data:image/png;base64,{qr_base64}",
+        "paymentMode": payment_mode,
+        "paymentEmailSent": payment_email_sent,
         "booking": booking,
     }
 
@@ -454,6 +509,38 @@ async def kiosk_stripe_webhook(request: Request):
         except Exception as e:
             logger.error(f"Stripe webhook parse error: {e}")
             raise HTTPException(400, "Invalid payload")
+
+    if getattr(event, "type", None) == "payment_intent.succeeded":
+        pi = event.data.object
+        meta = pi.get("metadata", {}) if isinstance(pi, dict) else (getattr(pi, "metadata", None) or {})
+        if (meta.get("channel") == "kiosk_terminal") and db is not None:
+            ref = meta.get("kiosk_reference")
+            pi_id = pi.get("id") if isinstance(pi, dict) else getattr(pi, "id", None)
+            if ref:
+                booking = await db.kiosk_bookings.find_one({"reference": ref}, {"_id": 0})
+                if booking and booking.get("status") != "dispatched":
+                    booking["stripe_payment_intent_id"] = pi_id
+                    booking["paymentIntentId"] = pi_id
+                    if not booking.get("clientEmail") and meta.get("client_email"):
+                        booking["clientEmail"] = meta.get("client_email")
+                    try:
+                        await dispatch_to_csharp(booking)
+                        await db.kiosk_bookings.update_one(
+                            {"reference": ref},
+                            {"$set": {
+                                "status": "dispatched",
+                                "stripe_payment_intent_id": pi_id,
+                                "dispatchedAt": datetime.now(timezone.utc).isoformat(),
+                            }},
+                        )
+                        logger.info(f"Webhook dispatched kiosk booking {ref} to C# addPrepaid")
+                    except Exception as e:
+                        logger.error(f"Webhook C# dispatch failed for {ref}: {e}")
+                        await db.kiosk_bookings.update_one(
+                            {"reference": ref},
+                            {"$set": {"status": "paid_dispatch_failed", "dispatchError": str(e)}},
+                        )
+        return {"received": True}
 
     if event.type == "checkout.session.completed":
         session = event.data.object
@@ -488,8 +575,8 @@ async def kiosk_stripe_webhook(request: Request):
 
 
 async def dispatch_to_csharp(booking):
-    """Send a paid kiosk booking to C# as a confirmed mission."""
-    # Login as company to get token
+    """Send a Terminal-paid kiosk booking to C# as a prepaid auction (no card charge)."""
+    # Login as company to get token (addPrepaid accepts Admin or Company)
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         login_resp = await client.post(
             f"{CSHARP_API}/api/Login/company",
@@ -508,30 +595,63 @@ async def dispatch_to_csharp(booking):
         else:
             cs_date = f"{booking['date']} {time_str}:00"
 
-        # Create auction/booking on C#
+        external_ref = (
+            booking.get("paymentIntentId")
+            or booking.get("payment_intent_id")
+            or booking.get("stripe_payment_intent_id")
+            or booking.get("stripeSessionId")
+            or booking.get("reference")
+            or ""
+        )
+        reception = (booking.get("receptionCode") or "").strip()
+        reception_note = f" | Reception code: {reception}" if reception else ""
+        dest_lat = booking.get("destinationLat") or booking.get("destLat")
+        dest_lng = booking.get("destinationLng") or booking.get("destLng")
+        destination = None
+        if dest_lat is not None and dest_lng is not None:
+            destination = f"{dest_lat},{dest_lng}"
+
         auction_payload = {
             "startAddress": booking.get("pickup", ""),
             "endAddress": booking.get("destinationAddress", booking.get("destination", "")),
             "startPointLatitude": booking.get("pickupLat", 0),
             "startPointLongitude": booking.get("pickupLng", 0),
+            "endPointLatitude": dest_lat,
+            "endPointLongitude": dest_lng,
+            "destination": destination,
             "startDate": cs_date,
+            "utcOffset": booking.get("utcOffset", 0),
             "clientPrice": booking.get("price", 0),
+            "paidAmount": booking.get("price", 0),
             "carType": booking.get("vehicleType", ""),
             "tripType": "distance",
-            "clientName": booking.get("clientName", ""),
-            "clientPhone": booking.get("clientPhone", ""),
-            "passengerCount": booking.get("passengers", 1),
-            "description": f"Kiosk booking from {booking.get('hotelName', '')} - Ref: {booking.get('reference', '')}",
+            "distance": booking.get("distance", 0),
+            "duration": booking.get("duration"),
+            "passengerName": booking.get("clientName", ""),
+            "passengerPhone": booking.get("clientPhone", ""),
+            "passengerEmail": booking.get("clientEmail") or booking.get("email"),
+            "paymentStatus": "prepaid",
+            "externalPaymentRef": external_ref,
+            "currency": booking.get("currency", "eur"),
+            "source": "kiosk",
+            "additionalComments": (
+                f"Kiosk booking from {booking.get('hotelName', '')} "
+                f"- Ref: {booking.get('reference', '')}{reception_note}"
+            ),
         }
 
         resp = await client.post(
-            f"{CSHARP_API}/api/Auction/company",
+            f"{CSHARP_API}/api/Auction/addPrepaid",
             json=auction_payload,
             headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
         )
         if resp.status_code not in (200, 201):
-            raise Exception(f"C# auction creation failed: {resp.status_code} {resp.text[:200]}")
-        logger.info(f"C# auction created for kiosk booking {booking.get('reference')}")
+            raise Exception(f"C# prepaid auction failed: {resp.status_code} {resp.text[:200]}")
+        data = resp.json() if resp.content else {}
+        auction_id = data.get("auctionId") if isinstance(data, dict) else data
+        logger.info(
+            f"C# prepaid auction created for kiosk booking {booking.get('reference')} auctionId={auction_id}"
+        )
 
 
 @router.get("/{slug}/bookings")

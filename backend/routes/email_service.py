@@ -260,3 +260,84 @@ async def send_booking_confirmation(email: str, booking_data: dict):
     except Exception as e:
         logger.error(f"Failed to send booking confirmation email to {email}: {e}")
         return None
+
+
+def build_kiosk_payment_link_html(booking_data: dict) -> str:
+    client_name = booking_data.get("clientName", "Client")
+    payment_url = booking_data.get("paymentUrl", "#")
+    reference = booking_data.get("reference", "")
+    hotel = booking_data.get("hotelName", "")
+    destination = booking_data.get("destination", "")
+    date = booking_data.get("date", "")
+    time = booking_data.get("time", "")
+    vehicle = booking_data.get("vehicleType", "")
+    price = booking_data.get("price", "")
+    reception = booking_data.get("receptionCode", "")
+    return f"""
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+          <tr>
+            <td style="background:#0b1120;padding:24px;text-align:center;">
+              <p style="margin:0;color:#2ecc71;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:700;">ZONT.CAB</p>
+              <h1 style="margin:8px 0 0;color:#ffffff;font-size:22px;">Finalisez votre paiement</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px;">
+              <p style="margin:0 0 16px;font-size:15px;">Bonjour {client_name},</p>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#334155;">
+                Votre reservation kiosk est prete. Cliquez sur le bouton ci-dessous pour payer en securite.
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;background:#f8fafc;border-radius:8px;">
+                <tr><td style="padding:14px 16px;font-size:13px;color:#64748b;">Reference</td><td style="padding:14px 16px;font-size:13px;font-weight:700;text-align:right;">{reference}</td></tr>
+                <tr><td style="padding:14px 16px;font-size:13px;color:#64748b;">Hotel</td><td style="padding:14px 16px;font-size:13px;text-align:right;">{hotel}</td></tr>
+                <tr><td style="padding:14px 16px;font-size:13px;color:#64748b;">Destination</td><td style="padding:14px 16px;font-size:13px;text-align:right;">{destination}</td></tr>
+                <tr><td style="padding:14px 16px;font-size:13px;color:#64748b;">Date / Heure</td><td style="padding:14px 16px;font-size:13px;text-align:right;">{date} {time}</td></tr>
+                <tr><td style="padding:14px 16px;font-size:13px;color:#64748b;">Vehicule</td><td style="padding:14px 16px;font-size:13px;text-align:right;">{vehicle}</td></tr>
+                <tr><td style="padding:14px 16px;font-size:13px;color:#64748b;">Code reception</td><td style="padding:14px 16px;font-size:13px;font-weight:700;text-align:right;">{reception}</td></tr>
+                <tr><td style="padding:14px 16px;font-size:13px;color:#64748b;">Montant</td><td style="padding:14px 16px;font-size:18px;font-weight:700;color:#16a34a;text-align:right;">{price} EUR</td></tr>
+              </table>
+              <p style="text-align:center;margin:24px 0;">
+                <a href="{payment_url}" style="display:inline-block;background:#2ecc71;color:#ffffff;text-decoration:none;font-weight:700;padding:14px 28px;border-radius:8px;">
+                  Payer maintenant
+                </a>
+              </p>
+              <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.6;text-align:center;">
+                Ce lien expire dans 30 minutes.<br>
+                Support: support@zont.cab
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def send_kiosk_payment_link(email: str, booking_data: dict):
+    if not resend.api_key:
+        logger.warning("RESEND_API_KEY not set, skipping kiosk payment link email")
+        return None
+
+    html = build_kiosk_payment_link_html(booking_data)
+    params = {
+        "from": SENDER_EMAIL,
+        "to": [email],
+        "subject": f"Paiement requis — {booking_data.get('reference', '')} - ZONT.CAB",
+        "html": html,
+    }
+    try:
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"Kiosk payment link email sent to {email}: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"Failed to send kiosk payment link email to {email}: {e}")
+        return None
