@@ -457,32 +457,93 @@ async def create_kiosk_booking(req: KioskBookingRequest):
     await db.kiosk_bookings.insert_one(booking)
     booking.pop("_id", None)
 
-    # Email-link flow: send the Stripe payment link to the guest's email.
+    # Email-link flow: the C# backend (SMTP) sends the Stripe payment link to the guest.
+    payment_email_sent = None
+    payment_email_error = None
     if payment_mode == "email_link" and email_clean:
-        try:
-            from routes.email_service import send_kiosk_payment_link
-            await send_kiosk_payment_link(email_clean, {
-                "reference": reference,
-                "hotelName": hotel["name"],
-                "destination": req.destination,
-                "date": req.date,
-                "time": req.time,
-                "vehicleType": req.vehicleType,
-                "price": req.price,
-                "clientName": req.clientName,
-                "receptionCode": reception_code,
-                "paymentUrl": session.url,
-            })
-        except Exception as e:
-            logger.error(f"Kiosk payment-link email failed for {reference}: {e}")
+        payment_email_sent, payment_email_error = await send_payment_link_via_csharp({
+            "clientEmail": email_clean,
+            "clientName": req.clientName,
+            "hotelName": hotel["name"],
+            "destination": req.destination,
+            "date": req.date,
+            "time": req.time,
+            "vehicleType": req.vehicleType,
+            "price": req.price,
+            "reference": reference,
+            "receptionCode": reception_code,
+            "paymentUrl": session.url,
+        })
+        await db.kiosk_bookings.update_one(
+            {"reference": reference},
+            {"$set": {"paymentEmailSent": payment_email_sent, "paymentEmailError": payment_email_error}},
+        )
 
     return {
         "reference": reference,
         "paymentMode": payment_mode,
         "paymentUrl": session.url,
         "qrCode": f"data:image/png;base64,{qr_base64}",
+        "paymentEmailSent": payment_email_sent,
+        "paymentEmailError": payment_email_error,
         "booking": booking,
     }
+
+
+async def send_payment_link_via_csharp(payload: dict):
+    """Ask the C# backend (SMTP) to email the Stripe payment link.
+    Returns (sent: bool, error: str|None). Never raises."""
+    try:
+        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+            resp = await client.post(
+                f"{CSHARP_API}/api/AdminNotify/kioskPaymentLink",
+                json=payload,
+                headers={"Content-Type": "application/json", "Origin": "https://zont.cab", "Referer": "https://zont.cab/"},
+            )
+        if resp.status_code in (200, 201, 204):
+            logger.info(f"C# payment-link email sent for {payload.get('reference')}")
+            return True, None
+        err = f"C# returned {resp.status_code}: {resp.text[:200]}"
+        logger.error(f"Kiosk payment-link email failed: {err}")
+        return False, err
+    except Exception as e:
+        logger.error(f"Kiosk payment-link C# call failed for {payload.get('reference')}: {e}")
+        return False, str(e)
+
+
+class SendPaymentLinkRequest(BaseModel):
+    reference: str
+
+
+@router.post("/send-payment-link")
+async def kiosk_send_payment_link(req: SendPaymentLinkRequest):
+    """Thin proxy to re-send the Stripe payment link email via the C# SMTP backend."""
+    if db is None:
+        raise HTTPException(500, "Database not available")
+    booking = await db.kiosk_bookings.find_one({"reference": req.reference}, {"_id": 0})
+    if not booking:
+        raise HTTPException(404, "Booking not found")
+    email = (booking.get("clientEmail") or "").strip()
+    if not email:
+        raise HTTPException(400, "Booking has no client email")
+    sent, error = await send_payment_link_via_csharp({
+        "clientEmail": email,
+        "clientName": booking.get("clientName", ""),
+        "hotelName": booking.get("hotelName") or booking.get("hotelSlug", ""),
+        "destination": booking.get("destination", ""),
+        "date": booking.get("date", ""),
+        "time": booking.get("time", ""),
+        "vehicleType": booking.get("vehicleType", ""),
+        "price": booking.get("price", 0),
+        "reference": booking.get("reference", ""),
+        "receptionCode": booking.get("receptionCode") or "",
+        "paymentUrl": booking.get("paymentUrl", ""),
+    })
+    await db.kiosk_bookings.update_one(
+        {"reference": req.reference},
+        {"$set": {"paymentEmailSent": sent, "paymentEmailError": error}},
+    )
+    return {"paymentEmailSent": sent, "paymentEmailError": error}
 
 
 class KioskSearchLog(BaseModel):

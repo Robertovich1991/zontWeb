@@ -597,3 +597,14 @@ Partie B — Kiosk booking (receptionCode optionnel → lien Stripe par email au
 - Frontend KioskPage.js: input "Code réception (optionnel)" en étape 3; si paymentMode==='email_link' => pas de terminal, écran "lien envoyé par email" + polling /booking/{ref}/status toutes les 2s (timeout 30 min) => succès quand paid|dispatched|paid_dispatch_failed. Sans code: flux Terminal inchangé.
 
 ⚠️ NON testable en preview: la création réelle de la Stripe Checkout Session échoue car la clé STRIPE_SECRET de preview est une clé LIVE EXPIRÉE (blocage connu, impacte TOUTES les réservations kiosk, pas spécifique à cette feature). En production (clé valide) le flux complet fonctionne. Logique payment_mode + endpoint statut + admin codes = testés et OK.
+
+## [2026-11] Kiosk payment-link email via C# SMTP (remplace Resend) — DONE (prod uniquement testable)
+Changement demandé: l'email du lien de paiement kiosk (quand receptionCode présent) doit être envoyé par le backend C# (SMTP), PAS par Resend.
+- kiosk.py: nouvelle fonction send_payment_link_via_csharp() → POST {CSHARP_API}/api/AdminNotify/kioskPaymentLink (headers Content-Type + Origin/Referer zont.cab), body {clientEmail,clientName,hotelName,destination,date,time,vehicleType,price,reference,receptionCode,paymentUrl}. Ne lève jamais; renvoie (sent,error).
+- /book (email_link): appelle C#, stocke+renvoie paymentEmailSent / paymentEmailError. Plus d'appel Resend (send_kiosk_payment_link reste dans email_service.py mais n'est plus utilisé par le kiosk).
+- Nouveau POST /api/kiosk/send-payment-link {reference} = proxy pour renvoyer l'email (retry). 404 si ref inconnue (testé ✓).
+- Frontend KioskPage.js écran email_sent: + bouton "Ouvrir le lien de paiement" (booking.paymentUrl), + QR de repli (booking.qrCode), + avertissement si paymentEmailSent===false, polling /booking/{ref}/status inchangé.
+
+⚠️ NON testable en preview: le conteneur preview est BLOQUÉ par le WAF/pare-feu de api.zont.cab (même /api/Login/company renvoie 403 "Web App - Unavailable" depuis ici → blocage par IP). + clé STRIPE preview expirée. Les deux fonctionnent en PRODUCTION (IP backend prod autorisée). 
+TEST À FAIRE EN PROD après déploiement: réserver kiosk avec clientEmail=ericyanrobertovich@gmail.com, price=2, receptionCode=TEST-FIX → vérifier réception email (bouton Stripe) + la borne attend jusqu'au paiement.
+Pré-requis prod: l'endpoint C# /api/AdminNotify/kioskPaymentLink doit exister et envoyer via SMTP (confirmé par l'utilisateur).

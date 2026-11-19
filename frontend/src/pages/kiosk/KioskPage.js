@@ -1506,11 +1506,32 @@ const KioskPage = () => {
                       {lang === 'fr' ? 'Le client reçoit le lien sur' : lang === 'ru' ? 'Клиент получит ссылку на' : lang === 'hy' ? 'Հղումն ուղարկվել է' : 'The link was sent to'}
                     </p>
                     <p className="text-[#2ecc71] font-bold text-lg lg:text-xl break-all">{clientEmail}</p>
+
+                    {booking?.paymentEmailSent === false && (
+                      <p className="text-amber-400 text-sm mt-3" data-testid="kiosk-email-link-warn">
+                        {lang === 'fr' ? "L'email n'a pas pu être envoyé — utilisez le lien ou le QR ci-dessous." : lang === 'ru' ? 'Email не отправлен — используйте ссылку или QR ниже.' : lang === 'hy' ? 'Էլ. նամակը չուղարկվեց — օգտվեք հղումից կամ QR-ից ներքևում։' : "Email couldn't be sent — use the link or QR below."}
+                      </p>
+                    )}
+
                     <div className="flex items-center justify-center gap-2 text-gray-400 mt-6">
                       <Loader2 className="w-5 h-5 animate-spin" />
                       <span>{lang === 'fr' ? 'En attente du paiement…' : lang === 'ru' ? 'Ожидание оплаты…' : lang === 'hy' ? 'Սպասում ենք վճարմանը…' : 'Waiting for payment…'}</span>
                     </div>
                     <p className="text-[#c8a951] font-black text-5xl lg:text-6xl mt-6">{selectedVehicle?.maxAmount}&euro;</p>
+
+                    {booking?.paymentUrl && (
+                      <a href={booking.paymentUrl} target="_blank" rel="noopener noreferrer"
+                        className="mt-6 inline-flex items-center justify-center gap-2 bg-[#2ecc71] hover:bg-[#27ae60] text-white px-8 py-4 rounded-xl text-lg font-bold transition-colors" data-testid="kiosk-email-link-open">
+                        <CreditCard className="w-5 h-5" />{lang === 'fr' ? 'Ouvrir le lien de paiement' : lang === 'ru' ? 'Открыть ссылку на оплату' : lang === 'hy' ? 'Բացել վճարման հղումը' : 'Open payment link'}
+                      </a>
+                    )}
+                    {booking?.qrCode && (
+                      <div className="mt-6 flex flex-col items-center">
+                        <p className="text-gray-400 text-sm mb-2">{lang === 'fr' ? 'ou scannez pour payer' : lang === 'ru' ? 'или отсканируйте для оплаты' : lang === 'hy' ? 'կամ սկանավորեք վճարելու համար' : 'or scan to pay'}</p>
+                        <img src={booking.qrCode} alt="QR" className="w-40 h-40 rounded-xl bg-white p-2" data-testid="kiosk-email-link-qr" />
+                      </div>
+                    )}
+
                     <button onClick={resetKiosk} className="mt-8 bg-[#111827] border border-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/[0.05] transition-colors" data-testid="kiosk-email-link-new">
                       <RotateCcw className="w-4 h-4 inline mr-2" />{t.newBooking}
                     </button>
