@@ -190,6 +190,6 @@ const content = {
 const vehiclesPrices = { sedan: 68, luxury: 95, minivan: 120, minibus: 105 };
 const seoUrls = { en: '/vtc-7-seats', fr: '/vtc-7-places', ru: '/vtc-7-mest', hy: '/vtc-7-tegh', es: '/es/minivan-7-plazas' };
 
-Object.values(content).forEach(v => { v.minivanPax = 7; v.minivanLuggage = 6; });
+Object.values(content).forEach(v => { v.minivanPax = 7; v.minivanLuggage = 10; });
 const VTC7Places = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} heroImage="/images/taxi-cab-transfer-7-places.webp" ogImage="/images/taxi-cab-transfer-7-places.webp" meetDriverImage="/images/taxi-cab-transfer-7-places.webp" />;
 export default VTC7Places;
