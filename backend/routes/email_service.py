@@ -246,8 +246,9 @@ async def send_kiosk_payment_link(email: str, data: dict):
 </div>
 """
     params = {
-        "from": SENDER_EMAIL,
+        "from": f"ZONT.CAB <{SENDER_EMAIL}>",
         "to": [email],
+        "reply_to": "zontcab@gmail.com",
         "subject": f"Payez votre transfert ZONT #{ref} — {price} €",
         "html": html,
     }
