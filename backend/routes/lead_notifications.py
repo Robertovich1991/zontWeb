@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 CSHARP_API = os.environ.get("CSHARP_API_URL", "https://api.zont.cab").rstrip("/")
 
 resend.api_key = os.environ.get("RESEND_API_KEY", "")
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "zontcab@gmail.com")
 ADMIN_NOTIFICATION_EMAIL = os.environ.get(
     "ADMIN_NOTIFICATION_EMAIL",
     "zontcab@gmail.com,carscomfort@gmail.com",
