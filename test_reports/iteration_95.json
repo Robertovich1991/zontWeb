@@ -1,0 +1,49 @@
+{
+  "summary": "Tested the hotel partner booking link and commission attribution feature (MVP Phase 1). Backend: 21/21 pytest tests passed. They cover the public link, the disabled link (no token), admin config GET/PUT, 401/403 guards, idempotency on one C# auction id, rate math (120*12%=14.4, per-link 20% -> 30), no token / forged token -> no row, _map_status, ledger filters, validate/cancel/payout history, hotel isolation (Bristol vs Negresco), cron auth, and the referralToken pop before the C# call. Frontend: /p/hotel-negresco-nice -> 'Réservez votre transfert vers Hotel Negresco Nice' -> redirect home, referral-banner shown, #h-dropoff prefilled with '37 Promenade des Anglais, Nice'. An unknown slug shows the error state. On the admin commissions page the totals, the validate -> payout (prompts) and cancel actions, and the status and hotel filters all work. The PartnerLinkSection URL, copy, preview, rate save (persisted 13) and toggle (persisted false) work. The hotel extranet shows only Bristol rows and totals. Extra edge scripts found 3 real backend issues: a concurrent-insert race that breaks idempotency, negative commissions accepted, and no status transition guards.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "record_referral_booking (internal)", "issue": "Idempotency is find-then-insert with no unique index on referral_bookings.csharp_auction_id / token_jti. 5 concurrent calls with the same auction id created 5 rows (reproduced in tests/race_check_referral.py). A double-submit or retry can create duplicate commissions. Fix: create unique sparse indexes on csharp_auction_id and token_jti at startup and catch DuplicateKeyError.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "record_referral_booking", "issue": "clientPrice is taken from the client payload with no validation. clientPrice=-500 produced commission_amount=-60. Clamp it to >=0, or rely only on the C# totalAmount."},
+      {"endpoint": "POST /api/admin/referrals/{id}/validate|cancel|payout", "issue": "The backend has no state-machine guards. A pending or cancelled row can be marked paid, and a paid row can be re-validated or cancelled. Only the UI hides these buttons. Enforce allowed transitions on the server (409 otherwise)."},
+      {"endpoint": "sync_referral_statuses", "issue": "The comment says 'only move status forward', but the code sets any mapped status. An admin-validated row whose C# status is still e.g. 'accepted' is reverted to 'pending' on the next cron run. A manually validated row can also be flipped to cancelled."},
+      {"endpoint": "PUT /api/admin/hotels/{id}/partner-link", "issue": "rate has no range check (negative or >100 accepted)."},
+      {"endpoint": "PUT /api/admin/referrals/{id}", "issue": "hotel_id reassignment is not validated against db.hotels."},
+      {"endpoint": "GET /api/hotel/referrals", "issue": "The response includes client_email and the full history for the hotel. Check this is intended for privacy (the comment says the hotel sees only amount/commission)."},
+      {"endpoint": "record_referral_booking", "issue": "Dedupe on token jti means one link visit = only one attributed booking. A second booking in the same session (same token) is NOT attributed. If C# returns no id/bookingId/auctionId, csharp_auction_id=None and the row is never synced by cron."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Admin HotelDetail PartnerLinkSection", "issues": ["The rate number input value is not visible (it looks empty in the screenshot even though the value is 12/13). It probably inherits a light text color. Add text-gray-900."]},
+      {"screen": "Admin /admin/partner-commissions filters", "issues": ["The 'Tous les hotels' / 'Tous les statuts' selects show light grey text on a grey background (low contrast)."]},
+      {"screen": "Global (dev preview)", "issues": ["The CookieYes third-party 'Script error.' triggers the webpack dev overlay, which blocks clicks in preview. This existed before and is unrelated to the feature; tests hid the overlay."]},
+      {"screen": "Admin PartnerLinkSection", "issues": ["Previsualiser opens production https://www.zont.cab/p/... (hardcoded PUBLIC_SITE), so the preview env cannot be previewed. Consider making this env-driven."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_hotel_referral.py", "/app/backend/tests/race_check_referral.py", "/app/backend/tests/seed_referral_ui.py", "/app/test_reports/pytest/hotel_referral.xml"],
+  "action_items": [
+    "Add unique (sparse) Mongo indexes on referral_bookings.csharp_auction_id and token_jti and handle DuplicateKeyError in record_referral_booking (concurrent duplicates reproduced)",
+    "Enforce status transitions server-side (payout only from validated; no changes from paid)",
+    "Fix sync_referral_statuses so it does not revert validated -> pending (respect the forward-only intent)",
+    "Validate clientPrice >= 0 and partner-link rate in 0..100",
+    "Make the rate input text visible and improve the filter select contrast"
+  ],
+  "critical_code_review_comments": [
+    "hotel_referral.py: SECRET_KEY falls back to a hardcoded 'zont-admin-secret-key-2025', and _COMPANY_CREDS falls back to hardcoded C# credentials. Remove these defaults.",
+    "Referral tokens have no exp and anyone can mint one via the public endpoint. This is acceptable for MVP, but any booking that attaches a harvested token is attributed regardless of destination. Consider checking that the booking dropoff/pickup matches the hotel, or a TTL.",
+    "_hotel_for_slug falls back to matching hotels by kiosk name, which could attribute to the wrong hotel if names collide.",
+    "Client side: visiting another /p/ link overwrites the stored referral (last-touch on the client), whereas the spec says first-touch.",
+    "backend/.env has MONGO_URL/DB_NAME/CORS_ORIGINS duplicated (lines 1-3 and 7-9)."
+  ],
+  "updated_files": ["/app/backend/tests/test_hotel_referral.py", "/app/backend/tests/race_check_referral.py", "/app/backend/tests/seed_referral_ui.py"],
+  "success_rate": {"backend": "100% of the 21 planned tests; 1 HIGH + 6 minor issues from the extra edge scripts", "frontend": "100% functional; 2 design issues"},
+  "seed_data_creation": "Temporary TEST_ referral_bookings rows were inserted via record_referral_booking and deleted by id (referral_bookings count is back to 0). Hotel 523e9be3 partner_link_rate/partner_link_enabled fields were $unset to restore the original state (commission_rate 12 untouched).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run: cd /app/backend && python -m pytest tests/test_hotel_referral.py -v. The tests call record_referral_booking directly via motor and clean up by id. The webpack dev overlay (CookieYes script error) blocks Playwright clicks: inject the style '#webpack-dev-server-client-overlay{display:none!important}'. Admin 'Voir details' is in the row kebab menu on /admin/hotels. The payout action uses window.prompt twice. Re-run race_check_referral.py to verify the unique-index fix (expect 1 row).",
+  "test_credentials": "admin@zont.cab/admin123, admin@bristol.fr/hotel123 (from /app/memory/test_credentials.md)"
+}

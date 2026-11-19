@@ -542,3 +542,31 @@ Corrigé et VÉRIFIÉ (screenshot ES Barcelona OK: image chargée + "Servicios")
 - heroImage remplacé par photos distantes fiables (Unsplash/Pexels, w=1200) sur 14 pages ES: Barcelona, Rome, Milan, Berlin, Munich, Alicante, Monaco, Nice, Cannes + EsGareAusterlitz/DeLyon/DuNord/Montparnasse/SaintLazare.
 - Header.js: "Services" traduit (Servicios ES / Услуги RU / Ծառայություններ HY) desktop + mobile.
 Compile clean.
+
+## [2026-11] Lien de réservation partenaire hôtel + commissions (MVP Phase 1) — DONE & TESTÉ
+Objectif: chaque hôtel a un lien partageable /p/{kiosk_slug}. Un client qui démarre une réservation via ce lien est attribué à l'hôtel côté serveur et une commission est enregistrée. Choix user validés: Phase 1 d'abord; Validée AUTO depuis statut C#; base commission = montant total payé; taux SPÉCIFIQUE par lien (override du commission_rate hôtel); réutilise le kiosk_slug existant.
+Règle anti-fraude (implémentée): l'attribution vient UNIQUEMENT d'un jeton signé né au clic du lien. L'adresse de l'hôtel seule ne déclenche jamais de commission (réservation directe sans jeton = aucune commission). First-touch, non rétroactif, 1 commission/réservation (idempotent).
+
+Architecture:
+- Les réservations web payées NE SONT PAS dans notre Mongo (vont au C# api.zont.cab via proxy POST /api/proxy/booking/create). Point de capture serveur = ce proxy: il retire `referralToken` du body AVANT de forwarder au C#, puis appelle record_referral_booking() avec la réf d'auction C# renvoyée.
+- Nouvelle collection `db.referral_bookings`: {id, hotel_id, hotel_slug, hotel_name, origin:'partner_link', csharp_auction_id, client_email, pickup/dropoff_address, start_date, amount, client_price, commission_base:'total_paid', commission_rate (snapshot), commission_amount, status (pending|validated|cancelled|paid), csharp_status, payout, token_jti, history[]}.
+- Champs ajoutés sur db.hotels: partner_link_enabled (def true), partner_link_rate (def = commission_rate).
+- Index uniques partiels: csharp_auction_id (number), token_jti (string) → idempotence même en concurrence (DuplicateKeyError ignoré).
+- Transitions serveur (409 sinon): pending→{validated,cancelled}; validated→{cancelled,paid}; cancelled/paid terminaux. Taux borné 0–100.
+- Sync auto: cron /api/cron/referral-sync (30 min, .emergent/crons.yml, auth Bearer WEBHOOK_CRON_SECRET dans backend/.env). sync_referral_statuses() lit GET /api/Auction/company/auctions/{aid} (token société) → mappe statut C# (completed/finished/done/ended→validated, cancelled/declined/…→cancelled) + met à jour amount/commission. Forward-only (respecte les transitions).
+
+Endpoints (backend/routes/hotel_referral.py, prefix /api):
+- Public: GET /referral/link/{slug} → {enabled, hotelName, destination, token}.
+- Admin: GET/PUT /admin/hotels/{id}/partner-link; GET /admin/referrals?hotel_id&origin&status; POST /admin/referrals/{id}/{validate|cancel|payout}; PUT /admin/referrals/{id} (correction, historisée).
+- Hôtel: GET /hotel/referrals (isolation stricte par hotel_id).
+- Cron: POST /cron/referral-sync.
+
+Frontend:
+- /p/:slug → PartnerLink.js (stocke referral dans BookingContext, préremplit destination, redirige /).
+- Home.js: prefill drop-off + bannière "Réservez votre transfert vers {hôtel}" (data-testid=referral-banner).
+- Checkout.js: ajoute referralToken au payload de réservation.
+- Admin: HotelDetail → section "Lien de réservation partenaire" (URL, copier, prévisualiser, toggle actif, taux); page /admin/partner-commissions (AdminReferrals.js, nav "Commissions Liens") filtres + actions valider/annuler/verser + totaux.
+- Hôtel extranet: /hotel/referrals (HotelReferrals.js, nav "Lien partenaire") liste + totaux.
+
+Testé: testing_agent 21/21 backend PASS + flows frontend. 3 edge bugs trouvés ET corrigés+revérifiés (race idempotence→1 ligne, garde-fous transitions 409, taux 0–100). BookingContext a un nouveau champ `referral`.
+À FAIRE (Phase 2 / backlog): vérifier le mapping exact des statuts C# avec de vraies données (ajuster _VALIDATED_STATES/_CANCELLED_STATES); proratisation remboursements partiels; versements automatisés; tester une VRAIE réservation payée de bout en bout (non testable sans paiement réel). Harmonisation séparée en attente: nb villes (16 vs 120+), capacité Van 7 places (carte=6 pax), note 4,5 vs 4,9.

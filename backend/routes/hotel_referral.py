@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 
 import jwt
 from fastapi import APIRouter, HTTPException, Request
+from pymongo.errors import DuplicateKeyError
 
 from routes.fleet_shared import get_shared_client, CSHARP_API
 
@@ -202,7 +203,12 @@ async def record_referral_booking(payload: dict, result: dict):
         "created_at": now,
         "updated_at": now,
     }
-    await db.referral_bookings.insert_one(doc)
+    try:
+        await db.referral_bookings.insert_one(doc)
+    except DuplicateKeyError:
+        # Concurrent/retry double-submit — commission already recorded for this booking.
+        logger.info(f"referral duplicate ignored auction={auction_id} jti={claims.get('jti')}")
+        return
     logger.info(f"referral attributed hotel={hotel_id} auction={auction_id} commission={doc['commission_amount']}")
 
 
@@ -273,8 +279,9 @@ async def sync_referral_statuses():
             "commission_amount": commission,
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }
-        # Only move status forward automatically; never auto-revert a paid row.
-        if new_status != row.get("status") and row.get("status") != "paid":
+        # Only move status along the allowed path (never revert validated->pending, never touch paid).
+        current = row.get("status", "pending")
+        if new_status != current and new_status in _ALLOWED_TRANSITIONS.get(current, set()):
             set_fields["status"] = new_status
         await db.referral_bookings.update_one(
             {"id": row["id"]},
@@ -340,9 +347,12 @@ async def admin_update_partner_link(hotel_id: str, request: Request):
         updates["partner_link_enabled"] = bool(body["enabled"])
     if "rate" in body and body["rate"] is not None:
         try:
-            updates["partner_link_rate"] = float(body["rate"])
+            r = float(body["rate"])
         except (TypeError, ValueError):
             raise HTTPException(400, "Taux invalide")
+        if r < 0 or r > 100:
+            raise HTTPException(400, "Le taux doit etre entre 0 et 100")
+        updates["partner_link_rate"] = r
     await db.hotels.update_one({"id": hotel_id}, {"$set": updates})
     return await admin_get_partner_link(hotel_id, request)
 
@@ -372,10 +382,21 @@ async def admin_list_referrals(request: Request, hotel_id: str = None, origin: s
     return {"referrals": rows, "totals": totals, "count": len(rows)}
 
 
+_ALLOWED_TRANSITIONS = {
+    "pending": {"validated", "cancelled"},
+    "validated": {"cancelled", "paid"},
+    "cancelled": set(),   # terminal
+    "paid": set(),        # terminal
+}
+
+
 async def _set_status(hotel_or_admin, row_id, new_status, by, extra=None):
     row = await db.referral_bookings.find_one({"id": row_id}, {"_id": 0})
     if not row:
         raise HTTPException(404, "Commission introuvable")
+    current = row.get("status", "pending")
+    if new_status != current and new_status not in _ALLOWED_TRANSITIONS.get(current, set()):
+        raise HTTPException(409, f"Transition {current} -> {new_status} non autorisee")
     now = datetime.now(timezone.utc).isoformat()
     sets = {"status": new_status, "updated_at": now}
     if extra:

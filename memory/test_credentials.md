@@ -11,3 +11,8 @@
 - GPS Admin (React /gps-admin): gps@zont.cab / gpsadmin123 (seed: POST /api/gps-admin/auth/seed).
 - Hotel Bristol extranet (/hotel/login): admin@bristol.fr / hotel123.
 - C# login endpoints: /api/Login/company (company), /api/Login/client (client), /api/Login (admin).
+
+## Hotel Partner Link (2026-11)
+- Partner commission sync cron auth: WEBHOOK_CRON_SECRET is set in backend/.env (Bearer token for POST /api/cron/referral-sync).
+- Test hotel with active partner link: slug `hotel-negresco-nice` (hotel id 523e9be3, commission_rate 12%). Public link: /p/hotel-negresco-nice.
+- Hotel extranet with the "Lien partenaire" tab: admin@bristol.fr / hotel123 (Hotel Le Bristol Paris).

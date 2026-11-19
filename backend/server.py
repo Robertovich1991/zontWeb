@@ -349,6 +349,14 @@ async def startup_event():
         await db.kiosk_bookings.create_index([("reference", 1)], unique=True)
         # Social auth
         await db.google_auth.create_index([("email", 1)], unique=True)
+        # Hotel partner-link commissions — unique only when the field is present/typed
+        await db.referral_bookings.create_index(
+            [("csharp_auction_id", 1)], unique=True,
+            partialFilterExpression={"csharp_auction_id": {"$type": "number"}})
+        await db.referral_bookings.create_index(
+            [("token_jti", 1)], unique=True,
+            partialFilterExpression={"token_jti": {"$type": "string"}})
+        await db.referral_bookings.create_index([("hotel_id", 1), ("created_at", -1)])
         # Seed demo hotel
         await ensure_demo_hotel()
         logger.info("MongoDB indexes created.")
