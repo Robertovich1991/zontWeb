@@ -16,7 +16,7 @@ const content = {
     points: [
       'Competitive earnings per transfer',
       'Flexible schedule — work when you want',
-      'Growing network across 16 cities',
+      'Growing network across 19 cities',
       'Professional support and training',
     ],
   },
@@ -30,7 +30,7 @@ const content = {
     points: [
       'Revenus competitifs par transfert',
       'Horaires flexibles — travaillez quand vous voulez',
-      'Reseau en croissance dans plus de 120 villes',
+      'Reseau en croissance dans 19 villes',
       'Support professionnel et formation',
     ],
   },
@@ -44,7 +44,7 @@ const content = {
     points: [
       'Конкурентный заработок за трансфер',
       'Гибкий график — работайте когда хотите',
-      'Растущая сеть в 16 городах',
+      'Растущая сеть в 19 городах',
       'Профессиональная поддержка и обучение',
     ],
   },
@@ -58,7 +58,7 @@ const content = {
     points: [
       'Մրցունակ վաստակ յուրաքանչյուր տրանսֆերի համար',
       'Ճկուն գրաֆիկ — աշխատեք երբ ուզում եք',
-      'Աճկող ցանց 16 քաղաքներում',
+      'Աճկող ցանց 19 քաղաքներում',
       'Պրոֆեսիոնալ աջակցություն և վերապատրաստում',
     ],
   },

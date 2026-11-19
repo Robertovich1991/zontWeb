@@ -83,7 +83,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { value: '50,000+', label: 'Transfers Delivered' },
-      { value: '16+', label: 'Cities Covered' },
+      { value: '19', label: 'Cities Covered' },
       { value: '12-20%', label: 'Commission on Premium & Vans' },
       { value: '24/7', label: 'Partner Support' },
     ],
@@ -170,7 +170,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { value: '50 000+', label: 'Transferts Réalisés' },
-      { value: '16+', label: 'Villes Couvertes' },
+      { value: '19', label: 'Villes Couvertes' },
       { value: '12-20%', label: 'Commission sur Premium & Vans' },
       { value: '24/7', label: 'Support Partenaire' },
     ],
@@ -245,7 +245,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { value: '50 000+', label: 'Трансферов выполнено' },
-      { value: '16+', label: 'Городов' },
+      { value: '19', label: 'Городов' },
       { value: '12-20%', label: 'Комиссия Premium & Vans' },
       { value: '24/7', label: 'Поддержка партнёров' },
     ],
@@ -320,7 +320,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { value: '50 000+', label: 'Կատարված տրանսֆերներ' },
-      { value: '16+', label: 'Քաղաքներ' },
+      { value: '19', label: 'Քաղաքներ' },
       { value: '12-20%', label: 'Միջնորդավճար' },
       { value: '24/7', label: 'Աջակցություն' },
     ],

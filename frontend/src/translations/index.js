@@ -2,7 +2,7 @@ export const translations = {
   en: {
     meta: {
       title: 'Zont - Premium Transportation & Airport Transfer Service',
-      description: 'Book professional drivers and airport transfers in 16 cities worldwide. Real-time tracking, transparent pricing, and 24/7 customer support. Download the app now!',
+      description: 'Book professional drivers and airport transfers in 19 cities worldwide. Real-time tracking, transparent pricing, and 24/7 customer support. Download the app now!',
       keywords: 'airport transfer, car service, private driver, taxi booking, ride sharing, transportation service',
     },
     nav: {
@@ -84,7 +84,7 @@ export const translations = {
     worldwide: {
       title: 'Your Best Worldwide Option',
       description: 'With a global on-demand network already spanning across',
-      cities: '16 cities',
+      cities: '19 cities',
       description2: ", we're taking transportation and instant ordering to the next level.",
     },
     footer: {
@@ -100,7 +100,7 @@ export const translations = {
   fr: {
     meta: {
       title: 'Zont - Service de Transport Premium & Transfert Aeroport',
-      description: 'Reservez des chauffeurs professionnels et transferts aeroport dans plus de 16 villes. Suivi en temps reel, prix transparents et support 24/7.',
+      description: 'Reservez des chauffeurs professionnels et transferts aeroport dans 19 villes. Suivi en temps reel, prix transparents et support 24/7.',
       keywords: 'transfert aeroport, service de voiture, chauffeur prive, reservation taxi, covoiturage, service de transport',
     },
     nav: {
@@ -182,7 +182,7 @@ export const translations = {
     worldwide: {
       title: 'Votre Meilleure Option Mondiale',
       description: 'Avec un reseau mondial a la demande couvrant deja plus de',
-      cities: '16 villes',
+      cities: '19 villes',
       description2: ', nous portons le transport a un nouveau niveau.',
     },
     footer: {
@@ -198,7 +198,7 @@ export const translations = {
   ru: {
     meta: {
       title: 'Zont - Премиум Транспорт и Трансфер из Аэропорта',
-      description: 'Закажите профессиональных водителей и трансферы из аэропорта в более чем 16 городах мира. Отслеживание в реальном времени, прозрачные цены и поддержка 24/7.',
+      description: 'Закажите профессиональных водителей и трансферы из аэропорта в 19 городах мира. Отслеживание в реальном времени, прозрачные цены и поддержка 24/7.',
       keywords: 'трансфер из аэропорта, служба такси, частный водитель, заказ такси, транспортные услуги',
     },
     nav: {
@@ -280,7 +280,7 @@ export const translations = {
     worldwide: {
       title: 'Ваш Лучший Вариант по Всему Миру',
       description: 'С глобальной сетью по требованию, охватывающей уже более',
-      cities: '16 городов',
+      cities: '19 городов',
       description2: ', мы выводим транспорт и мгновенный заказ на новый уровень.',
     },
     footer: {
@@ -296,7 +296,7 @@ export const translations = {
   hy: {
     meta: {
       title: 'Zont - Պրեմիում Տրանսպորտ և Օդանավակայանի Տրանսֆեր',
-      description: 'Ամրագրեք պրոֆեսիոնալ վարորդներ և օդանավակայանի տրանսֆերներ 16 քաղաքներում: Իրական ժամանակի հետևելում, թաֆանցիկ գներ և 24/7 աջակցություն:',
+      description: 'Ամրագրեք պրոֆեսիոնալ վարորդներ և օդանավակայանի տրանսֆերներ 19 քաղաքներում: Իրական ժամանակի հետևելում, թաֆանցիկ գներ և 24/7 աջակցություն:',
       keywords: 'օդանավակայանի տրանսֆեր, մեքենայի ծառայություն, անձնական վարորդ, տաքսի ամրագրում',
     },
     nav: {
@@ -378,7 +378,7 @@ export const translations = {
     worldwide: {
       title: 'Ձեր Լավագույն Համաշխարհային Ընտրությունը',
       description: 'Համաշխարհային ցանցով արդեն ընդգրկում է',
-      cities: '16 քաղաքներ',
+      cities: '19 քաղաքներ',
       description2: ', մենք տրանսպորտը տանում ենք նոր մակարդակ:',
     },
     footer: {
@@ -466,7 +466,7 @@ export const translations = {
     globalReach: {
       title: 'Alcance global',
       description: 'Nuestra red mundial cubre ya',
-      cities: '16 ciudades',
+      cities: '19 ciudades',
       description2: ', y estamos llevando el transporte a un nuevo nivel.',
     },
     footer: {

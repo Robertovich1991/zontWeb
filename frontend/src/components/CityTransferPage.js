@@ -147,7 +147,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
   const vehicles = [
     { id: 1, name: c.sedan, desc: c.sedanDesc, passengers: 3, luggage: 3, price: vehiclesPrices?.sedan || 65, img: IMAGES.sedan },
     { id: 2, name: c.luxury, desc: c.luxuryDesc, passengers: 3, luggage: 3, price: vehiclesPrices?.luxury || 95, img: IMAGES.interior },
-    { id: 3, name: c.minivan, desc: c.minivanDesc, passengers: 6, luggage: 6, price: vehiclesPrices?.minivan || 120, img: IMAGES.minivan },
+    { id: 3, name: c.minivan, desc: c.minivanDesc, passengers: c.minivanPax ?? 6, luggage: c.minivanLuggage ?? 6, price: vehiclesPrices?.minivan || 120, img: IMAGES.minivan },
     { id: 4, name: c.minibus, desc: c.minibusDesc, passengers: 8, luggage: 8, price: vehiclesPrices?.minibus || 180, img: IMAGES.airport },
   ];
 

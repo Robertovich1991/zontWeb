@@ -570,3 +570,16 @@ Frontend:
 
 Testé: testing_agent 21/21 backend PASS + flows frontend. 3 edge bugs trouvés ET corrigés+revérifiés (race idempotence→1 ligne, garde-fous transitions 409, taux 0–100). BookingContext a un nouveau champ `referral`.
 À FAIRE (Phase 2 / backlog): vérifier le mapping exact des statuts C# avec de vraies données (ajuster _VALIDATED_STATES/_CANCELLED_STATES); proratisation remboursements partiels; versements automatisés; tester une VRAIE réservation payée de bout en bout (non testable sans paiement réel). Harmonisation séparée en attente: nb villes (16 vs 120+), capacité Van 7 places (carte=6 pax), note 4,5 vs 4,9.
+
+## [2026-11] Harmonisation infos — nombre de villes + capacité Van 7 places — DONE
+Demande user: afficher le NOMBRE RÉEL de destinations partout (au lieu du mélange "16" sur l'accueil et "120+"/"16+" ailleurs), et corriger la capacité du Van 7 places (carte affichait 6 passagers sous un nom "Van 7 Places").
+Décisions: nombre réel vérifié = **19 destinations** (source: src/data/cities.js → countriesList : France 11, Monaco 1, Allemagne 2, Italie 2, Espagne 2, Arménie 1). Van 7 places = **7 passagers / 6 bagages** (défaut assumé, user a skip).
+
+Fait (compile clean; vérifié via bundle servi à l'edge preview = contient "19 cities"/"cities: '19'"):
+- Remplacé TOUTES les mentions de comptage de villes 16 / 120 / 16+ / 120+ par **19** sur ~30 fichiers, 5 langues (EN/FR/RU/HY/ES): Home (heroSub+stats+seoDesc+CTA), translations/index.js, Countries, Help, BecomeClient, BecomeDriver, About, Partners, LookingForPartners, ParisAirportTransfer, DisneylandParis, VTC7/VTC8, tous les b2b (TourOperators, TravelAgencies, TourismAgencies, EventAgencies, BusinessPartners, ConciergeServices, CorporateClients), pages villes (otherCitiesTitle HY), etc.
+- PRESERVÉ volontairement (NE PAS confondre avec villes): stats "Max Passengers/Max Per Vehicle/Passagers Max/Макс пассажиров/1-16 Passengers-Vehicle" = 16 (capacité véhicule), prix (minibus 160, Beauvais 280...), autoroute "A16", festival "16 jours/days", 166 mètres Alicante.
+- ⚠️ Le "19" est codé en dur dans les textes marketing (5 langues). À METTRE À JOUR si on ajoute/retire une destination (modifier aussi src/data/cities.js + sitemap + App.js routes).
+
+Van 7 places: capacité de carte rendue par CityTransferPage.js (ligne 150) était hardcodée passengers:6. Rendue per-page: `passengers: c.minivanPax ?? 6, luggage: c.minivanLuggage ?? 6`. ParisAirportTransfer.js et services/VTC7Places.js: `Object.values(content).forEach(v => {v.minivanPax=7; v.minivanLuggage=6})` + desc HY/ES alignés sur 7. Les autres pages villes (Rome, Nice...) gardent 6 (cohérent avec leur texte "jusqu'à 6"). VÉRIFIÉ screenshot page Paris: "Van 7 Places — Mercedes Classe V, jusqu'à 7 passagers — 7 Passagers / 6 Bagages".
+
+Reste non traité (user a reporté à plus tard): note 4,5 vs 4,9 (page V-Class premium).

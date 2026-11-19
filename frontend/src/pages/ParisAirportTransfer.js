@@ -33,7 +33,7 @@ const content = {
     bookingForm: 'Book Your Paris Taxi / VTC',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: '',
-    otherCitiesTitle: 'We serve 16+ cities across Europe', otherCitiesBtn: 'View All Destinations',
+    otherCitiesTitle: 'We serve 19 cities across Europe', otherCitiesBtn: 'View All Destinations',
     faqTitle: 'Frequently Asked Questions — Taxi & VTC in Paris',
     faq: [
       { q: 'Which airports and stations do you serve in Paris?', a: 'We provide transfers to and from all Paris airports — Roissy-Charles-de-Gaulle (CDG), Orly and Beauvais — as well as train stations (Gare du Nord, Gare de Lyon, Montparnasse) and any address across the Île-de-France region.' },
@@ -77,7 +77,7 @@ const content = {
     bookingForm: 'Réservez Votre Taxi / VTC à Paris',
     pickupLabel: 'Départ', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: '',
-    otherCitiesTitle: 'Plus de 120 destinations en Europe', otherCitiesBtn: 'Voir Toutes les Destinations',
+    otherCitiesTitle: '19 destinations en Europe', otherCitiesBtn: 'Voir Toutes les Destinations',
     faqTitle: 'Questions fréquentes — Taxi & VTC à Paris',
     faq: [
       { q: 'Quels aéroports et gares desservez-vous à Paris ?', a: 'Nous assurons les transferts depuis et vers tous les aéroports parisiens — Roissy-Charles-de-Gaulle (CDG), Orly et Beauvais — ainsi que les gares (Gare du Nord, Gare de Lyon, Montparnasse) et toute adresse en Île-de-France.' },
@@ -122,7 +122,7 @@ const content = {
     bookingForm: 'Заказать трансфер в Париже',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: '',
-    otherCitiesTitle: '16+ городов в Европе', otherCitiesBtn: 'Все Направления',
+    otherCitiesTitle: '19 городов в Европе', otherCitiesBtn: 'Все Направления',
     rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
@@ -138,7 +138,7 @@ const content = {
     feature4Title: '\u0556\u056b\u0584\u057d \u0563\u0576\u0565\u0580', feature4Desc: '\u0539\u0561\u0584\u0576\u057e\u0561\u0564 \u057e\u0573\u0561\u0580\u0576\u0565\u0580 \u0579\u043a\u0561\u0576:',
     sedan: '\u054a\u0580\u0565\u043c\u056b\u0578\u043c \u057d\u0565\u0564\u0561\u0576', sedanDesc: 'Mercedes E-Class, 1-3 \u0578\u0582\u0572\u0587\u043e\u0580',
     luxury: '\u053c\u0575\u0578\u0582\u0584\u057d \u057d\u0565\u0564\u0561\u0576', luxuryDesc: 'Mercedes S-Class \u043a\u0561\u0574 BMW 7',
-    minivan: '\u0544\u056b\u0576\u056b\u057e\u0565\u0576', minivanDesc: 'Mercedes V-Class, \u0574\u056b\u0576\u0579\u0587 6 \u0578\u0582\u0572\u0587\u043e\u0580',
+    minivan: '\u0544\u056b\u0576\u056b\u057e\u0565\u0576', minivanDesc: 'Mercedes V-Class, \u0574\u056b\u0576\u0579\u0587 7 \u0578\u0582\u0572\u0587\u043e\u0580',
     minibus: '\u0544\u056b\u0576\u056b\u0562\u0578\u0582\u057d', minibusDesc: '\u0544\u056b\u0576\u0579\u0587 8 \u0578\u0582\u0572\u0587\u043e\u0580',
     passengers: '\u0548\u0582\u0572\u0587\u043e\u0580\u0576\u0565\u0580', luggage: '\u0548\u0582\u0572\u0565\u0562\u0561\u0580\u0561\u0576',
     bookNow: '\u0531\u0544\u054f\u0531\u0533\u054f\u054e\u0535\u053c', allInclusive: '\u0531\u0574\u0565\u0576 \u056b\u0576\u0579 \u0576\u0565\u0580\u0561\u057c\u057e\u0561\u0564 \u0567',
@@ -156,7 +156,7 @@ const content = {
     pickupLabel: '\u054e\u0565\u0580\u0581\u0576\u0578\u043c', dropoffLabel: '\u053b\u057b\u0576\u0578\u043c',
     dateLabel: '\u0531\u043c\u057d\u0561\u0569\u056b\u057e', timeLabel: '\u053a\u0561\u043c',
     defaultPickup: '',
-    otherCitiesTitle: '16 \u0584\u0561\u0572\u0561\u0584 \u0535\u057e\u0580\u043e\u043f\u0561\u0575\u0578\u043c',
+    otherCitiesTitle: '19 \u0584\u0561\u0572\u0561\u0584 \u0535\u057e\u0580\u043e\u043f\u0561\u0575\u0578\u043c',
     otherCitiesBtn: '\u0532\u043e\u043b\u043e\u0580 \u0578\u0582\u0572\u0572\u0578\u0582\u0569\u0575\u0578\u0582\u0576\u0576\u0565\u0580\u0568',
     rating: '4.5/5 Tripadvisor',
   },
@@ -173,7 +173,7 @@ const content = {
     feature4Title: 'Precios fijos', feature4Desc: 'Precio confirmado al reservar. Sin gastos ocultos ni recargos.',
     sedan: 'Berlina Premium', sedanDesc: 'Mercedes Clase E, 1-3 pasajeros',
     luxury: 'Berlina de Lujo', luxuryDesc: 'Mercedes Clase S o BMW Serie 7',
-    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V, hasta 6 pasajeros',
+    minivan: 'Minivan', minivanDesc: 'Mercedes Clase V, hasta 7 pasajeros',
     minibus: 'Microbus', minibusDesc: 'Para grupos de hasta 8 pasajeros',
     passengers: 'Pasajeros', luggage: 'Maletas',
     bookNow: 'RESERVAR', allInclusive: 'Todo incluido',
@@ -193,7 +193,7 @@ const content = {
     pickupLabel: 'Recogida', dropoffLabel: 'Destino',
     dateLabel: 'Fecha', timeLabel: 'Hora',
     defaultPickup: '',
-    otherCitiesTitle: 'Tambien disponible en 16 ciudades de Europa',
+    otherCitiesTitle: 'Tambien disponible en 19 ciudades de Europa',
     otherCitiesBtn: 'Ver todos los destinos',
     rating: '4.5/5 Tripadvisor',
   },
@@ -233,5 +233,6 @@ const airportLinks = [
 ];
 
 const seoUrls = { en: '/paris-airport-transfer', fr: '/transfert-aeroport-paris', ru: '/transfer-aeroport-parizh', hy: '/pariz-odanavakayani-transfer', es: '/es/traslado-aeropuerto-paris' };
+Object.values(content).forEach(v => { v.minivanPax = 7; v.minivanLuggage = 6; });
 const ParisAirportTransfer = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} stationLinks={airportLinks} pageId="paris-airport" showDisposalCta />;
 export default ParisAirportTransfer;

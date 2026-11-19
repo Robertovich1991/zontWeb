@@ -38,7 +38,7 @@ const content = {
     ],
     stats: [
       { val: '50,000+', label: 'Trips completed' },
-      { val: '16+', label: 'Cities in Europe' },
+      { val: '19', label: 'Cities in Europe' },
       { val: '4.5/5', label: 'Average rating' },
       { val: '24/7', label: 'Live support' },
     ],
@@ -82,7 +82,7 @@ const content = {
     ],
     stats: [
       { val: '50 000+', label: 'Trajets réalisés' },
-      { val: '16+', label: 'Villes en Europe' },
+      { val: '19', label: 'Villes en Europe' },
       { val: '4,5/5', label: 'Note moyenne' },
       { val: '24h/24', label: 'Assistance' },
     ],
@@ -126,7 +126,7 @@ const content = {
     ],
     stats: [
       { val: '50 000+', label: 'Поездок' },
-      { val: '16+', label: 'Городов Европы' },
+      { val: '19', label: 'Городов Европы' },
       { val: '4.5/5', label: 'Рейтинг' },
       { val: '24/7', label: 'Поддержка' },
     ],
@@ -170,7 +170,7 @@ const content = {
     ],
     stats: [
       { val: '50,000+', label: 'Ուղևորություններ' },
-      { val: '16+', label: 'Քաղաքներ' },
+      { val: '19', label: 'Քաղաքներ' },
       { val: '4.5/5', label: 'Գնահատական' },
       { val: '24/7', label: 'Աջակցություն' },
     ],
@@ -214,7 +214,7 @@ const content = {
     ],
     stats: [
       { val: '50.000+', label: 'Viajes completados' },
-      { val: '16+', label: 'Ciudades en Europa' },
+      { val: '19', label: 'Ciudades en Europa' },
       { val: '4,5/5', label: 'Valoración media' },
       { val: '24/7', label: 'Soporte' },
     ],

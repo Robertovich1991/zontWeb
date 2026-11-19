@@ -133,7 +133,7 @@ const content = {
     feature4Title: '\u0556\u056b\u0584\u057d \u0563\u0576\u0565\u0580', feature4Desc: '\u0533\u056b\u0576\u0568 \u0570\u0561\u057d\u057f\u0561\u057f\u057e\u0561\u0564 \u0567 \u0561\u0574\u0580\u0561\u0563\u0580\u0574\u0561\u0576 \u056a\u0561\u0574\u0561\u0576\u0561\u043a: \u0539\u0561\u0584\u0576\u057e\u0561\u0564 \u057e\u0573\u0561\u0580\u0576\u0565\u0580 \u0579\u043a\u0561\u0576:',
     sedan: '\u054a\u0580\u0565\u0574\u056b\u0578\u0574 \u057d\u0565\u0564\u0561\u0576', sedanDesc: 'Mercedes E-Class, 1-3 \u0578\u0582\u0572\u0587\u043e\u0580',
     luxury: '\u053c\u0575\u0578\u0582\u0584\u057d \u057d\u0565\u0564\u0561\u0576', luxuryDesc: 'Mercedes S-Class \u043a\u0561\u0574 BMW 7',
-    minivan: '\u0544\u056b\u0576\u056b\u057e\u0565\u0576', minivanDesc: 'Mercedes V-Class, \u0574\u056b\u0576\u0579\u0587 6 \u0578\u0582\u0572\u0587\u043e\u0580',
+    minivan: '\u0544\u056b\u0576\u056b\u057e\u0565\u0576', minivanDesc: 'Mercedes V-Class, \u0574\u056b\u0576\u0579\u0587 7 \u0578\u0582\u0572\u0587\u043e\u0580',
     minibus: '\u0544\u056b\u0576\u056b\u0562\u0578\u0582\u057d', minibusDesc: '\u0544\u056b\u0576\u0579\u0587 8 \u0578\u0582\u0572\u0587\u043e\u0580',
     passengers: '\u0548\u0582\u0572\u0587\u043e\u0580\u0576\u0565\u0580', luggage: '\u0548\u0582\u0572\u0565\u0562\u0561\u0580\u0561\u0576',
     bookNow: '\u0531\u0544\u054f\u0531\u0533\u054f\u054e\u0535\u053c', allInclusive: '\u0531\u0574\u0565\u0576 \u056b\u0576\u0579 \u0576\u0565\u0580\u0561\u057c\u057e\u0561\u0564 \u0567',
@@ -147,7 +147,7 @@ const content = {
     pickupLabel: '\u054e\u0565\u0580\u0581\u0576\u0578\u0574', dropoffLabel: '\u053b\u057b\u0576\u0578\u0574',
     dateLabel: '\u0531\u0574\u057d\u0561\u0569\u056b\u057e', timeLabel: '\u053a\u0561\u0574',
     defaultPickup: '',
-    otherCitiesTitle: '\u054d\u043f\u0561\u057d\u0561\u0580\u043a\u0578\u0574 \u0565\u0576\u0584 16 \u0584\u0561\u0572\u0561\u0584\u0576\u0565\u0580 \u0535\u057e\u0580\u043e\u043f\u0561\u0575\u0578\u0574',
+    otherCitiesTitle: '\u054d\u043f\u0561\u057d\u0561\u0580\u043a\u0578\u0574 \u0565\u0576\u0584 19 \u0584\u0561\u0572\u0561\u0584\u0576\u0565\u0580 \u0535\u057e\u0580\u043e\u043f\u0561\u0575\u0578\u0574',
     otherCitiesBtn: '\u0532\u043e\u043b\u043e\u0580 \u0578\u0582\u0572\u0572\u0578\u0582\u0569\u0575\u0578\u0582\u0576\u0576\u0565\u0580\u0568',
     rating: '4.5/5 Tripadvisor',
   },
@@ -190,5 +190,6 @@ const content = {
 const vehiclesPrices = { sedan: 68, luxury: 95, minivan: 120, minibus: 105 };
 const seoUrls = { en: '/vtc-7-seats', fr: '/vtc-7-places', ru: '/vtc-7-mest', hy: '/vtc-7-tegh', es: '/es/minivan-7-plazas' };
 
+Object.values(content).forEach(v => { v.minivanPax = 7; v.minivanLuggage = 6; });
 const VTC7Places = () => <CityTransferPage content={content} vehicles={vehiclesPrices} seoUrls={seoUrls} heroImage="/images/taxi-cab-transfer-7-places.webp" ogImage="/images/taxi-cab-transfer-7-places.webp" meetDriverImage="/images/taxi-cab-transfer-7-places.webp" />;
 export default VTC7Places;
