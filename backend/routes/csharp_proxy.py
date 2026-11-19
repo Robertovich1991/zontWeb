@@ -854,6 +854,10 @@ async def proxy_create_booking(request: Request):
     if not isinstance(payload, dict):
         raise HTTPException(status_code=400, detail="Body must be a JSON object")
 
+    # Pull our own attribution field out of the body before forwarding to C#
+    # (C# must receive only the fields it expects).
+    referral_token = payload.pop("referralToken", None)
+
     trip_type = str(payload.get("tripType", "")).lower()
 
     # Only rewrite legacy transfer/hourly aliases → "distance". Keep "timing" (hourly) untouched.
@@ -897,7 +901,14 @@ async def proxy_create_booking(request: Request):
         raise HTTPException(status_code=502, detail={"error": "backend_unreachable", "message": str(e)})
 
     if resp.status_code in (200, 201):
-        return resp.json() if resp.text else {"success": True}
+        result = resp.json() if resp.text else {"success": True}
+        # Attribute to a hotel partner link when the booking carries a referral token.
+        try:
+            from routes.hotel_referral import record_referral_booking
+            await record_referral_booking({**payload, "referralToken": referral_token}, result if isinstance(result, dict) else {})
+        except Exception as _e:
+            logger.warning(f"referral attribution skipped: {_e}")
+        return result
 
     # Surface the real C# error body so the client can see what went wrong
     try:

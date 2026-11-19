@@ -23,6 +23,7 @@ const Help = lazy(() => import("@/pages/Help"));
 const About = lazy(() => import("@/pages/About"));
 const Countries = lazy(() => import("@/pages/Countries"));
 const CarSelection = lazy(() => import("@/pages/CarSelection"));
+const PartnerLink = lazy(() => import("@/pages/PartnerLink"));
 const TripRecap = lazy(() => import("@/pages/TripRecap"));
 const Checkout = lazy(() => import("@/pages/Checkout"));
 const MyBookings = lazy(() => import("@/pages/MyBookings"));
@@ -64,6 +65,7 @@ const HotelsDashboard = lazy(() => import("@/pages/admin/HotelsDashboard"));
 const KiosksManager = lazy(() => import("@/pages/admin/KiosksManager"));
 const HotelBookingsManager = lazy(() => import("@/pages/admin/HotelBookingsManager"));
 const HotelPayments = lazy(() => import("@/pages/admin/HotelPayments"));
+const AdminReferrals = lazy(() => import("@/pages/admin/AdminReferrals"));
 const PromoEmails = lazy(() => import("@/pages/admin/PromoEmails"));
 const ReviewsManager = lazy(() => import("@/pages/admin/ReviewsManager"));
 const LeadsManager = lazy(() => import("@/pages/admin/LeadsManager"));
@@ -99,6 +101,7 @@ const HotelDashboard = lazy(() => import("@/pages/hotel/HotelDashboard"));
 const HotelBookings = lazy(() => import("@/pages/hotel/HotelBookings"));
 const HotelRevenue = lazy(() => import("@/pages/hotel/HotelRevenue"));
 const HotelInvoices = lazy(() => import("@/pages/hotel/HotelInvoices"));
+const HotelReferrals = lazy(() => import("@/pages/hotel/HotelReferrals"));
 
 // Driver App
 const DriverApp = lazy(() => import("@/pages/driver/DriverApp"));
@@ -428,6 +431,7 @@ function App() {
                   <Route path="/erevan-odanavakayani-transfer" element={<YerevanTransfer />} />
                   <Route path="/es/traslado-aeropuerto-erevan-zvartnots" element={<YerevanTransfer />} />
                   {/* General pages */}
+                  <Route path="/p/:slug" element={<PartnerLink />} />
                   <Route path="/car-selection" element={<CarSelection />} />
                   <Route path="/trip-recap" element={<TripRecap />} />
                   <Route path="/checkout" element={<Checkout />} />
@@ -531,6 +535,7 @@ function App() {
                     <Route path="hotel-kiosks" element={<KiosksManager />} />
                     <Route path="hotel-bookings" element={<HotelBookingsManager />} />
                     <Route path="hotel-payments" element={<HotelPayments />} />
+                    <Route path="partner-commissions" element={<AdminReferrals />} />
                     <Route path="promo-emails" element={<PromoEmails />} />
                     <Route path="reviews" element={<ReviewsManager />} />
                     <Route path="leads" element={<LeadsManager />} />
@@ -545,6 +550,7 @@ function App() {
                     <Route path="bookings" element={<HotelBookings />} />
                     <Route path="revenue" element={<HotelRevenue />} />
                     <Route path="invoices" element={<HotelInvoices />} />
+                    <Route path="referrals" element={<HotelReferrals />} />
                   </Route>
                   {/* Fleet Portal (Societe) */}
                   <Route path="/fleet/login" element={<FleetAuthProvider><FleetLogin /></FleetAuthProvider>} />

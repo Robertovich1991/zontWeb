@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import { toast } from 'sonner';
-import { ArrowLeft, Building2, MapPin, Phone, Mail, Users, CreditCard, Car, Wifi, WifiOff, Calendar, TrendingUp, Loader2 } from 'lucide-react';
+import { ArrowLeft, Building2, MapPin, Phone, Mail, Users, CreditCard, Car, Wifi, WifiOff, Calendar, TrendingUp, Loader2, Link as LinkIcon, Copy, ExternalLink } from 'lucide-react';
 
 const HotelDetail = ({ hotelId, onBack }) => {
   const { authFetch } = useAdminAuth();
@@ -128,6 +128,9 @@ const HotelDetail = ({ hotelId, onBack }) => {
         </div>
       )}
 
+      {/* Partner booking link */}
+      <PartnerLinkSection hotelId={hotelId} authFetch={authFetch} />
+
       {/* Recent Bookings */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">Reservations recentes</h2>
@@ -172,5 +175,104 @@ const HotelDetail = ({ hotelId, onBack }) => {
 };
 
 const round = (n) => Math.round(n * 100) / 100;
+
+const PartnerLinkSection = ({ hotelId, authFetch }) => {
+  const [cfg, setCfg] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [rate, setRate] = useState('');
+
+  const load = async () => {
+    try {
+      const res = await authFetch(`/api/admin/hotels/${hotelId}/partner-link`);
+      if (res.ok) { const d = await res.json(); setCfg(d); setRate(String(d.rate ?? '')); }
+    } catch { /* noop */ }
+  };
+  useEffect(() => { load(); }, [hotelId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const save = async (patch) => {
+    setSaving(true);
+    try {
+      const res = await authFetch(`/api/admin/hotels/${hotelId}/partner-link`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
+      });
+      if (res.ok) { const d = await res.json(); setCfg(d); setRate(String(d.rate ?? '')); toast.success('Lien partenaire mis a jour'); }
+      else toast.error('Erreur de mise a jour');
+    } catch { toast.error('Erreur'); }
+    finally { setSaving(false); }
+  };
+
+  if (!cfg) return null;
+  const t = cfg.totals || {};
+  const sum = (k) => (t[k]?.commission || 0);
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm" data-testid="partner-link-section">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-2">
+          <LinkIcon className="w-4 h-4 text-emerald-500" /> Lien de reservation partenaire
+        </h2>
+        <label className="inline-flex items-center gap-2 cursor-pointer" data-testid="partner-link-toggle">
+          <span className="text-xs text-gray-500">{cfg.enabled ? 'Actif' : 'Desactive'}</span>
+          <input type="checkbox" checked={!!cfg.enabled} disabled={saving}
+            onChange={(e) => save({ enabled: e.target.checked })}
+            className="w-9 h-5 appearance-none rounded-full bg-gray-300 checked:bg-emerald-500 relative transition-colors cursor-pointer
+              before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-4 before:h-4 before:bg-white before:rounded-full before:transition-transform checked:before:translate-x-4" />
+        </label>
+      </div>
+
+      {cfg.url ? (
+        <>
+          <div className="flex items-center gap-2 mb-4">
+            <input readOnly value={cfg.url} data-testid="partner-link-url"
+              className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 font-mono" />
+            <button onClick={() => { navigator.clipboard?.writeText(cfg.url); toast.success('Lien copie'); }}
+              className="px-3 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 inline-flex items-center gap-1.5" data-testid="partner-link-copy">
+              <Copy className="w-4 h-4" /> Copier
+            </button>
+            <a href={cfg.url} target="_blank" rel="noopener noreferrer"
+              className="px-3 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 inline-flex items-center gap-1.5" data-testid="partner-link-preview">
+              <ExternalLink className="w-4 h-4" /> Previsualiser
+            </a>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Taux de commission du lien (%)</label>
+              <div className="flex items-center gap-2">
+                <input type="number" step="0.1" value={rate} onChange={(e) => setRate(e.target.value)}
+                  className="w-28 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm" data-testid="partner-link-rate-input" />
+                <button onClick={() => save({ rate: parseFloat(rate) })} disabled={saving}
+                  className="px-3 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50" data-testid="partner-link-rate-save">
+                  Enregistrer
+                </button>
+              </div>
+              <p className="text-[11px] text-gray-400 mt-1">Base: montant total paye par le client</p>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Destination preremplie</label>
+              <p className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 truncate">{cfg.destination || '—'}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { k: 'pending', label: 'En attente', color: 'text-yellow-600 bg-yellow-50' },
+              { k: 'validated', label: 'Validees', color: 'text-emerald-600 bg-emerald-50' },
+              { k: 'paid', label: 'Versees', color: 'text-blue-600 bg-blue-50' },
+            ].map(s => (
+              <div key={s.k} className={`rounded-lg p-3 ${s.color}`} data-testid={`partner-link-total-${s.k}`}>
+                <p className="text-xs opacity-80">{s.label}</p>
+                <p className="text-lg font-bold">{sum(s.k).toFixed(2)} EUR</p>
+                <p className="text-[11px] opacity-70">{t[s.k]?.count || 0} resa.</p>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="text-sm text-gray-400">Aucun identifiant de borne (kiosk_slug) pour cet hotel — enregistrez l'hotel pour generer le lien.</p>
+      )}
+    </div>
+  );
+};
 
 export default HotelDetail;

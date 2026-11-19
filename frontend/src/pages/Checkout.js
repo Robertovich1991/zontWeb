@@ -343,7 +343,7 @@ const formatPhone = (phone, countryCode) => {
 
 const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user, onLoginDirect }) => {
   const navigate = useNavigate();
-  const { completeBooking } = useBooking();
+  const { completeBooking, referral } = useBooking();
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -774,6 +774,7 @@ const UnifiedCheckoutForm = ({ searchData, selectedCar, c, isAuthenticated, user
         endPointLatitude: finalCoords?.latitude,
         endPointLongitude: finalCoords?.longitude,
         email: override.email || form.email,
+        ...(referral && referral.token ? { referralToken: referral.token } : {}),
       };
 
       const result = await transferService.submitBooking(bookingPayload);

@@ -47,9 +47,10 @@ export const BookingProvider = ({ children }) => {
   const [selectedCar, setSelectedCar] = useState(cached.selectedCar || null);
   const [bookingDetails, setBookingDetails] = useState(cached.bookingDetails || null);
   const [vehicleResults, setVehicleResults] = useState(cached.vehicleResults || null);
+  const [referral, setReferral] = useState(cached.referral || null);
 
-  const ref = useRef({ searchData, selectedCar, bookingDetails, vehicleResults });
-  ref.current = { searchData, selectedCar, bookingDetails, vehicleResults };
+  const ref = useRef({ searchData, selectedCar, bookingDetails, vehicleResults, referral });
+  ref.current = { searchData, selectedCar, bookingDetails, vehicleResults, referral };
 
   const persist = useCallback((patch) => {
     const cur = ref.current;
@@ -58,8 +59,14 @@ export const BookingProvider = ({ children }) => {
       selectedCar: patch.selectedCar !== undefined ? patch.selectedCar : cur.selectedCar,
       bookingDetails: patch.bookingDetails !== undefined ? patch.bookingDetails : cur.bookingDetails,
       vehicleResults: patch.vehicleResults !== undefined ? patch.vehicleResults : cur.vehicleResults,
+      referral: patch.referral !== undefined ? patch.referral : cur.referral,
     });
   }, []);
+
+  const setReferralWrapped = useCallback((data) => {
+    setReferral(data);
+    persist({ referral: data });
+  }, [persist]);
 
   const startBooking = useCallback((data) => {
     setSearchData(data);
@@ -86,13 +93,15 @@ export const BookingProvider = ({ children }) => {
     setSelectedCar(null);
     setBookingDetails(null);
     setVehicleResults(null);
+    setReferral(null);
     try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
   }, []);
 
   const value = {
-    searchData, selectedCar, bookingDetails, vehicleResults,
+    searchData, selectedCar, bookingDetails, vehicleResults, referral,
     startBooking, selectCar, completeBooking, resetBooking,
     setVehicleResults: setVehicleResultsWrapped,
+    setReferral: setReferralWrapped,
   };
 
   return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>;

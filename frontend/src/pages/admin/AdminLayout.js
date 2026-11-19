@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAdminAuth } from './AdminAuthContext';
-import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight, Users, Car, Building2, BarChart3, Monitor, BookOpen, CreditCard, Mail, Star, Inbox } from 'lucide-react';
+import { LayoutDashboard, FileText, MapPin, Home, Shield, HelpCircle, Search, LogOut, Menu, X, ChevronRight, Users, Car, Building2, BarChart3, Monitor, BookOpen, CreditCard, Mail, Star, Inbox, Link as LinkIcon } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -18,6 +18,7 @@ const navItems = [
   { path: '/admin/hotel-kiosks', icon: Monitor, label: 'Bornes Tactiles' },
   { path: '/admin/hotel-bookings', icon: BookOpen, label: 'Reservations Hotels' },
   { path: '/admin/hotel-payments', icon: CreditCard, label: 'Paiements Hotels' },
+  { path: '/admin/partner-commissions', icon: LinkIcon, label: 'Commissions Liens' },
   { type: 'divider', label: 'CMS' },
   { path: '/admin/pages', icon: FileText, label: 'Pages SEO' },
   { path: '/admin/places', icon: MapPin, label: 'Lieux / Destinations' },

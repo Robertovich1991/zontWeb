@@ -1,0 +1,8 @@
+crons:
+  - name: referral-sync
+    description: "Syncs hotel partner-link commissions with C# booking status every 30 min (pending -> validated/cancelled)"
+    cron: "*/30 * * * *"
+    endpoint: "{{BASE_URL}}/api/cron/referral-sync"
+    method: POST
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    enabled: true

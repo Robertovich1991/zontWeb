@@ -200,7 +200,7 @@ const homeSeoUrls = { en: '/', fr: '/fr', ru: '/ru', hy: '/hy', es: '/es' };
 const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { startBooking, setVehicleResults } = useBooking();
+  const { startBooking, setVehicleResults, referral } = useBooking();
   const { t, language, changeLanguage } = useLanguage();
   const [loading, setLoading] = useState(false);
   const bookingRef = useRef(null);
@@ -257,6 +257,20 @@ const Home = () => {
       navigate(targetUrl, { replace: true });
     }
   }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Prefill drop-off from an active hotel partner link (/p/:slug)
+  useEffect(() => {
+    if (referral && referral.dropoff && (referral.dropoff.address || referral.dropoff.latitude != null)) {
+      const d = {
+        address: referral.dropoff.address || referral.hotelName || '',
+        latitude: referral.dropoff.latitude ?? null,
+        longitude: referral.dropoff.longitude ?? null,
+      };
+      setDropoff(d);
+      dropoffSafeRef.current = { latitude: d.latitude, longitude: d.longitude, placeId: null, address: d.address };
+      setMode('transfer');
+    }
+  }, [referral]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetch(`${API}/api/public/trust-blocks`).then(r => r.json()).then(setCmsTrustBlocks).catch(() => {});
@@ -880,6 +894,15 @@ const Home = () => {
                 {/* Right: Booking Form */}
                 <div ref={bookingRef} className="w-full max-w-md mx-auto lg:mx-0">
                   <div className="bg-white rounded-2xl p-5 md:p-6 shadow-2xl" data-testid="home-booking-card">
+                    {referral && referral.hotelName && (
+                      <div className="mb-3 flex items-center gap-2 rounded-lg bg-[#2ecc71]/10 border border-[#2ecc71]/30 px-3 py-2" data-testid="referral-banner">
+                        <MapPin className="w-4 h-4 text-[#2ecc71] shrink-0" />
+                        <p className="text-xs md:text-sm text-gray-700">
+                          {language === 'fr' ? 'Réservez votre transfert vers ' : language === 'es' ? 'Reserve su traslado a ' : language === 'ru' ? 'Забронируйте трансфер до ' : 'Book your transfer to '}
+                          <span className="font-semibold text-gray-900">{referral.hotelName}</span>
+                        </p>
+                      </div>
+                    )}
                     <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-3 text-center">{c.bookingTitle}</h2>
                     {/* Mode switch: Transfer vs Driver at disposal */}
                     <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100 rounded-lg mb-3" role="tablist" aria-label="Booking mode">
