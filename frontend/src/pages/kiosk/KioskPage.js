@@ -471,13 +471,23 @@ const KioskPage = () => {
       });
       if (!resp.ok) throw new Error();
       const data = await resp.json();
-      setBooking(data);
+      setBooking({
+        ...data,
+        paymentUrl: data.paymentUrl,
+        qrCode: data.qrCode,
+        paymentEmailSent: data.paymentEmailSent,
+        paymentEmailError: data.paymentEmailError,
+        reference: data.reference,
+      });
       setStep(4);
 
       // Reception code present → email Stripe link and wait for paid status
       if (data.paymentMode === 'email_link' || reception) {
         setPaymentMode('email_link');
         setTerminalStatus('waiting_email');
+        if (data.paymentEmailSent === false) {
+          console.warn('Kiosk payment email failed:', data.paymentEmailError);
+        }
         return;
       }
 
@@ -1227,10 +1237,37 @@ const KioskPage = () => {
                     <h3 className="text-3xl lg:text-4xl font-bold text-white mb-2">{t.waitingEmailTitle}</h3>
                     <p className="text-gray-300 text-lg mb-3">{t.waitingEmailSub}</p>
                     <p className="text-[#2ecc71] font-mono text-sm mb-2">{clientEmail.trim().toLowerCase()}</p>
+                    {booking?.paymentEmailSent === false && (
+                      <p className="text-red-400 text-sm mb-3" data-testid="payment-email-failed">
+                        {lang === 'fr'
+                          ? "L'email n'a pas pu etre envoye. Utilisez le bouton ou le QR ci-dessous."
+                          : lang === 'ru'
+                            ? 'Не удалось отправить email. Используйте кнопку или QR ниже.'
+                            : 'Email could not be sent. Use the button or QR below.'}
+                      </p>
+                    )}
                     {receptionCode.trim() && (
                       <p className="text-yellow-500 text-sm mb-4">{t.receptionCode}: <span className="font-mono font-bold">{receptionCode.trim()}</span></p>
                     )}
                     <p className="text-[#2ecc71] font-black text-6xl lg:text-7xl mt-2">{selectedVehicle?.minAmount}&euro;</p>
+                    {booking?.paymentUrl && (
+                      <a
+                        href={booking.paymentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center mt-6 bg-[#2ecc71] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#27ae60]"
+                        data-testid="open-payment-link"
+                      >
+                        {lang === 'fr' ? 'Ouvrir le lien de paiement' : lang === 'ru' ? 'Открыть ссылку оплаты' : 'Open payment link'}
+                      </a>
+                    )}
+                    {booking?.qrCode && (
+                      <div className="mt-6">
+                        <div className="bg-white border border-[#2ecc71]/20 rounded-2xl p-4 inline-block">
+                          <img src={booking.qrCode} alt="QR Payment" className="w-40 h-40 mx-auto block" data-testid="payment-qr-email-fallback" />
+                        </div>
+                      </div>
+                    )}
                     <div className="flex items-center justify-center gap-2 mt-6 text-gray-400 text-sm">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span>{lang === 'fr' ? 'En attente du paiement…' : lang === 'ru' ? 'Ожидание оплаты…' : 'Waiting for payment…'}</span>

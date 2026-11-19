@@ -460,10 +460,11 @@ async def create_kiosk_booking(req: KioskBookingRequest):
     booking.pop("_id", None)
 
     payment_email_sent = False
+    payment_email_error = None
     if payment_mode == "email_link":
         try:
             from routes.email_service import send_kiosk_payment_link
-            result = await send_kiosk_payment_link(email, {
+            result, payment_email_error = await send_kiosk_payment_link(email, {
                 **booking,
                 "paymentUrl": session.url,
             })
@@ -472,10 +473,14 @@ async def create_kiosk_booking(req: KioskBookingRequest):
                 {"reference": reference},
                 {"$set": {
                     "paymentEmailSent": payment_email_sent,
+                    "paymentEmailError": payment_email_error,
                     "paymentEmailSentAt": datetime.now(timezone.utc).isoformat() if payment_email_sent else None,
                 }},
             )
+            if not payment_email_sent:
+                logger.error(f"Payment link email NOT sent for {reference}: {payment_email_error}")
         except Exception as e:
+            payment_email_error = str(e)
             logger.error(f"Failed to email payment link for {reference}: {e}")
 
     return {
@@ -484,6 +489,7 @@ async def create_kiosk_booking(req: KioskBookingRequest):
         "qrCode": f"data:image/png;base64,{qr_base64}",
         "paymentMode": payment_mode,
         "paymentEmailSent": payment_email_sent,
+        "paymentEmailError": payment_email_error,
         "booking": booking,
     }
 

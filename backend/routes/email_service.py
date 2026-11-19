@@ -323,9 +323,11 @@ def build_kiosk_payment_link_html(booking_data: dict) -> str:
 
 
 async def send_kiosk_payment_link(email: str, booking_data: dict):
+    """Send Stripe Checkout URL by email. Returns (result, error_message)."""
     if not resend.api_key:
-        logger.warning("RESEND_API_KEY not set, skipping kiosk payment link email")
-        return None
+        msg = "RESEND_API_KEY not set"
+        logger.warning(f"{msg}, skipping kiosk payment link email")
+        return None, msg
 
     html = build_kiosk_payment_link_html(booking_data)
     params = {
@@ -337,7 +339,8 @@ async def send_kiosk_payment_link(email: str, booking_data: dict):
     try:
         result = await asyncio.to_thread(resend.Emails.send, params)
         logger.info(f"Kiosk payment link email sent to {email}: {result}")
-        return result
+        return result, None
     except Exception as e:
-        logger.error(f"Failed to send kiosk payment link email to {email}: {e}")
-        return None
+        msg = str(e)
+        logger.error(f"Failed to send kiosk payment link email to {email}: {msg}")
+        return None, msg
