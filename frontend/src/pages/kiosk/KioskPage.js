@@ -316,6 +316,7 @@ const KioskPage = () => {
   const [clientEmail, setClientEmail] = useState('');
   const [receptionCode, setReceptionCode] = useState('');
   const [paymentMode, setPaymentMode] = useState('terminal');
+  const [emailWaitSeconds, setEmailWaitSeconds] = useState(300);
   const [clientCountryCode, setClientCountryCode] = useState('+33');
   const [booking, setBooking] = useState(null);
   const [searchId, setSearchId] = useState(null);
@@ -347,7 +348,7 @@ const KioskPage = () => {
     }
     setStep(0); setSelectedDest(null); setDate(''); setTime('');
     setSelectedVehicle(null); setClientName(''); setClientPhone(''); setClientEmail(''); setClientCountryCode('+33');
-    setReceptionCode(''); setPaymentMode('terminal');
+    setReceptionCode(''); setPaymentMode('terminal'); setEmailWaitSeconds(300);
     setBooking(null); setSubmitting(false); setCustomPricing(false);
     setCustomHours(4);
     setShowIdlePrompt(false);
@@ -446,13 +447,31 @@ const KioskPage = () => {
   })();
 
   useEffect(() => {
-    // Auto-reset the payment screen after 90s of inactivity (e.g. customer walked away)
-    // resetKiosk() will also cancel the pending Stripe Terminal PaymentIntent so the TPE goes back to idle
-    if (step === 4 && booking && terminalStatus !== 'paid') {
+    // Auto-reset the payment screen after 90s of inactivity (TERMINAL flow only).
+    // The email-link flow has its own 5-minute countdown with an extend button (below).
+    if (step === 4 && booking && terminalStatus !== 'paid' && terminalStatus !== 'email_sent') {
       const t2 = setTimeout(() => { resetKiosk(); setShowAttract(true); }, 90000);
       return () => clearTimeout(t2);
     }
   }, [step, booking, terminalStatus, resetKiosk]);
+
+  // Email-link waiting: 5-minute countdown; at 1 min left the guest can extend, else back to main.
+  useEffect(() => {
+    if (paymentMode !== 'email_link' || terminalStatus !== 'email_sent') return;
+    setEmailWaitSeconds(300);
+    const iv = setInterval(() => {
+      setEmailWaitSeconds((s) => {
+        if (s <= 1) {
+          clearInterval(iv);
+          resetKiosk();
+          setShowAttract(true);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [paymentMode, terminalStatus, resetKiosk]);
 
   // After a successful payment: show the confirmation for 5s, then return to the main screen.
   useEffect(() => {
@@ -1517,6 +1536,15 @@ const KioskPage = () => {
                       <Loader2 className="w-5 h-5 animate-spin" />
                       <span>{lang === 'fr' ? 'En attente du paiement…' : lang === 'ru' ? 'Ожидание оплаты…' : lang === 'hy' ? 'Սպասում ենք վճարմանը…' : 'Waiting for payment…'}</span>
                     </div>
+                    <p className={`font-black text-4xl lg:text-5xl mt-4 tabular-nums ${emailWaitSeconds <= 60 ? 'text-amber-400' : 'text-white'}`} data-testid="kiosk-email-countdown">
+                      {Math.floor(emailWaitSeconds / 60)}:{String(emailWaitSeconds % 60).padStart(2, '0')}
+                    </p>
+                    {emailWaitSeconds <= 60 && (
+                      <button onClick={() => setEmailWaitSeconds(300)}
+                        className="mt-4 inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-8 py-4 rounded-xl text-lg font-bold transition-colors" data-testid="kiosk-email-extend">
+                        <RotateCcw className="w-5 h-5" />{lang === 'fr' ? "J'ai besoin de plus de temps (+5 min)" : lang === 'ru' ? 'Нужно больше времени (+5 мин)' : lang === 'hy' ? 'Ավելի շատ ժամանակ (+5 րոպե)' : 'I need more time (+5 min)'}
+                      </button>
+                    )}
                     <p className="text-[#c8a951] font-black text-5xl lg:text-6xl mt-6">{selectedVehicle?.maxAmount}&euro;</p>
 
                     {booking?.paymentUrl && (

@@ -608,3 +608,6 @@ Changement demandé: l'email du lien de paiement kiosk (quand receptionCode pré
 ⚠️ NON testable en preview: le conteneur preview est BLOQUÉ par le WAF/pare-feu de api.zont.cab (même /api/Login/company renvoie 403 "Web App - Unavailable" depuis ici → blocage par IP). + clé STRIPE preview expirée. Les deux fonctionnent en PRODUCTION (IP backend prod autorisée). 
 TEST À FAIRE EN PROD après déploiement: réserver kiosk avec clientEmail=ericyanrobertovich@gmail.com, price=2, receptionCode=TEST-FIX → vérifier réception email (bouton Stripe) + la borne attend jusqu'au paiement.
 Pré-requis prod: l'endpoint C# /api/AdminNotify/kioskPaymentLink doit exister et envoyer via SMTP (confirmé par l'utilisateur).
+
+## [2026-11] Kiosk email-payment: compte à rebours 5 min + bouton prolonger — DONE
+KioskPage.js: l'écran d'attente paiement email (terminalStatus='email_sent') n'est plus soumis au reset auto 90s (exclu). Nouveau compte à rebours 5 min (emailWaitSeconds, state, reset dans resetKiosk). À ≤60s: minuteur orange + bouton "J'ai besoin de plus de temps (+5 min)" (data-testid kiosk-email-extend) qui remet à 300s. À 0: resetKiosk + écran principal. Non testable visuellement en preview (Stripe preview key expirée empêche d'atteindre email_sent). Compile OK.
