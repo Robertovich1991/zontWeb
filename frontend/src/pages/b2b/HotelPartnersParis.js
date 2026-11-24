@@ -286,7 +286,7 @@ export default function HotelPartnersParis() {
             </div>
             <div className="flex items-center justify-center gap-2 mt-6 text-sm text-gray-400">
               <Mail className="w-4 h-4" />
-              <a href="mailto:partners@zont.cab" className="hover:text-[#2ecc71] transition-colors">partners@zont.cab</a>
+              <a href="mailto:contact@zont.cab" className="hover:text-[#2ecc71] transition-colors">contact@zont.cab</a>
             </div>
           </div>
         </div>

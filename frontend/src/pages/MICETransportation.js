@@ -794,8 +794,8 @@ const MICETransportation = () => {
                   </button>
 
                   <div className="flex flex-wrap gap-3 pt-2 text-xs text-gray-400 justify-center">
-                    <a href={`mailto:partners@zont.cab`} className="inline-flex items-center gap-1 hover:text-[#2ecc71] transition-colors">
-                      <Mail className="w-3 h-3" /> partners@zont.cab
+                    <a href={`mailto:contact@zont.cab`} className="inline-flex items-center gap-1 hover:text-[#2ecc71] transition-colors">
+                      <Mail className="w-3 h-3" /> contact@zont.cab
                     </a>
                     <span>·</span>
                     <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-[#2ecc71] transition-colors">

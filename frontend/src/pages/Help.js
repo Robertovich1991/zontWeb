@@ -32,7 +32,7 @@ const content = {
     contactTitle: 'Contact Us',
     contactSub: 'Can\'t find an answer? Our team responds within minutes.',
     contactInfo: [
-      { type: 'email', label: 'Email Support', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
+      { type: 'email', label: 'Email Support', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
       { type: 'address', label: 'Office', value: 'Paris, France', action: null },
     ],
@@ -66,7 +66,7 @@ const content = {
     contactTitle: 'Contactez-Nous',
     contactSub: 'Vous ne trouvez pas de reponse ? Notre equipe repond en quelques minutes.',
     contactInfo: [
-      { type: 'email', label: 'Support Email', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
+      { type: 'email', label: 'Support Email', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
       { type: 'address', label: 'Bureau', value: 'Paris, France', action: null },
     ],
@@ -100,7 +100,7 @@ const content = {
     contactTitle: 'Свяжитесь с Нами',
     contactSub: 'Не нашли ответ? Наша команда отвечает в течение минут.',
     contactInfo: [
-      { type: 'email', label: 'Email Поддержки', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
+      { type: 'email', label: 'Email Поддержки', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
       { type: 'address', label: 'Офис', value: 'Париж, Франция', action: null },
     ],
@@ -134,7 +134,7 @@ const content = {
     contactTitle: 'Կապվեք մեզ հետ',
     contactSub: 'Չգտա՞ք պատասխանը։ Մեր թիմը պատասխանում է րոպեների ընթացքում։',
     contactInfo: [
-      { type: 'email', label: 'Email աջակցություն', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
+      { type: 'email', label: 'Email աջակցություն', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
       { type: 'address', label: 'Գրասենյակ', value: 'Փարիզ, Ֆրանսիա', action: null },
     ],
@@ -168,7 +168,7 @@ const content = {
     contactTitle: 'Contáctanos',
     contactSub: '¿No encuentras respuesta? Nuestro equipo responde en minutos.',
     contactInfo: [
-      { type: 'email', label: 'Soporte por Email', value: 'support@zont.cab', action: 'mailto:support@zont.cab' },
+      { type: 'email', label: 'Soporte por Email', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
       { type: 'address', label: 'Oficina', value: 'París, Francia', action: null },
     ],

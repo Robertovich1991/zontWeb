@@ -265,7 +265,7 @@ const About = () => {
             logo: 'https://www.zont.cab/logo512.png',
             description: c.seoDesc,
             areaServed: 'Europe',
-            email: 'support@zont.cab',
+            email: 'contact@zont.cab',
           },
         }]}
       />

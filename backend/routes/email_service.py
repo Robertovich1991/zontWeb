@@ -174,7 +174,7 @@ def build_booking_confirmation_html(booking_data: dict) -> str:
               <hr style="margin:20px 0;border:none;border-top:1px solid #e2e8f0;">
               <p style="margin:0;color:#cbd5e1;font-size:11px;">
                 ZONT.CAB - Service de transport premium<br>
-                Pour toute question : support@zont.cab
+                Pour toute question : contact@zont.cab
               </p>
             </td>
           </tr>
