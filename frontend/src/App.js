@@ -70,6 +70,7 @@ const PromoEmails = lazy(() => import("@/pages/admin/PromoEmails"));
 const ReviewsManager = lazy(() => import("@/pages/admin/ReviewsManager"));
 const LeadsManager = lazy(() => import("@/pages/admin/LeadsManager"));
 const ReservationsManager = lazy(() => import("@/pages/admin/ReservationsManager"));
+const ComfortCarsApi = lazy(() => import("@/pages/admin/ComfortCarsApi"));
 
 // Hotel Admin Portal
 const HotelLogin = lazy(() => import("@/pages/hotel/HotelLogin"));
@@ -540,6 +541,7 @@ function App() {
                     <Route path="reviews" element={<ReviewsManager />} />
                     <Route path="leads" element={<LeadsManager />} />
                     <Route path="reservations" element={<ReservationsManager />} />
+                    <Route path="comfort-cars-api" element={<ComfortCarsApi />} />
                   </Route>
                   {/* Driver PWA */}
                   <Route path="/driver/*" element={<DriverApp />} />

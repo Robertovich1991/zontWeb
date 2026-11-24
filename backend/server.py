@@ -254,6 +254,11 @@ from routes.admin_reservations import router as admin_reservations_router, set_d
 set_reservations_db(db)
 app.include_router(admin_reservations_router)
 
+from routes.comfort_cars import router as comfort_cars_router, admin_router as comfort_cars_admin_router, set_db as comfort_cars_set_db
+comfort_cars_set_db(db)
+app.include_router(comfort_cars_router)
+app.include_router(comfort_cars_admin_router)
+
 from routes.flight_tracking import router as flight_tracking_router
 app.include_router(flight_tracking_router)
 

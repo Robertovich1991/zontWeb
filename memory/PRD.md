@@ -618,3 +618,19 @@ Demande: afficher le code de réception (reception code) dans /admin/hotel-booki
 
 ## [2026-11] Kiosk email-payment: compte à rebours 5 min + bouton prolonger — DONE
 KioskPage.js: l'écran d'attente paiement email (terminalStatus='email_sent') n'est plus soumis au reset auto 90s (exclu). Nouveau compte à rebours 5 min (emailWaitSeconds, state, reset dans resetKiosk). À ≤60s: minuteur orange + bouton "J'ai besoin de plus de temps (+5 min)" (data-testid kiosk-email-extend) qui remet à 300s. À 0: resetKiosk + écran principal. Non testable visuellement en preview (Stripe preview key expirée empêche d'atteindre email_sent). Compile OK.
+
+## [2026-06] API partenaire « Comfort Cars » (lecture seule) — DONE (logique testée ; données live prod-only)
+Nouvelle API REST pour que Comfort Cars lise ses réservations en JSON, filtrées depuis les auctions C# (compte company), protégée par clé API.
+- Backend routes/comfort_cars.py : router public /api/partners/comfort-cars + admin_router /api/admin/comfort-cars. set_db enregistré dans server.py.
+  - GET /reservations : filtres date_from/date_to (date course YYYY-MM-DD), status (normalisé), page/page_size (défaut 1/50, max 200). Auth header X-API-Key. Valide les params AVANT le scan C# (400 rapides).
+  - GET /reservations/{id} : une résa si Comfort Cars sinon 404.
+  - GET /docs : référence JSON auto-descriptive (public, sans clé).
+  - Admin (JWT) : GET /settings (apiKey, companyMatch, baseUrl, docsUrl, rotatedAt), POST /rotate-key, PUT /company-match.
+  - Clé API auto-générée (secrets.token_urlsafe, préfixe cc_) stockée dans db.kv_store, renouvelable. Filtre société stocké dans kv_store (défaut substring "comfort cars", insensible casse). Cache liste 60s.
+  - Statuts normalisés : pending/confirmed/assigned/in_progress/completed/cancelled (map depuis New/ApprovedByAdmin/Took/Started/Completed/Cancelled*/DontApprovedByDriver).
+  - Réutilise fleet_shared (csharp_get cache 30s, CSHARP_API, parse_csharp_date) + env CSHARP_COMPANY_USERNAME/PASSWORD. Scan auctions 1..(reservations_max_id+20).
+- Frontend pages/admin/ComfortCarsApi.js + route /admin/comfort-cars-api + nav "API Comfort Cars" (AdminLayout). Affiche/masque/copie/renouvelle la clé, URL de base (REACT_APP_BACKEND_URL), lien doc, édition filtre société, exemple curl.
+- Doc de référence : /app/COMFORT_CARS_API.md.
+- Testé preview : 401 (clé absente/invalide), 400 (status/date invalides), 200 admin settings, PUT company-match, logique pure (filtre société substring, normalisation statut, filtre date course, pagination) via test offline. Page admin OK (screenshot).
+- ⚠️ Chemin données live (scan C#) renvoie 502 en PREVIEW (WAF api.zont.cab bloque l'IP preview). Fonctionnera en PRODUCTION. À valider après déploiement : GET /reservations avec la clé → vérifier que seules les courses Comfort Cars reviennent.
+- Hypothèse à confirmer en prod : le nom exact de la société dans le dispatch doit contenir "comfort cars" ; sinon ajuster le filtre dans l'admin.
