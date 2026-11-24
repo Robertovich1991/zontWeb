@@ -34,7 +34,7 @@ const content = {
     contactInfo: [
       { type: 'email', label: 'Email Support', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
-      { type: 'address', label: 'Office', value: 'Paris, France', action: null },
+      { type: 'address', label: 'Office', value: '38 rue Coriolis, 75012 Paris, France', action: null },
     ],
     formName: 'Your Name', formEmail: 'Email', formSubject: 'Subject',
     formMessage: 'Your Message', formPlaceholder: 'Describe your question or issue...',
@@ -68,7 +68,7 @@ const content = {
     contactInfo: [
       { type: 'email', label: 'Support Email', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
-      { type: 'address', label: 'Bureau', value: 'Paris, France', action: null },
+      { type: 'address', label: 'Bureau', value: '38 rue Coriolis, 75012 Paris, France', action: null },
     ],
     formName: 'Votre Nom', formEmail: 'Email', formSubject: 'Sujet',
     formMessage: 'Votre Message', formPlaceholder: 'Decrivez votre question ou probleme...',
@@ -102,7 +102,7 @@ const content = {
     contactInfo: [
       { type: 'email', label: 'Email Поддержки', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
-      { type: 'address', label: 'Офис', value: 'Париж, Франция', action: null },
+      { type: 'address', label: 'Офис', value: '38 rue Coriolis, 75012 Париж, Франция', action: null },
     ],
     formName: 'Ваше Имя', formEmail: 'Email', formSubject: 'Тема',
     formMessage: 'Ваше Сообщение', formPlaceholder: 'Опишите ваш вопрос или проблему...',
@@ -136,7 +136,7 @@ const content = {
     contactInfo: [
       { type: 'email', label: 'Email աջակցություն', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
-      { type: 'address', label: 'Գրասենյակ', value: 'Փարիզ, Ֆրանսիա', action: null },
+      { type: 'address', label: 'Գրասենյակ', value: '38 rue Coriolis, 75012 Paris, Ֆրանսիա', action: null },
     ],
     formName: 'Ձեր անունը', formEmail: 'Email', formSubject: 'Թեմա',
     formMessage: 'Ձեր հաղորդագրությունը', formPlaceholder: 'Նկարագրեք ձեր հարցը կամ խնդիրը...',
@@ -170,7 +170,7 @@ const content = {
     contactInfo: [
       { type: 'email', label: 'Soporte por Email', value: 'contact@zont.cab', action: 'mailto:contact@zont.cab' },
       { type: 'phone', label: 'WhatsApp', value: '+33 7 83 77 70 27', action: 'https://wa.me/33783777027' },
-      { type: 'address', label: 'Oficina', value: 'París, Francia', action: null },
+      { type: 'address', label: 'Oficina', value: '38 rue Coriolis, 75012 París, Francia', action: null },
     ],
     formName: 'Tu Nombre', formEmail: 'Email', formSubject: 'Asunto',
     formMessage: 'Tu Mensaje', formPlaceholder: 'Describe tu pregunta o problema...',

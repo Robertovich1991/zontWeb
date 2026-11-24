@@ -327,7 +327,7 @@ const BecomeClient = () => {
           "url": "https://www.zont.cab",
           "image": "https://www.zont.cab/logo512.png",
           "telephone": "+33600000000",
-          "address": { "@type": "PostalAddress", "addressLocality": "Paris", "addressCountry": "FR" },
+          "address": { "@type": "PostalAddress", "streetAddress": "38 rue Coriolis", "postalCode": "75012", "addressLocality": "Paris", "addressCountry": "FR" },
           "priceRange": "$$",
           "areaServed": { "@type": "Place", "name": "Europe" },
           "hasOfferCatalog": {

@@ -416,7 +416,7 @@ const Partners = () => {
         ogType="website"
         ogImage={`${SITE}/images/borne-reservation-vtc-taxi-hotel-paris.webp`}
         jsonLd={[
-          { "@context": "https://schema.org", "@type": "LocalBusiness", "name": c.seoTitle, "description": c.seoDesc, "url": "https://www.zont.cab", "image": "https://www.zont.cab/logo512.png", "telephone": "+33783777027", "address": { "@type": "PostalAddress", "addressLocality": "Paris", "addressCountry": "FR" }, "priceRange": "$$", "serviceType": "B2B Airport Transfer & Chauffeur Service", "areaServed": ["Paris", "France", "Monaco", "Europe"] },
+          { "@context": "https://schema.org", "@type": "LocalBusiness", "name": c.seoTitle, "description": c.seoDesc, "url": "https://www.zont.cab", "image": "https://www.zont.cab/logo512.png", "telephone": "+33783777027", "address": { "@type": "PostalAddress", "streetAddress": "38 rue Coriolis", "postalCode": "75012", "addressLocality": "Paris", "addressCountry": "FR" }, "priceRange": "$$", "serviceType": "B2B Airport Transfer & Chauffeur Service", "areaServed": ["Paris", "France", "Monaco", "Europe"] },
           { "@context": "https://schema.org", "@type": "WebPage", "name": c.seoTitle, "url": canonical, "description": c.seoDesc },
         ]}
       />

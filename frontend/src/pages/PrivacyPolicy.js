@@ -25,7 +25,7 @@ const content = {
       { title: '10. Securite des donnees', text: 'Nous mettons en oeuvre des mesures techniques et organisationnelles appropriees pour proteger vos donnees :\n\n- Chiffrement SSL/TLS pour toutes les communications\n- Paiements securises via Stripe (certifie PCI DSS)\n- Acces restreint aux donnees personnelles\n- Surveillance et mise a jour reguliere de nos systemes' },
       { title: '11. Mineurs', text: 'Nos services ne s\'adressent pas aux personnes de moins de 16 ans. Nous ne collectons pas sciemment de donnees personnelles de mineurs.' },
       { title: '12. Modifications', text: 'Nous pouvons modifier cette Politique de Confidentialite a tout moment. Les modifications seront publiees sur cette page avec la date de mise a jour. Nous vous encourageons a consulter regulierement cette page.' },
-      { title: '13. Contact', text: 'Pour toute question relative a la protection de vos donnees personnelles :\n\nEmail : contact@zont.cab\nTelephone : +33 7 83 77 70 27\nAdresse : Zont Technologies Inc.' },
+      { title: '13. Contact', text: 'Pour toute question relative a la protection de vos donnees personnelles :\n\nEmail : contact@zont.cab\nTelephone : +33 7 83 77 70 27\nAdresse : Zont Technologies Inc., 38 rue Coriolis, 75012 Paris, France' },
     ],
   },
   en: {
@@ -47,7 +47,7 @@ const content = {
       { title: '10. Data Security', text: 'We implement appropriate technical and organizational measures to protect your data:\n\n- SSL/TLS encryption for all communications\n- Secure payments via Stripe (PCI DSS certified)\n- Restricted access to personal data\n- Regular monitoring and system updates' },
       { title: '11. Minors', text: 'Our services are not intended for persons under 16 years of age. We do not knowingly collect personal data from minors.' },
       { title: '12. Changes', text: 'We may modify this Privacy Policy at any time. Changes will be published on this page with the update date. We encourage you to review this page regularly.' },
-      { title: '13. Contact', text: 'For any questions regarding the protection of your personal data:\n\nEmail: contact@zont.cab\nPhone: +33 7 83 77 70 27\nAddress: Zont Technologies Inc.' },
+      { title: '13. Contact', text: 'For any questions regarding the protection of your personal data:\n\nEmail: contact@zont.cab\nPhone: +33 7 83 77 70 27\nAddress: Zont Technologies Inc., 38 rue Coriolis, 75012 Paris, France' },
     ],
   },
   ru: {
@@ -91,7 +91,7 @@ const content = {
       { title: '10. Seguridad de los datos', text: 'Aplicamos medidas técnicas y organizativas adecuadas para proteger tus datos:\n\n- Cifrado SSL/TLS en todas las comunicaciones\n- Pagos seguros a través de Stripe (certificado PCI DSS)\n- Acceso restringido a los datos personales\n- Supervisión y actualización periódica de nuestros sistemas' },
       { title: '11. Menores', text: 'Nuestros servicios no están dirigidos a personas menores de 16 años. No recopilamos conscientemente datos personales de menores.' },
       { title: '12. Modificaciones', text: 'Podemos modificar esta Política de Privacidad en cualquier momento. Los cambios se publicarán en esta página con la fecha de actualización. Te recomendamos consultar esta página con regularidad.' },
-      { title: '13. Contacto', text: 'Para cualquier cuestión relativa a la protección de tus datos personales:\n\nEmail: contact@zont.cab\nTeléfono: +33 7 83 77 70 27\nDirección: Zont Technologies Inc.' },
+      { title: '13. Contacto', text: 'Para cualquier cuestión relativa a la protección de tus datos personales:\n\nEmail: contact@zont.cab\nTeléfono: +33 7 83 77 70 27\nDirección: Zont Technologies Inc., 38 rue Coriolis, 75012 París, Francia' },
     ],
   },
   hy: {
@@ -113,7 +113,7 @@ const content = {
       { title: '10. Տվյալների անվտանգություն', text: 'Մենք կիրառում ենք համապատասխան տեխնիկական և կազմակերպչական միջոցներ ձեր տվյալները պաշտպանելու համար՝\n\n- SSL/TLS գաղտնագրում բոլոր հաղորդակցությունների համար\n- Անվտանգ վճարումներ Stripe-ի միջոցով (PCI DSS հավաստագրված)\n- Անձնական տվյալների սահմանափակ հասանելիություն\n- Համակարգերի կանոնավոր մոնիտորինգ և թարմացում' },
       { title: '11. Անչափահասներ', text: 'Մեր ծառայությունները նախատեսված չեն 16 տարեկանից ցածր անձանց համար։ Մենք գիտակցաբար չենք հավաքում անչափահասների անձնական տվյալներ։' },
       { title: '12. Փոփոխություններ', text: 'Մենք կարող ենք ցանկացած պահի փոփոխել սույն Գաղտնիության քաղաքականությունը։ Փոփոխությունները կհրապարակվեն այս էջում՝ թարմացման ամսաթվի նշումով։' },
-      { title: '13. Կապ', text: 'Անձնական տվյալների պաշտպանության հարցերով՝\n\nEmail՝ contact@zont.cab\nՀեռախոս՝ +33 7 83 77 70 27\nՀասցե՝ Zont Technologies Inc.' },
+      { title: '13. Կապ', text: 'Անձնական տվյալների պաշտպանության հարցերով՝\n\nEmail՝ contact@zont.cab\nՀեռախոս՝ +33 7 83 77 70 27\nՀասցե՝ Zont Technologies Inc., 38 rue Coriolis, 75012 Paris, Ֆրանսիա' },
     ],
   },
 };

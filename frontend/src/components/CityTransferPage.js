@@ -300,7 +300,7 @@ const CityTransferPage = ({ content, vehicles: vehiclesPrices, seoUrls, meetDriv
             "url": "https://www.zont.cab",
             "image": "https://www.zont.cab/logo512.png",
             "telephone": "+33783777027",
-            "address": { "@type": "PostalAddress", "addressLocality": "Paris", "addressCountry": "FR" },
+            "address": { "@type": "PostalAddress", "streetAddress": "38 rue Coriolis", "postalCode": "75012", "addressLocality": "Paris", "addressCountry": "FR" },
             "priceRange": "$$",
             "serviceType": "Airport Transfer",
             "areaServed": { "@type": "Place", "name": c.title.split(' - ')[0] },

@@ -87,7 +87,7 @@ export default function HotelPartnersParis() {
           name: 'Partenariat VTC pour Hôtels à Paris',
           description: "Programme partenaire ZONT pour hôtels : chauffeur privé, transferts aéroport CDG, Orly, Beauvais et jusqu'à 10 % de commission sur la gamme Premium.",
           url: CANONICAL,
-          provider: { '@type': 'LocalBusiness', name: 'ZONT', telephone: '+33783777027', address: { '@type': 'PostalAddress', addressLocality: 'Paris', addressCountry: 'FR' } },
+          provider: { '@type': 'LocalBusiness', name: 'ZONT', telephone: '+33783777027', address: { '@type': 'PostalAddress', streetAddress: '38 rue Coriolis', postalCode: '75012', addressLocality: 'Paris', addressCountry: 'FR' } },
           areaServed: ['Paris', 'Île-de-France'],
           serviceType: 'Chauffeur privé et transferts aéroport pour hôtels',
         }}
