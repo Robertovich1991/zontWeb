@@ -43,7 +43,7 @@ const content = {
     trustTitle: 'Trusted by Tourism Professionals',
     trustSub: '',
     trustPoints: [
-      { value: '19', label: 'European Cities' },
+      { value: '22', label: 'European Cities' },
       { value: '15+', label: 'Countries' },
       { value: '6', label: 'Languages Spoken' },
       { value: '99%', label: 'Satisfaction Rate' },
@@ -96,7 +96,7 @@ const content = {
     trustTitle: 'La Confiance des Professionnels du Tourisme',
     trustSub: '',
     trustPoints: [
-      { value: '19', label: 'Villes Europeennes' },
+      { value: '22', label: 'Villes Europeennes' },
       { value: '15+', label: 'Pays' },
       { value: '6', label: 'Langues Parlees' },
       { value: '99%', label: 'Taux de Satisfaction' },
@@ -138,7 +138,7 @@ const content = {
       { title: 'Довольные Туристы', desc: 'Премиальные трансферы на каждом этапе.' },
     ],
     trustTitle: 'Доверие Профессионалов Туризма', trustSub: '',
-    trustPoints: [{ value: '19', label: 'Городов' }, { value: '15+', label: 'Стран' }, { value: '6', label: 'Языков' }, { value: '99%', label: 'Удовлетворенность' }],
+    trustPoints: [{ value: '22', label: 'Городов' }, { value: '15+', label: 'Стран' }, { value: '6', label: 'Языков' }, { value: '99%', label: 'Удовлетворенность' }],
     contactTitle: 'Партнерство для Туристического Транспорта',
     contactSub: 'Опишите ваши программы и ожидаемые объемы.',
     formSubmit: 'Запросить Партнерство', backToPartners: 'Назад ко Всем Решениям',
@@ -159,7 +159,7 @@ const content = {
     trustSub: '',
     trustPoints: [
       { v: '500+', l: 'Գործընկեր Գործակալություններ' },
-      { v: '19', l: 'Քաղաքներ' },
+      { v: '22', l: 'Քաղաքներ' },
       { v: '24/7', l: 'Աջակցություն' },
       { v: '98%', l: 'Գոհունակություն' },
     ],

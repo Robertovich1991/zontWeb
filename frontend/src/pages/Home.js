@@ -27,7 +27,7 @@ const homeContent = {
   en: {
     heroTitle: 'Premium Airport Transfer',
     heroAccent: 'Across Europe',
-    heroSub: 'Professional private drivers in 19 cities. Fixed prices, flight tracking, meet & greet.',
+    heroSub: 'Professional private drivers in 22 cities. Fixed prices, flight tracking, meet & greet.',
     bookingTitle: 'Book Your Transfer',
     tabTransfer: 'Transfer', tabDisposal: 'Driver at disposal', hoursLabel: 'How many hours?',
     pickup: 'Pick up address', dropoff: 'Drop off address', date: 'Date', time: 'Time',
@@ -35,7 +35,7 @@ const homeContent = {
     pickupPh: 'Airport, hotel, address...', dropoffPh: 'Hotel, city center, address...',
     bookNow: 'SEARCH TRANSFER', searching: 'SEARCHING...',
     fixedPrices: 'Fixed Prices', securePay: 'Secure Payment',
-    stats: { trips: '50K+', tripsLabel: 'Completed Trips', cities: '19', citiesLabel: 'Cities', available: '24/7', availableLabel: 'Service', rating: '4.5/5', ratingLabel: 'Rating' },
+    stats: { trips: '50K+', tripsLabel: 'Completed Trips', cities: '22', citiesLabel: 'Cities', available: '24/7', availableLabel: 'Service', rating: '4.5/5', ratingLabel: 'Rating' },
     trustTitle: 'Why Travelers Trust Zont',
     f1Title: 'Meet & Greet', f1Desc: 'Your driver waits at arrivals with a personalized name sign. 60 min free waiting for flight delays.',
     f2Title: 'Flight Tracking', f2Desc: 'Real-time monitoring of your flight. No extra charge if delayed.',
@@ -53,12 +53,12 @@ const homeContent = {
     s2: 'Meet Your Driver', s2d: 'Driver waits at arrivals with your name sign. Help with luggage included.',
     s3: 'Enjoy the Ride', s3d: 'Comfortable direct transfer in a premium vehicle to your destination.',
     seoTitle: 'Zont - Premium Airport Transfer Service in Europe',
-    seoDesc: 'Professional private driver in 19 European cities. Fixed prices, flight tracking, meet and greet. Book your airport transfer online.',
+    seoDesc: 'Professional private driver in 22 European cities. Fixed prices, flight tracking, meet and greet. Book your airport transfer online.',
   },
   fr: {
     heroTitle: 'Transfert Aeroport Premium',
     heroAccent: 'Partout en Europe',
-    heroSub: 'Chauffeurs privés professionnels dans 19 villes. Prix fixes, suivi de vol, accueil personnalisé.',
+    heroSub: 'Chauffeurs privés professionnels dans 22 villes. Prix fixes, suivi de vol, accueil personnalisé.',
     bookingTitle: 'Réservez Votre Transfert',
     tabTransfer: 'Transfert', tabDisposal: 'Chauffeur à disposition', hoursLabel: 'Combien d\'heures ?',
     pickup: 'Adresse de départ', dropoff: 'Adresse d\'arrivée', date: 'Date', time: 'Heure',
@@ -66,7 +66,7 @@ const homeContent = {
     pickupPh: 'Aéroport, hôtel, adresse...', dropoffPh: 'Hôtel, centre-ville, adresse...',
     bookNow: 'RECHERCHER UN TRANSFERT', searching: 'RECHERCHE...',
     fixedPrices: 'Prix Fixes', securePay: 'Paiement Sécurisé',
-    stats: { trips: '50K+', tripsLabel: 'Courses Effectuées', cities: '19', citiesLabel: 'Villes', available: '24/7', availableLabel: 'Service', rating: '4.5/5', ratingLabel: 'Note' },
+    stats: { trips: '50K+', tripsLabel: 'Courses Effectuées', cities: '22', citiesLabel: 'Villes', available: '24/7', availableLabel: 'Service', rating: '4.5/5', ratingLabel: 'Note' },
     trustTitle: 'Pourquoi les Voyageurs Font Confiance à Zont',
     f1Title: 'Accueil Personnalisé', f1Desc: 'Votre chauffeur vous attend aux arrivées avec une pancarte à votre nom. 60 min d\'attente gratuites.',
     f2Title: 'Suivi des Vols', f2Desc: 'Surveillance en temps réel de votre vol. Aucun supplément en cas de retard.',
@@ -84,7 +84,7 @@ const homeContent = {
     s2: 'Rencontrez Votre Chauffeur', s2d: 'Chauffeur aux arrivées avec pancarte à votre nom. Aide aux bagages.',
     s3: 'Profitez du Trajet', s3d: 'Transfert direct confortable dans un véhicule premium.',
     seoTitle: 'Zont - Transfert Aéroport Premium en Europe | Chauffeur Privé',
-    seoDesc: 'Transfert privé premium en 19 villes d\'Europe. Prix fixes garantis, suivi des vols en temps réel et accueil personnalisé. Réservez en ligne maintenant.',
+    seoDesc: 'Transfert privé premium en 22 villes d\'Europe. Prix fixes garantis, suivi des vols en temps réel et accueil personnalisé. Réservez en ligne maintenant.',
   },
   ru: {
     heroTitle: 'Премиум Трансфер из Аэропорта',
@@ -97,7 +97,7 @@ const homeContent = {
     pickupPh: 'Аэропорт, отель, адрес...', dropoffPh: 'Отель, центр города...',
     bookNow: 'НАЙТИ ТРАНСФЕР', searching: 'ПОИСК...',
     fixedPrices: 'Фиксированные Цены', securePay: 'Безопасная Оплата',
-    stats: { trips: '50K+', tripsLabel: 'Поездок', cities: '19', citiesLabel: 'Городов', available: '24/7', availableLabel: 'Сервис', rating: '4.5/5', ratingLabel: 'Рейтинг' },
+    stats: { trips: '50K+', tripsLabel: 'Поездок', cities: '22', citiesLabel: 'Городов', available: '24/7', availableLabel: 'Сервис', rating: '4.5/5', ratingLabel: 'Рейтинг' },
     trustTitle: 'Почему Путешественники Доверяют Zont',
     f1Title: 'Встреча с Табличкой', f1Desc: 'Водитель ждет с именной табличкой. 60 минут бесплатного ожидания.',
     f2Title: 'Отслеживание Рейсов', f2Desc: 'Мониторинг вашего рейса в реальном времени. Без доплаты за задержку.',
@@ -115,12 +115,12 @@ const homeContent = {
     s2: 'Встретьте Водителя', s2d: 'Водитель ждет в зале прилета с табличкой.',
     s3: 'Наслаждайтесь', s3d: 'Комфортная поездка в премиум автомобиле.',
     seoTitle: 'Zont - Премиум Трансфер из Аэропорта в Европе',
-    seoDesc: 'Трансферы из аэропортов Парижа (CDG/ORY/BVA) и 19 городов Европы у лицензированных водителей: фиксированная цена и отслеживание рейса.',
+    seoDesc: 'Трансферы из аэропортов Парижа (CDG/ORY/BVA) и 22 городов Европы у лицензированных водителей: фиксированная цена и отслеживание рейса.',
   },
   hy: {
     heroTitle: 'Պրեմիում Օդանավակայանի Տրանսֆեր',
     heroAccent: 'Ամբողջ Եվրոպայում',
-    heroSub: 'Պրոֆեսիոնալ անձնական վարորդներ 19 քաղաքներում: Հաստատ գներ, թռիչքի հետևելում, անհատական դիմավորում:',
+    heroSub: 'Պրոֆեսիոնալ անձնական վարորդներ 22 քաղաքներում: Հաստատ գներ, թռիչքի հետևելում, անհատական դիմավորում:',
     bookingTitle: 'Ամրագրեք Ձեր Տրանսֆերը',
     tabTransfer: 'Տրանսֆեր', tabDisposal: 'Վարորդ տրամադրության տակ', hoursLabel: 'Քանի՞ ժամ',
     pickup: 'Վերցնելու հասցե', dropoff: 'Իջնելու հասցե', date: 'Ամսաթիվ', time: 'Ժամ',
@@ -128,7 +128,7 @@ const homeContent = {
     pickupPh: 'Օդանավակայան, հյուրանոց, հասցե...', dropoffPh: 'Հյուրանոց, կենտրոն, հասցե...',
     bookNow: 'ՈՌՈՆԵԼ ՏՌԱՆՍՖԵՌ', searching: 'ՈՌՈՆՈՒՄ...',
     fixedPrices: 'Հաստատ Գներ', securePay: 'Ապահով Վճարում',
-    stats: { trips: '50K+', tripsLabel: 'Կատարված Ուղևորություններ', cities: '19', citiesLabel: 'Քաղաքներ', available: '24/7', availableLabel: 'Սպասարկում', rating: '4.5/5', ratingLabel: 'Վարկանիշ' },
+    stats: { trips: '50K+', tripsLabel: 'Կատարված Ուղևորություններ', cities: '22', citiesLabel: 'Քաղաքներ', available: '24/7', availableLabel: 'Սպասարկում', rating: '4.5/5', ratingLabel: 'Վարկանիշ' },
     trustTitle: 'Ինչու Ճամորդները Վստահում Են Zont-ին',
     f1Title: 'Դիմավորում', f1Desc: 'Վարորդը սպասում է ժամանման վայրում անվանական ցուցանակով: 60 րոպե անվճար սպասում:',
     f2Title: 'Թռիչքի Հետևելում', f2Desc: 'Ձեր թռիչքի հետևելում իրական ժամանակում: Հավելյալ վճար ուշացման դեպքում:',
@@ -148,7 +148,7 @@ const homeContent = {
   es: {
     heroTitle: 'Traslado Aeropuerto Premium',
     heroAccent: 'En Toda Europa',
-    heroSub: 'Chóferes privados profesionales en 19 ciudades. Precios fijos, seguimiento de vuelo, recepción personalizada.',
+    heroSub: 'Chóferes privados profesionales en 22 ciudades. Precios fijos, seguimiento de vuelo, recepción personalizada.',
     bookingTitle: 'Reserva Tu Traslado',
     tabTransfer: 'Traslado', tabDisposal: 'Chófer a disposición', hoursLabel: '¿Cuántas horas?',
     pickup: 'Dirección de recogida', dropoff: 'Dirección de destino', date: 'Fecha', time: 'Hora',
@@ -156,7 +156,7 @@ const homeContent = {
     pickupPh: 'Aeropuerto, hotel, dirección...', dropoffPh: 'Hotel, centro, dirección...',
     bookNow: 'BUSCAR TRASLADO', searching: 'BUSCANDO...',
     fixedPrices: 'Precios Fijos', securePay: 'Pago Seguro',
-    stats: { trips: '50K+', tripsLabel: 'Viajes Realizados', cities: '19', citiesLabel: 'Ciudades', available: '24/7', availableLabel: 'Servicio', rating: '4.5/5', ratingLabel: 'Valoración' },
+    stats: { trips: '50K+', tripsLabel: 'Viajes Realizados', cities: '22', citiesLabel: 'Ciudades', available: '24/7', availableLabel: 'Servicio', rating: '4.5/5', ratingLabel: 'Valoración' },
     trustTitle: '¿Por qué los Viajeros Confían en Zont?',
     f1Title: 'Recepción Personalizada', f1Desc: 'Tu chófer te espera en llegadas con un cartel con tu nombre. 60 min de espera gratis en caso de retraso.',
     f2Title: 'Seguimiento de Vuelos', f2Desc: 'Monitorización en tiempo real de tu vuelo. Sin recargo si hay retraso.',
@@ -176,7 +176,7 @@ const homeContent = {
     s2: 'Encuentra a Tu Chófer', s2d: 'El chófer te espera en llegadas con cartel con tu nombre. Ayuda con equipaje incluida.',
     s3: 'Disfruta del Viaje', s3d: 'Traslado directo y cómodo en un vehículo premium hasta tu destino.',
     seoTitle: 'Zont - Traslado Aeropuerto Premium en Europa | Chófer Privado',
-    seoDesc: 'Traslado privado premium en 19 ciudades de Europa. Precios fijos garantizados, seguimiento de vuelos y recepción personalizada. Reserva online ahora.',
+    seoDesc: 'Traslado privado premium en 22 ciudades de Europa. Precios fijos garantizados, seguimiento de vuelos y recepción personalizada. Reserva online ahora.',
   },
 };
 
@@ -193,6 +193,9 @@ const popularDest = [
   { nameEn: 'Alicante Airport Transfer', nameFr: 'Alicante', nameRu: 'Аликанте', nameHy: 'Ալիկանտե', price: 31, urlEn: '/alicante-airport-transfer', urlFr: '/transfert-aeroport-alicante', urlRu: '/taksi-iz-aeroporta-alikante', urlHy: '/alikante-odanavakayani-transfer', urlEs: '/alicante-airport-transfer', nameEs: 'Alicante' },
   { nameEn: 'Yerevan Airport Transfer', nameFr: 'Erevan', nameRu: 'Ереван', nameHy: 'Երևան', price: 8, urlEn: '/yerevan-airport-transfer', urlFr: '/transfert-aeroport-erevan', urlRu: '/taksi-iz-aeroporta-erevan', urlHy: '/erevan-odanavakayani-transfer', urlEs: '/es/traslado-aeropuerto-erevan-zvartnots', nameEs: 'Ereván' },
   { nameEn: 'Strasbourg Airport Transfer', nameFr: 'Strasbourg', nameRu: 'Страсбург', nameHy: 'Ստրասբուրգ', price: 40, urlEn: '/strasbourg-airport-transfer', urlFr: '/transfert-aeroport-strasbourg', urlRu: '/taksi-iz-aeroporta-strasburg', urlHy: '/strasburg-odanavakayani-transfer', urlEs: '/strasbourg-airport-transfer', nameEs: 'Estrasburgo' },
+  { nameEn: 'Madrid Airport Transfer', nameFr: 'Madrid', nameRu: 'Мадрид', nameHy: 'Մադրիդ', price: 49, urlEn: '/madrid-airport-transfer', urlFr: '/transfert-aeroport-madrid', urlRu: '/taksi-iz-aeroporta-madrid', urlHy: '/madrid-odanavakayani-transfer', urlEs: '/madrid-airport-transfer', nameEs: 'Madrid' },
+  { nameEn: 'Lyon Airport Transfer', nameFr: 'Lyon', nameRu: 'Лион', nameHy: 'Լիոն', price: 85, urlEn: '/lyon-airport-transfer', urlFr: '/transfert-aeroport-lyon', urlRu: '/taksi-iz-aeroporta-lion', urlHy: '/lion-odanavakayani-transfer', urlEs: '/lyon-airport-transfer', nameEs: 'Lyon' },
+  { nameEn: 'Prague Airport Transfer', nameFr: 'Prague', nameRu: 'Прага', nameHy: 'Պրահա', price: 45, urlEn: '/prague-airport-transfer', urlFr: '/transfert-aeroport-prague', urlRu: '/taksi-iz-aeroporta-praga', urlHy: '/praga-odanavakayani-transfer', urlEs: '/prague-airport-transfer', nameEs: 'Praga' },
 ];
 
 const homeSeoUrls = { en: '/', fr: '/fr', ru: '/ru', hy: '/hy', es: '/es' };
@@ -1288,7 +1291,7 @@ const Home = () => {
             </div>
             <div className="text-center mt-8">
               <Link to="/countries" className="inline-flex items-center bg-white/10 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors" data-testid="view-all-destinations">
-                {language === 'fr' ? 'Voir les 19 destinations' : language === 'ru' ? 'Все 19 направлений' : language === 'hy' ? 'Տեսնել բոլոր 19 ուղղությունները' : 'View all 19 destinations'} <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
+                {language === 'fr' ? 'Voir les 22 destinations' : language === 'ru' ? 'Все 22 направлений' : language === 'hy' ? 'Տեսնել բոլոր 22 ուղղությունները' : 'View all 22 destinations'} <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
               </Link>
             </div>
           </div>

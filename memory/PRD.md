@@ -634,3 +634,16 @@ Nouvelle API REST pour que Comfort Cars lise ses réservations en JSON, filtrée
 - Testé preview : 401 (clé absente/invalide), 400 (status/date invalides), 200 admin settings, PUT company-match, logique pure (filtre société substring, normalisation statut, filtre date course, pagination) via test offline. Page admin OK (screenshot).
 - ⚠️ Chemin données live (scan C#) renvoie 502 en PREVIEW (WAF api.zont.cab bloque l'IP preview). Fonctionnera en PRODUCTION. À valider après déploiement : GET /reservations avec la clé → vérifier que seules les courses Comfort Cars reviennent.
 - Hypothèse à confirmer en prod : le nom exact de la société dans le dispatch doit contenir "comfort cars" ; sinon ajuster le filtre dans l'admin.
+
+## [2026-06] Ajout de 3 destinations : Prague, Madrid, Lyon — DONE (testé preview)
+- 3 pages de transfert dédiées (modèle CityTransferPage, contenu en/fr/ru/hy complet + SEO) :
+  - pages/cities/Prague.js — Václav Havel (PRG). Prix { sedan 45, luxury 63, minivan 70, minibus 78 }. Routes centre/gare 45.
+  - pages/cities/Madrid.js — Adolfo Suárez Madrid-Barajas (MAD). Prix { 49, 69, 77, 87 }. Routes centre/Atocha/Chamartín 49.
+  - pages/cities/Lyon.js — Lyon Saint-Exupéry (LYS). Prix { 85, 119, 132, 149 }. Routes centre/Part-Dieu 85, Perrache 86.
+- Routes App.js : 4 slugs par ville (en/fr/ru/hy) + lazy imports. es pointe vers slug en.
+- data/cities.js : citiesData + countriesList (Lyon→France, Madrid→Spain, Prague→nouvelle "Czech Republic").
+- pages/Countries.js : images (Unsplash réelles), startingPrices, drapeau 🇨🇿, compteurs 22 villes / 7 pays.
+- pages/Home.js : popularDest + Madrid(49)/Lyon(85)/Prague(45).
+- Compteurs "19 villes → 22" et "6 pays → 7" mis à jour sur tout le site (~14 fichiers : translations, Home, Countries, B2B, BecomeClient, etc.).
+- Testé preview : /countries (Madrid, section Czech Republic + Prague, images OK), pages /prague-airport-transfer, /lyon-airport-transfer, /madrid-airport-transfer rendent avec aéroport prérempli + bons prix.
+- Prix fournis par l'utilisateur (déjà dans l'API C#) — ne PAS modifier la logique de pricing backend.

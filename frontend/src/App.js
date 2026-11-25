@@ -141,6 +141,9 @@ const RomeTransfer = lazy(() => import("@/pages/cities/Rome"));
 const MilanTransfer = lazy(() => import("@/pages/cities/Milan"));
 const AlicanteTransfer = lazy(() => import("@/pages/cities/Alicante"));
 const BarcelonaTransfer = lazy(() => import("@/pages/cities/Barcelona"));
+const PragueTransfer = lazy(() => import("@/pages/cities/Prague"));
+const MadridTransfer = lazy(() => import("@/pages/cities/Madrid"));
+const LyonTransfer = lazy(() => import("@/pages/cities/Lyon"));
 const YerevanTransfer = lazy(() => import("@/pages/cities/Yerevan"));
 const CDGTransfer = lazy(() => import("@/pages/cities/CDG"));
 const OrlyTransfer = lazy(() => import("@/pages/cities/Orly"));
@@ -425,6 +428,21 @@ function App() {
                   <Route path="/transfert-aeroport-barcelone" element={<BarcelonaTransfer />} />
                   <Route path="/taksi-iz-aeroporta-barselona" element={<BarcelonaTransfer />} />
                   <Route path="/barselona-odanavakayani-transfer" element={<BarcelonaTransfer />} />
+                  {/* Prague */}
+                  <Route path="/prague-airport-transfer" element={<PragueTransfer />} />
+                  <Route path="/transfert-aeroport-prague" element={<PragueTransfer />} />
+                  <Route path="/taksi-iz-aeroporta-praga" element={<PragueTransfer />} />
+                  <Route path="/praga-odanavakayani-transfer" element={<PragueTransfer />} />
+                  {/* Madrid */}
+                  <Route path="/madrid-airport-transfer" element={<MadridTransfer />} />
+                  <Route path="/transfert-aeroport-madrid" element={<MadridTransfer />} />
+                  <Route path="/taksi-iz-aeroporta-madrid" element={<MadridTransfer />} />
+                  <Route path="/madrid-odanavakayani-transfer" element={<MadridTransfer />} />
+                  {/* Lyon */}
+                  <Route path="/lyon-airport-transfer" element={<LyonTransfer />} />
+                  <Route path="/transfert-aeroport-lyon" element={<LyonTransfer />} />
+                  <Route path="/taksi-iz-aeroporta-lion" element={<LyonTransfer />} />
+                  <Route path="/lion-odanavakayani-transfer" element={<LyonTransfer />} />
                   {/* Yerevan */}
                   <Route path="/yerevan-airport-transfer" element={<YerevanTransfer />} />
                   <Route path="/transfert-aeroport-erevan" element={<YerevanTransfer />} />

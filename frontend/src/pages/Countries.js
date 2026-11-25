@@ -28,6 +28,9 @@ const cityImages = {
   barcelona: 'https://images.unsplash.com/photo-1660855562147-2f2eab48c0c7?w=600&q=75&auto=format',
   yerevan: 'https://images.unsplash.com/photo-1771444617885-cf21bd096091?w=600&q=75&auto=format',
   strasbourg: 'https://images.unsplash.com/photo-1708640944954-2c7e7feab704?w=600&q=75&auto=format',
+  lyon: 'https://images.unsplash.com/photo-1767809603057-663f86bd94fb?w=600&q=75&auto=format',
+  madrid: 'https://images.unsplash.com/photo-1725112675082-5fc786ea4269?w=600&q=75&auto=format',
+  prague: 'https://images.unsplash.com/photo-1563913801192-bcefb1bb7651?w=600&q=75&auto=format',
 };
 
 const defaultImg = 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b?w=600&q=75&auto=format';
@@ -35,11 +38,11 @@ const defaultImg = 'https://images.unsplash.com/photo-1764089859662-7b4773dff85b
 const translations = {
   en: {
     seoTitle: 'Airport Transfers in Europe - All Destinations | Zont',
-    seoDesc: 'Premium private airport transfer in 19 European cities. Fixed prices, flight tracking. Book online.',
+    seoDesc: 'Premium private airport transfer in 22 European cities. Fixed prices, flight tracking. Book online.',
     heroTitle: 'Airport Transfers', heroAccent: 'Across Europe',
-    heroSub: 'Premium private driver service in 19 cities. Book your airport transfer with fixed prices and professional drivers.',
+    heroSub: 'Premium private driver service in 22 cities. Book your airport transfer with fixed prices and professional drivers.',
     searchPh: 'Search a city or airport...',
-    stats: [{ v: '19', l: 'Cities' }, { v: '6', l: 'Countries' }, { v: '24/7', l: 'Service' }, { v: '4.5/5', l: 'Rating' }],
+    stats: [{ v: '22', l: 'Cities' }, { v: '7', l: 'Countries' }, { v: '24/7', l: 'Service' }, { v: '4.5/5', l: 'Rating' }],
     browseTitle: 'Choose Your Destination',
     viewCity: 'Book Transfer', from: 'From', airports: 'Airports',
     noResults: 'No destinations found for',
@@ -53,11 +56,11 @@ const translations = {
   },
   fr: {
     seoTitle: 'Transferts Aéroport en Europe - Toutes les Destinations | Zont',
-    seoDesc: 'Transfert aéroport privé premium dans 19 villes européennes. Prix fixes, suivi de vol. Réservez en ligne.',
+    seoDesc: 'Transfert aéroport privé premium dans 22 villes européennes. Prix fixes, suivi de vol. Réservez en ligne.',
     heroTitle: 'Transferts Aéroport', heroAccent: 'Partout en Europe',
-    heroSub: 'Service de chauffeur privé premium dans 19 villes. Réservez votre transfert aéroport à prix fixes.',
+    heroSub: 'Service de chauffeur privé premium dans 22 villes. Réservez votre transfert aéroport à prix fixes.',
     searchPh: 'Rechercher une ville ou un aéroport...',
-    stats: [{ v: '19', l: 'Villes' }, { v: '6', l: 'Pays' }, { v: '24/7', l: 'Service' }, { v: '4.5/5', l: 'Note' }],
+    stats: [{ v: '22', l: 'Villes' }, { v: '7', l: 'Pays' }, { v: '24/7', l: 'Service' }, { v: '4.5/5', l: 'Note' }],
     browseTitle: 'Choisissez Votre Destination',
     viewCity: 'Réserver un Transfert', from: 'À partir de', airports: 'Aéroports',
     noResults: 'Aucune destination trouvée pour',
@@ -75,7 +78,7 @@ const translations = {
     heroTitle: 'Трансферы из Аэропортов', heroAccent: 'По Всей Европе',
     heroSub: 'Премиум-сервис частного водителя в 19 городах. Забронируйте трансфер по фиксированным ценам.',
     searchPh: 'Поиск города или аэропорта...',
-    stats: [{ v: '19', l: 'Городов' }, { v: '6', l: 'Стран' }, { v: '24/7', l: 'Сервис' }, { v: '4.5/5', l: 'Рейтинг' }],
+    stats: [{ v: '22', l: 'Городов' }, { v: '7', l: 'Стран' }, { v: '24/7', l: 'Сервис' }, { v: '4.5/5', l: 'Рейтинг' }],
     browseTitle: 'Выберите Направление',
     viewCity: 'Забронировать', from: 'От', airports: 'Аэропорты',
     noResults: 'Направлений не найдено для',
@@ -89,11 +92,11 @@ const translations = {
   },
   es: {
     seoTitle: 'Traslados Aeropuerto en Europa - Todos los Destinos | Zont',
-    seoDesc: 'Traslado privado premium desde el aeropuerto en 19 ciudades europeas. Precios fijos, seguimiento de vuelo. Reserva online.',
+    seoDesc: 'Traslado privado premium desde el aeropuerto en 22 ciudades europeas. Precios fijos, seguimiento de vuelo. Reserva online.',
     heroTitle: 'Traslados Aeropuerto', heroAccent: 'Por Toda Europa',
-    heroSub: 'Servicio premium de conductor privado en 19 ciudades. Reserva tu traslado al aeropuerto con precios fijos y chóferes profesionales.',
+    heroSub: 'Servicio premium de conductor privado en 22 ciudades. Reserva tu traslado al aeropuerto con precios fijos y chóferes profesionales.',
     searchPh: 'Buscar una ciudad o aeropuerto...',
-    stats: [{ v: '19', l: 'Ciudades' }, { v: '6', l: 'Países' }, { v: '24/7', l: 'Servicio' }, { v: '4.5/5', l: 'Valoración' }],
+    stats: [{ v: '22', l: 'Ciudades' }, { v: '7', l: 'Países' }, { v: '24/7', l: 'Servicio' }, { v: '4.5/5', l: 'Valoración' }],
     browseTitle: 'Elige Tu Destino',
     viewCity: 'Reservar Traslado', from: 'Desde', airports: 'Aeropuertos',
     noResults: 'No se encontraron destinos para',
@@ -109,9 +112,9 @@ const translations = {
     seoTitle: 'Օդանավակայանի Տրանսֆերներ Եվրոպայում - Բոլոր Ուղղությունները | Zont',
     seoDesc: 'Պրեմիում անձնական օդանավակայանի տրանսֆեր 19 եվրոպական քաղաքներում: Հաստատ գներ:',
     heroTitle: 'Օդանավակայանի Տրանսֆերներ', heroAccent: 'Ամբողջ Եվրոպայում',
-    heroSub: 'Պրեմիում անձնական վարորդի ծառայություն 19 քաղաքներում: Ամրագրեք հաստատ գներով:',
+    heroSub: 'Պրեմիում անձնական վարորդի ծառայություն 22 քաղաքներում: Ամրագրեք հաստատ գներով:',
     searchPh: 'Որոնել քաղաք կամ օդանավակայան...',
-    stats: [{ v: '19', l: 'Քաղաքներ' }, { v: '6', l: 'Երկրներ' }, { v: '24/7', l: 'Սպասարկում' }, { v: '4.5/5', l: 'Վարկանիշ' }],
+    stats: [{ v: '22', l: 'Քաղաքներ' }, { v: '7', l: 'Երկրներ' }, { v: '24/7', l: 'Սպասարկում' }, { v: '4.5/5', l: 'Վարկանիշ' }],
     browseTitle: 'Ընտրեք Ձեր Ուղղությունը',
     viewCity: 'Ամրագրել Տրանսֆեր', from: 'Սկսած', airports: 'Օդանավակայաններ',
     noResults: 'Ուղղություններ չգտնվեցին',
@@ -129,9 +132,10 @@ const startingPrices = {
   paris: 65, cdg: 65, orly: 45, beauvais: 120, paristrainstation: 25,
   nice: 35, monaco: 109, cannes: 70, cotedazur: 45, disneyland: 49,
   berlin: 75, munich: 115, rome: 90, milan: 127, alicante: 31, barcelona: 48, yerevan: 8, strasbourg: 40,
+  lyon: 85, madrid: 49, prague: 45,
 };
 
-const countryFlags = { France: '\ud83c\uddeb\ud83c\uddf7', Monaco: '\ud83c\uddf2\ud83c\udde8', Germany: '\ud83c\udde9\ud83c\uddea', Italy: '\ud83c\uddee\ud83c\uddf9', Spain: '\ud83c\uddea\ud83c\uddf8', Armenia: '\ud83c\udde6\ud83c\uddf2' };
+const countryFlags = { France: '\ud83c\uddeb\ud83c\uddf7', Monaco: '\ud83c\uddf2\ud83c\udde8', Germany: '\ud83c\udde9\ud83c\uddea', Italy: '\ud83c\uddee\ud83c\uddf9', Spain: '\ud83c\uddea\ud83c\uddf8', 'Czech Republic': '\ud83c\udde8\ud83c\uddff', Armenia: '\ud83c\udde6\ud83c\uddf2' };
 
 const Countries = () => {
   const language = useLangRouting('countries');

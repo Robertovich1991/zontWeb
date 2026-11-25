@@ -33,7 +33,7 @@ const content = {
     bookingForm: 'Book Your Paris Taxi / VTC',
     pickupLabel: 'Pick up', dropoffLabel: 'Drop off', dateLabel: 'Date', timeLabel: 'Time',
     defaultPickup: '',
-    otherCitiesTitle: 'We serve 19 cities across Europe', otherCitiesBtn: 'View All Destinations',
+    otherCitiesTitle: 'We serve 22 cities across Europe', otherCitiesBtn: 'View All Destinations',
     faqTitle: 'Frequently Asked Questions — Taxi & VTC in Paris',
     faq: [
       { q: 'Which airports and stations do you serve in Paris?', a: 'We provide transfers to and from all Paris airports — Roissy-Charles-de-Gaulle (CDG), Orly and Beauvais — as well as train stations (Gare du Nord, Gare de Lyon, Montparnasse) and any address across the Île-de-France region.' },
@@ -77,7 +77,7 @@ const content = {
     bookingForm: 'Réservez Votre Taxi / VTC à Paris',
     pickupLabel: 'Départ', dropoffLabel: 'Destination', dateLabel: 'Date', timeLabel: 'Heure',
     defaultPickup: '',
-    otherCitiesTitle: '19 destinations en Europe', otherCitiesBtn: 'Voir Toutes les Destinations',
+    otherCitiesTitle: '22 destinations en Europe', otherCitiesBtn: 'Voir Toutes les Destinations',
     faqTitle: 'Questions fréquentes — Taxi & VTC à Paris',
     faq: [
       { q: 'Quels aéroports et gares desservez-vous à Paris ?', a: 'Nous assurons les transferts depuis et vers tous les aéroports parisiens — Roissy-Charles-de-Gaulle (CDG), Orly et Beauvais — ainsi que les gares (Gare du Nord, Gare de Lyon, Montparnasse) et toute adresse en Île-de-France.' },
@@ -122,7 +122,7 @@ const content = {
     bookingForm: 'Заказать трансфер в Париже',
     pickupLabel: 'Откуда', dropoffLabel: 'Куда', dateLabel: 'Дата', timeLabel: 'Время',
     defaultPickup: '',
-    otherCitiesTitle: '19 городов в Европе', otherCitiesBtn: 'Все Направления',
+    otherCitiesTitle: '22 городов в Европе', otherCitiesBtn: 'Все Направления',
     rating: '4.5/5 Tripadvisor (29 отзывов)',
   },
   hy: {
@@ -193,7 +193,7 @@ const content = {
     pickupLabel: 'Recogida', dropoffLabel: 'Destino',
     dateLabel: 'Fecha', timeLabel: 'Hora',
     defaultPickup: '',
-    otherCitiesTitle: 'Tambien disponible en 19 ciudades de Europa',
+    otherCitiesTitle: 'Tambien disponible en 22 ciudades de Europa',
     otherCitiesBtn: 'Ver todos los destinos',
     rating: '4.5/5 Tripadvisor',
   },

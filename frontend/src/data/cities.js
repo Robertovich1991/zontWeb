@@ -257,12 +257,57 @@ export const citiesData = {
     urlRu: '/taksi-iz-aeroporta-strasburg',
     urlHy: '/strasburg-odanavakayani-transfer',
   },
+  lyon: {
+    id: 'lyon',
+    nameEs: 'Lyon',
+    urlEs: '/lyon-airport-transfer',
+    country: 'France',
+    nameEn: 'Lyon',
+    nameFr: 'Lyon',
+    nameRu: 'Лион',
+    nameHy: 'Լիոն',
+    airports: ['Lyon Saint-Exupéry (LYS)'],
+    urlEn: '/lyon-airport-transfer',
+    urlFr: '/transfert-aeroport-lyon',
+    urlRu: '/taksi-iz-aeroporta-lion',
+    urlHy: '/lion-odanavakayani-transfer',
+  },
+  madrid: {
+    id: 'madrid',
+    nameEs: 'Madrid',
+    urlEs: '/madrid-airport-transfer',
+    country: 'Spain',
+    nameEn: 'Madrid',
+    nameFr: 'Madrid',
+    nameRu: 'Мадрид',
+    nameHy: 'Մադրիդ',
+    airports: ['Adolfo Suárez Madrid-Barajas (MAD)'],
+    urlEn: '/madrid-airport-transfer',
+    urlFr: '/transfert-aeroport-madrid',
+    urlRu: '/taksi-iz-aeroporta-madrid',
+    urlHy: '/madrid-odanavakayani-transfer',
+  },
+  prague: {
+    id: 'prague',
+    nameEs: 'Praga',
+    urlEs: '/prague-airport-transfer',
+    country: 'Czech Republic',
+    nameEn: 'Prague',
+    nameFr: 'Prague',
+    nameRu: 'Прага',
+    nameHy: 'Պրահա',
+    airports: ['Václav Havel Airport (PRG)'],
+    urlEn: '/prague-airport-transfer',
+    urlFr: '/transfert-aeroport-prague',
+    urlRu: '/taksi-iz-aeroporta-praga',
+    urlHy: '/praga-odanavakayani-transfer',
+  },
 };
 
 export const countriesList = [
   {
     name: 'France',
-    cities: ['paris', 'cdg', 'orly', 'beauvais', 'paristrainstation', 'nice', 'cannes', 'cotedazur', 'marseille', 'disneyland', 'strasbourg']
+    cities: ['paris', 'cdg', 'orly', 'beauvais', 'paristrainstation', 'nice', 'cannes', 'cotedazur', 'marseille', 'disneyland', 'strasbourg', 'lyon']
   },
   {
     name: 'Monaco',
@@ -278,7 +323,11 @@ export const countriesList = [
   },
   {
     name: 'Spain',
-    cities: ['alicante', 'barcelona']
+    cities: ['alicante', 'barcelona', 'madrid']
+  },
+  {
+    name: 'Czech Republic',
+    cities: ['prague']
   },
   {
     name: 'Armenia',
