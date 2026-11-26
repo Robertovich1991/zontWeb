@@ -647,3 +647,13 @@ Nouvelle API REST pour que Comfort Cars lise ses réservations en JSON, filtrée
 - Compteurs "19 villes → 22" et "6 pays → 7" mis à jour sur tout le site (~14 fichiers : translations, Home, Countries, B2B, BecomeClient, etc.).
 - Testé preview : /countries (Madrid, section Czech Republic + Prague, images OK), pages /prague-airport-transfer, /lyon-airport-transfer, /madrid-airport-transfer rendent avec aéroport prérempli + bons prix.
 - Prix fournis par l'utilisateur (déjà dans l'API C#) — ne PAS modifier la logique de pricing backend.
+
+## [2026-11] Fix SEO doublon page hôtels (/hotels) — DONE (testé preview)
+Problème GSC : /hotels signalé "Page en double, canonique différente" car il rendait le MÊME composant (b2b/Hotels = B2BPage) que les 5 slugs par langue déjà en place (EN /hotel-booking-kiosk, FR /borne-reservation-hotel, RU, HY, ES). /hotels était un doublon EN hérité, listé à part dans le sitemap + lié depuis 4 pages B2B.
+Correctifs (frontend uniquement) :
+- App.js : route /hotels → <Navigate to="/hotel-booking-kiosk" replace /> (redirection client, pas de 404).
+- public/sitemap.xml : suppression de la ligne /hotels.
+- pages/b2b/{TourismAgencies,ConciergeServices,EventAgencies,TourOperators}.js : relatedPages lien '/hotels' → '/hotel-booking-kiosk'.
+- utils/pageUrlMaps.js : suppression du mapping legacy /hotels→fr.
+Les 5 URLs par langue sont conservées (voulu, SEO multilingue). Testé preview : /hotels affiche bien la page kiosk (redirigé).
+Note : redirection côté SPA (React Router), plus faible qu'un 301 serveur mais suivie par Google. Après déploiement, resoumettre le sitemap et "Demander une indexation".

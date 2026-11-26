@@ -171,7 +171,7 @@ const content = {
 
 const seoUrls = { en: '/concierge-services', fr: '/concierge-services', ru: '/concierge-services' };
 const relatedPages = [
-  { path: '/hotels', name: 'Hotels', tagline: 'Guest transfer services' },
+  { path: '/hotel-booking-kiosk', name: 'Hotels', tagline: 'Guest transfer services' },
   { path: '/corporate-clients', name: 'Corporate Clients', tagline: 'Business travel services' },
   { path: '/event-agencies', name: 'Event Agencies', tagline: 'Event transportation' },
 ];

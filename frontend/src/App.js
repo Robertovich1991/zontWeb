@@ -524,7 +524,7 @@ function App() {
                   <Route path="/es/chofer-privado-a-disposicion/:slug" element={<DisposalVehicle />} />
                   <Route path="/travel-agencies" element={<TravelAgencies />} />
                   <Route path="/tourism-agencies" element={<TourismAgencies />} />
-                  <Route path="/hotels" element={<HotelsB2B />} />
+                  <Route path="/hotels" element={<Navigate to="/hotel-booking-kiosk" replace />} />
                   <Route path="/partenaire-vtc-hotel-paris" element={<HotelPartnersParis />} />
                   <Route path="/hotel-booking-kiosk" element={<HotelsB2B />} />
                   <Route path="/borne-reservation-hotel" element={<HotelsB2B />} />

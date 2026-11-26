@@ -181,7 +181,7 @@ const seoUrls = { en: '/tourism-agencies', fr: '/tourism-agencies', ru: '/touris
 const relatedPages = [
   { path: '/travel-agencies', name: 'Travel Agencies', tagline: 'Airport transfer partnership' },
   { path: '/tour-operators', name: 'Tour Operators', tagline: 'Tour logistics partner' },
-  { path: '/hotels', name: 'Hotels', tagline: 'Guest transfer services' },
+  { path: '/hotel-booking-kiosk', name: 'Hotels', tagline: 'Guest transfer services' },
 ];
 
 const TourismAgencies = () => <B2BPage content={content} seoUrls={seoUrls} relatedPages={relatedPages} />;

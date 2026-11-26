@@ -181,8 +181,7 @@ export const matchPathToLanguage = (pathname) => {
   for (const [lang, path] of Object.entries(MULTI_LANG_URLS.hotels)) {
     if (clean === path) return { pageKey: 'hotels', language: lang };
   }
-  // legacy /hotels — default to FR (since this is the most-used in the business)
-  if (clean === '/hotels') return { pageKey: 'hotels', language: 'fr' };
+  // legacy /hotels now redirects to the canonical EN URL /hotel-booking-kiosk
 
   // 4) partners (B2B airport transfers)
   for (const [lang, path] of Object.entries(MULTI_LANG_URLS.partners)) {

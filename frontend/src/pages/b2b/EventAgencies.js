@@ -173,7 +173,7 @@ const seoUrls = { en: '/event-agencies', fr: '/event-agencies', ru: '/event-agen
 const relatedPages = [
   { path: '/corporate-clients', name: 'Corporate Clients', tagline: 'Business travel services' },
   { path: '/concierge-services', name: 'Concierge Services', tagline: 'VIP chauffeur solutions' },
-  { path: '/hotels', name: 'Hotels', tagline: 'Guest transfer services' },
+  { path: '/hotel-booking-kiosk', name: 'Hotels', tagline: 'Guest transfer services' },
 ];
 
 const EventAgencies = () => <B2BPage content={content} seoUrls={seoUrls} relatedPages={relatedPages} />;
