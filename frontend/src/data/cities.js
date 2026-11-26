@@ -11,7 +11,7 @@ export const citiesData = {
     airports: ['CDG', 'Orly', 'Beauvais'],
     urlEn: '/paris-airport-transfer',
     urlFr: '/transfert-aeroport-paris',
-    urlRu: '/taksi-iz-aeroporta-parij',
+    urlRu: '/transfer-aeroport-parizh',
   },
   cdg: {
     id: 'cdg',

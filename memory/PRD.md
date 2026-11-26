@@ -665,4 +665,4 @@ Correctifs (frontend, uniquement /partners — Disneyland RU et Paris Aéroport 
 - utils/pageUrlMaps.js : suppression du mapping legacy /partners→fr
 - public/sitemap.xml : suppression de la ligne <loc>/partners</loc>
 Testé preview : /partners redirige vers /b2b-transferts-aeroport (page FR OK).
-Doublons restants identifiés mais NON corrigés (à la demande) : RU Disneyland (/transfer-disneylend-parizh), RU Paris (/taksi-iz-aeroporta-parij), + alias ES dormants VTC 7/8 places.
+Doublon RU Paris corrigé : /taksi-iz-aeroporta-parij → <Navigate /transfer-aeroport-parizh> ; cities.js urlRu + sitemap (hreflang ru x2 corrigés, ancien loc retiré). Testé preview : redirige vers la page russe. Restants NON corrigés : RU Disneyland (/transfer-disneylend-parizh), alias ES dormants VTC 7/8.

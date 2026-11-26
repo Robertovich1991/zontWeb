@@ -278,7 +278,7 @@ function App() {
                   {/* Paris */}
                   <Route path="/paris-airport-transfer" element={<ParisAirportTransfer />} />
                   <Route path="/transfert-aeroport-paris" element={<ParisAirportTransfer />} />
-                  <Route path="/taksi-iz-aeroporta-parij" element={<ParisAirportTransfer />} />
+                  <Route path="/taksi-iz-aeroporta-parij" element={<Navigate to="/transfer-aeroport-parizh" replace />} />
                   <Route path="/transfer-aeroport-parizh" element={<ParisAirportTransfer />} />
                   <Route path="/pariz-odanavakayani-transfer" element={<ParisAirportTransfer />} />
                   {/* CDG */}
