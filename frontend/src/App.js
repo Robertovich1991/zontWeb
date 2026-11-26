@@ -329,7 +329,7 @@ function App() {
                   {/* Disneyland Paris */}
                   <Route path="/disneyland-paris-transfer" element={<DisneylandTransfer />} />
                   <Route path="/transfert-disneyland-paris" element={<DisneylandTransfer />} />
-                  <Route path="/transfer-disneylend-parizh" element={<DisneylandTransfer />} />
+                  <Route path="/transfer-disneylend-parizh" element={<Navigate to="/transfer-disneyland-parizh" replace />} />
                   <Route path="/transfer-disneyland-parizh" element={<DisneylandTransfer />} />
                   <Route path="/disneylend-pariz-transfer" element={<DisneylandTransfer />} />
                   <Route path="/es/traslado-disneyland-paris" element={<DisneylandTransfer />} />

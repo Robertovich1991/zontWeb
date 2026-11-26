@@ -666,3 +666,12 @@ Correctifs (frontend, uniquement /partners — Disneyland RU et Paris Aéroport 
 - public/sitemap.xml : suppression de la ligne <loc>/partners</loc>
 Testé preview : /partners redirige vers /b2b-transferts-aeroport (page FR OK).
 Doublon RU Paris corrigé : /taksi-iz-aeroporta-parij → <Navigate /transfer-aeroport-parizh> ; cities.js urlRu + sitemap (hreflang ru x2 corrigés, ancien loc retiré). Testé preview : redirige vers la page russe. Restants NON corrigés : RU Disneyland (/transfer-disneylend-parizh), alias ES dormants VTC 7/8.
+
+## [2026-11] Fix doublon/langue Disneyland RU — DONE (testé preview)
+Scan complet des 319 routes : seul vrai lien "langue mélangée" restant = /transfer-disneylend-parizh (faute "disneylend"), affichait le FR au lieu du RU (absent des seoUrls, ru correct = /transfer-disneyland-parizh).
+Correctifs frontend :
+- App.js : /transfer-disneylend-parizh → <Navigate /transfer-disneyland-parizh replace>
+- Home.js popularDest + data/cities.js : urlRu → /transfer-disneyland-parizh
+- sitemap.xml : hreflang ru Disneyland corrigé vers la bonne URL, ancien <loc> mal orthographié retiré
+Testé preview : redirige et affiche la page russe. MICE confirmé sain (table URLS locale avec hy+es).
+Bilan session doublons/langue : /hotels, /partners, /taksi-iz-aeroporta-parij, /transfer-disneylend-parizh tous corrigés. Reste alias ES dormants VTC 7/8 (sans risque, non listés sitemap).

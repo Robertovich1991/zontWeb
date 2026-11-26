@@ -141,7 +141,7 @@ export const citiesData = {
     airports: ['Marne-la-Vallée', 'CDG', 'Orly'],
     urlEn: '/disneyland-paris-transfer',
     urlFr: '/transfert-disneyland-paris',
-    urlRu: '/transfer-disneylend-parizh',
+    urlRu: '/transfer-disneyland-parizh',
   },
   
   // GERMANY
