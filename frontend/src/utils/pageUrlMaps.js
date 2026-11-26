@@ -187,8 +187,7 @@ export const matchPathToLanguage = (pathname) => {
   for (const [lang, path] of Object.entries(MULTI_LANG_URLS.partners)) {
     if (clean === path) return { pageKey: 'partners', language: lang };
   }
-  // legacy /partners — default to FR
-  if (clean === '/partners') return { pageKey: 'partners', language: 'fr' };
+  // legacy /partners now redirects to the canonical FR URL /b2b-transferts-aeroport
 
   // 5) blog index pages
   for (const [lang, path] of Object.entries(MULTI_LANG_URLS.blog)) {

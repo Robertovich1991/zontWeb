@@ -657,3 +657,12 @@ Correctifs (frontend uniquement) :
 - utils/pageUrlMaps.js : suppression du mapping legacy /hotels→fr.
 Les 5 URLs par langue sont conservées (voulu, SEO multilingue). Testé preview : /hotels affiche bien la page kiosk (redirigé).
 Note : redirection côté SPA (React Router), plus faible qu'un 301 serveur mais suivie par Google. Après déploiement, resoumettre le sitemap et "Demander une indexation".
+
+## [2026-11] Fix doublon /partners — DONE (testé preview)
+Suite au scan de doublons : /partners affichait la page FR (mappé 'fr' dans pageUrlMaps) = doublon de /b2b-transferts-aeroport (canonique FR), et était listé à part dans le sitemap.
+Correctifs (frontend, uniquement /partners — Disneyland RU et Paris Aéroport RU restent à faire plus tard) :
+- App.js : route /partners → <Navigate to="/b2b-transferts-aeroport" replace />
+- utils/pageUrlMaps.js : suppression du mapping legacy /partners→fr
+- public/sitemap.xml : suppression de la ligne <loc>/partners</loc>
+Testé preview : /partners redirige vers /b2b-transferts-aeroport (page FR OK).
+Doublons restants identifiés mais NON corrigés (à la demande) : RU Disneyland (/transfer-disneylend-parizh), RU Paris (/taksi-iz-aeroporta-parij), + alias ES dormants VTC 7/8 places.
